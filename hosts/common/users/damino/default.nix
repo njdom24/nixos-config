@@ -31,17 +31,12 @@ in
     shell = pkgs.zsh;
     packages = with pkgs; [
       home-manager
-      #sway
-      swayfx
       mesa-demos
       vulkan-tools
-      #linuxKernel.packages.linux_zen.xpadneo
-      #linuxKernel.packages.linux_zen.xone
       firefox
       kate
       kitty
       gnome.nautilus
-      #steam
       steam-run
       neofetch
       zsh
@@ -53,9 +48,6 @@ in
       killall
 	  nix-index
 	  pavucontrol
-	  #fluent-gtk-theme
-	  #fluent-icon-theme
-	  #kora-icon-theme
     ];
   };
 
@@ -78,6 +70,12 @@ in
 
   programs = {
 	dconf.enable = true;
+	#ssh.startAgent = true;
+	seahorse.enable = true;
+	ssh = {
+	  enableAskPassword = true;
+	  askPassword = pkgs.lib.mkForce "${pkgs.gnome.seahorse.out}/libexec/seahorse/ssh-askpass";
+	};
   
     zsh = {
 	  enable = true;
@@ -112,13 +110,26 @@ in
   	openrazer.enable = true;
   };
 
-  services.openssh = {
-    enable = true;
-    settings.PasswordAuthentication = true;
+  services = {
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;	
+    };
+  	openssh = {
+  	  enable = true;
+  	  settings.PasswordAuthentication = true;
+ 	};
+ 	gnome.gnome-keyring.enable = true;
   };
 
   security = {
-  	pam.enableEcryptfs = true;
+    rtkit.enable = true;
+    pam = {
+      enableEcryptfs = true;
+      services.gdm.enableGnomeKeyring = true;	
+    };
   };
 
   boot = {

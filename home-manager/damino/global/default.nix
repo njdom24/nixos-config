@@ -1,3 +1,4 @@
+
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
@@ -56,42 +57,31 @@
   #  };
   #};
 
-  # TODO: Set your username
   home = {
     username = "damino";
     homeDirectory = "/home/damino";
     sessionPath = [ "$HOME/.local/bin" ];
+    # sessionVariables = { };
 
     packages = with pkgs; [
       nwg-look
-      #nwg-displays
       fluent-gtk-theme
       fluent-icon-theme
       kora-icon-theme
     ];
   };
-  #	home = {
-	#	username = lib.mkDefault "damino";
-	#	homeDirectory - lib.mkDefaukt "/home/${config.home.username}";
-	#	stateVersion = lib.mkDefault "23.11";
-	#	sessionPath = [ "$HOME/.local/bin" ];
-	#	sessionVariables = {
-	#		
-	#	}
-  #	}
-
-  # Add stuff for your user as you see fit:
-  # programs.neovim.enable = true;
-  # home.packages = with pkgs; [ steam ];
 
   # Enable home-manager and git
   programs = {
     home-manager.enable = true;
   	git = {
   	  enable = true;
+  	  package = pkgs.gitFull;
+  	  extraConfig.credential.helper = "libsecret";
   	  userName = "Damino";
   	  userEmail = "dom32400@aol.com";
   	};
+  	
   };
 
   # Nicely reload system units when changing configs
