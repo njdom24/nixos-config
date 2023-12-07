@@ -48,6 +48,15 @@ in
       killall
 	  nix-index
 	  pavucontrol
+	  discord
+	  betterdiscord-installer
+	  #obs-studio
+	  (wrapOBS {
+	  	plugins = with obs-studio-plugins; [
+	  		wlrobs
+	  		obs-pipewire-audio-capture
+	  	];
+	  })
     ];
   };
 
@@ -104,7 +113,11 @@ in
 
   hardware = {
   	bluetooth.enable = true;
-  	opengl.driSupport32Bit = true; # Enables support for 32bit libs that steam uses
+  	opengl = {
+  		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
+  		extraPackages = with pkgs; [mangohud];
+  		extraPackages32 = with pkgs; [mangohud];
+  	};
   	xpadneo.enable = true;
   	xone.enable = true;
   	openrazer.enable = true;
@@ -136,10 +149,16 @@ in
   	kernelModules = [ "ecryptfs" ];
   };
 
-  environment.systemPackages = with pkgs; [
-  	lsof
-  	ecryptfs
-  ];
+  environment = {
+  	systemPackages = with pkgs; [
+  	 lsof
+  	  ecryptfs
+  	];
+  	variables = {
+  	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
+  	  "MANGOHUD" = "1";
+  	};
+  };
 
   # If home-manager is managed by system:
   #home-manager.users.damino = import ../../../../home/damino/${config.networking.hostName}.nix;

@@ -23,7 +23,10 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
-  networking.networkmanager.enable = true;
+  networking = {
+  	dhcpcd.enable = true;
+  	wireless.iwd.enable = true;
+  };
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -55,6 +58,8 @@
     layout = "us";
     xkbVariant = "";
   };
+
+  services.resolved.enable = true;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;

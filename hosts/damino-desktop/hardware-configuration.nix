@@ -13,6 +13,7 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amd_iommu=on" "pci_acs_override=downstream,multifunction" ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/075c17d3-1b73-429f-b716-2b156c5ce4cb";

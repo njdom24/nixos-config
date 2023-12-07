@@ -81,6 +81,18 @@
   	  userName = "Damino";
   	  userEmail = "dom32400@aol.com";
   	};
+
+	mangohud = {
+	  enable = true;
+	  settings = {
+	  	no_display = true;
+	  	vsync = 3;
+	  	gl_vsync = 1;
+	  	gpu_name = true;
+	  	toggle_logging = "Shift_L+Shift_R";
+	  	reload_cfg = "Shift_L+Shift_R";
+	  };
+	};
   	
   };
 
