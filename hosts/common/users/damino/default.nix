@@ -27,6 +27,7 @@ in
     	"docker"
     	"libvirtd"
     	"plugdev"
+    	"corectrl"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
@@ -48,7 +49,10 @@ in
       killall
 	  nix-index
 	  pavucontrol
-	  discord
+	  #discord
+	  (discord.override {
+	  	withOpenASAR = true;
+	  })
 	  betterdiscord-installer
 	  #obs-studio
 	  (wrapOBS {
@@ -57,6 +61,7 @@ in
 	  		obs-pipewire-audio-capture
 	  	];
 	  })
+	  xorg.xeyes
     ];
   };
 
@@ -109,6 +114,11 @@ in
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
     };
+
+    corectrl = {
+      enable = true;
+      gpuOverclock.enable = true;	
+    };
   };
 
   hardware = {
@@ -151,7 +161,7 @@ in
 
   environment = {
   	systemPackages = with pkgs; [
-  	 lsof
+  	  lsof
   	  ecryptfs
   	];
   	variables = {
