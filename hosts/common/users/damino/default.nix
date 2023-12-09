@@ -44,6 +44,7 @@ in
       kitty
       gnome.nautilus
       steam-run
+      protonup-qt
       neofetch
       zsh
       oh-my-zsh
@@ -72,6 +73,8 @@ in
 	  	];
 	  })
 	  xorg.xeyes
+	  corefonts
+	  vistafonts
     ];
   };
 
