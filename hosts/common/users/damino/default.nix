@@ -49,6 +49,9 @@ in
       killall
 	  nix-index
 	  pavucontrol
+	  gammastep
+	  blueberry
+	  gnome.gnome-font-viewer
 	  #discord
 	  (discord.override {
 	  	withOpenASAR = true;
@@ -80,6 +83,10 @@ in
   	fira-code
   	inter
   	input-fonts
+  	noto-fonts
+  	noto-fonts-cjk
+  	noto-fonts-emoji
+  	nerdfonts
   ];
 
   programs = {
@@ -163,6 +170,7 @@ in
   	systemPackages = with pkgs; [
   	  lsof
   	  ecryptfs
+  	  unzip
   	];
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
