@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ outputs, config, pkgs, ... }:
 let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
@@ -10,6 +10,11 @@ in
     [
     	../../desktops/sway
     ];
+
+  nixpkgs.overlays = [
+  	outputs.overlays.unstable-packages
+  	outputs.overlays.legacy-packages
+  ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.damino = {
@@ -49,9 +54,11 @@ in
       killall
 	  nix-index
 	  pavucontrol
+	  pulseaudio # Needed for pactl
 	  gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
+	  libnotify
 	  #discord
 	  (discord.override {
 	  	withOpenASAR = true;
@@ -129,7 +136,11 @@ in
   };
 
   hardware = {
-  	bluetooth.enable = true;
+    bluetooth = {
+    	enable = true;
+    	powerOnBoot = true;
+    	package = pkgs.legacy.bluez;
+    };
   	opengl = {
   		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
   		extraPackages = with pkgs; [mangohud];

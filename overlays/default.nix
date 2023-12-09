@@ -20,4 +20,11 @@
       config.allowUnfree = true;
     };
   };
+
+  legacy-packages = final: _prev: {
+    legacy = import inputs.nixpkgs-legacy {
+      system = final.system;
+      config.allowUnfree = true;
+    };
+  };
 }

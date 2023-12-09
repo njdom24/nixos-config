@@ -8,6 +8,7 @@
     # at the same time. Here is an working example:
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
+	nixpkgs-legacy.url = "github:nixos/nixpkgs/nixos-23.05";
 
     # Home manager
     home-manager.url = "github:nix-community/home-manager/release-23.11";
