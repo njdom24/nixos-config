@@ -155,6 +155,10 @@ in
   };
 
   services = {
+  	xserver.displayManager.sddm = {
+  	  enable = true;
+  	  theme = "chili";	
+  	};
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -172,7 +176,8 @@ in
     rtkit.enable = true;
     pam = {
       enableEcryptfs = true;
-      services.gdm.enableGnomeKeyring = true;	
+      services.gdm.enableGnomeKeyring = true;
+      services.sddm.enableGnomeKeyring = true;	
     };
   };
 
@@ -185,6 +190,7 @@ in
   	  lsof
   	  ecryptfs
   	  unzip
+  	  sddm-chili-theme
   	];
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
