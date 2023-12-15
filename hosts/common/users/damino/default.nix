@@ -194,8 +194,9 @@ in
   	];
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
-  	  "MANGOHUD" = "1";
+  	  #"MANGOHUD" = "1";
   	};
+  	extraInit = "source ${config.users.users.damino.home}/.nix-profile/etc/profile.d/hm-session-vars.sh";
   };
 
   # If home-manager is managed by system:

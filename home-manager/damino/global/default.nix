@@ -65,6 +65,7 @@
 
     packages = with pkgs; [
       nwg-look
+      nwg-displays
       fluent-gtk-theme
       fluent-icon-theme
       kora-icon-theme
@@ -84,6 +85,7 @@
 
 	mangohud = {
 	  enable = true;
+	  enableSessionWide = true;
 	  settings = {
 	  	no_display = true;
 	  	vsync = 3;
