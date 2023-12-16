@@ -64,7 +64,9 @@ in
 	  (discord.override {
 	  	withOpenASAR = true;
 	  })
-	  betterdiscord-installer
+	  #betterdiscord-installer
+	  betterdiscordctl
+	  unstable.discord-screenaudio
 	  #obs-studio
 	  (wrapOBS {
 	  	plugins = with obs-studio-plugins; [
@@ -72,6 +74,7 @@ in
 	  		obs-pipewire-audio-capture
 	  	];
 	  })
+	  jellyfin-media-player
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
@@ -170,6 +173,7 @@ in
   	  settings.PasswordAuthentication = true;
  	};
  	gnome.gnome-keyring.enable = true;
+ 	gvfs.enable = true;
   };
 
   security = {
@@ -181,6 +185,10 @@ in
     };
   };
 
+  networking = {
+  	interfaces.enp4s0.wakeOnLan.enable = true;
+  };
+
   boot = {
   	kernelModules = [ "ecryptfs" ];
   };
@@ -190,6 +198,8 @@ in
   	  lsof
   	  ecryptfs
   	  unzip
+  	  ethtool
+  	  gtk3
   	  sddm-chili-theme
   	];
   	variables = {

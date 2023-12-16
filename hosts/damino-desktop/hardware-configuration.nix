@@ -5,24 +5,49 @@
 
 {
   imports =
-    [ (modulesPath + "/profiles/qemu-guest.nix")
+    [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "sr_mod" "virtio_blk" ];
+  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
+  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amd_iommu=on" "pci_acs_override=downstream,multifunction" "hid_apple.fnmode=2" ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amd_iommu=on" "pci_acs_override=downstream,multifunction" ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/075c17d3-1b73-429f-b716-2b156c5ce4cb";
-      fsType = "ext4";
+    { device = "/dev/disk/by-uuid/423a230f-e396-41fb-a481-839c127d7a5d";
+      fsType = "btrfs";
+      options = [ "subvol=root" "compress=zstd" ];
+    };
+
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/423a230f-e396-41fb-a481-839c127d7a5d";
+      fsType = "btrfs";
+      options = [ "subvol=home" "compress=zstd" ];
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/42D5-56F1";
+    { device = "/dev/disk/by-uuid/61D8-F6FA";
       fsType = "vfat";
+    };
+
+  fileSystems."/mnt/WD_BLACK" =
+    { device = "dev/disk/by-uuid/38c2bd3d-7f9e-47a5-8385-7b970e6ac656";
+      fsType = "btrfs";
+      options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
+    };
+
+  fileSystems."/mnt/WD_BLACK2" =
+    { device = "dev/disk/by-uuid/417a6a41-7168-4ad1-b945-6cd820914983";
+      fsType = "btrfs";
+      options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
+    };
+
+  fileSystems."/mnt/s860" =
+    { device = "dev/disk/by-uuid/4176292a-e20c-4ccb-8b06-14eacd7449b5";
+      fsType = "ext4";
+      options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
 
   swapDevices = [ ];
@@ -32,7 +57,10 @@
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.enp1s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp4s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp14s0f3u1.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp9s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

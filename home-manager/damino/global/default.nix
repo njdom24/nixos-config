@@ -69,6 +69,7 @@
       fluent-gtk-theme
       fluent-icon-theme
       kora-icon-theme
+      flavours
     ];
   };
 
@@ -96,6 +97,10 @@
 	  };
 	};
   	
+  };
+
+  services = {
+  	syncthing.enable = true;
   };
 
   # Nicely reload system units when changing configs
