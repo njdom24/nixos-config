@@ -96,6 +96,7 @@
         BEEPSTATE T
       '';
     };
+    sunshine.enable = true;
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -125,7 +126,7 @@
   #  wget
     git
     micro
-    sunshine
+    #sunshine
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

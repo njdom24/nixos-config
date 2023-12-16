@@ -10,7 +10,7 @@ in
     [
     	../../desktops/sway
     	inputs.nur.nixosModules.nur
-    ];
+    ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
   	outputs.overlays.unstable-packages
@@ -166,6 +166,10 @@ in
   	  enable = true;
   	  theme = "chili";	
   	};
+  	xserver.displayManager.setupCommands = ''
+  	  ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
+  	  #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
+  	'';
     pipewire = {
       enable = true;
       alsa.enable = true;
