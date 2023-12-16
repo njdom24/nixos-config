@@ -40,6 +40,8 @@ in
       home-manager
       mesa-demos
       vulkan-tools
+      nvtop
+      handbrake
       firefox
       kate
       kitty
@@ -60,6 +62,7 @@ in
 	  gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
+	  gnome.gnome-disk-utility
 	  libnotify
 	  #discord
 	  (discord.override {
@@ -208,6 +211,8 @@ in
   	  unzip
   	  ethtool
   	  gtk3
+  	  wineWowPackages.stagingFull
+  	  winetricks
   	  sddm-chili-theme
   	];
   	variables = {
