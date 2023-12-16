@@ -20,12 +20,14 @@
     # Shameless plug: looking for a way to nixify your themes and make
     # everything match nicely? Try nix-colors!
     # nix-colors.url = "github:misterio77/nix-colors";
+    nur.url = "github:nix-community/NUR";
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
+    nur,
     ...
   } @ inputs: let
     inherit (self) outputs;

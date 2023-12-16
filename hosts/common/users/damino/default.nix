@@ -2,13 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ outputs, config, pkgs, ... }:
+{ inputs, outputs, config, pkgs, ... }:
 let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
   imports =
     [
     	../../desktops/sway
+    	inputs.nur.nixosModules.nur
     ];
 
   nixpkgs.overlays = [
@@ -78,7 +79,10 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
-    ];
+    ] ++ ( with config.nur.repos; [
+    	#mic92.hello-nur
+    	wolfangaukang.vdhcoapp
+    ]);
   };
 
   nix = {
