@@ -15,6 +15,7 @@ in
   nixpkgs.overlays = [
   	outputs.overlays.unstable-packages
   	outputs.overlays.legacy-packages
+  	outputs.overlays.additions
   ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -220,6 +221,7 @@ in
   	  wineWowPackages.stagingFull
   	  winetricks
   	  sddm-chili-theme
+  	  xcursor-pro
   	];
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
