@@ -13,6 +13,7 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
   boot.kernelParams = [ "amdgpu.pcie_gen_cap=0x4000" ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   fileSystems."/" = {
       device = "/dev/disk/by-uuid/a4fa4d1f-24cc-45b6-890d-2526c32e922b";
