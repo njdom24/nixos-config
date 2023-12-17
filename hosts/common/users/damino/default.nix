@@ -60,7 +60,7 @@ in
 	  nix-index
 	  pavucontrol
 	  pulseaudio # Needed for pactl
-	  gammastep
+	  #gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
 	  gnome.gnome-disk-utility

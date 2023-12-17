@@ -101,6 +101,12 @@
 
   services = {
   	syncthing.enable = true;
+  	gammastep = {
+  	  enable = true;
+  	  provider = "manual";
+  	  latitude = 40.0;
+  	  longitude = 74.0;
+  	};
   };
 
   # Nicely reload system units when changing configs
