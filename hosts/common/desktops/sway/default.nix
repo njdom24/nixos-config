@@ -44,6 +44,7 @@ in
     lxappearance
     wdisplays
     kanshi
+    jq
   ];
 
   # xdg-desktop-portal works by exposing a series of D-Bus interfaces

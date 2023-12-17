@@ -47,6 +47,7 @@ in
       kate
       kitty
       gnome.nautilus
+      gimp
       steam-run
       protontricks
       protonup-qt
