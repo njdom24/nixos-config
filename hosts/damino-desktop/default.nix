@@ -26,6 +26,7 @@
   networking = {
   	dhcpcd.enable = true;
   	wireless.iwd.enable = true;
+  	interfaces.enp4s0.wakeOnLan.enable = true;
   };
 
   # Set your time zone.

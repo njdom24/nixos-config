@@ -62,6 +62,7 @@ in
 	  nix-index
 	  pavucontrol
 	  pulseaudio # Needed for pactl
+	  pciutils
 	  #gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
@@ -167,20 +168,28 @@ in
   		extraPackages = with pkgs; [mangohud];
   		extraPackages32 = with pkgs; [mangohud];
   	};
+  	nvidia = {
+  	  # Modesetting is required.
+      modesetting.enable = true;
+  	};
   	xpadneo.enable = true;
   	xone.enable = true;
   	openrazer.enable = true;
   };
 
   services = {
-  	xserver.displayManager.sddm = {
-  	  enable = true;
-  	  theme = "chili";	
-  	};
-  	xserver.displayManager.setupCommands = ''
-  	  ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
-  	  #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
-  	'';
+    xserver = {
+   	  displayManager.sddm = {
+  	    enable = true;
+  	    theme = "chili";	
+  	  };
+  	  displayManager.setupCommands = ''
+  	    ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
+  	    #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
+  	  '';
+	  videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
+    };
+
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -202,10 +211,6 @@ in
       services.gdm.enableGnomeKeyring = true;
       services.sddm.enableGnomeKeyring = true;	
     };
-  };
-
-  networking = {
-  	interfaces.enp4s0.wakeOnLan.enable = true;
   };
 
   boot = {

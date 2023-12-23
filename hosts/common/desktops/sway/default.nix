@@ -81,10 +81,16 @@ in
     export MOZ_DBUS_REMOTE=1
     export XDG_CURRENT_DESKTOP=sway
     export NIXOS_OZONE_WL=1
+
+    export WLR_DRM_DEVICES=/dev/dri/card0
     
     eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
     export SSH_AUTH_SOCK
     '';
+
+    extraOptions = [
+      "--unsupported-gpu"	
+    ];
     # Consider export QT_QPA_PLATFORMTHEME=qt5ct
   };
 
