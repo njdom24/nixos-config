@@ -128,6 +128,7 @@
     git
     micro
     x11vnc
+    wayvnc
     #sunshine
   ];
 
