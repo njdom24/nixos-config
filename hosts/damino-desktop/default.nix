@@ -127,6 +127,7 @@
   #  wget
     git
     micro
+    x11vnc
     #sunshine
   ];
 

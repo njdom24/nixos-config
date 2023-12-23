@@ -65,6 +65,7 @@ in
 	  nix-index
 	  pavucontrol
 	  pulseaudio # Needed for pactl
+	  remmina
 	  #gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
