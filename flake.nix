@@ -21,6 +21,10 @@
     # everything match nicely? Try nix-colors!
     # nix-colors.url = "github:misterio77/nix-colors";
     nur.url = "github:nix-community/NUR";
+
+    nixpkgs-wayland.url = "github:nix-community/nixpkgs-wayland";
+    # only needed if you use as a package set:
+    nixpkgs-wayland.inputs.nixpkgs.follows = "nixpkgs-unstable";
   };
 
   outputs = {
@@ -28,6 +32,7 @@
     nixpkgs,
     home-manager,
     nur,
+    nixpkgs-wayland,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -75,6 +80,9 @@
         modules = [
           # > Our main nixos configuration file <
           ./hosts/damino-framework
+          ({ config, lib, ...}: {
+            #nixpkgs.overlays = [ inputs.nixpkgs-wayland.overlay ];
+    	  })
         ];
       };
     };

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ inputs, config, pkgs, lib, ... }:
 
 let
   # Might not be working
@@ -21,6 +21,11 @@ let
 
 in
 {
+  nixpkgs.overlays = [
+    # wlroots currently broken, possibly from: https://github.com/nix-community/nixpkgs-wayland/pull/433
+  	# inputs.nixpkgs-wayland.overlay
+  ];
+
   environment.systemPackages = with pkgs; [
     kitty
     wayland
@@ -81,8 +86,6 @@ in
     export MOZ_DBUS_REMOTE=1
     export XDG_CURRENT_DESKTOP=sway
     export NIXOS_OZONE_WL=1
-
-    export WLR_DRM_DEVICES=/dev/dri/card0
     
     eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
     export SSH_AUTH_SOCK

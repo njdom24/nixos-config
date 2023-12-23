@@ -49,6 +49,9 @@ in
       gnome.nautilus
       gimp
       steam-run
+      steamtinkerlaunch
+      lutris
+      vkbasalt
       protontricks
       protonup-qt
       neofetch
@@ -62,7 +65,6 @@ in
 	  nix-index
 	  pavucontrol
 	  pulseaudio # Needed for pactl
-	  pciutils
 	  #gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
@@ -93,7 +95,9 @@ in
   };
 
   nix = {
-  	settings.auto-optimise-store = true;
+    settings = {
+      auto-optimise-store = true;
+  	};
   	gc = {
   	  automatic = true;
   	  dates = "daily";
@@ -144,6 +148,21 @@ in
       enable = true;
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
+      package = pkgs.steam.override {
+        extraEnv = {};
+        extraLibraries = pkgs: with pkgs; [
+          xorg.libXcursor
+          xorg.libXi
+          xorg.libXinerama
+          xorg.libXScrnSaver
+          libpng
+          libpulseaudio
+          libvorbis
+          stdenv.cc.cc.lib
+          libkrb5
+          keyutils
+        ];
+      };
     };
 
     gamescope = {
@@ -155,7 +174,13 @@ in
       enable = true;
       gpuOverclock.enable = true;	
     };
+
+    gamemode.enable = true;
+
+    virt-manager.enable = true;
   };
+
+  virtualisation.libvirtd.enable = true;
 
   hardware = {
     bluetooth = {
@@ -220,14 +245,23 @@ in
   environment = {
   	systemPackages = with pkgs; [
   	  lsof
+  	  wget
+  	  xdotool
   	  ecryptfs
   	  unzip
   	  ethtool
   	  gtk3
-  	  wineWowPackages.stagingFull
+  	  #wineWowPackages.stagingFull
+  	  wineWowPackages.waylandFull
   	  winetricks
   	  sddm-chili-theme
   	  xcursor-pro
+  	  pciutils
+  	  libgcc
+  	  bison
+  	  flex
+  	  freetype
+  	  OVMFFull
   	];
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";

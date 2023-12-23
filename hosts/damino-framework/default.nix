@@ -10,7 +10,7 @@
       ./hardware-configuration.nix
       ../common/users/damino
     ];
-
+ 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -28,13 +28,23 @@
   	wireless.iwd.enable = true;
   };
 
-  hardware.opengl = {
-  	extraPackages = with pkgs; [
-  	  intel-media-driver # LIBVA_DRIVER_NAME=iHD
-  	  vaapiIntel		 # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
-  	  vaapiVdpau
-  	  libvdpau-va-gl	
-  	];
+  hardware = {
+    opengl = {
+      extraPackages = with pkgs; [
+  	    intel-media-driver # LIBVA_DRIVER_NAME=iHD
+  	    vaapiIntel		 # LIBVA_DRIVER_NAME=i965 (older but works better for Firefox/Chromium)
+  	    vaapiVdpau
+  	    libvdpau-va-gl	
+  	  ];
+    };
+
+  	#nvidia.prime = {
+  	#  sync.enable = true;
+  	#  allowExternalGpu = true;
+    #
+  	#  nvidiaBusId = "PCI:46:0:0";
+  	#  intelBusId = "PCI:0:2:0";
+  	#};
   };
 
   # Set your time zone.
@@ -62,6 +72,7 @@
   # Enable the KDE Plasma Desktop Environment.
   #services.xserver.displayManager.sddm.enable = true;
   services.xserver.desktopManager.plasma5.enable = true;
+  #services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11
   services.xserver = {

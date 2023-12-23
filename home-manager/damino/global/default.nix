@@ -96,7 +96,6 @@
 	  	reload_cfg = "Shift_L+Shift_R";
 	  };
 	};
-  	
   };
 
   services = {
