@@ -193,10 +193,10 @@ in
   		extraPackages = with pkgs; [mangohud];
   		extraPackages32 = with pkgs; [mangohud];
   	};
-  	nvidia = {
+  	#nvidia = {
   	  # Modesetting is required.
-      modesetting.enable = true;
-  	};
+      #modesetting.enable = true;
+  	#};
   	xpadneo.enable = true;
   	xone.enable = true;
   	openrazer.enable = true;
