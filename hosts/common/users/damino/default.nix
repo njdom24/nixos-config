@@ -213,7 +213,7 @@ in
   	    ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
   	    #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
   	  '';
-	  videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
+	  #videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
     };
 
     pipewire = {
