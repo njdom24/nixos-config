@@ -86,7 +86,7 @@ in
     export MOZ_DBUS_REMOTE=1
     export XDG_CURRENT_DESKTOP=sway
     export NIXOS_OZONE_WL=1
-    export WLR_NO_HARDWARE_CURSORS=1
+    #export WLR_NO_HARDWARE_CURSORS=1
     
     eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
     export SSH_AUTH_SOCK

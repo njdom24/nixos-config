@@ -70,6 +70,7 @@ in
 	  blueberry
 	  gnome.gnome-font-viewer
 	  gnome.gnome-disk-utility
+	  gnome.gnome-system-monitor
 	  libnotify
 	  #discord
 	  (discord.override {
@@ -129,20 +130,20 @@ in
   
     zsh = {
 	  enable = true;
-	  enableCompletion = true;
-	  #autosuggestions.enable = true;
-	  shellAliases = {
-	  	update = "sudo nix flake update /etc/nixos";
-	  	upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#${config.networking.hostName}";
-	  	update-home = "home-manager switch --flake /etc/nixos/.#damino@${config.networking.hostName}";
-	  	#clear-boot = "sudo nix-collect-garbage --delete-generations 1 2 3";
-	  };
-	  ohMyZsh = {
-	  	enable = true;
-	  	plugins = [ "git" ];
-	  	custom = "${config.users.users.damino.home}/.oh-my-zsh"; # TODO: Handle this with home-manager
-	  	theme = "damino";
-	  };
+	#  enableCompletion = true;
+	#  #autosuggestions.enable = true;
+	#  shellAliases = {
+	#  	update = "sudo nix flake update /etc/nixos";
+	#  	upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#${config.networking.hostName}";
+	#  	update-home = "home-manager switch --flake /etc/nixos/.#damino@${config.networking.hostName}";
+	#  	#clear-boot = "sudo nix-collect-garbage --delete-generations 1 2 3";
+	#  };
+	#  ohMyZsh = {
+	#  	enable = true;
+	#  	plugins = [ "git" ];
+	#  	custom = "${config.users.users.damino.home}/.oh-my-zsh"; # TODO: Handle this with home-manager
+	#  	theme = "damino";
+	#  };
     };
 
     steam = {

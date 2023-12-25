@@ -38,6 +38,9 @@
   	  ];
     };
 
+    #nvidia.modesetting.enable = true;
+    #nvidia.powerManagement.enable = false;
+
   	#nvidia.prime = {
   	#  sync.enable = true;
   	#  allowExternalGpu = true;
@@ -101,6 +104,8 @@
     # no need to redefine it in your config for now)
     #media-session.enable = true;
   };
+
+  #services.xserver.videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;

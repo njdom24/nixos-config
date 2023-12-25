@@ -7,6 +7,7 @@
   lib,
   config,
   pkgs,
+  hostName,
   ...
 }: {
   # You can import other home-manager modules here
@@ -94,6 +95,22 @@
 	  	gpu_name = true;
 	  	toggle_logging = "Shift_L+Shift_R";
 	  	reload_cfg = "Shift_L+Shift_R";
+	  };
+	};
+
+	zsh = {
+	  enable = true;
+	  enableCompletion = true;
+	  shellAliases = {
+	  	update = "sudo nix flake update /etc/nixos";
+	  	upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#";
+	  	update-home = "home-manager switch --flake /etc/nixos/.";
+	  };
+	  oh-my-zsh = {
+	  	enable = true;
+	  	plugins = [ "git" ];
+	  	custom = ".oh-my-zsh";
+	  	theme = "damino";
 	  };
 	};
   };

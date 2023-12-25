@@ -92,7 +92,9 @@
     homeConfigurations = {
       "damino@damino-desktop" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
+        extraSpecialArgs = {
+          inherit inputs outputs;
+        };
         modules = [
           # > Our main home-manager configuration file <
           ./home-manager/damino/damino-desktop.nix
@@ -101,7 +103,9 @@
 
       "damino@damino-framework" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-        extraSpecialArgs = {inherit inputs outputs;};
+        extraSpecialArgs = {
+          inherit inputs outputs;
+        };
         modules = [
           # > Our main home-manager configuration file <
           ./home-manager/damino/damino-framework.nix
