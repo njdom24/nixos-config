@@ -169,7 +169,7 @@ in
 
     gamescope = {
       enable = true;
-      capSysNice = true;	
+      capSysNice = true;
     };
 
     corectrl = {
@@ -192,7 +192,7 @@ in
     };
   	opengl = {
   		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
-  		extraPackages = with pkgs; [mangohud];
+  		extraPackages = with pkgs; [mangohud intel-media-driver vaapiIntel vaapiVdpau libvdpau-va-gl ];
   		extraPackages32 = with pkgs; [mangohud];
   	};
   	#nvidia = {
@@ -210,10 +210,14 @@ in
   	    enable = true;
   	    theme = "chili";	
   	  };
-  	  displayManager.setupCommands = ''
-  	    ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
-  	    #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
-  	  '';
+  	  #displayManager.gdm = {
+  	  #	 enable = true;
+  	  #	 wayland = false;
+  	  #};
+  	  #displayManager.setupCommands = ''
+  	  #  ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
+  	  #  #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
+  	  #'';
 	  #videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
     };
 

@@ -49,6 +49,7 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+  services.xserver.videoDrivers = [ "amdgpu" ];
 
   #services.xserver.displayManager.gdm.enable = true;
   # Enable the KDE Plasma Desktop Environment.
