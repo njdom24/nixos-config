@@ -112,6 +112,9 @@
 	  	custom = ".oh-my-zsh";
 	  	theme = "damino";
 	  };
+	  localVariables = {
+	  	TERM = "xterm-256color"; # Fixes kitty ssh
+	  };
 	};
   };
 
