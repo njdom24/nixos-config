@@ -50,6 +50,7 @@ in
       gimp
       steam-run
       steamtinkerlaunch
+      moonlight-qt
       lutris
       vkbasalt
       protontricks
