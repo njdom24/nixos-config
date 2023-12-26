@@ -15,7 +15,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     # TODO: Add any other flake you might need
-    # hardware.url = "github:nixos/nixos-hardware";
+    hardware.url = "github:nixos/nixos-hardware";
 
     # Shameless plug: looking for a way to nixify your themes and make
     # everything match nicely? Try nix-colors!
@@ -31,6 +31,7 @@
     self,
     nixpkgs,
     home-manager,
+    hardware,
     nur,
     nixpkgs-wayland,
     ...
@@ -75,14 +76,12 @@
         ];
       };
 
-     damino-framework = nixpkgs.lib.nixosSystem {
+      damino-framework = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
           ./hosts/damino-framework
-          ({ config, lib, ...}: {
-            #nixpkgs.overlays = [ inputs.nixpkgs-wayland.overlay ];
-    	  })
+          hardware.nixosModules.framework-11th-gen-intel
         ];
       };
     };
