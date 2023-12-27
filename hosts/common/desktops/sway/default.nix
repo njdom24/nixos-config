@@ -73,10 +73,11 @@ in
   programs.sway = {
     enable = true;
     # Workaround
+    # Currently not working until below is merged
     #package = (pkgs.swayfx.overrideAttrs (old: { passthru.providedSessions = [ "sway" ]; }));
     wrapperFeatures.gtk = true;
 
-	# Currently not working until below is merged
+	
     extraSessionCommands = ''
     export SDL_VIDEODRIVER=wayland
     export QT_QPA_PLATFORM=wayland
@@ -86,9 +87,11 @@ in
     export MOZ_DBUS_REMOTE=1
     export XDG_CURRENT_DESKTOP=sway
     export NIXOS_OZONE_WL=1
-    export WLR_NO_HARDWARE_CURSORS=1
-    #export WLR_LIBINPUT_NO_DEVICES=1
-    #export WLR_DRM_DEVICES=/dev/dri/by-path/pci-0000:0c:00.0-card
+
+    REMOTE_ENABLED=$(pgrep -x x11vnc > /dev/null && echo 1 || echo 0)
+    export WLR_NO_HARDWARE_CURSORS=$REMOTE_ENABLED
+    export WLR_BACKENDS=$([ $REMOTE_ENABLED -eq 0 ] && echo "headless,libinput" || echo "")
+    
     
     eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
     export SSH_AUTH_SOCK
