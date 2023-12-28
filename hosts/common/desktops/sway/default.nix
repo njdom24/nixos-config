@@ -88,10 +88,9 @@ in
     export XDG_CURRENT_DESKTOP=sway
     export NIXOS_OZONE_WL=1
 
-    REMOTE_ENABLED=$(pgrep -x x11vnc > /dev/null && echo 1 || echo 0)
+    export REMOTE_ENABLED=$(pgrep -x x11vnc > /dev/null && echo 1 || echo 0)
     export WLR_NO_HARDWARE_CURSORS=$REMOTE_ENABLED
-    export WLR_BACKENDS=$([ $REMOTE_ENABLED -eq 0 ] && echo "headless,libinput" || echo "")
-    
+    export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
     
     eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
     export SSH_AUTH_SOCK
