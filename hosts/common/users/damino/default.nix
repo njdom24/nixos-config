@@ -35,6 +35,7 @@ in
     	"libvirtd"
     	"plugdev"
     	"corectrl"
+    	"adbusers"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
@@ -44,6 +45,7 @@ in
       nvtop
       handbrake
       firefox
+      chromium
       kate
       kitty
       gnome.nautilus
@@ -103,8 +105,8 @@ in
   	};
   	gc = {
   	  automatic = true;
-  	  dates = "daily";
-  	  options = "--delete-older-than +5";
+  	  dates = "weekly";
+  	  options = "--delete-older-than 7d";
   	};
   };
 
@@ -146,6 +148,8 @@ in
 	#  	theme = "damino";
 	#  };
     };
+
+    adb.enable = true;
 
     steam = {
       enable = true;
@@ -253,6 +257,8 @@ in
   	systemPackages = with pkgs; [
   	  lsof
   	  wget
+  	  libarchive
+  	  p7zip
   	  xdotool
   	  ecryptfs
   	  unzip
