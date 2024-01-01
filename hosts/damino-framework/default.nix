@@ -38,17 +38,20 @@
   	  ];
     };
 
-    #nvidia.modesetting.enable = true;
-    #nvidia.powerManagement.enable = false;
-
+    nvidia.modesetting.enable = true;
+    nvidia.powerManagement.enable = false;
+	nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
   	#nvidia.prime = {
-  	#  sync.enable = true;
-  	#  allowExternalGpu = true;
-    #
-  	#  nvidiaBusId = "PCI:46:0:0";
-  	#  intelBusId = "PCI:0:2:0";
+  	  #allowExternalGpu = true;
+  	  #reverseSync.enable = true;
+  	  # sync.enable = true;
+      #
+  	  #nvidiaBusId = "PCI:46:0:0";
+  	  #intelBusId = "PCI:0:2:0";
   	#};
   };
+
+  services.xserver.videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -104,8 +107,6 @@
     # no need to redefine it in your config for now)
     #media-session.enable = true;
   };
-
-  #services.xserver.videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
