@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ inputs, outputs, config, pkgs, ... }:
+{ inputs, outputs, config, lib, pkgs, ... }:
 let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
@@ -50,6 +50,7 @@ in
       kitty
       gnome.nautilus
       gimp
+      vlc
       steam-run
       steamtinkerlaunch
       moonlight-qt
@@ -69,6 +70,7 @@ in
 	  pavucontrol
 	  pulseaudio # Needed for pactl
 	  remmina
+	  filezilla
 	  #gammastep
 	  blueberry
 	  gnome.gnome-font-viewer
@@ -257,6 +259,7 @@ in
   	systemPackages = with pkgs; [
   	  lsof
   	  wget
+  	  sshfs
   	  libarchive
   	  p7zip
   	  xdotool
@@ -275,10 +278,22 @@ in
   	  flex
   	  freetype
   	  OVMFFull
-  	];
+  	] ++ (with pkgs.gst_all_1; [
+  		#gst-plugins-good
+  	    #gst-plugins-bad
+  	    #gst-plugins-ugly
+  	    #gst-libav
+  	]);
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
+  	  #"TZ" = "${config.time.timeZone}";
   	  #"MANGOHUD" = "1";
+  	  "GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" (with pkgs.gst_all_1; [
+  	    gst-plugins-good
+  	    gst-plugins-bad
+  	    gst-plugins-ugly
+  	    gst-libav
+  	  ]);
   	};
   	extraInit = "source ${config.users.users.damino.home}/.nix-profile/etc/profile.d/hm-session-vars.sh";
   };
