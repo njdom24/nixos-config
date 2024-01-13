@@ -4,6 +4,14 @@
 
 { inputs, outputs, config, lib, pkgs, ... }:
 let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
+
+  gst_plugins = (with pkgs.gst_all_1; [
+	gst-plugins-good
+	gst-plugins-bad
+	gst-plugins-ugly
+	gst-libav
+  ]);
+
 in
 {
   imports =
@@ -258,6 +266,7 @@ in
   environment = {
   	systemPackages = with pkgs; [
   	  lsof
+  	  file
   	  wget
   	  sshfs
   	  libarchive
@@ -278,27 +287,17 @@ in
   	  flex
   	  freetype
   	  OVMFFull
-  	] ++ (with pkgs.gst_all_1; [
-  		#gst-plugins-good
-  	    #gst-plugins-bad
-  	    #gst-plugins-ugly
-  	    #gst-libav
-  	]);
+  	] ++ gst_plugins;
+
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
   	  #"TZ" = "${config.time.timeZone}";
   	  #"MANGOHUD" = "1";
-  	  "GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" (with pkgs.gst_all_1; [
-  	    gst-plugins-good
-  	    gst-plugins-bad
-  	    gst-plugins-ugly
-  	    gst-libav
-  	  ]);
+  	  "GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins;
   	};
   	extraInit = "source ${config.users.users.damino.home}/.nix-profile/etc/profile.d/hm-session-vars.sh";
   };
 
   # If home-manager is managed by system:
   #home-manager.users.damino = import ../../../../home/damino/${config.networking.hostName}.nix;
-
 }
