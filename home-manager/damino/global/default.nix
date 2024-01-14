@@ -71,6 +71,8 @@
       fluent-icon-theme
       kora-icon-theme
       flavours
+      gradience
+      adw-gtk3
     ];
   };
 

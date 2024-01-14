@@ -132,6 +132,11 @@ in
   	nerdfonts
   ];
 
+  qt = {
+  	enable = true;
+  	platformTheme = "gtk2";
+  };
+
   programs = {
 	dconf.enable = true;
 	#ssh.startAgent = true;
@@ -276,6 +281,7 @@ in
   	  unzip
   	  ethtool
   	  gtk3
+  	  pcmanfm
   	  #wineWowPackages.stagingFull
   	  wineWowPackages.waylandFull
   	  winetricks
