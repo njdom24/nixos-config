@@ -25,7 +25,7 @@
   # Enable networking
   networking = {
   	dhcpcd.enable = true;
-  	wireless.iwd.enable = true;
+  	wireless.iwd.enable = false;
   	interfaces.enp4s0.wakeOnLan.enable = true;
   };
 
