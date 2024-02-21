@@ -21,7 +21,7 @@ in
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
   boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amd_iommu=on" "pci_acs_override=downstream,multifunction" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
-  #boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/423a230f-e396-41fb-a481-839c127d7a5d";

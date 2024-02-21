@@ -18,6 +18,7 @@ in
     [
     	../../desktops/sway
     	inputs.nur.nixosModules.nur
+    	"${inputs.nixpkgs-unstable}/nixos/modules/hardware/corectrl.nix" # TODO: Remove after 23.11
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
@@ -25,6 +26,8 @@ in
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
   ];
+
+  disabledModules = [ "hardware/corectrl.nix" ]; # TODO: Remove after 23.11
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.damino = {
@@ -194,6 +197,7 @@ in
 
     corectrl = {
       enable = true;
+      package = pkgs.unstable.corectrl;
       gpuOverclock.enable = true;	
     };
 
