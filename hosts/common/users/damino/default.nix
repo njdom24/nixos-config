@@ -95,6 +95,7 @@ in
 	  #betterdiscord-installer
 	  betterdiscordctl
 	  unstable.discord-screenaudio
+	  unstable.ryujinx
 	  #obs-studio
 	  (wrapOBS {
 	  	plugins = with obs-studio-plugins; [

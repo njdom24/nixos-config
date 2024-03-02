@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, outputs, config, pkgs, lib, ... }:
 
 let
   # Might not be working
@@ -24,6 +24,7 @@ in
   nixpkgs.overlays = [
     # wlroots currently broken, possibly from: https://github.com/nix-community/nixpkgs-wayland/pull/433
   	# inputs.nixpkgs-wayland.overlay
+  	outputs.overlays.unstable-packages
   ];
 
   environment.systemPackages = with pkgs; [
@@ -51,6 +52,7 @@ in
     kanshi
     jq
     vulkan-validation-layers # for WLR_RENDERER=vulkan
+    unstable.xwaylandvideobridge
   ];
 
   # xdg-desktop-portal works by exposing a series of D-Bus interfaces
