@@ -84,6 +84,7 @@ in
 	  filezilla
 	  #gammastep
 	  blueberry
+	  cinnamon.warpinator
 	  gnome.gnome-font-viewer
 	  gnome.gnome-disk-utility
 	  gnome.gnome-system-monitor
