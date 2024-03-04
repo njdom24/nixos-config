@@ -107,9 +107,13 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
-    ] ++ ( with config.nur.repos; [
+    ]# ++ (with dotnetCorePackages; [
+    #	sdk_5_0
+    #])
+    ++ (with config.nur.repos; [
     	#mic92.hello-nur
     	wolfangaukang.vdhcoapp
+    	#ivar.ryujinx
     ]);
   };
 
