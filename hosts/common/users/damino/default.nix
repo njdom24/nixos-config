@@ -318,4 +318,15 @@ in
 
   # If home-manager is managed by system:
   #home-manager.users.damino = import ../../../../home/damino/${config.networking.hostName}.nix;
+
+  # Warpinator
+  networking.firewall = {
+  	allowedTCPPorts = [
+  	    42000
+  	    42001
+  	];
+  	allowedUDPPorts = [
+  	    5353
+ 	];
+  };
 }
