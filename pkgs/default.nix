@@ -3,4 +3,5 @@
 {pkgs, ...}: {
   # example = pkgs.callPackage ./example { };
   xcursor-pro = pkgs.callPackage ./xcursor-pro { };
+  citra-mk7 = pkgs.callPackage ./citra { branch = "mk7"; };
 }
