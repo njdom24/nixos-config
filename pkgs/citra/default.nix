@@ -16,7 +16,7 @@ in {
   mk7 = qt6Packages.callPackage ./generic.nix rec {
     pname = "citra-mk7";
     #version = "1963";
-    version = "2.1";
+    version = "2.2";
 
     src = fetchFromGitHub {
       #owner = "citra-emu";
@@ -25,7 +25,8 @@ in {
       repo = "citra";
       #rev = "nightly-${version}";
       rev = "v${version}";
-      sha256 = "0l9w4i0zbafcv2s6pd1zqb11vh0i7gzwbqnzlz9al6ihwbsgbj3k";
+      # hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      sha256 = "sha256-k07BdZr8Y4S8cUDJVnCw4NkeeRJoXfuK0aRx6EJ3bAQ=";
       fetchSubmodules = true;
     };
 

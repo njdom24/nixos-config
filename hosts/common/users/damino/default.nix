@@ -305,6 +305,9 @@ in
   	  flex
   	  freetype
   	  OVMFFull
+  	  #citra-nightly
+  	  #unstable.citra-canary
+  	  citra-mk7
   	] ++ gst_plugins;
 
   	variables = {
