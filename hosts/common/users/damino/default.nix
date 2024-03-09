@@ -97,6 +97,7 @@ in
 	  betterdiscordctl
 	  unstable.discord-screenaudio
 	  unstable.ryujinx
+	  citra-mk7
 	  #obs-studio
 	  (wrapOBS {
 	  	plugins = with obs-studio-plugins; [
@@ -305,9 +306,6 @@ in
   	  flex
   	  freetype
   	  OVMFFull
-  	  #citra-nightly
-  	  #unstable.citra-canary
-  	  citra-mk7
   	] ++ gst_plugins;
 
   	variables = {
