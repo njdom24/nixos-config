@@ -216,6 +216,7 @@ in
   virtualisation.libvirtd.enable = true;
 
   hardware = {
+    enableRedistributableFirmware = true;
     bluetooth = {
     	enable = true;
     	powerOnBoot = true;
