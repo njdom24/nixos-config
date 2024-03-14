@@ -194,6 +194,10 @@ in
           libkrb5
           keyutils
         ];
+        # https://github.com/NixOS/nixpkgs/issues/279893
+        extraProfile = ''
+          unset TZ
+        '';
       };
     };
 
