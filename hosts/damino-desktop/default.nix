@@ -104,7 +104,10 @@
         BEEPSTATE T
       '';
     };
-    sunshine.enable = true;
+    sunshine = {
+      enable = true;
+      package = pkgs.unstable.sunshine;
+    };
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
