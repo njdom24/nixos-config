@@ -89,6 +89,7 @@ in
 	  gnome.gnome-disk-utility
 	  gnome.gnome-system-monitor
 	  libnotify
+	  xwaylandvideobridge
 	  #discord
 	  (discord.override {
 	  	withOpenASAR = true; # If this breaks, set to false and re-run Discord. https://github.com/NixOS/nixpkgs/issues/208749
