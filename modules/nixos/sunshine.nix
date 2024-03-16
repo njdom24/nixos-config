@@ -13,17 +13,22 @@ in
 
     services.sunshine = {
       enable = mkEnableOption (mdDoc "Sunshine");
+      package = mkPackageOption pkgs "sunshine" { };
     };
 
   };
 
-  config = mkIf config.services.sunshine.enable {
+  config = mkIf cfg.enable {
+
+    environment.systemPackages = [
+      cfg.package
+    ];
 
     security.wrappers.sunshine = {
       owner = "root";
       group = "root";
       capabilities = "cap_sys_admin+p";
-      source = "${pkgs.sunshine}/bin/sunshine";
+      source = "${cfg.package}/bin/sunshine";
     };
 
     systemd.user.services.sunshine = {
