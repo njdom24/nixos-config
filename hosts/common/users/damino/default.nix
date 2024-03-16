@@ -91,7 +91,7 @@ in
 	  libnotify
 	  #discord
 	  (discord.override {
-	  	withOpenASAR = true;
+	  	withOpenASAR = true; # If this breaks, set to false and re-run Discord. https://github.com/NixOS/nixpkgs/issues/208749
 	  })
 	  #betterdiscord-installer
 	  betterdiscordctl
