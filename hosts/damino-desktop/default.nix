@@ -106,7 +106,7 @@
     };
     sunshine = {
       enable = true;
-      package = pkgs.unstable.sunshine;
+      package = pkgs.unstable.sunshine.override { mesa = pkgs.mesa; };
     };
   };
 
