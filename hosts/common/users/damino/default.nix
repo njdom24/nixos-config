@@ -99,6 +99,7 @@ in
 	  unstable.discord-screenaudio
 	  unstable.ryujinx
 	  citra-mk7
+	  dolphin-emu
 	  #obs-studio
 	  (wrapOBS {
 	  	plugins = with obs-studio-plugins; [
