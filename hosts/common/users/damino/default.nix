@@ -116,7 +116,7 @@ in
     #])
     ++ (with config.nur.repos; [
     	#mic92.hello-nur
-    	wolfangaukang.vdhcoapp
+    	#wolfangaukang.vdhcoapp
     	#ivar.ryujinx
     ]);
   };
