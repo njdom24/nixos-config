@@ -111,6 +111,12 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
+	  (unstable.retroarch.override {
+	    cores = with libretro; [
+	      melonds
+	      mgba
+	    ];
+  	  })
     ]# ++ (with dotnetCorePackages; [
     #	sdk_5_0
     #])
