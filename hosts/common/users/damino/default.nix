@@ -100,6 +100,14 @@ in
 	  unstable.ryujinx
 	  citra-mk7
 	  dolphin-emu
+	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
+	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
+	  }))
+	  (unstable.retroarch.override {
+	    cores = with unstable.libretro; [
+	      mgba
+	    ];
+  	  })
 	  #obs-studio
 	  (wrapOBS {
 	  	plugins = with obs-studio-plugins; [
@@ -111,12 +119,6 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
-	  (unstable.retroarch.override {
-	    cores = with libretro; [
-	      melonds
-	      mgba
-	    ];
-  	  })
     ]# ++ (with dotnetCorePackages; [
     #	sdk_5_0
     #])
