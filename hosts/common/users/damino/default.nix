@@ -100,6 +100,7 @@ in
 	  unstable.ryujinx
 	  citra-mk7
 	  dolphin-emu
+	  unstable.cemu
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
