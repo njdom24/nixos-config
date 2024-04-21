@@ -54,6 +54,7 @@ in
       mesa-demos
       vulkan-tools
       nvtop
+      rclone
       handbrake
       firefox
       chromium
