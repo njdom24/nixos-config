@@ -60,6 +60,7 @@ in
       kate
       kitty
       gnome.nautilus
+      gnome.file-roller
       gimp
       vlc
       steam-run
@@ -97,6 +98,7 @@ in
 	  #betterdiscord-installer
 	  betterdiscordctl
 	  unstable.discord-screenaudio
+	  unstable.ludusavi
 	  unstable.ryujinx
 	  citra-mk7
 	  dolphin-emu
