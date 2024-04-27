@@ -325,6 +325,7 @@ in
   	  flex
   	  freetype
   	  OVMFFull
+  	  python3
   	] ++ gst_plugins;
 
   	variables = {
