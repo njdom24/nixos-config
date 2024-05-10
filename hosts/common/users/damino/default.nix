@@ -7,10 +7,13 @@
 let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 
   gst_plugins = (with pkgs.gst_all_1; [
+  	gstreamer
+  	gst-plugins-base
 	gst-plugins-good
 	gst-plugins-bad
 	gst-plugins-ugly
 	gst-libav
+	gst-vaapi
   ]);
 
 in
@@ -125,6 +128,7 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
+	  vscode
     ]# ++ (with dotnetCorePackages; [
     #	sdk_5_0
     #])
@@ -233,7 +237,10 @@ in
     virt-manager.enable = true;
   };
 
-  virtualisation.libvirtd.enable = true;
+  virtualisation = {
+  	libvirtd.enable = true;
+  	docker.enable = true;
+  };
 
   hardware = {
     enableRedistributableFirmware = true;
@@ -244,7 +251,7 @@ in
     };
   	opengl = {
   		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
-  		extraPackages = with pkgs; [mangohud intel-media-driver vaapiIntel vaapiVdpau libvdpau-va-gl ];
+  		extraPackages = with pkgs; [mangohud intel-media-driver vaapiIntel vaapiVdpau libvdpau-va-gl vulkan-loader vulkan-validation-layers vulkan-extension-layer];
   		extraPackages32 = with pkgs; [mangohud];
   	};
   	#nvidia = {
@@ -328,6 +335,7 @@ in
   	  freetype
   	  OVMFFull
   	  python3
+  	  distrobox
   	] ++ gst_plugins;
 
   	variables = {
