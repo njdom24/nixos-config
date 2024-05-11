@@ -213,7 +213,7 @@ in
           stdenv.cc.cc.lib
           libkrb5
           keyutils
-        ];
+        ] ++ gst_plugins;
         # https://github.com/NixOS/nixpkgs/issues/279893
         extraProfile = ''
           unset TZ
