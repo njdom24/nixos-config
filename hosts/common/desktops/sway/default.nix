@@ -83,7 +83,7 @@ in
 	
     extraSessionCommands = ''
     #export SDL_VIDEODRIVER=wayland
-    export QT_QPA_PLATFORM=wayland;xcb
+    export QT_QPA_PLATFORM="wayland;xcb"
     export GDK_BACKEND=wayland,x11
     export CLUTTER_BACKEND=wayland
     export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
