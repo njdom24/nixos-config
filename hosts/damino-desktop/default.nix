@@ -60,9 +60,9 @@
   services.xserver.desktopManager.plasma5.enable = true;
 
   # Configure keymap in X11
-  services.xserver = {
+  services.xserver.xkb = {
     layout = "us";
-    xkbVariant = "";
+    variant = "";
   };
 
   services.resolved.enable = true;
@@ -106,6 +106,8 @@
     };
     sunshine = {
       enable = true;
+      capSysAdmin = true;
+      openFirewall = true;
       package = pkgs.unstable.sunshine.override { mesa = pkgs.mesa; };
     };
   };

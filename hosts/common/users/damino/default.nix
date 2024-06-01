@@ -22,7 +22,6 @@ in
     [
     	../../desktops/sway
     	inputs.nur.nixosModules.nur
-    	"${inputs.nixpkgs-unstable}/nixos/modules/hardware/corectrl.nix" # TODO: Remove after 23.11
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
@@ -30,8 +29,6 @@ in
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
   ];
-
-  disabledModules = [ "hardware/corectrl.nix" ]; # TODO: Remove after 23.11
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.damino = {
@@ -57,7 +54,7 @@ in
       home-manager
       mesa-demos
       vulkan-tools
-      nvtop
+      nvtopPackages.full
       rclone
       handbrake
       firefox
@@ -264,20 +261,9 @@ in
   };
 
   services = {
-    xserver = {
-   	  displayManager.sddm = {
-  	    enable = true;
-  	    theme = "chili";	
-  	  };
-  	  #displayManager.gdm = {
-  	  #	 enable = true;
-  	  #	 wayland = false;
-  	  #};
-  	  #displayManager.setupCommands = ''
-  	  #  ${config.nur.repos.wolfangaukang.vdhcoapp}/net.downloadhelper.coapp install --user
-  	  #  #etc/profiles/per-user/damino/share/vdhcoapp/net.downloadhelper.coapp install --user
-  	  #'';
-	  #videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
+    displayManager.sddm = {
+  	  enable = true;
+  	  theme = "chili";	
     };
 
     pipewire = {

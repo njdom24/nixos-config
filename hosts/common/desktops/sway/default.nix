@@ -69,8 +69,8 @@ in
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
   };
 
-  #services.xserver.displayManager.setupCommands = "eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)";
-  services.xserver.displayManager.defaultSession = "sway";
+  #services.displayManager.setupCommands = "eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)";
+  services.displayManager.defaultSession = "sway";
 
   # enable sway window manager
   programs.sway = {
