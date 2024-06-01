@@ -58,7 +58,7 @@ in
       rclone
       handbrake
       firefox
-      chromium
+      (chromium.override { enableWideVine = true; })
       kate
       kitty
       gnome.nautilus
