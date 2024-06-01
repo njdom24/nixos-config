@@ -198,29 +198,37 @@ in
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
       package = pkgs.steam.override {
-        extraEnv = {};
-        extraLibraries = pkgs: with pkgs; [
-          xorg.libXcursor
-          xorg.libXi
-          xorg.libXinerama
-          xorg.libXScrnSaver
-          libpng
-          libpulseaudio
-          libvorbis
-          stdenv.cc.cc.lib
-          libkrb5
-          keyutils
-        ] ++ gst_plugins;
         # https://github.com/NixOS/nixpkgs/issues/279893
         extraProfile = ''
           unset TZ
         '';
       };
+
+      extraPackages = with pkgs; [
+        gamescope
+        xorg.libXcursor
+        xorg.libXi
+        xorg.libXinerama
+        xorg.libXScrnSaver
+        libpng
+        libpulseaudio
+        libvorbis
+        stdenv.cc.cc.lib
+        libkrb5
+        keyutils
+      ] ++ gst_plugins;
+
+      gamescopeSession = {
+        enable = true;
+        args = [
+          "-f"	
+        ];
+      };
     };
 
     gamescope = {
       enable = true;
-      capSysNice = true;
+      capSysNice = false; # Needed or gamescope fails within Steam
     };
 
     corectrl = {
