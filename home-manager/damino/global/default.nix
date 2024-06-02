@@ -64,6 +64,10 @@
     sessionPath = [ "$HOME/.local/bin" ];
     # sessionVariables = { };
 
+    file = {
+      ".face.icon".source = ./.face.icon;
+    };
+
     packages = with pkgs; [
       nwg-look
       nwg-displays
