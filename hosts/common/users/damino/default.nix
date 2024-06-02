@@ -252,7 +252,12 @@ in
     bluetooth = {
     	enable = true;
     	powerOnBoot = true;
-    	package = pkgs.legacy.bluez;
+    	# package = pkgs.legacy.bluez;
+    	settings = {
+    	  General = {
+    	  	UserspaceHID = "true";
+    	  };
+    	};
     };
   	opengl = {
   		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
