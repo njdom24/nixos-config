@@ -271,7 +271,11 @@ in
   services = {
     displayManager.sddm = {
   	  enable = true;
-  	  theme = "chili";	
+  	  theme = "Elegant";
+
+  	  # https://github.com/NixOS/nixpkgs/issues/292761
+  	  package = pkgs.lib.mkForce pkgs.libsForQt5.sddm;
+  	  extraPackages = pkgs.lib.mkForce [];
     };
 
     pipewire = {
@@ -320,7 +324,7 @@ in
   	  #wineWowPackages.stagingFull
   	  wineWowPackages.waylandFull
   	  winetricks
-  	  sddm-chili-theme
+  	  elegant-sddm
   	  xcursor-pro
   	  pciutils
   	  libgcc
