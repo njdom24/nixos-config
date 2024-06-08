@@ -320,6 +320,7 @@ in
   	  sshfs
   	  libarchive
   	  p7zip
+  	  duperemove
   	  xdotool
   	  ecryptfs
   	  unzip
