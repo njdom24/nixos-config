@@ -277,6 +277,9 @@ in
     displayManager.sddm = {
   	  enable = true;
   	  theme = "Elegant";
+  	  settings = {
+  	  	Theme.CursorTheme = "XCursor-Pro-Dark";
+  	  };
 
   	  # https://github.com/NixOS/nixpkgs/issues/292761
   	  package = pkgs.lib.mkForce pkgs.libsForQt5.sddm;
