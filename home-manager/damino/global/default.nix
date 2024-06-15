@@ -99,6 +99,7 @@
 	  	vsync = 3;
 	  	gl_vsync = 1;
 	  	gpu_name = true;
+	  	fps_limit_method = "early";
 	  	toggle_logging = "Shift_L+Shift_R";
 	  	reload_cfg = "Shift_L+Shift_R";
 	  };
