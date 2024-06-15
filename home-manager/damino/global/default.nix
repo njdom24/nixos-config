@@ -100,8 +100,9 @@
 	  	gl_vsync = 1;
 	  	gpu_name = true;
 	  	fps_limit_method = "early";
-	  	toggle_logging = "Shift_L+Shift_R";
-	  	reload_cfg = "Shift_L+Shift_R";
+	  	toggle_hud = "Shift_R+F12";
+	  	toggle_logging = true; # Unbind
+	  	reload_cfg = true; # Unbind
 	  };
 	};
 
