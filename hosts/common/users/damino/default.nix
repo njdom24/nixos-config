@@ -73,7 +73,7 @@ in
       vkbasalt
       protontricks
       protonup-qt
-      neofetch
+      fastfetch
       zsh
       oh-my-zsh
       mission-center
@@ -98,9 +98,10 @@ in
 	  (discord.override {
 	  	withOpenASAR = true; # If this breaks, set to false and re-run Discord. https://github.com/NixOS/nixpkgs/issues/208749
 	  })
+	  
 	  #betterdiscord-installer
 	  betterdiscordctl
-	  unstable.discord-screenaudio
+	  unstable.vesktop
 	  unstable.ludusavi
 	  unstable.ryujinx
 	  citra-mk7
