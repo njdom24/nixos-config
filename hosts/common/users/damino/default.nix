@@ -234,7 +234,9 @@ in
 
     corectrl = {
       enable = true;
-      package = pkgs.unstable.corectrl;
+      package = pkgs.unstable.corectrl.overrideAttrs (finalAttrs: prevAttrs: {
+      	qtWrapperArgs = ["--unset QT_QPA_PLATFORMTHEME"];
+      });
       gpuOverclock.enable = true;	
     };
 
