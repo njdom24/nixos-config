@@ -75,7 +75,15 @@
   };
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  services.xserver = {
+  	enable = true;
+  	# Only show login screen on external monitor when it's connected
+  	displayManager.setupCommands = ''  	 
+  	 if [ "${pkgs.xorg.xrandr}/bin/xrandr --current | grep 'eDP-[0-1] connected'" ]; then
+  	   ${pkgs.xorg.xrandr}/bin/xrandr --output "$(xrandr --current | grep "eDP-[0-1] connected" | awk '{print $1;}')" --off
+  	 fi
+  	'';
+  }
 
   #services.xserver.displayManager.gdm.enable = true;
   # Enable the KDE Plasma Desktop Environment.
