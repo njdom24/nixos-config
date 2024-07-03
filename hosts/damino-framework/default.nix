@@ -83,7 +83,7 @@
   	   ${pkgs.xorg.xrandr}/bin/xrandr --output "$(xrandr --current | grep "eDP-[0-1] connected" | awk '{print $1;}')" --off
   	 fi
   	'';
-  }
+  };
 
   #services.xserver.displayManager.gdm.enable = true;
   # Enable the KDE Plasma Desktop Environment.
