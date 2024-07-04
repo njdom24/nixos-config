@@ -86,7 +86,10 @@
   	git = {
   	  enable = true;
   	  package = pkgs.gitFull;
-  	  extraConfig.credential.helper = "libsecret";
+  	  extraConfig = {
+  	    safe.directory = "/etc/nixos/.git";
+  	  	credential.helper = "libsecret";
+  	  };
   	  userName = "Damino";
   	  userEmail = "dom32400@aol.com";
   	};
