@@ -56,7 +56,7 @@
   	videoDrivers = [ "amdgpu" ];
   	# Only show login screen on primary monitor when it's connected
   	displayManager.setupCommands = ''  	  
-  	  if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected'" ]; then
+  	  if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
   	    ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --auto --primary
   	    ${pkgs.xorg.xrandr}/bin/xrandr --output HDMI-A-0 --off
   	  else
