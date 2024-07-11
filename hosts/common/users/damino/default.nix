@@ -170,7 +170,6 @@ in
 	#ssh.startAgent = true;
 	seahorse.enable = true;
 	ssh = {
-	  forwardX11 = true;
 	  enableAskPassword = true;
 	  askPassword = pkgs.lib.mkForce "${pkgs.gnome.seahorse.out}/libexec/seahorse/ssh-askpass";
 	};
@@ -218,7 +217,6 @@ in
         stdenv.cc.cc.lib
         libkrb5
         keyutils
-        waypipe
       ] ++ gst_plugins;
 
       gamescopeSession = {
@@ -299,7 +297,10 @@ in
     };
   	openssh = {
   	  enable = true;
-  	  settings.PasswordAuthentication = true;
+  	  settings = {
+  	    X11Forwarding = true;
+  	  	PasswordAuthentication = true;
+  	  };
  	};
  	gnome.gnome-keyring.enable = true;
  	gvfs.enable = true;
@@ -348,6 +349,7 @@ in
   	  OVMFFull
   	  python3
   	  distrobox
+  	  waypipe
   	] ++ gst_plugins;
 
   	variables = {
