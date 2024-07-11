@@ -170,6 +170,7 @@ in
 	#ssh.startAgent = true;
 	seahorse.enable = true;
 	ssh = {
+	  forwardX11 = true;
 	  enableAskPassword = true;
 	  askPassword = pkgs.lib.mkForce "${pkgs.gnome.seahorse.out}/libexec/seahorse/ssh-askpass";
 	};
@@ -217,6 +218,7 @@ in
         stdenv.cc.cc.lib
         libkrb5
         keyutils
+        waypipe
       ] ++ gst_plugins;
 
       gamescopeSession = {
