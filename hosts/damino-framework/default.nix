@@ -38,20 +38,13 @@
   	  ];
     };
 
-    nvidia.modesetting.enable = true;
-    nvidia.powerManagement.enable = false;
-	nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
-  	#nvidia.prime = {
-  	  #allowExternalGpu = true;
-  	  #reverseSync.enable = true;
-  	  # sync.enable = true;
-      #
-  	  #nvidiaBusId = "PCI:46:0:0";
-  	  #intelBusId = "PCI:0:2:0";
-  	#};
+    #nvidia.modesetting.enable = true;
+    #nvidia.powerManagement.enable = false;
+	#nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
   };
 
-  services.xserver.videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
+  #services.xserver.videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
+  services.xserver.videoDrivers = [ "modesetting" "fbdev" ];
 
   # Set your time zone.
   time = {
