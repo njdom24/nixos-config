@@ -138,6 +138,10 @@
   #  ];
   #};
 
+  users.users.damino.packages = with pkgs; [
+  	unstable.xivlauncher
+  ];
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
