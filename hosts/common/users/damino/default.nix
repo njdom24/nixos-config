@@ -61,8 +61,10 @@ in
       (chromium.override { enableWideVine = true; })
       kate
       kitty
+      ffmpeg-full
       gnome.nautilus
       gnome.file-roller
+      loupe
       gimp
       vlc
       steam-run
