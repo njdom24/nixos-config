@@ -50,31 +50,10 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  # Enable the X11 windowing system.
-  services.xserver = {
-  	enable = true;
-  	videoDrivers = [ "amdgpu" ];
-  	# Only show login screen on primary monitor when it's connected
-  	displayManager.setupCommands = ''  	  
-  	  if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
-  	    ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --auto --primary
-  	    ${pkgs.xorg.xrandr}/bin/xrandr --output HDMI-A-0 --off
-  	  else
-  	    ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --off
-  	  fi
-  	'';
-  };
-
   #services.xserver.displayManager.gdm.enable = true;
   # Enable the KDE Plasma Desktop Environment.
   #services.xserver.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
 
   services.resolved.enable = true;
 
@@ -89,6 +68,26 @@
   };
   security.rtkit.enable = true;
   services = {
+  	# Enable the X11 windowing system.
+    xserver = {
+  	  enable = true;
+  	  # Configure keymap in X11
+  	  xkb = {
+  	    layout = "us";
+  	    variant = "";
+  	  };
+  	  videoDrivers = [ "amdgpu" ];
+  	  # Only show login screen on primary monitor when it's connected
+  	  displayManager.setupCommands = ''  	  
+  	    if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
+  	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --auto --primary
+  	      ${pkgs.xorg.xrandr}/bin/xrandr --output HDMI-A-0 --off
+  	    else
+  	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --off
+  	    fi
+  	  '';
+    };
+  
   	pipewire = {
       enable = true;
       alsa.enable = true;
@@ -120,6 +119,25 @@
       capSysAdmin = true;
       openFirewall = true;
       package = pkgs.unstable.sunshine.override { mesa = pkgs.mesa; };
+    };
+
+    flatpak = {
+      packages = [
+        "com.valvesoftware.Steam"
+        # Needs manual selection. Version must match "freedesktop-sdk" from "flatpak list"
+      	{ appId = "org.freedesktop.Platform.GL.mesa-git//23.08"; origin = "flathub-beta"; }
+      	{ appId = "org.freedesktop.Platform.GL32.mesa-git//23.08"; origin = "flathub-beta"; }
+      ];
+
+      overrides = {
+      	"com.valvesoftware.Steam" = {
+      	  Environment.FLATPAK_GL_DRIVERS = "mesa-git";
+      	  Context = {
+      	    device = "all";
+      	    filesystems = [ "~/.local/share/Steam" "/mnt/*/SteamLibrary" ];
+      	  };
+      	};
+      };
     };
   };
 

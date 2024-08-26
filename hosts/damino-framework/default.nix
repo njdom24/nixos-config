@@ -69,32 +69,33 @@
 
   # Enable the X11 windowing system.
   # ''$(${pkgs.xorg.xrandr}/bin/xrandr --current | grep 'eDP-[0-1] connected' | awk '{print ''$1;}') > /tmp/wha.txt
-  services.xserver = {
-  	enable = true;
-  	# Only show login screen on external monitor when it's connected
-  	displayManager.setupCommands = ''
-  	 if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep '[0-9] connected' | ${pkgs.coreutils}/bin/wc -l)" -gt 1 ]; then
-  	   ${pkgs.xorg.xrandr}/bin/xrandr --output "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'eDP-[0-9] connected' | ${pkgs.gawk}/bin/awk '{print $1;}')" --off
-  	 fi
-  	'';
+  services = {
+    xserver = {
+   	  enable = true;
+      # Only show login screen on external monitor when it's connected
+      displayManager.setupCommands = ''
+        if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep '[0-9] connected' | ${pkgs.coreutils}/bin/wc -l)" -gt 1 ]; then
+    	${pkgs.xorg.xrandr}/bin/xrandr --output "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'eDP-[0-9] connected' | ${pkgs.gawk}/bin/awk '{print $1;}')" --off
+    	fi
+      '';
+      # Configure keymap in X11
+      xkb = {
+        layout = "us";
+        variant = "";
+      };
+    };
+
+    #xserver.displayManager.gdm.enable = true;
+    # Enable the KDE Plasma Desktop Environment.
+    #xserver.displayManager.sddm.enable = true;
+    desktopManager.plasma6.enable = true;
+    #xserver.desktopManager.gnome.enable = true;
+
+    resolved.enable = true;
+
+    # Enable CUPS to print documents.
+    printing.enable = true;
   };
-
-  #services.xserver.displayManager.gdm.enable = true;
-  # Enable the KDE Plasma Desktop Environment.
-  #services.xserver.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
-  #services.xserver.desktopManager.gnome.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
-
-  services.resolved.enable = true;
-
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
 
   # Enable sound with pipewire.
   sound.enable = true;
