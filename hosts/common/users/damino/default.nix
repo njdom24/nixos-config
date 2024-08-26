@@ -58,6 +58,7 @@ in
       rclone
       handbrake
       firefox
+      vdhcoapp
       (chromium.override { enableWideVine = true; })
       kate
       kitty
