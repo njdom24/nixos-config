@@ -20,11 +20,8 @@
     # Shameless plug: looking for a way to nixify your themes and make
     # everything match nicely? Try nix-colors!
     # nix-colors.url = "github:misterio77/nix-colors";
-    nur.url = "github:nix-community/NUR";
 
-    nixpkgs-wayland.url = "github:nix-community/nixpkgs-wayland";
-    # only needed if you use as a package set:
-    nixpkgs-wayland.inputs.nixpkgs.follows = "nixpkgs-unstable";
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
   };
 
   outputs = {
@@ -32,8 +29,7 @@
     nixpkgs,
     home-manager,
     hardware,
-    nur,
-    nixpkgs-wayland,
+    nix-flatpak,
     ...
   } @ inputs: let
     inherit (self) outputs;

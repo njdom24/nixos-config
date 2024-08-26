@@ -21,7 +21,7 @@ in
   imports =
     [
     	../../desktops/sway
-    	inputs.nur.nixosModules.nur
+    	inputs.nix-flatpak.nixosModules.nix-flatpak
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
@@ -130,14 +130,7 @@ in
 	  corefonts
 	  vistafonts
 	  vscode
-    ]# ++ (with dotnetCorePackages; [
-    #	sdk_5_0
-    #])
-    ++ (with config.nur.repos; [
-    	#mic92.hello-nur
-    	#wolfangaukang.vdhcoapp
-    	#ivar.ryujinx
-    ]);
+    ];
   };
 
   nix = {
