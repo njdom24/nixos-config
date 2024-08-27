@@ -120,25 +120,6 @@
       openFirewall = true;
       package = pkgs.unstable.sunshine.override { mesa = pkgs.mesa; };
     };
-
-    flatpak = {
-      packages = [
-        "com.valvesoftware.Steam"
-        # Needs manual selection. Version must match "freedesktop-sdk" from "flatpak list"
-      	{ appId = "org.freedesktop.Platform.GL.mesa-git//23.08"; origin = "flathub-beta"; }
-      	{ appId = "org.freedesktop.Platform.GL32.mesa-git//23.08"; origin = "flathub-beta"; }
-      ];
-
-      overrides = {
-      	"com.valvesoftware.Steam" = {
-      	  Environment.FLATPAK_GL_DRIVERS = "mesa-git";
-      	  Context = {
-      	    device = "all";
-      	    filesystems = [ "~/.local/share/Steam" "/mnt/*/SteamLibrary" ];
-      	  };
-      	};
-      };
-    };
   };
 
   # Enable touchpad support (enabled default in most desktopManager).

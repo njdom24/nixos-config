@@ -20,8 +20,7 @@ in
 {
   imports =
     [
-    	../../desktops/sway
-    	inputs.nix-flatpak.nixosModules.nix-flatpak
+      ../../desktops/sway
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
@@ -302,14 +301,6 @@ in
  	gvfs.enable = true;
 
  	fstrim.enable = true;
-
- 	flatpak = {
- 	  enable = true;
- 	  uninstallUnmanaged = true;
- 	  remotes = lib.mkOptionDefault [{ # Merges with the default flathub repo instead of replacing it
- 	  	name = "flathub-beta"; location = "https://flathub.org/beta-repo/flathub-beta.flatpakrepo";
- 	  }];
- 	};
   };
 
   security = {
