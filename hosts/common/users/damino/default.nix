@@ -193,6 +193,7 @@ in
       enable = true;
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
+	  extest.enable = true;
       package = pkgs.steam.override {
         # https://github.com/NixOS/nixpkgs/issues/279893
         extraProfile = ''
