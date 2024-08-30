@@ -4,8 +4,8 @@
 let
   # GTX 960
   gpuIDs = [
-    "10de:1401" # Graphics
-    "10de:0fba" # Audio
+    #"10de:1401" # Graphics
+    #"10de:0fba" # Audio
   ];
 in
 { config, lib, pkgs, modulesPath, ... }:

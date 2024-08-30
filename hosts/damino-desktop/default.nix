@@ -2,14 +2,19 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../common/users/damino
+      
     ];
+
+  nixpkgs.overlays = [
+  	inputs.nvidia-patch.overlays.default
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -65,6 +70,13 @@
   hardware = {
   	pulseaudio.enable = false;
   	cpu.amd.updateMicrocode = true;
+
+  	nvidia = {
+  	  modesetting.enable = true;
+  	  open = false;
+  	  #package = config.boot.kernelPackages.nvidiaPackages.beta;
+  	  package = pkgs.nvidia-patch.patch-nvenc (pkgs.nvidia-patch.patch-fbc config.boot.kernelPackages.nvidiaPackages.beta);
+  	};
   };
   security.rtkit.enable = true;
   services = {
@@ -76,7 +88,7 @@
   	    layout = "us";
   	    variant = "";
   	  };
-  	  videoDrivers = [ "amdgpu" ];
+  	  videoDrivers = [ "amdgpu" "nvidia" ];
   	  # Only show login screen on primary monitor when it's connected
   	  displayManager.setupCommands = ''  	  
   	    if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
@@ -118,9 +130,20 @@
       enable = true;
       capSysAdmin = true;
       openFirewall = true;
-      package = pkgs.unstable.sunshine.override { mesa = pkgs.mesa; };
+      package = pkgs.unstable.sunshine.override {
+        mesa = pkgs.mesa;
+        cudaSupport = true;
+    	stdenv = pkgs.cudaPackages.backendStdenv;
+      };
     };
   };
+
+  programs.sway.extraSessionCommands = ''
+	export WLR_DRM_DEVICES=/dev/dri/card1
+    #export WLR_DRM_DEVICES=$([ $REMOTE_ENABLED = 1 ] && echo "/dev/dri/card0" || echo "/dev/dri/card1")
+    #export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "vulkan" || echo "gles2")
+    export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json
+  '';
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
