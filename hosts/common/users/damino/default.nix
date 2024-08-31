@@ -1,4 +1,3 @@
-
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
@@ -67,6 +66,7 @@ in
       loupe
       gimp
       vlc
+      libva-utils
       steam-run
       steamtinkerlaunch
       samrewritten
@@ -260,7 +260,7 @@ in
     };
   	opengl = {
   		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
-  		extraPackages = with pkgs; [mangohud intel-media-driver vaapiIntel vaapiVdpau libvdpau-va-gl vulkan-loader vulkan-validation-layers vulkan-extension-layer];
+  		extraPackages = with pkgs; [mangohud intel-media-driver intel-vaapi-driver vaapiIntel vaapiVdpau libva libva-utils libvdpau-va-gl vulkan-loader vulkan-validation-layers vulkan-extension-layer];
   		extraPackages32 = with pkgs; [mangohud];
   	};
   	#nvidia = {

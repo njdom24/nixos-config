@@ -16,11 +16,10 @@ in
     ];
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ "amdgpu" "vfio_pci" "vfio" "vfio_iommu_type1" ];
-  boot.blacklistedKernelModules = [ "nouveau" ];
+  boot.initrd.kernelModules = [ "amdgpu" "i915" "vfio_pci" "vfio" "vfio_iommu_type1" ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "amd_iommu=on" "pci_acs_override=downstream,multifunction" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
+  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "amd_iommu=on" "i915.enable_guc=3" "pci_acs_override=downstream,multifunction" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
   # https://gitlab.freedesktop.org/drm/amd/-/issues/3149
   boot.kernelPackages = pkgs.linuxPackages_6_6;
 
@@ -58,6 +57,19 @@ in
       fsType = "ext4";
       options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
+
+  fileSystems."/mnt/ext" =
+    { device = "damino@192.168.1.18:/mnt/ext";
+      fsType = "sshfs";
+      options = [ "nosuid" "nodev" "noatime" "allow_other" "reconnect" "ServerAliveInterval=15" "ServerAliveCountMax=3" "IdentityFile=/home/damino/.ssh/pi4_ed25519" ];
+    };
+
+  fileSystems."/tmp/transcodes" =
+    { device = "damino@192.168.1.18:/tmp/transcodes";
+      fsType = "sshfs";
+      options = [ "nosuid" "nodev" "noatime" "allow_other" "reconnect" "ServerAliveInterval=15" "ServerAliveCountMax=3" "IdentityFile=/home/damino/.ssh/pi4_ed25519" ];
+    };
+
 
   swapDevices = [ ];
 

@@ -12,10 +12,6 @@
       
     ];
 
-  nixpkgs.overlays = [
-  	inputs.nvidia-patch.overlays.default
-  ];
-
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -70,13 +66,9 @@
   hardware = {
   	pulseaudio.enable = false;
   	cpu.amd.updateMicrocode = true;
-
-  	nvidia = {
-  	  modesetting.enable = true;
-  	  open = false;
-  	  #package = config.boot.kernelPackages.nvidiaPackages.beta;
-  	  package = pkgs.nvidia-patch.patch-nvenc (pkgs.nvidia-patch.patch-fbc config.boot.kernelPackages.nvidiaPackages.beta);
-  	};
+  	#opengl.extraPackages = with pkgs; [ vpl-gpu-rt ]; #  24.10+
+  	opengl.extraPackages = with pkgs; [ onevpl-intel-gpu ];
+  	intel-gpu-tools.enable = true;
   };
   security.rtkit.enable = true;
   services = {
@@ -88,12 +80,13 @@
   	    layout = "us";
   	    variant = "";
   	  };
-  	  videoDrivers = [ "amdgpu" "nvidia" ];
+  	  videoDrivers = [ "amdgpu" "modesetting" ];
   	  # Only show login screen on primary monitor when it's connected
   	  displayManager.setupCommands = ''  	  
   	    if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
   	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --auto --primary
   	      ${pkgs.xorg.xrandr}/bin/xrandr --output HDMI-A-0 --off
+  	      ${pkgs.xorg.xrandr}/bin/xrandr --output DP-2 --off
   	    else
   	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --off
   	    fi
@@ -132,15 +125,13 @@
       openFirewall = true;
       package = pkgs.unstable.sunshine.override {
         mesa = pkgs.mesa;
-        cudaSupport = true;
-    	stdenv = pkgs.cudaPackages.backendStdenv;
       };
     };
   };
 
   programs.sway.extraSessionCommands = ''
-	export WLR_DRM_DEVICES=/dev/dri/card1
-    #export WLR_DRM_DEVICES=$([ $REMOTE_ENABLED = 1 ] && echo "/dev/dri/card0" || echo "/dev/dri/card1")
+	#export WLR_DRM_DEVICES=/dev/dri/card1
+    export WLR_DRM_DEVICES=$([ $REMOTE_ENABLED = 1 ] && echo "/dev/dri/card0" || echo "/dev/dri/card1")
     #export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "vulkan" || echo "gles2")
     export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json
   '';
