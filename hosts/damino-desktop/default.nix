@@ -86,9 +86,7 @@
   	    if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
   	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --auto --primary
   	      ${pkgs.xorg.xrandr}/bin/xrandr --output HDMI-A-0 --off
-  	      ${pkgs.xorg.xrandr}/bin/xrandr --output DP-2 --off
-  	    else
-  	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-0 --off
+  	      ${pkgs.xorg.xrandr}/bin/xrandr --output DisplayPort-1 --off
   	    fi
   	  '';
     };
@@ -135,6 +133,15 @@
     #export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "vulkan" || echo "gles2")
     export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json
   '';
+
+  programs.steam.gamescopeSession.args = [
+  	"-w 2560"
+  	"-W 2560"
+  	"-h 1440"
+  	"-H 1440"
+  	"-O HDMI-A-1"
+  	"-r 120"
+  ];
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;

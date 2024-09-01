@@ -22,6 +22,10 @@ in
   boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "amd_iommu=on" "i915.enable_guc=3" "pci_acs_override=downstream,multifunction" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
   # https://gitlab.freedesktop.org/drm/amd/-/issues/3149
   boot.kernelPackages = pkgs.linuxPackages_6_6;
+  boot.kernelPatches = [ {
+  	name = "enable-hdmi-freesync";
+  	patch = ../../patches/enable-hdmi-freesync.mypatch;
+  }];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/423a230f-e396-41fb-a481-839c127d7a5d";
