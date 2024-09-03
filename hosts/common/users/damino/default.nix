@@ -302,7 +302,6 @@ in
  	gvfs.enable = true;
 
  	fstrim.enable = true;
- 	flatpak.enable = true; # For sunshine-nightly
   };
 
   security = {
