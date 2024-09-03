@@ -9,7 +9,6 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../common/users/damino
-      
     ];
 
   # Bootloader.
@@ -157,6 +156,23 @@
     #  thunderbird
   #  ];
   #};
+  users.users.jellyfin = {
+  	isSystemUser = true;
+  	description = "jellyfin rffmpeg";
+  	uid = 965;
+  	group = "jellyfin";
+  	createHome = true;
+  	home = "/home/jellyfin";
+  	shell = pkgs.bash;
+  	extraGroups = [
+  		"video"
+  		"audio"
+  		"render"
+  	];
+  	packages = with pkgs; [ steam-run jellyfin-ffmpeg ];
+  };
+
+  users.groups.jellyfin = {};
 
   users.users.damino.packages = with pkgs; [
   	unstable.xivlauncher
