@@ -127,10 +127,13 @@
   };
 
   programs.sway.extraSessionCommands = ''
-	#export WLR_DRM_DEVICES=/dev/dri/card1
-    export WLR_DRM_DEVICES=$([ $REMOTE_ENABLED = 1 ] && echo "/dev/dri/card0" || echo "/dev/dri/card1")
+	export WLR_DRM_DEVICES=/dev/dri/card1
+    #export WLR_DRM_DEVICES=$([ $REMOTE_ENABLED = 1 ] && echo "/dev/dri/card0" || echo "/dev/dri/card1")
+
     #export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "vulkan" || echo "gles2")
-    export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json
+	#export WLR_RENDERER=vulkan
+    #export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json
+    #export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
   '';
 
   programs.steam.gamescopeSession.args = [
