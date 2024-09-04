@@ -102,6 +102,7 @@ in
 	  })
 	  
 	  #betterdiscord-installer
+
 	  betterdiscordctl
 	  unstable.vesktop
 	  unstable.ludusavi
@@ -239,6 +240,7 @@ in
     };
 
     gamemode.enable = true;
+    noisetorch.enable = true;
 
     virt-manager.enable = true;
   };
