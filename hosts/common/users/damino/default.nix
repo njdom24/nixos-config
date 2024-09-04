@@ -260,8 +260,8 @@ in
     };
   	opengl = {
   		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
-  		extraPackages = with pkgs; [mangohud intel-media-driver intel-vaapi-driver vaapiIntel vaapiVdpau libva libva-utils libvdpau-va-gl vulkan-loader vulkan-validation-layers vulkan-extension-layer];
-  		extraPackages32 = with pkgs; [mangohud];
+  		extraPackages = with pkgs; [ mangohud vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
+  		extraPackages32 = with pkgs; [ mangohud ];
   	};
   	#nvidia = {
   	  # Modesetting is required.
