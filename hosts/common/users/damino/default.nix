@@ -122,6 +122,8 @@ in
 	  	plugins = with obs-studio-plugins; [
 	  		wlrobs
 	  		obs-pipewire-audio-capture
+	  		obs-vaapi
+	  		obs-gstreamer
 	  	];
 	  })
 	  jellyfin-media-player
