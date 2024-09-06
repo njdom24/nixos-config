@@ -131,6 +131,7 @@
 
   services = {
   	syncthing.enable = true;
+  	arrpc.enable = true;
   	gammastep = {
   	  enable = true;
   	  provider = "manual";
