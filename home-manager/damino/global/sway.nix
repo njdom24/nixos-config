@@ -97,7 +97,11 @@
 		  };
 		  focus.mouseWarping = false;
 		  seat = {
-		  	"*".hide_cursor = "6000";
+		  	"*" = {
+		  	  hide_cursor = "6000";
+		  	  xcursor_theme = "${config.gtk.cursorTheme.name}";
+		  	};
+		  	
 		  };
 		  gaps = {
 		  	smartGaps = true;
