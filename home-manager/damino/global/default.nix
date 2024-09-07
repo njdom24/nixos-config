@@ -20,6 +20,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
+    ./sway.nix
   ];
 
   nixpkgs = {
@@ -140,10 +141,39 @@
   	};
   };
 
-  # Nicely reload system units when changing configs
-  systemd.user.startServices = "sd-switch";
+  systemd.user = {
+    startServices = "sd-switch";
+    services = {
+      # Nicely reload system units when changing configs
+      gammastep.Install.WantedBy = lib.mkForce [ ];	
+    };
+  };
+
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Fluent-Dark";
+    };
+    iconTheme = {
+      name = "Kora";
+    };
+    cursorTheme = {
+      name = "XCursor-Pro-Dark";	
+    };
+    font = {
+      name = "Inter";
+      size = 10;
+    };
+
+    gtk3.extraConfig.gtk-xft-antialias = 1;
+    gtk3.extraConfig.gtk-xft-rgba = "none";
+    gtk3.extraConfig.gtk-xft-hinting = 1;
+    gtk3.extraConfig.gtk-xft-hintstyle = "slight";
+    gtk3.extraConfig.gtk-decoration-layout = "menu:";
+    #gtk3.extraConfig.gtk-toolbar-style = "GTK_TOOLBAR_BOTH_HORIZ";
+    #gtk3.extraConfig.gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
+  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "23.11";
-  
 }

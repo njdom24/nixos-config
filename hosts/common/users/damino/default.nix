@@ -276,6 +276,14 @@ in
   	openrazer.enable = true;
   };
 
+  fonts = {
+  	fontconfig = {
+  	  antialias = true;
+  	  hinting.enable = true;
+  	  hinting.autohint = true;	
+  	};
+  };
+
   services = {
     displayManager.sddm = {
   	  enable = true;

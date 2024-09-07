@@ -118,6 +118,7 @@
     };
     sunshine = {
       enable = true;
+      autoStart = false;
       capSysAdmin = true;
       openFirewall = true;
       package = pkgs.unstable.sunshine.override {

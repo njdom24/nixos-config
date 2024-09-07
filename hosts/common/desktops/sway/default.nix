@@ -79,28 +79,6 @@ in
     # Currently not working until below is merged
     #package = (pkgs.swayfx.overrideAttrs (old: { passthru.providedSessions = [ "sway" ]; }));
     wrapperFeatures.gtk = true;
-
-	
-    extraSessionCommands = ''
-    #export SDL_VIDEODRIVER=wayland
-    export QT_QPA_PLATFORM="wayland;xcb"
-    export GDK_BACKEND=wayland,x11
-    export CLUTTER_BACKEND=wayland
-    export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
-    export _JAVA_AWT_WM_NONREPARENTING=1
-    export MOZ_ENABLE_WAYLAND=1
-    export MOZ_DBUS_REMOTE=1
-    export XDG_CURRENT_DESKTOP=sway
-    export NIXOS_OZONE_WL=1
-
-    export REMOTE_ENABLED=$(pgrep -x x11vnc > /dev/null && echo 1 || echo 0)
-    export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
-    export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
-    
-    eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
-    export SSH_AUTH_SOCK
-    '';
-
     extraOptions = [
       "--unsupported-gpu"	
     ];
