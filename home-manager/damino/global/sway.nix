@@ -57,7 +57,7 @@
 		  client.placeholder      $base00 $base00 $base05 $base00 $base00
 		  client.background       $base07
 
-		  exec timeout 10 kanshi
+		  exec_always timeout 10 kanshi
 		  exec mako
 		  exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
@@ -129,15 +129,15 @@
 			"$mod+space" = "focus mode_toggle";
 			"$mod+a" = "focus parent";
 
-			"$mod+1" = "workspace number $ws1 ; exec $map-to-active";
-			"$mod+2" = "workspace number $ws2 ; exec $map-to-active";
-			"$mod+3" = "workspace number $ws3 ; exec $map-to-active";
-			"$mod+4" = "workspace number $ws4 ; exec $map-to-active";
-			"$mod+5" = "workspace number $ws5 ; exec $map-to-active";
-			"$mod+6" = "workspace number $ws6 ; exec $map-to-active";
-			"$mod+7" = "workspace number $ws7 ; exec $map-to-active";
-			"$mod+8" = "workspace number $ws8 ; exec $map-to-active";
-			"$mod+9" = "workspace number $ws9 ; exec $map-to-active";
+			" $mod+1" = "workspace number $ws1 ; exec $map-to-active";
+			" $mod+2" = "workspace number $ws2 ; exec $map-to-active";
+			" $mod+3" = "workspace number $ws3 ; exec $map-to-active";
+			" $mod+4" = "workspace number $ws4 ; exec $map-to-active";
+			" $mod+5" = "workspace number $ws5 ; exec $map-to-active";
+			" $mod+6" = "workspace number $ws6 ; exec $map-to-active";
+			" $mod+7" = "workspace number $ws7 ; exec $map-to-active";
+			" $mod+8" = "workspace number $ws8 ; exec $map-to-active";
+			" $mod+9" = "workspace number $ws9 ; exec $map-to-active";
 			"$mod+0" = "workspace number $ws10 ; exec $map-to-active";
 
 			"$mod+Shift+1" = "move container to workspace number $ws1";
