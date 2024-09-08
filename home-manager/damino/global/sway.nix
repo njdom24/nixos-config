@@ -1,4 +1,4 @@
-{ inputs, config, ... }: {
+{ inputs, lib, config, ... }: {
 	wayland.windowManager.sway = {
 		enable = true;
 		systemd.enable = true;
@@ -217,5 +217,15 @@
 		  eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
 		  export SSH_AUTH_SOCK
 	    '';
+	};
+
+	# """ # Workaround to fix highlighting
+
+	services = {
+	  kanshi = {
+	    enable = true;
+	    #Install.WantedBy = lib.mkForce [ ];
+	    systemdTarget = "";
+	  };
 	};
 }

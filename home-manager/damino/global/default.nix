@@ -146,7 +146,7 @@
     startServices = "sd-switch";
     services = {
       # Nicely reload system units when changing configs
-      gammastep.Install.WantedBy = lib.mkForce [ ];	
+      gammastep.Install.WantedBy = lib.mkForce [ ];
     };
   };
 
