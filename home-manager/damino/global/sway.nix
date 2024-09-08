@@ -118,7 +118,7 @@
 		  	"Control+space" = "exec makoctl dismiss";
 		  	"$mod+Return" = "exec kitty";
 		  	"$mod+Shift+q" = "kill";
-		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/sidetab-adapta.rasi -show drun\"";
+		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
 			"$mod+h" = "split h";
 			"$mod+v" = "split v";
 			"$mod+f" = "fullscreen toggle";

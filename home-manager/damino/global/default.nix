@@ -21,6 +21,7 @@
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
     ./sway.nix
+    ./rofi.nix
   ];
 
   nixpkgs = {
