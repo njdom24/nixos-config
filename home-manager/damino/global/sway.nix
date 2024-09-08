@@ -189,7 +189,7 @@
 		  	  "$mod+r" = "mode \"default\"";
 
 		  	  "$mod+w" = "output HDMI-A-1 enable mode 2560x1440@120Hz pos 0 0; output DP-1 disable; output DP-2 disable; output * adaptive_sync on; exec pactl set-default-sinkalsa_output.pci-0000_0f_00.1.pro-output-3";
-			  "$mod+o" = "exec kanshi";
+			  "$mod+o" = "exec timeout 10 kanshi";
 		  	};
 		  };
 
