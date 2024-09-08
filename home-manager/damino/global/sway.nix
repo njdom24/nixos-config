@@ -224,8 +224,32 @@
 	services = {
 	  kanshi = {
 	    enable = true;
-	    #Install.WantedBy = lib.mkForce [ ];
 	    systemdTarget = "";
+	  };
+
+	  mako = {
+	    enable = true;
+
+	  	font = "${config.gtk.font.name} 11";
+	  	layer = "overlay";
+	  	defaultTimeout = 4000;
+	  	borderRadius = 6;
+	  	borderSize = 2;
+	  	maxIconSize = 32;
+	  	anchor = "top-right";
+
+	  	backgroundColor = "#3b3228";
+	  	borderColor = "#8ab3b5";
+	  	textColor = "#d0c8c6";
+
+	  	extraConfig =
+''
+[urgency=low]
+text-color=#f4bc87
+
+[urgency=high]
+text-color=#cb6077
+'';
 	  };
 	};
 }
