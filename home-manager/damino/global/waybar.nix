@@ -65,7 +65,29 @@
     	};
 
     	"custom/weather" = {
-          exec = "$HOME/.config/waybar/scripts/get_weather.sh";
+          exec = pkgs.writeShellScript "get_weather" ''
+            #!/usr/bin/env bash
+            # get_weather.sh
+            for i in {1..5}
+            do
+                #text=$(curl -s "https://wttr.in/$1?format=1")
+                text=$(curl -s "https://wttr.in/$1?format=%c+%t")
+                if [[ $? == 0 ]]
+                then
+                	text=$(echo "$text" | tr -d +)
+                    text=$(echo "$text" | sed -E "s/\s+/ /g")
+                    tooltip=$(curl -s "https://wttr.in/$1?format=4")
+                    if [[ $? == 0 ]]
+                    then
+                        tooltip=$(echo "$tooltip" | sed -E "s/\s+/ /g")
+                        echo "{\"text\":\"$text\", \"tooltip\":\"$tooltip\"}"
+                        exit
+                    fi
+                fi
+                sleep 2
+            done
+            echo "{\"text\":\"error\", \"tooltip\":\"error\"}"
+          '';
           return-type = "json";
           format = "{}";
           tooltip = true;
@@ -79,7 +101,7 @@
 	      format-icons = {
             default = "";
           };
-		  on-click = "nwg-menu -fm nautilus -ha right -va top";
+		  on-click = "${pkgs.nwg-menu}/bin/nwg-menu -fm nautilus -ha right -va top";
     	};
 
     	"pulseaudio" = {
@@ -100,7 +122,7 @@
             car = "";
             default = [ "" "" "" ];
           };
-          on-click = "pavucontrol";
+          on-click = "${pkgs.pavucontrol}/bin/pavucontrol";
     	};
 	  };
 	};
