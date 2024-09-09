@@ -22,6 +22,7 @@
     # ./nvim.nix
     ./sway.nix
     ./rofi.nix
+    ./kitty.nix
   ];
 
   nixpkgs = {
@@ -46,6 +47,7 @@
     config = {
       # Disable if you don't want unfree packages
       allowUnfree = true;
+      input-fonts.acceptLicense = true;
       # Workaround for https://github.com/nix-community/home-manager/issues/2942
       allowUnfreePredicate = _: true;
     };
@@ -163,6 +165,7 @@
     };
     font = {
       name = "Inter";
+      package = pkgs.inter;
       size = 10;
     };
 
