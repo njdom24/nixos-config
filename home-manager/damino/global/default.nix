@@ -23,6 +23,7 @@
     ./sway.nix
     ./rofi.nix
     ./kitty.nix
+    ./waybar.nix
   ];
 
   nixpkgs = {
