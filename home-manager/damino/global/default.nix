@@ -24,6 +24,7 @@
     ./sway.nix
     ./rofi.nix
     ./kitty.nix
+    ./wlogout.nix
     ./waybar.nix
   ];
 
