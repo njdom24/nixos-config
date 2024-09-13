@@ -14,12 +14,12 @@
 
 	theme = let inherit (config.lib.formats.rasi) mkLiteral; in {
 	  "*" = {
-		red = mkLiteral "rgba ( 203, 96, 119, 100 % )";
-		blue = mkLiteral "rgba ( 138, 179, 181, 100 % )";
-		lightfg = mkLiteral "rgba ( 233, 225, 221, 100 % )";
-		lightbg = mkLiteral "rgba ( 83, 70, 54, 100 % )";
-		foreground = mkLiteral "rgba ( 208, 200, 198, 100 % )";
-		background = mkLiteral "rgba ( 59, 50, 40, 100 % )";
+		red = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base08}, 100 % )";
+		blue = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base0D}, 100 % )";
+		lightfg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base06}, 100 % )";
+		lightbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 100 % )";
+		foreground = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base05}, 100 % )";
+		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 100 % )";
 		background-color = mkLiteral "@background";
 
 		separatorcolor = mkLiteral "@foreground";

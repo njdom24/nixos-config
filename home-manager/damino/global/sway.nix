@@ -27,29 +27,24 @@
 		extraConfig = ''
 		  exec systemctl --user restart xdg-desktop-portal
 		  exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-
-		  # TODO: https://github.com/Misterio77/nix-colors
-		  # Start flavours
-		  ## Base16 Mocha
-		  # Author: Chris Kempson (http://chriskempson.com)
 		  
-		  set $base00 #3b3228
-		  set $base01 #534636
-		  set $base02 #645240
-		  set $base03 #7e705a
-		  set $base04 #b8afad
-		  set $base05 #d0c8c6
-		  set $base06 #e9e1dd
-		  set $base07 #f5eeeb
-		  set $base08 #cb6077
-		  set $base09 #d28b71
-		  set $base0A #f4bc87
-		  set $base0B #beb55b
-		  set $base0C #7bbda4
-		  set $base0D #8ab3b5
-		  set $base0E #a89bb9
-		  set $base0F #bb9584
-		  # End flavours
+		  set $base00 #${config.colorScheme.palette.base00}
+		  set $base01 #${config.colorScheme.palette.base01}
+		  set $base02 #${config.colorScheme.palette.base02}
+		  set $base03 #${config.colorScheme.palette.base03}
+		  set $base04 #${config.colorScheme.palette.base04}
+		  set $base05 #${config.colorScheme.palette.base05}
+		  set $base06 #${config.colorScheme.palette.base06}
+		  set $base07 #${config.colorScheme.palette.base07}
+		  set $base08 #${config.colorScheme.palette.base08}
+		  set $base09 #${config.colorScheme.palette.base09}
+		  set $base0A #${config.colorScheme.palette.base0A}
+		  set $base0B #${config.colorScheme.palette.base0B}
+		  set $base0C #${config.colorScheme.palette.base0C}
+		  set $base0D #${config.colorScheme.palette.base0D}
+		  set $base0E #${config.colorScheme.palette.base0E}
+		  set $base0F #${config.colorScheme.palette.base0F}
+		  
 		  client.focused          $base05 $base04 $base00 $base04 $base04
 		  client.focused_inactive $base01 $base01 $base05 $base03 $base01
 		  client.unfocused        $base01 $base00 $base05 $base01 $base01
@@ -238,17 +233,18 @@
 	  	maxIconSize = 32;
 	  	anchor = "top-right";
 
-	  	backgroundColor = "#3b3228";
-	  	borderColor = "#8ab3b5";
-	  	textColor = "#d0c8c6";
+	  	backgroundColor = "#${config.colorScheme.palette.base00}";
+	  	borderColor = "#${config.colorScheme.palette.base0D}";
+	  	progressColor = "#${config.colorScheme.palette.base0D}";
+	  	textColor = "#${config.colorScheme.palette.base05}";
 
 	  	extraConfig =
 ''
 [urgency=low]
-text-color=#f4bc87
+text-color=${config.colorScheme.palette.base0A}
 
 [urgency=high]
-text-color=#cb6077
+text-color=${config.colorScheme.palette.base08}
 '';
 	  };
 	};

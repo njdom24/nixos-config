@@ -19,47 +19,47 @@
 	  touch_scroll_multiplier = "7.0";
 
 	  # Colors
-	  background = "#3b3228";
-	  foreground = "#d0c8c6";
-	  selection_background = "#d0c8c6";
-	  selection_foreground = "#3b3228";
-	  url_color = "#b8afad";
-	  cursor = "#d0c8c6";
-	  active_border_color = "#7e705a";
-	  inactive_border_color = "#534636";
-	  active_tab_background = "#3b3228";
-	  active_tab_foreground = "#d0c8c6";
-	  inactive_tab_background = "#534636";
-	  inactive_tab_foreground = "#b8afad";
-	  tab_bar_background = "#534636";
+	  background = "#${config.colorScheme.palette.base00}";
+	  foreground = "#${config.colorScheme.palette.base05}";
+	  selection_background = "#${config.colorScheme.palette.base05}";
+	  selection_foreground = "#${config.colorScheme.palette.base00}";
+	  url_color = "#${config.colorScheme.palette.base04}";
+	  cursor = "#${config.colorScheme.palette.base05}";
+	  active_border_color = "#${config.colorScheme.palette.base03}";
+	  inactive_border_color = "#${config.colorScheme.palette.base01}";
+	  active_tab_background = "#${config.colorScheme.palette.base00}";
+	  active_tab_foreground = "#${config.colorScheme.palette.base05}";
+	  inactive_tab_background = "#${config.colorScheme.palette.base01}";
+	  inactive_tab_foreground = "#${config.colorScheme.palette.base04}";
+	  tab_bar_background = "#${config.colorScheme.palette.base01}";
 
 	  # Normal
-	  color0 = "#3b3228";
-	  color1 = "#cb6077";
-	  color2 = "#beb55b";
-	  color3 = "#f4bc87";
-	  color4 = "#8ab3b5";
-	  color5 = "#a89bb9";
-	  color6 = "#7bbda4";
-	  color7 = "#d0c8c6";
+	  color0 = "#${config.colorScheme.palette.base00}";
+	  color1 = "#${config.colorScheme.palette.base08}";
+	  color2 = "#${config.colorScheme.palette.base0B}";
+	  color3 = "#${config.colorScheme.palette.base0A}";
+	  color4 = "#${config.colorScheme.palette.base0D}";
+	  color5 = "#${config.colorScheme.palette.base0E}";
+	  color6 = "#${config.colorScheme.palette.base0C}";
+	  color7 = "#${config.colorScheme.palette.base05}";
 
 	  # Bright
-	  color8 = "#7e705a";
-	  color9 = "#cb6077";
-	  color10 = "#beb55b";
-	  color11 = "#f4bc87";
-	  color12 = "#8ab3b5";
-	  color13 = "#a89bb9";
-	  color14 = "#7bbda4";
-	  color15 = "#f5eeeb";
+	  color8 = "#${config.colorScheme.palette.base03}";
+	  color9 = "#${config.colorScheme.palette.base08}";
+	  color10 = "#${config.colorScheme.palette.base0B}";
+	  color11 = "#${config.colorScheme.palette.base0A}";
+	  color12 = "#${config.colorScheme.palette.base0D}";
+	  color13 = "#${config.colorScheme.palette.base0E}";
+	  color14 = "#${config.colorScheme.palette.base0C}";
+	  color15 = "#${config.colorScheme.palette.base07}";
 
 	  # Extended base16 colors
-	  color16 = "#d28b71";
-	  color17 = "#bb9584";
-	  color18 = "#534636";
-	  color19 = "#645240";
-	  color20 = "#b8afad";
-	  color21 = "#e9e1dd";
+	  color16 = "#${config.colorScheme.palette.base09}";
+	  color17 = "#${config.colorScheme.palette.base0F}";
+	  color18 = "#${config.colorScheme.palette.base01}";
+	  color19 = "#${config.colorScheme.palette.base02}";
+	  color20 = "#${config.colorScheme.palette.base04}";
+	  color21 = "#${config.colorScheme.palette.base06}";
 	};
   };
 }

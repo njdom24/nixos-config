@@ -128,31 +128,22 @@
 	};
 	
 	style = ''
-/* Start flavours */
-/*
-*
-* Base16 Mocha
-* Author: Chris Kempson (http://chriskempson.com)
-*
-*/
-
-@define-color base00 #3b3228;
-@define-color base01 #534636;
-@define-color base02 #645240;
-@define-color base03 #7e705a;
-@define-color base04 #b8afad;
-@define-color base05 #d0c8c6;
-@define-color base06 #e9e1dd;
-@define-color base07 #f5eeeb;
-@define-color base08 #cb6077;
-@define-color base09 #d28b71;
-@define-color base0A #f4bc87;
-@define-color base0B #beb55b;
-@define-color base0C #7bbda4;
-@define-color base0D #8ab3b5;
-@define-color base0E #a89bb9;
-@define-color base0F #bb9584;
-/* End flavours */
+@define-color base00 #${config.colorScheme.palette.base00};
+@define-color base01 #${config.colorScheme.palette.base01};
+@define-color base02 #${config.colorScheme.palette.base02};
+@define-color base03 #${config.colorScheme.palette.base03};
+@define-color base04 #${config.colorScheme.palette.base04};
+@define-color base05 #${config.colorScheme.palette.base05};
+@define-color base06 #${config.colorScheme.palette.base06};
+@define-color base07 #${config.colorScheme.palette.base07};
+@define-color base08 #${config.colorScheme.palette.base08};
+@define-color base09 #${config.colorScheme.palette.base09};
+@define-color base0A #${config.colorScheme.palette.base0A};
+@define-color base0B #${config.colorScheme.palette.base0B};
+@define-color base0C #${config.colorScheme.palette.base0C};
+@define-color base0D #${config.colorScheme.palette.base0D};
+@define-color base0E #${config.colorScheme.palette.base0E};
+@define-color base0F #${config.colorScheme.palette.base0F};
 
 * {
     border: none;

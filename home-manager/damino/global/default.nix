@@ -20,11 +20,14 @@
 
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
+    inputs.nix-colors.homeManagerModules.default
     ./sway.nix
     ./rofi.nix
     ./kitty.nix
     ./waybar.nix
   ];
+
+  colorScheme = inputs.nix-colors.colorSchemes.mocha;
 
   nixpkgs = {
     # You can add overlays here
