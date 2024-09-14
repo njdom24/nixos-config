@@ -1,4 +1,10 @@
 { inputs, lib, config, ... }: {
+	imports = [
+		./wlogout.nix
+		./waybar.nix
+		./rofi.nix
+	];
+
 	wayland.windowManager.sway = {
 		enable = true;
 		systemd.enable = true;

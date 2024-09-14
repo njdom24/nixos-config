@@ -22,10 +22,7 @@
     # ./nvim.nix
     inputs.nix-colors.homeManagerModules.default
     ./sway.nix
-    ./rofi.nix
     ./kitty.nix
-    ./wlogout.nix
-    ./waybar.nix
   ];
 
   colorScheme = inputs.nix-colors.colorSchemes.mocha;
