@@ -42,7 +42,6 @@
   };
 
   #services.xserver.videoDrivers = [ "modesetting" "fbdev" "nvidia" ];
-  services.xserver.videoDrivers = [ "modesetting" "fbdev" ];
 
   # Set your time zone.
   time = {
@@ -70,17 +69,18 @@
   services = {
     xserver = {
    	  enable = true;
+   	  videoDrivers = [ "modesetting" "fbdev" ];
+   	  # Configure keymap in X11
+      xkb = {
+        layout = "us";
+        variant = "";
+      };
       # Only show login screen on external monitor when it's connected
       displayManager.setupCommands = ''
         if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep '[0-9] connected' | ${pkgs.coreutils}/bin/wc -l)" -gt 1 ]; then
     	${pkgs.xorg.xrandr}/bin/xrandr --output "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'eDP-[0-9] connected' | ${pkgs.gawk}/bin/awk '{print $1;}')" --off
     	fi
       '';
-      # Configure keymap in X11
-      xkb = {
-        layout = "us";
-        variant = "";
-      };
     };
 
     #xserver.displayManager.gdm.enable = true;
