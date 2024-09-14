@@ -1,6 +1,45 @@
 { inputs, config, pkgs, ... }: {
   programs.wlogout = {
 	enable = true;
+
+	layout = [
+	  {
+		label = "lock";
+		action = "${pkgs.swaylock}/bin/swaylock -c ${config.colorScheme.palette.base00}";
+		text = "Lock";
+		keybind = "l";
+	  }
+	  {
+		label = "hibernate";
+		action = "${pkgs.systemd}/bin/systemctl hibernate";
+		text = "Hibernate";
+		keybind = "h";
+	  }
+	  {
+		label = "logout";
+		action = "${pkgs.sway}/bin/swaymsg exit";
+		text = "Logout";
+		keybind = "e";
+	  }
+	  {
+		label = "shutdown";
+		action = "${pkgs.systemd}/bin/systemctl poweroff";
+		text = "Shutdown";
+		keybind = "s";
+	  }
+	  {
+		label = "suspend";
+		action = "${pkgs.systemd}/bin/systemctl suspend";
+		text = "Suspend";
+		keybind = "u";
+	  }
+	  {
+		label = "reboot";
+		action = "${pkgs.systemd}/bin/systemctl reboot";
+		text = "Reboot";
+		keybind = "r";
+	  }
+	];
 	
 	style =
 ''
