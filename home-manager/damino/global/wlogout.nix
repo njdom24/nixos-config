@@ -47,26 +47,32 @@ button:focus, button:active, button:hover {
 }
 
 #lock {
+	background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/lock.png"));
 	background-blend-mode: luminosity;
 }
 
 #logout {
+	background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/logout.png"));
 	background-blend-mode: luminosity;
 }
 
 #suspend {
+	background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/suspend.png"));
 	background-blend-mode: luminosity;
 }
 
 #hibernate {
+	background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/hibernate.png"));
 	background-blend-mode: luminosity;
 }
 
 #shutdown {
+	background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/shutdown.png"));
 	background-blend-mode: luminosity;
 }
 
 #reboot {
+	background-image: image(url("${pkgs.wlogout}/share/wlogout/icons/reboot.png"));
 	background-blend-mode: luminosity;
 }
 '';
