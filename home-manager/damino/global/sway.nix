@@ -247,10 +247,10 @@
 	  	extraConfig =
 ''
 [urgency=low]
-text-color=${config.colorScheme.palette.base0A}
+text-color=#${config.colorScheme.palette.base0A}
 
 [urgency=high]
-text-color=${config.colorScheme.palette.base08}
+text-color=#${config.colorScheme.palette.base08}
 '';
 	  };
 	};
