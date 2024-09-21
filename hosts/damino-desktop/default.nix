@@ -64,10 +64,6 @@
   sound.enable = true;
   hardware = {
   	pulseaudio.enable = false;
-  	cpu.amd.updateMicrocode = true;
-  	#opengl.extraPackages = with pkgs; [ vpl-gpu-rt ]; #  24.10+
-  	opengl.extraPackages = with pkgs; [ onevpl-intel-gpu ];
-  	intel-gpu-tools.enable = true;
   };
   security.rtkit.enable = true;
   services = {
@@ -126,16 +122,6 @@
       };
     };
   };
-
-  programs.sway.extraSessionCommands = ''
-	export WLR_DRM_DEVICES=/dev/dri/card1
-    #export WLR_DRM_DEVICES=$([ $REMOTE_ENABLED = 1 ] && echo "/dev/dri/card0" || echo "/dev/dri/card1")
-
-    #export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "vulkan" || echo "gles2")
-	#export WLR_RENDERER=vulkan
-    #export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json
-    #export VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
-  '';
 
   programs.steam.gamescopeSession.args = [
   	"-w 2560"

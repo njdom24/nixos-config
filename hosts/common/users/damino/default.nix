@@ -337,10 +337,10 @@ in
   	  sshfs
   	  libarchive
   	  p7zip
+  	  unzip
   	  duperemove
   	  xdotool
   	  ecryptfs
-  	  unzip
   	  ethtool
   	  gtk3
   	  pcmanfm

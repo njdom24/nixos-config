@@ -66,6 +66,7 @@
         modules = [
           # > Our main nixos configuration file <
           ./hosts/damino-desktop
+          hardware.nixosModules.common-cpu-amd
         ];
       };
 
@@ -75,6 +76,15 @@
           # > Our main nixos configuration file <
           ./hosts/damino-framework
           hardware.nixosModules.framework-11th-gen-intel
+        ];
+      };
+
+      eitherys = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          # > Our main nixos configuration file <
+          ./hosts/eitherys
+          hardware.nixosModules.common-cpu-intel
         ];
       };
     };
@@ -101,6 +111,17 @@
         modules = [
           # > Our main home-manager configuration file <
           ./home-manager/damino/damino-framework.nix
+        ];
+      };
+
+      "elpis@eitherys" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+        extraSpecialArgs = {
+          inherit inputs outputs;
+        };
+        modules = [
+          # > Our main home-manager configuration file <
+          ./home-manager/elpis/eitherys.nix
         ];
       };
     };

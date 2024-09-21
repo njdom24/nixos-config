@@ -147,9 +147,9 @@
   };
 
   systemd.user = {
+    # Nicely reload system units when changing configs
     startServices = "sd-switch";
     services = {
-      # Nicely reload system units when changing configs
       gammastep.Install.WantedBy = lib.mkForce [ ];
     };
   };
