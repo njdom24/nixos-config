@@ -2,8 +2,9 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, inputs, ... }:
+{ inputs, outputs, config, lib, pkgs, ... }:
 let
+  ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
   gst_plugins = (with pkgs.gst_all_1; [
   	gstreamer
   	gst-plugins-base
@@ -35,7 +36,7 @@ in
   networking = {
   	dhcpcd.enable = true;
   	wireless.iwd.enable = false;
-  	interfaces.enp4s0.wakeOnLan.enable = true;
+  	interfaces.enp1s0.wakeOnLan.enable = true;
   };
 
   # Set your time zone.
@@ -129,7 +130,6 @@ in
       ffmpeg-full
       libva-utils
       steam-run
-      unstable.lutris
       fastfetch
       zsh
       oh-my-zsh
@@ -177,7 +177,37 @@ in
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix = {
+    settings = {
+      auto-optimise-store = true;
+      experimental-features = [ "nix-command" "flakes" ];
+  	};
+  	gc = {
+  	  automatic = true;
+  	  dates = "weekly";
+  	  options = "--delete-older-than 7d";
+  	};
+  };
+
+  nixpkgs.config.input-fonts.acceptLicense = true;
+
+  programs = {
+	dconf.enable = true;
+	#ssh.startAgent = true;
+	seahorse.enable = true;
+	ssh = {
+	  enableAskPassword = true;
+	  askPassword = pkgs.lib.mkForce "${pkgs.gnome.seahorse.out}/libexec/seahorse/ssh-askpass";
+	};
+
+    zsh.enable = true;
+    virt-manager.enable = true;
+  };
+
+  virtualisation = {
+  	libvirtd.enable = true;
+  	docker.enable = true;
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -210,11 +240,11 @@ in
     waypipe
   ] ++ gst_plugins;
 
-  variables = {
-  	"GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins;
-  };
+  #variables = {
+  #	"GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins;
+  #};
 
-  extraInit = "source ${config.users.users.elpis.home}/.nix-profile/etc/profile.d/hm-session-vars.sh";
+  #extraInit = "source ${config.users.users.elpis.home}/.nix-profile/etc/profile.d/hm-session-vars.sh";
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
