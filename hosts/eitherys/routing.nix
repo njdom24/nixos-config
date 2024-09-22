@@ -78,8 +78,12 @@
             proxy_set_header Connection $http_connection;
             proxy_buffering off;
           }
-          location /qbt/ {
+          location = /qbt {
+          	return 301 /qbt/;
+          }
+          location ~ /qbt(.*)$ {
             proxy_pass http://127.0.0.1:43000;
+            rewrite /qbt(.*) $1 break;
             proxy_http_version 1.1;
             proxy_set_header Host 127.0.0.1:43000;
             proxy_set_header X-Forwarded-Host $http_host;
