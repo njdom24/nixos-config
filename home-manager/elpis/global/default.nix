@@ -20,6 +20,7 @@
 
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
+    ./../../common/zsh
   ];
 
   nixpkgs = {
@@ -73,25 +74,6 @@
   	  userName = "Damino";
   	  userEmail = "dom32400@aol.com";
   	};
-
-	zsh = {
-	  enable = true;
-	  enableCompletion = true;
-	  shellAliases = {
-	  	update = "sudo nix flake update /etc/nixos";
-	  	upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#";
-	  	update-home = "home-manager switch --flake /etc/nixos/.";
-	  };
-	  oh-my-zsh = {
-	  	enable = true;
-	  	plugins = [ "git" ];
-	  	custom = ".oh-my-zsh";
-	  	theme = "damino";
-	  };
-	  localVariables = {
-	  	TERM = "xterm-256color"; # Fixes kitty ssh
-	  };
-	};
   };
 
   services = {
