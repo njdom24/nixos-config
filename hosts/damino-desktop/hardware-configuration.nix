@@ -62,19 +62,6 @@ in
       options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
 
-  fileSystems."/mnt/ext" =
-    { device = "damino@192.168.1.18:/mnt/ext";
-      fsType = "sshfs";
-      options = [ "nosuid" "nodev" "noatime" "allow_other" "reconnect" "ServerAliveInterval=15" "ServerAliveCountMax=3" "IdentityFile=/home/damino/.ssh/pi4_ed25519" ];
-    };
-
-  fileSystems."/tmp/transcodes" =
-    { device = "damino@192.168.1.18:/tmp/transcodes";
-      fsType = "sshfs";
-      options = [ "nosuid" "nodev" "noatime" "allow_other" "reconnect" "ServerAliveInterval=15" "ServerAliveCountMax=3" "IdentityFile=/home/damino/.ssh/pi4_ed25519" ];
-    };
-
-
   swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
