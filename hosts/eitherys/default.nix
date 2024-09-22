@@ -171,25 +171,6 @@ in
     ];
   };
 
-
-  users.users.jellyfin = {
-  	isSystemUser = true;
-  	description = "jellyfin rffmpeg";
-  	uid = 965;
-  	group = "jellyfin";
-  	createHome = true;
-  	home = "/home/jellyfin";
-  	shell = pkgs.bash;
-  	extraGroups = [
-  	  "video"
-  	  "audio"
-  	  "render"
-  	];
-  	packages = with pkgs; [ steam-run jellyfin-ffmpeg ];
-  };
-
-  users.groups.jellyfin = {};
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -274,7 +255,6 @@ in
   	allowedTCPPorts = [
   	  80
   	  443
-  	  8096
   	];
   };
 

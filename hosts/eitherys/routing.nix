@@ -32,6 +32,27 @@ in
           };
         };
 
+        "${domain}-suwayomi" = {
+           root = "/var/lib/acme/${domain}";
+      	   sslCertificate = "/var/lib/acme/${domain}/fullchain.pem";
+      	   sslCertificateKey = "/var/lib/acme/${domain}/key.pem";
+      	   forceSSL = true;
+           listen = [
+           	 { addr = "0.0.0.0"; port = 4580; ssl = true; }
+      	     { addr = "[::]"; port = 4580; ssl = true; }
+           ];
+
+           locations."/" = {
+      	     proxyPass = "http://127.0.0.1:4568";
+      	     proxyWebsockets = true;
+      	     extraConfig = ''
+      	       proxy_set_header Host 127.0.0.1:4568;
+      	       proxy_set_header X-Forwarded-Host $http_host;
+      	       proxy_set_header X-Forwarded-For $remote_addr;
+      	     '';
+      	   };
+        };
+
       	"${domain}-ssl" = {
       	 root = "/var/lib/acme/${domain}";
       	 sslCertificate = "/var/lib/acme/${domain}/fullchain.pem";
@@ -39,21 +60,9 @@ in
       	 forceSSL = true;
       	 
       	 listen = [
-      	   { addr = "0.0.0.0"; port = 4580; ssl = true; }
-      	   { addr = "[::]"; port = 4580; ssl = true; }
       	   { addr = "0.0.0.0"; port = 443; ssl = true; }
       	   { addr = "[::]"; port = 443; ssl = true; }
       	 ];
-      	
-      	 locations."/" = {
-      	   proxyPass = "http://127.0.0.1:4568";
-      	   proxyWebsockets = true;
-      	   extraConfig = ''
-      	     proxy_set_header Host 127.0.0.1:4568;
-      	     proxy_set_header X-Forwarded-Host $http_host;
-      	     proxy_set_header X-Forwarded-For $remote_addr;
-      	   '';
-      	 };
 
       	 extraConfig = ''
           error_page 401 403 404 /404.html;
