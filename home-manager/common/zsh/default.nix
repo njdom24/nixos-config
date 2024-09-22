@@ -10,10 +10,10 @@
 	oh-my-zsh = {
 	 enable = true;
 	 plugins = [ "git" ];
+	 extraConfig = ''
+	   source ${./damino.zsh-theme}
+	 '';
 	};
-	initExtra = ''
-	  source ${./damino.zsh-theme}
-	'';
 	localVariables = {
 	  TERM = "xterm-256color"; # Fixes kitty ssh
 	};
