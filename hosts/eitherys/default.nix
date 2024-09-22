@@ -19,6 +19,8 @@ in
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./media.nix
+      ./routing.nix
     ];
 
   # Bootloader.
@@ -97,7 +99,20 @@ in
   	opengl.extraPackages = with pkgs; [ onevpl-intel-gpu ];
   	intel-gpu-tools.enable = true;
   };
-  security.rtkit.enable = true;
+
+  security = {
+  	rtkit.enable = true;
+
+  	acme = {
+  	  acceptTerms = true;
+  	  defaults.email = "dom32400@gmail.com";
+  	  #defaults.environmentFile = "/var/secrets/acme";
+  	  certs."daminop.duckdns.org" = {
+  	    # Disallowed by nginx
+  	  	# dnsProvider = "duckdns";
+  	  };
+  	};
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.elpis = {
@@ -115,6 +130,7 @@ in
     	"docker"
     	"libvirtd"
     	"plugdev"
+    	"jellyfin"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
@@ -256,6 +272,9 @@ in
 
   networking.firewall = {
   	allowedTCPPorts = [
+  	  80
+  	  443
+  	  8096
   	];
   };
 
