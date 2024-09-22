@@ -28,6 +28,27 @@
           };
         };
 
+        "daminop.duckdns.org-suwayomi" = {
+           root = "/var/lib/acme/daminop.duckdns.org";
+      	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
+      	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
+      	   forceSSL = true;
+           listen = [
+           	 { addr = "0.0.0.0"; port = 4580; ssl = true; }
+      	     { addr = "[::]"; port = 4580; ssl = true; }
+           ];
+
+           locations."/" = {
+      	     proxyPass = "http://127.0.0.1:4568";
+      	     proxyWebsockets = true;
+      	     extraConfig = ''
+      	       proxy_set_header Host 127.0.0.1:4568;
+      	       proxy_set_header X-Forwarded-Host $http_host;
+      	       proxy_set_header X-Forwarded-For $remote_addr;
+      	     '';
+      	   };
+        };
+
       	"daminop.duckdns.org-ssl" = {
       	 root = "/var/lib/acme/daminop.duckdns.org";
       	 sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
@@ -35,21 +56,9 @@
       	 forceSSL = true;
       	 
       	 listen = [
-      	   { addr = "0.0.0.0"; port = 4580; ssl = true; }
-      	   { addr = "[::]"; port = 4580; ssl = true; }
       	   { addr = "0.0.0.0"; port = 443; ssl = true; }
       	   { addr = "[::]"; port = 443; ssl = true; }
       	 ];
-      	
-      	 locations."/" = {
-      	   proxyPass = "http://127.0.0.1:4568";
-      	   proxyWebsockets = true;
-      	   extraConfig = ''
-      	     proxy_set_header Host 127.0.0.1:4568;
-      	     proxy_set_header X-Forwarded-Host $http_host;
-      	     proxy_set_header X-Forwarded-For $remote_addr;
-      	   '';
-      	 };
 
       	 extraConfig = ''
           error_page 401 403 404 /404.html;
@@ -111,7 +120,7 @@
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           }
           location /suwayomi/ {
-            return 301 https://daminop.duckdns.org:4580;
+            return 301 https://daminop.duckdns.org:4580$request_uri;
           }
         '';
       	};
