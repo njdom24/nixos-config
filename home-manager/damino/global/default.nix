@@ -21,6 +21,7 @@
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
     inputs.nix-colors.homeManagerModules.default
+    ./../../common/zsh
     ./sway.nix
     ./kitty.nix
   ];
@@ -112,25 +113,6 @@
 	  	toggle_hud = "Shift_R+F12";
 	  	toggle_logging = ""; # Unbind
 	  	reload_cfg = ""; # Unbind
-	  };
-	};
-
-	zsh = {
-	  enable = true;
-	  enableCompletion = true;
-	  shellAliases = {
-	  	update = "sudo nix flake update /etc/nixos";
-	  	upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#";
-	  	update-home = "home-manager switch --flake /etc/nixos/.";
-	  };
-	  oh-my-zsh = {
-	  	enable = true;
-	  	plugins = [ "git" ];
-	  	custom = ".oh-my-zsh";
-	  	theme = "damino";
-	  };
-	  localVariables = {
-	  	TERM = "xterm-256color"; # Fixes kitty ssh
 	  };
 	};
   };
