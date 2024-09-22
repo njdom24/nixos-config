@@ -14,6 +14,7 @@
   services = {
     sonarr = {
       enable = true;
+      package = pkgs.unstable.sonarr;
       openFirewall = true;
       user = "jellyfin";
       group = "jellyfin";
@@ -21,6 +22,7 @@
 
     radarr = {
       enable = true;
+      package = pkgs.unstable.radarr;
       openFirewall = true;
       user = "jellyfin";
       group = "jellyfin";	
