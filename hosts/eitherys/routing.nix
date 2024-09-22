@@ -111,7 +111,7 @@
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           }
           location /suwayomi/ {
-            return 301 https://daminop.duckdns.org:4580$request_uri;
+            return 301 https://daminop.duckdns.org:4580;
           }
         '';
       	};
