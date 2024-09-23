@@ -17,7 +17,7 @@ let
   getFileForExec = service: 
     if (service ? searchStrings && service ? replaceStrings)
       then substituteYaml { file = service.file; searchStrings = service.searchStrings; replaceStrings = service.replaceStrings; }
-      else service.file;
+      else substituteYaml { file = service.file; searchStrings = []; replaceStrings = []; };
 
   # Function to get the name without any extension
   nameWithoutExtension = file: let
