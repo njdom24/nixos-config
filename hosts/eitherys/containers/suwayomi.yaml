@@ -32,7 +32,7 @@ services:
 #      - BASIC_AUTH_USERNAME=manga
 #      - BASIC_AUTH_PASSWORD=hello123
 #      - EXTENSION_REPOS=["http://github.com/orginazation-name/repo-name", "http://github.com/orginazation-name-2/repo-name-2"]
-    user: "965:998"
+    user: "MEDIA_UID:MEDIA_GID"
     volumes:
       - /srv/docker/suwayomi/data:/home/suwayomi/.local/share/Tachidesk
       - /mnt/ext/Media/Manga:/home/suwayomi/.local/share/Tachidesk/downloads/
