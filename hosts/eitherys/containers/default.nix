@@ -1,11 +1,16 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 # Define the function to substitute strings in a YAML file (no default args)
 let
+  defaultSearchStrings = [ "MEDIA_UID" "MEDIA_GID" ];
+  defaultReplaceStrings = [ "${toString config.users.users.jellyfin.uid}" "${toString config.users.groups.jellyfin.gid}" ];
+
   substituteYaml = { file, searchStrings, replaceStrings }: 
     pkgs.writeTextFile {
       name = "${builtins.baseNameOf file}-substituted.yaml";  # Create a new name based on the original file
-      text = builtins.replaceStrings searchStrings replaceStrings (builtins.readFile file);
+      text = builtins.replaceStrings (defaultSearchStrings ++ searchStrings) 
+                                      (defaultReplaceStrings ++ replaceStrings) 
+                                      (builtins.readFile file);
     };
 
   # Function to determine the appropriate file for Exec commands
@@ -63,3 +68,4 @@ in
     }
   ) composeServices);
 }
+
