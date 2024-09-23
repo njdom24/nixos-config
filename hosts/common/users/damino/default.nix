@@ -311,6 +311,7 @@ in
 
   boot = {
   	kernelModules = [ "ecryptfs" ];
+  	tmp.useTmpfs = true;
   };
 
   environment = {
