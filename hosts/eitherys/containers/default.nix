@@ -41,6 +41,7 @@ in
   systemd.services = builtins.listToAttrs (map (service:
   let
     serviceName = nameWithoutExtension service.file;
+    composeFile = getFileForExec service;
   in
     {
       name = serviceName;  # Use the derived name
@@ -51,9 +52,9 @@ in
         serviceConfig = {
           WorkingDirectory = "/srv/docker/${serviceName}";
           TimeoutStartSec = "60min";
-          ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${getFileForExec service} pull";
-          ExecStart = "${pkgs.docker}/bin/docker compose -f ${getFileForExec service} up";
-          ExecStop = "${pkgs.docker}/bin/docker compose -f ${getFileForExec service} down";
+          ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${composeFile} pull";
+          ExecStart = "${pkgs.docker}/bin/docker compose -f ${composeFile} up";
+          ExecStop = "${pkgs.docker}/bin/docker compose -f ${composeFile} down";
           Restart = "on-failure";
           Type = "simple";
         };
