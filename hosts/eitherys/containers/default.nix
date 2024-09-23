@@ -15,6 +15,8 @@ in
       wants = [ "docker.service" ];
       serviceConfig = {
         WorkingDirectory = "/srv/docker/${service.name}";
+        TimeoutStartSec = "60min";
+        ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${service.file} pull";
         ExecStart = "${pkgs.docker}/bin/docker compose -f ${service.file} up";
         ExecStop = "${pkgs.docker}/bin/docker compose -f ${service.file} down";
         Restart = "on-failure";
