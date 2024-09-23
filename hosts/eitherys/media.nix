@@ -1,7 +1,7 @@
 { inputs, outputs, config, pkgs, lib, ... }:
 {
   imports = [
-  	
+  	./containers
   ];
 
   nixpkgs.overlays = [
