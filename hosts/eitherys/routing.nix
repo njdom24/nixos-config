@@ -127,6 +127,9 @@ in
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           }
+          location = /suwayomi {
+          	return 301 /suwayomi/;
+          }
           location /suwayomi/ {
             return 301 https://${domain}:4580$request_uri;
           }
