@@ -1,0 +1,33 @@
+version: "3.7"
+
+services:
+  qbittorrent:
+    container_name: qbittorrent
+    image: ghcr.io/hotio/qbittorrent
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8118:8118"
+      - "43000:43000"
+    environment:
+      - PUID=965
+      - PGID=998
+      - UMASK=002
+      - TZ=EST
+      - VPN_ENABLED=true
+      - VPN_LAN_NETWORK=192.168.1.0/24
+      - VPN_CONF=AirVPN_Sweden
+      - VPN_ADDITIONAL_PORTS
+      - PRIVOXY_ENABLED=false
+      - WEBUI_PORTS=43000/tcp,43000/udp
+    volumes:
+      #- /mnt/ext/Media/qbittorrent/config:/config
+      - /srv/docker/qbittorrent/config:/config
+      - /mnt/ext/Media/qbittorrent/data:/data
+    cap_add:
+      - NET_ADMIN
+    dns:
+      - 1.1.1.1
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=1
