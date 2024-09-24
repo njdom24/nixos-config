@@ -50,7 +50,7 @@ in
     dockerPath = "/srv/docker";
     serviceName = nameWithoutExtension service.file;
     composeFile = getFileForExec service;
-    envFile = "${dockerPath}/${serviceName}/.env";
+    envFile = "/var/secrets/${serviceName}";
   in
     {
       name = serviceName;  # Use the derived name
@@ -61,11 +61,8 @@ in
         serviceConfig = {
           WorkingDirectory = "${dockerPath}/${serviceName}";
           TimeoutStartSec = "60min";
-          ExecStartPre = [
-            "${pkgs.bash}/bin/bash -c 'test -f ${envFile} || touch ${envFile}'"
-            "${pkgs.docker}/bin/docker compose -f ${composeFile} pull"
-          ];
-          ExecStart = "${pkgs.docker}/bin/docker compose -f ${composeFile} --env-file ${envFile} up";
+          ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${composeFile} pull";
+          ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker compose -f ${composeFile} $(test -f ${envFile} && echo --env-file ${envFile}) up'";
           ExecStop = "${pkgs.docker}/bin/docker compose -f ${composeFile} down";
           Restart = "on-failure";
           Type = "simple";
