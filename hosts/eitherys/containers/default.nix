@@ -39,6 +39,7 @@ let
 
     { file = ./flaresolverr.yaml; }
     { file = ./suwayomi.yaml; }
+    { file = ./qbittorrent.yaml; }
   ];
 in
 {
