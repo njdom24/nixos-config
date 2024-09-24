@@ -10,8 +10,8 @@ services:
       - "8118:8118"
       - "43000:43000"
     environment:
-      - PUID=965
-      - PGID=998
+      - PUID=MEDIA_UID
+      - PGID=MEDIA_GID
       - UMASK=002
       - TZ=EST
       - VPN_ENABLED=true
