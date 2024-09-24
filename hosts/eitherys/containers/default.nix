@@ -2,8 +2,9 @@
 
 # Define the function to substitute strings in a YAML file (no default args)
 let
-  defaultSearchStrings = [ "MEDIA_UID" "MEDIA_GID" ];
-  defaultReplaceStrings = [ "${toString config.users.users.jellyfin.uid}" "${toString config.users.groups.jellyfin.gid}" ];
+  dockerPath = "/srv/docker";
+  defaultSearchStrings = [ "REL_PATH" "MEDIA_UID" "MEDIA_GID" ];
+  defaultReplaceStrings = [ "${dockerPath}" "${toString config.users.users.jellyfin.uid}" "${toString config.users.groups.jellyfin.gid}" ];
 
   substituteYaml = { file, searchStrings, replaceStrings }: 
     pkgs.writeTextFile {
@@ -47,7 +48,6 @@ in
   # Generate systemd services for each docker-compose file
   systemd.services = builtins.listToAttrs (map (service:
   let
-    dockerPath = "/srv/docker";
     serviceName = nameWithoutExtension service.file;
     composeFile = getFileForExec service;
     envFile = "/var/secrets/${serviceName}";
@@ -59,7 +59,6 @@ in
         after = [ "docker.service" ];
         wants = [ "docker.service" ];
         serviceConfig = {
-          WorkingDirectory = "${dockerPath}/${serviceName}";
           TimeoutStartSec = "60min";
           ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${composeFile} pull";
           ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker compose -f ${composeFile} $(test -f ${envFile} && echo --env-file ${envFile}) up'";
