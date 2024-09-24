@@ -47,8 +47,10 @@ in
   # Generate systemd services for each docker-compose file
   systemd.services = builtins.listToAttrs (map (service:
   let
+    dockerPath = "/srv/docker";
     serviceName = nameWithoutExtension service.file;
     composeFile = getFileForExec service;
+    envFile = "${dockerPath}/${serviceName}/.env";
   in
     {
       name = serviceName;  # Use the derived name
@@ -57,10 +59,13 @@ in
         after = [ "docker.service" ];
         wants = [ "docker.service" ];
         serviceConfig = {
-          WorkingDirectory = "/srv/docker/${serviceName}";
+          WorkingDirectory = "${dockerPath}/${serviceName}";
           TimeoutStartSec = "60min";
-          ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${composeFile} pull";
-          ExecStart = "${pkgs.docker}/bin/docker compose -f ${composeFile} up";
+          ExecStartPre = [
+            "${pkgs.bash}/bin/bash -c 'test -f ${envFile} || touch ${envFile}'"
+            "${pkgs.docker}/bin/docker compose -f ${composeFile} pull"
+          ];
+          ExecStart = "${pkgs.docker}/bin/docker compose -f ${composeFile} --env-file ${envFile} up";
           ExecStop = "${pkgs.docker}/bin/docker compose -f ${composeFile} down";
           Restart = "on-failure";
           Type = "simple";
