@@ -3,7 +3,7 @@ services:
     kavita:
         image: jvmilazz0/kavita:latest
         group_add:
-            - 998
+            - MEDIA_GID
         volumes:
             - /mnt/ext/Media/Manga/mangas:/manga
             - /srv/docker/kavita/data:/kavita/config
@@ -14,7 +14,7 @@ services:
     komf:
         image: sndxr/komf:latest
         container_name: komf
-        user: "965:998"
+        user: "MEDIA_UID:MEDIA_GID"
         #network_mode: "host"
         ports:
           - "8085:8085"

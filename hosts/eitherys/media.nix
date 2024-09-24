@@ -40,7 +40,9 @@
   	   "render"
   	  ];
     };
-    groups.jellyfin = {};
+    groups.jellyfin = {
+      gid = 998;
+    };
   };
 
 
