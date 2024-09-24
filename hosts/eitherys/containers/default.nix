@@ -38,8 +38,9 @@ let
     #}
 
     { file = ./flaresolverr.yaml; }
-    { file = ./suwayomi.yaml; }
     { file = ./qbittorrent.yaml; }
+    { file = ./suwayomi.yaml; }
+    { file = ./kavita.yaml; }
   ];
 in
 {

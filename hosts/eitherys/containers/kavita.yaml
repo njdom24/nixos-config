@@ -1,0 +1,34 @@
+version: '3.9'
+services:
+    kavita:
+        image: jvmilazz0/kavita:latest
+        group_add:
+            - 998
+        volumes:
+            - /mnt/ext/Media/Manga/mangas:/manga
+            - /srv/docker/kavita/data:/kavita/config
+        ports:
+            - "5000:5000"
+        restart: unless-stopped
+
+    komf:
+        image: sndxr/komf:latest
+        container_name: komf
+        user: "965:998"
+        #network_mode: "host"
+        ports:
+          - "8085:8085"
+        depends_on:
+            - kavita
+        environment:
+          - KOMF_SERVER_PORT=8085
+          - KOMF_KAVITA_BASE_URI=http://kavita:5000/kavita
+          - KOMF_KAVITA_API_KEY=${KOMF_KAVITA_API_KEY:-none}
+          - KOMF_METADATA_PROVIDERS_COMIC_VINE_API_KEY=${KOMF_METADATA_PROVIDERS_COMIC_VINE_API_KEY:-none}
+          #- KOMF_LOG_LEVEL=INFO
+          - TZ=America/New_York # set the same timezone as your Kavita instance if you want Kavita event listener to work properly
+          # optional jvm options. Example config for low memory usage. Runs guaranteed cleanup up every 3600000ms(1hour)
+          - JAVA_TOOL_OPTIONS=-XX:+UnlockExperimentalVMOptions -XX:+UseShenandoahGC -XX:ShenandoahGCHeuristics=compact -XX:ShenandoahGuaranteedGCInterval=3600000 -XX:TrimNativeHeapInterval=3600000
+        volumes:
+          - /srv/docker/kavita/komf:/config #path to directory with application.yml and database file
+        restart: unless-stopped
