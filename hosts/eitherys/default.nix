@@ -21,6 +21,7 @@ in
       ./hardware-configuration.nix
       ./media.nix
       ./routing.nix
+      ./storage.nix
     ];
 
   # Bootloader.
