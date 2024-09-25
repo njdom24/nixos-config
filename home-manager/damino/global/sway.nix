@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }: {
+{ inputs, lib, config, pkgs, ... }: {
 	imports = [
 		./wlogout.nix
 		./waybar.nix
@@ -64,6 +64,7 @@
 		  exec gtk-launch firefox.desktop
 		  exec gtk-launch vesktop.desktop
 		  exec gtk-launch steam.desktop
+		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
 		'';
 
 		config = {
