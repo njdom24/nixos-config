@@ -201,6 +201,21 @@ in
 
     zsh.enable = true;
     virt-manager.enable = true;
+
+    msmtp = {
+      enable = true;
+      accounts = {
+      	default = {
+      	  auth = true;
+      	  tls = true;
+      	  tls_starttls = false;
+      	  from = "dom32400@gmail.com";
+      	  host = "smtp.gmail.com";
+      	  user = "dom32400";
+      	  passwordeval = "cat /var/secrets/msmtp";
+      	};
+      };
+    };
   };
 
   virtualisation = {
