@@ -3,6 +3,23 @@ let
   # List of devices for Btrfs scrub and SMART monitoring
   btrfsDevices = [ "/" ];  # Adjust paths as needed
   smartDevices = [ "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0" ];  # Adjust device names as needed
+
+  # Create a script for the Btrfs scrub status check
+  smartStatusScript = pkgs.writeShellScript "smart-mon-status" ''
+    #!/usr/bin/env bash
+    device="$1"
+
+    sleep 5
+    while true; do
+      smart_output=$(${pkgs.smartmontools}/bin/smartctl -a $device)
+      if ! echo "$smart_output" | grep -q "test remaining"; then
+        break
+      fi
+      trimmed=$(echo "$smart_output" | grep "test remaining" | ${pkgs.findutils}/bin/xargs)
+      echo "$trimmed"
+      sleep 600
+    done
+  '';
 in
 {
   environment.systemPackages = with pkgs; [
@@ -11,9 +28,9 @@ in
 
   services.smartd = {
     enable = true;
-    devices = [
-      { device = "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0"; } 
-    ];
+    devices = lib.concatMap (device: [
+      { device = device; }
+    ]) smartDevices;
   };
 
   systemd = {
@@ -23,8 +40,9 @@ in
           description = "Btrfs Scrub Monitoring Service for ${device}";
           after = [ "network.target" ];
           serviceConfig = {
-            Type = "simple";
-            ExecStart = [ "${pkgs.btrfs-progs}/bin/btrfs scrub start -B ${device}" ];
+            Type = "forking";
+            ExecStart = "${pkgs.btrfs-progs}/bin/btrfs scrub start ${device}";
+            ExecStop = "${pkgs.btrfs-progs}/bin/btrfs scrub cancel ${device}";
           };
           restartIfChanged = true;
         };
@@ -35,8 +53,9 @@ in
           description = "SMART Monitoring Service for Extended Test on ${device}";
           after = [ "network.target" ];
           serviceConfig = {
-            Type = "oneshot";
-            ExecStart = [ "${pkgs.smartmontools}/bin/smartctl -t long ${device}" ];
+            Type = "forking";
+            ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -t long ${device} && ${smartStatusScript} ${device} &'";
+            ExecStop = "${pkgs.smartmontools}/bin/smartctl -X ${device}";
           };
           restartIfChanged = true;
         };
@@ -47,20 +66,24 @@ in
       {
         "btrfs-scrub-${lib.replaceStrings ["/"] ["_"] device}.timer" = {
           description = "Monthly Btrfs Scrub Timer for ${device}";
-          timerConfig.OnCalendar = "*-*-01 01:00:00";  # Runs at 1:00 AM on the first of each month
           wantedBy = [ "timers.target" ];
-          timerConfig.Persistent = true;
-          timerConfig.Unit = "btrfs-scrub-${lib.replaceStrings ["/"] ["_"] device}.service";
+          timerConfig = {
+          	OnCalendar = "*-*-01 01:00:00";  # Runs at 1:00 AM on the first of each month
+          	Persistent = true;
+          	Unit = "btrfs-scrub-${lib.replaceStrings ["/"] ["_"] device}.service";
+          };
         };
       }
     ]) btrfsDevices ++ lib.concatMap (device: [
       {
         "smart-monitor-${lib.replaceStrings ["/"] ["_"] device}.timer" = {
           description = "Monthly SMART Test Timer for ${device}";
-          timerConfig.OnCalendar = "*-*-01 04:00:00";  # Runs at 4:00 AM on the first of each month
           wantedBy = [ "timers.target" ];
-          timerConfig.Persistent = true;
-          timerConfig.Unit = "smart-monitor-${lib.replaceStrings ["/"] ["_"] device}.service";
+          timerConfig = {
+          	OnCalendar = "*-*-01 04:00:00";  # Runs at 4:00 AM on the first of each month
+          	Persistent = true;
+          	Unit = "smart-monitor-${lib.replaceStrings ["/"] ["_"] device}.service";
+          };
         };
       }
     ]) smartDevices);
