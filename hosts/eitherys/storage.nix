@@ -42,7 +42,7 @@ in
           serviceConfig = {
             Type = "forking";
             ExecStart = "${pkgs.btrfs-progs}/bin/btrfs scrub start ${device}";
-            ExecStop = "${pkgs.btrfs-progs}/bin/btrfs scrub cancel ${device}";
+            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.btrfs-progs}/bin/btrfs scrub status ${device} | grep -q \"Time left\" && ${pkgs.btrfs-progs}/bin/btrfs scrub cancel ${device} || true'";
           };
           restartIfChanged = true;
         };
