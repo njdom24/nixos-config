@@ -42,6 +42,7 @@ let
     { file = ./qbittorrent.yaml; }
     { file = ./suwayomi.yaml; }
     { file = ./kavita.yaml; }
+    { file = ./lazylibrarian.yaml; }
   ];
 in
 {
@@ -70,5 +71,13 @@ in
       };
     }
   ) composeServices);
+
+  networking.firewall.allowedTCPPorts = [
+    4568 4580 # suwayomi
+    5000 # kavita
+    5299 # lazylibrarian
+    6788 # sabnzbd
+    43000 # qbt
+  ];
 }
 
