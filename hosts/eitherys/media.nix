@@ -86,11 +86,4 @@
       logDir = "/srv/media/jellyfin/log";
     };
   };
-
-  networking.firewall.allowedTCPPorts = [
-    4568 4580 # suwayomi
-    5000 # kavita
-  	6788 # SABnzbd
-  	43000 # qbt
-  ];
 }

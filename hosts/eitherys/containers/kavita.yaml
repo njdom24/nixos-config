@@ -6,6 +6,7 @@ services:
             - MEDIA_GID
         volumes:
             - /mnt/ext/Media/Manga/mangas:/manga
+            - /mnt/ext/Media/Books:/books
             - /srv/docker/kavita/data:/kavita/config
         ports:
             - "5000:5000"

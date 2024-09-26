@@ -1,0 +1,16 @@
+services:
+  lazylibrarian:
+    image: lscr.io/linuxserver/lazylibrarian:latest
+    container_name: lazylibrarian
+    environment:
+      - PUID=MEDIA_UID
+      - PGID=MEDIA_GID
+      - TZ=Etc/UTC
+      - DOCKER_MODS=linuxserver/mods:universal-calibre|linuxserver/mods:lazylibrarian-ffmpeg #optional
+    volumes:
+      - /srv/docker/lazylibrarian/data:/config
+      - /mnt/ext/Media/Books/:/books #optional
+      - /mnt/ext/Media/qbittorrent/data/downloads:/downloads
+    ports:
+      - 5299:5299
+    restart: unless-stopped

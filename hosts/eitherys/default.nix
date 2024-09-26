@@ -102,19 +102,7 @@ in
   	intel-gpu-tools.enable = true;
   };
 
-  security = {
-  	rtkit.enable = true;
-
-  	acme = {
-  	  acceptTerms = true;
-  	  defaults.email = "dom32400@gmail.com";
-  	  #defaults.environmentFile = "/var/secrets/acme";
-  	  certs."daminop.duckdns.org" = {
-  	    # Disallowed by nginx
-  	  	# dnsProvider = "duckdns";
-  	  };
-  	};
-  };
+  security.rtkit.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.elpis = {
@@ -192,7 +180,6 @@ in
 
   programs = {
 	dconf.enable = true;
-	#ssh.startAgent = true;
 	seahorse.enable = true;
 	ssh = {
 	  enableAskPassword = true;

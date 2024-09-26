@@ -4,6 +4,15 @@ let
   domain = "${subdomain}.duckdns.org";
 in
 {
+  security.acme = {
+    acceptTerms = true;
+    defaults = {
+      email = "dom32400@gmail.com";
+      webroot = "/var/lib/acme/acme-challenge";
+    };
+    certs."${domain}" = { };
+  };
+
   services = {
     ddclient = {
       enable = true;
@@ -19,8 +28,8 @@ in
       virtualHosts = {
 		"${domain}" = {
           forceSSL = true;  # Enforce HTTPS redirection
-          enableACME = true;
-          root = "/var/lib/acme/${domain}";          
+          enableACME = true; # Auto-renew cert
+          acmeRoot = null;
           listen = [
             { addr = "0.0.0.0"; port = 80; }
             { addr = "[::]"; port = 80; }
@@ -33,9 +42,10 @@ in
         };
 
         "${domain}-suwayomi" = {
-           root = "/var/lib/acme/${domain}";
+           useACMEHost = "${domain}";
       	   sslCertificate = "/var/lib/acme/${domain}/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/${domain}/key.pem";
+      	   acmeRoot = null;
       	   forceSSL = true;
            listen = [
            	 { addr = "0.0.0.0"; port = 4580; ssl = true; }
@@ -53,8 +63,32 @@ in
       	   };
         };
 
+        "${domain}-romm" = {
+           useACMEHost = "${domain}";
+      	   sslCertificate = "/var/lib/acme/${domain}/fullchain.pem";
+      	   sslCertificateKey = "/var/lib/acme/${domain}/key.pem";
+      	   acmeRoot = null;
+      	   forceSSL = true;
+           listen = [
+           	 { addr = "0.0.0.0"; port = 8598; ssl = true; }
+      	     { addr = "[::]"; port = 8598; ssl = true; }
+           ];
+
+           locations."/" = {
+      	     proxyWebsockets = true;
+      	     extraConfig = ''
+      	       proxy_pass http://127.0.0.1:8597; # setting proxyPass option breaks; unsure why
+      	       proxy_set_header Host 127.0.0.1:8597;
+      	       proxy_set_header X-Forwarded-Host $http_host;
+      	       proxy_set_header X-Forwarded-For $remote_addr;
+      	       proxy_cookie_path / "/; Secure";
+      	     '';
+      	   };
+        };
+
       	"${domain}-ssl" = {
-      	 root = "/var/lib/acme/${domain}";
+      	 useACMEHost = "${domain}";
+      	 acmeRoot = null; # Inherit from security.acme.webroot
       	 sslCertificate = "/var/lib/acme/${domain}/fullchain.pem";
       	 sslCertificateKey = "/var/lib/acme/${domain}/key.pem";
       	 forceSSL = true;
@@ -109,6 +143,12 @@ in
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $http_connection;
           }
+          location /lazylibrarian/ {
+            proxy_pass http://127.0.0.1:5299;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          }
           location /prowlarr/ {
             proxy_pass http://127.0.0.1:9696;
             proxy_set_header Host $host;
@@ -132,6 +172,12 @@ in
           }
           location /suwayomi/ {
             return 301 https://${domain}:4580$request_uri;
+          }
+          location = /romm {
+          	return 301 /romm/;
+          }
+          location /romm/ {
+            return 301 https://${domain}:8598;
           }
         '';
       	};
