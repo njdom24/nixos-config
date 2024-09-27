@@ -43,6 +43,7 @@ let
     { file = ./suwayomi.yaml; }
     { file = ./kavita.yaml; }
     { file = ./lazylibrarian.yaml; }
+    { file = ./romm.yaml; }
   ];
 in
 {
@@ -77,6 +78,7 @@ in
     5000 # kavita
     5299 # lazylibrarian
     6788 # sabnzbd
+    8597 8598 # romm
     43000 # qbt
   ];
 }

@@ -49,6 +49,28 @@
       	   };
         };
 
+        "daminop.duckdns.org-romm" = {
+           root = "/var/lib/acme/daminop.duckdns.org";
+      	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
+      	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
+      	   forceSSL = true;
+           listen = [
+           	 { addr = "0.0.0.0"; port = 8598; ssl = true; }
+      	     { addr = "[::]"; port = 8598; ssl = true; }
+           ];
+
+           locations."/" = {
+      	     proxyWebsockets = true;
+      	     extraConfig = ''
+      	       proxy_pass http://127.0.0.1:8597; # setting proxyPass option breaks; unsure why
+      	       proxy_set_header Host 127.0.0.1:8597;
+      	       proxy_set_header X-Forwarded-Host $http_host;
+      	       proxy_set_header X-Forwarded-For $remote_addr;
+      	       proxy_cookie_path / "/; Secure";
+      	     '';
+      	   };
+        };
+
       	"daminop.duckdns.org-ssl" = {
       	 root = "/var/lib/acme/daminop.duckdns.org";
       	 sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
@@ -134,6 +156,12 @@
           }
           location /suwayomi/ {
             return 301 https://daminop.duckdns.org:4580$request_uri;
+          }
+          location = /romm {
+          	return 301 /romm/;
+          }
+          location /romm/ {
+            return 301 https://daminop.duckdns.org:8598;
           }
         '';
       	};
