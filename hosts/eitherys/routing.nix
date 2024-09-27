@@ -1,5 +1,14 @@
 { inputs, outputs, config, pkgs, lib, ... }:
 {
+  security.acme = {
+    acceptTerms = true;
+    defaults = {
+      email = "dom32400@gmail.com";
+      webroot = "/var/lib/acme/acme-challenge";
+    };
+    certs."daminop.duckdns.org" = { };
+  };
+
   services = {
     ddclient = {
       enable = true;
@@ -15,8 +24,8 @@
       virtualHosts = {
 		"daminop.duckdns.org" = {
           forceSSL = true;  # Enforce HTTPS redirection
-          enableACME = true;
-          root = "/var/lib/acme/daminop.duckdns.org";          
+          enableACME = true; # Auto-renew cert
+          acmeRoot = null;
           listen = [
             { addr = "0.0.0.0"; port = 80; }
             { addr = "[::]"; port = 80; }
@@ -29,9 +38,9 @@
         };
 
         "daminop.duckdns.org-suwayomi" = {
-           root = "/var/lib/acme/daminop.duckdns.org";
       	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
+      	   acmeRoot = null;
       	   forceSSL = true;
            listen = [
            	 { addr = "0.0.0.0"; port = 4580; ssl = true; }
@@ -50,9 +59,9 @@
         };
 
         "daminop.duckdns.org-romm" = {
-           root = "/var/lib/acme/daminop.duckdns.org";
       	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
+      	   acmeRoot = null;
       	   forceSSL = true;
            listen = [
            	 { addr = "0.0.0.0"; port = 8598; ssl = true; }
@@ -72,7 +81,7 @@
         };
 
       	"daminop.duckdns.org-ssl" = {
-      	 root = "/var/lib/acme/daminop.duckdns.org";
+      	 acmeRoot = null; # Inherit from security.acme.webroot
       	 sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	 sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
       	 forceSSL = true;
