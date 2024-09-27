@@ -38,6 +38,7 @@
         };
 
         "daminop.duckdns.org-suwayomi" = {
+           useACMEHost = "daminop.duckdns.org";
       	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
       	   acmeRoot = null;
@@ -59,6 +60,7 @@
         };
 
         "daminop.duckdns.org-romm" = {
+           useACMEHost = "daminop.duckdns.org";
       	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
       	   acmeRoot = null;
@@ -81,6 +83,7 @@
         };
 
       	"daminop.duckdns.org-ssl" = {
+      	 useACMEHost = "daminop.duckdns.org";
       	 acmeRoot = null; # Inherit from security.acme.webroot
       	 sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	 sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
