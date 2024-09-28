@@ -322,6 +322,7 @@ in
   	  libarchive
   	  p7zip
   	  unzip
+  	  zip
   	  duperemove
   	  xdotool
   	  ecryptfs

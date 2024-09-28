@@ -158,6 +158,7 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
+	  zip
     ];
   };
 
