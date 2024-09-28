@@ -74,11 +74,11 @@ in
   ) composeServices);
 
   networking.firewall.allowedTCPPorts = [
-    4568 4580 # suwayomi
+    4568 # suwayomi
     5000 # kavita
     5299 # lazylibrarian
     6788 # sabnzbd
-    8597 8598 # romm
+    8597 # romm
     43000 # qbt
   ];
 }

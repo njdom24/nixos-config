@@ -6,7 +6,9 @@
       email = "dom32400@gmail.com";
       webroot = "/var/lib/acme/acme-challenge";
     };
-    certs."daminop.duckdns.org" = { };
+    certs."daminop.duckdns.org" = {
+      extraDomainNames = [ "suwayomi.daminop.duckdns.org" "romm.daminop.duckdns.org" ];
+    };
   };
 
   services = {
@@ -37,46 +39,48 @@
           };
         };
 
-        "daminop.duckdns.org-suwayomi" = {
+        "suwayomi.daminop.duckdns.org" = {
            useACMEHost = "daminop.duckdns.org";
       	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
       	   acmeRoot = null;
       	   forceSSL = true;
            listen = [
-           	 { addr = "0.0.0.0"; port = 4580; ssl = true; }
-      	     { addr = "[::]"; port = 4580; ssl = true; }
+           	 { addr = "0.0.0.0"; port = 443; ssl = true; }
+      	     { addr = "[::]"; port = 443; ssl = true; }
            ];
 
            locations."/" = {
       	     proxyPass = "http://127.0.0.1:4568";
       	     proxyWebsockets = true;
       	     extraConfig = ''
-      	       proxy_set_header Host 127.0.0.1:4568;
+      	       proxy_set_header Host $host;
       	       proxy_set_header X-Forwarded-Host $http_host;
       	       proxy_set_header X-Forwarded-For $remote_addr;
       	     '';
       	   };
         };
 
-        "daminop.duckdns.org-romm" = {
+        "romm.daminop.duckdns.org" = {
            useACMEHost = "daminop.duckdns.org";
       	   sslCertificate = "/var/lib/acme/daminop.duckdns.org/fullchain.pem";
       	   sslCertificateKey = "/var/lib/acme/daminop.duckdns.org/key.pem";
       	   acmeRoot = null;
       	   forceSSL = true;
            listen = [
-           	 { addr = "0.0.0.0"; port = 8598; ssl = true; }
-      	     { addr = "[::]"; port = 8598; ssl = true; }
+           	 { addr = "0.0.0.0"; port = 443; ssl = true; }
+      	     { addr = "[::]"; port = 443; ssl = true; }
            ];
 
            locations."/" = {
+             #proxyPass = "http://127.0.0.1:8597";
       	     proxyWebsockets = true;
       	     extraConfig = ''
       	       proxy_pass http://127.0.0.1:8597; # setting proxyPass option breaks; unsure why
-      	       proxy_set_header Host 127.0.0.1:8597;
+      	       proxy_set_header Host $host;
       	       proxy_set_header X-Forwarded-Host $http_host;
       	       proxy_set_header X-Forwarded-For $remote_addr;
+      	       proxy_set_header X-Forwarded-Server $host;
       	       proxy_cookie_path / "/; Secure";
       	     '';
       	   };
@@ -93,6 +97,9 @@
       	   { addr = "0.0.0.0"; port = 443; ssl = true; }
       	   { addr = "[::]"; port = 443; ssl = true; }
       	 ];
+
+      	 locations."/".extraConfig = "return 404;";
+         locations."/.well-known/acme-challenge".root = config.security.acme.defaults.webroot;
 
       	 extraConfig = ''
           error_page 401 403 404 /404.html;
@@ -167,16 +174,24 @@
           	return 301 /suwayomi/;
           }
           location /suwayomi/ {
-            return 301 https://daminop.duckdns.org:4580$request_uri;
+            return 301 https://suwayomi.daminop.duckdns.org$request_uri;
           }
           location = /romm {
           	return 301 /romm/;
           }
           location /romm/ {
-            return 301 https://daminop.duckdns.org:8598;
+            return 301 https://romm.daminop.duckdns.org;
           }
         '';
       	};
+
+      	# Fixes security.acme.certs.extraDomainNames (See https://github.com/NixOS/nixpkgs/issues/180980)
+        "defaultDummy404" = {
+          default = true;
+          serverName = "_";
+          locations."/".extraConfig = "return 404;";
+          locations."/.well-known/acme-challenge".root = config.security.acme.defaults.webroot;
+        };
       };
     };
   };
