@@ -32,7 +32,7 @@ in
       { device = device; }
     ]) smartDevices;
   };
-
+#echo -e "Content-Type: text/plain\r\nSubject: Test\r\n\r\nHello World" | tee >(sudo sendmail dom32400@gmail.com)
   systemd = {
     services = lib.mkMerge (lib.concatMap (device: [
       {
@@ -42,7 +42,7 @@ in
           serviceConfig = {
             Type = "forking";
             ExecStart = "${pkgs.btrfs-progs}/bin/btrfs scrub start ${device}";
-            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.btrfs-progs}/bin/btrfs scrub status ${device} | grep -q \"Time left\" && ${pkgs.btrfs-progs}/bin/btrfs scrub cancel ${device} || true'";
+            ExecStop = "${pkgs.bash}/bin/bash -c 'status=$(${pkgs.btrfs-progs}/bin/btrfs scrub status ${device}); echo \"$status\" | grep -q \"Time left\" && ${pkgs.btrfs-progs}/bin/btrfs scrub cancel ${device} || echo \"$status\" && echo -e \"Content-Type: text/plain\\r\\nSubject: BTRFS Scrub Status: ${device}\\r\\n\\r\\n$status\" | ${pkgs.msmtp}/bin/sendmail dom32400@gmail.com'";
           };
           restartIfChanged = true;
         };
@@ -55,7 +55,7 @@ in
           serviceConfig = {
             Type = "forking";
             ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -t long ${device} && ${smartStatusScript} ${device} &'";
-            ExecStop = "${pkgs.smartmontools}/bin/smartctl -X ${device}";
+            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -X ${device} && status=$(${pkgs.smartmontools}/bin/smartctl -a ${device}) && echo \"$status\" && echo -e \"Content-Type: text/plain\\r\\nSubject: SMART Status: ${device}\\r\\n\\r\\n$status\" | ${pkgs.msmtp}/bin/sendmail dom32400@gmail.com'";
           };
           restartIfChanged = true;
         };
