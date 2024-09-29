@@ -1,0 +1,16 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "4568:4567" # suwayomi
+      - "8191:8191" # flaresolverr
+    environment:
+      - VPN_SERVICE_PROVIDER=airvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY:-none}
+      - WIREGUARD_PRESHARED_KEY=${WIREGUARD_PRESHARED_KEY:-none}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES:-none}
+      - SERVER_COUNTRIES=Sweden

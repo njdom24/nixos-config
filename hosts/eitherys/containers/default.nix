@@ -37,7 +37,7 @@ let
     #  searchStrings = [ "OLD_STRING" ];   # Define the strings to replace
     #  replaceStrings = [ "NEW_STRING" ];  # Define the replacements
     #}
-
+    { file = ./gluetun.yaml; }
     { file = ./flaresolverr.yaml; }
     { file = ./qbittorrent.yaml; }
     { file = ./suwayomi.yaml; }
