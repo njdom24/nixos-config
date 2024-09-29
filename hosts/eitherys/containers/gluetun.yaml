@@ -7,6 +7,7 @@ services:
     ports:
       - "4568:4567" # suwayomi
       - "8191:8191" # flaresolverr
+      - "43000:43000" # qbittorrent
     environment:
       - VPN_SERVICE_PROVIDER=airvpn
       - VPN_TYPE=wireguard

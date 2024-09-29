@@ -38,12 +38,12 @@ let
     #  replaceStrings = [ "NEW_STRING" ];  # Define the replacements
     #}
     { file = ./gluetun.yaml; }
+    { file = ./romm.yaml; }
+    { file = ./kavita.yaml; }
+    { file = ./lazylibrarian.yaml; }
     { file = ./flaresolverr.yaml; }
     { file = ./qbittorrent.yaml; }
     { file = ./suwayomi.yaml; }
-    { file = ./kavita.yaml; }
-    { file = ./lazylibrarian.yaml; }
-    { file = ./romm.yaml; }
   ];
 in
 {
