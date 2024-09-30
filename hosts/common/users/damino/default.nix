@@ -104,7 +104,7 @@ in
 	  #betterdiscord-installer
 
 	  betterdiscordctl
-	  unstable.vesktop
+	  vesktop
 	  unstable.ludusavi
 	  unstable.ryujinx
 	  citra-mk7
@@ -113,7 +113,7 @@ in
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
-	  (unstable.retroarch.override {
+	  (retroarch.override {
 	    cores = with unstable.libretro; [
 	      mgba
 	    ];
@@ -223,6 +223,7 @@ in
       gpuOverclock.enable = true;	
     };
 
+    gamemode.enable = true;
     noisetorch.enable = true;
 
     virt-manager.enable = true;
