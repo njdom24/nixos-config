@@ -67,6 +67,12 @@
   };
   security.rtkit.enable = true;
   services = {
+    udev = {
+      extraHwdb = ''
+        evdev:atkbd:dmi:bvn*:bvr*:bd*:br*:efr*:svnGPD:pnMicroPC:*
+          KEYBOARD_KEY_36=sysrq  # Right Shift -> SysRq
+      '';
+    };
   	# Enable the X11 windowing system.
     xserver = {
   	  enable = true;
