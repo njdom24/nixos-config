@@ -16,7 +16,7 @@
 	  	  	    status = "enable";
 	  	  	    mode = "2560x1440@143.999Hz";
 	  	  	    position = "0,0";
-	  	  	    adaptiveSync = false;
+	  	  	    adaptiveSync = true;
 	  	  	  }
 	  	  	  {
 	  	  	    criteria = "Acer Technologies R240HY T4BAA0012411";
