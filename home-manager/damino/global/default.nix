@@ -69,7 +69,9 @@
     username = "damino";
     homeDirectory = "/home/damino";
     sessionPath = [ "$HOME/.local/bin" ];
-    # sessionVariables = { };
+    sessionVariables = {
+      GTK_THEME= "${config.gtk.theme.name}:dark";
+    };
 
     file = {
       ".face.icon".source = ./.face.icon;
