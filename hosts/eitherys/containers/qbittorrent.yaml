@@ -10,7 +10,7 @@ services:
       - WEBUI_PORT=43000
       - TORRENTING_PORT=31552
     volumes:
-      - /mnt/ext/Media/qbittorrent/config:/config
+      - /srv/docker/qbittorrent/config:/config
       - /mnt/ext/Media/qbittorrent/downloads:/downloads
     #ports:
     #  - 8080:8080
