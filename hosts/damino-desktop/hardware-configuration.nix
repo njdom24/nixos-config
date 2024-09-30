@@ -28,13 +28,13 @@ in
   #}];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/423a230f-e396-41fb-a481-839c127d7a5d";
+    { device = "/dev/disk/by-uuid/68204c3c-28fc-4294-b954-3b69b21690e0";
       fsType = "btrfs";
       options = [ "subvol=root" "compress=zstd" ];
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/423a230f-e396-41fb-a481-839c127d7a5d";
+    { device = "/dev/disk/by-uuid/68204c3c-28fc-4294-b954-3b69b21690e0";
       fsType = "btrfs";
       options = [ "subvol=home" "compress=zstd" ];
     };
