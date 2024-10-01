@@ -55,10 +55,13 @@ let
     done
     
     export RCLONE_CONFIG=/var/secrets/rclone.conf
+
+    echo "Backing up .nfos"
+    ${pkgs.rsync}/bin/rsync -av --relative /mnt/ext/Media/TV/*/*/*.nfo "$BACKUP_DIR"
     
     # Rsync locally (-LK to follow links, dir links)
     # "'''" (Fixing syntax highlighting issue)
-    ${pkgs.rsync}/bin/rsync -avLK "$BACKUP_DIR" "$LOCAL_BACKUP" "''${exclude_args[@]}" #--log-file="$BACKUP_DIR/rsync-local.log"
+    ${pkgs.rsync}/bin/rsync --delete -avLK "$BACKUP_DIR" "$LOCAL_BACKUP" "''${exclude_args[@]}" #--log-file="$BACKUP_DIR/rsync-local.log"
     
     cd "$LOCAL_BACKUP/$BACKUP_NAME/"
     
