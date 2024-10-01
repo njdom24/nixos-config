@@ -22,6 +22,7 @@ in
       ./media.nix
       ./routing.nix
       ./storage.nix
+      ./backup.nix
     ];
 
   # Bootloader.

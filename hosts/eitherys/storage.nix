@@ -64,7 +64,7 @@ in
 
     timers = lib.mkMerge (lib.concatMap (device: [
       {
-        "btrfs-scrub-${lib.replaceStrings ["/"] ["_"] device}.timer" = {
+        "btrfs-scrub-${lib.replaceStrings ["/"] ["_"] device}" = {
           description = "Monthly Btrfs Scrub Timer for ${device}";
           wantedBy = [ "timers.target" ];
           timerConfig = {
@@ -76,7 +76,7 @@ in
       }
     ]) btrfsDevices ++ lib.concatMap (device: [
       {
-        "smart-monitor-${lib.replaceStrings ["/"] ["_"] device}.timer" = {
+        "smart-monitor-${lib.replaceStrings ["/"] ["_"] device}" = {
           description = "Monthly SMART Test Timer for ${device}";
           wantedBy = [ "timers.target" ];
           timerConfig = {
