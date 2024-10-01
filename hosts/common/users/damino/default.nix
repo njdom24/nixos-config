@@ -311,8 +311,8 @@ in
 
   boot = {
   	kernelModules = [ "ecryptfs" ];
+  	kernel.sysctl."kernel.sysrq" = 1;
   	tmp.useTmpfs = true;
-  	sysctl."kernel.sysrq" = 1;
   };
 
   environment = {
