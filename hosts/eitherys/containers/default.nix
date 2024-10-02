@@ -20,6 +20,10 @@ let
       then substituteYaml { file = service.file; searchStrings = service.searchStrings; replaceStrings = service.replaceStrings; }
       else substituteYaml { file = service.file; searchStrings = []; replaceStrings = []; };
 
+ # Function to check for "network_mode: container:gluetun"
+  checkForGluetunNetwork = composeFile:
+    lib.strings.hasInfix "network_mode: \"container:gluetun\"" (builtins.readFile composeFile);
+
   # Function to get the name without any extension
   nameWithoutExtension = file: let
     baseName = builtins.baseNameOf file;
@@ -53,6 +57,7 @@ in
     serviceName = nameWithoutExtension service.file;
     composeFile = getFileForExec service;
     envFile = "/var/secrets/${serviceName}";
+    sleepCommand = if (checkForGluetunNetwork composeFile) then "sleep 5 &&" else "";
   in
     {
       name = serviceName;  # Use the derived name
@@ -62,10 +67,11 @@ in
         wants = [ "docker.service" ];
         serviceConfig = {
           TimeoutStartSec = "60min";
-          ExecStartPre = "${pkgs.docker}/bin/docker compose -f ${composeFile} pull";
-          ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker compose -f ${composeFile} $(test -f ${envFile} && echo --env-file ${envFile}) up'";
+          ExecStartPre = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker compose -f ${composeFile} down && ${pkgs.docker}/bin/docker compose -f ${composeFile} pull'";
+          ExecStart = "${pkgs.bash}/bin/bash -c '${sleepCommand} ${pkgs.docker}/bin/docker compose -f ${composeFile} $(test -f ${envFile} && echo --env-file ${envFile}) up'";
           ExecStop = "${pkgs.docker}/bin/docker compose -f ${composeFile} down";
           Restart = "on-failure";
+          RestartSec = "5";
           Type = "simple";
         };
         wantedBy = [ "multi-user.target" ];
