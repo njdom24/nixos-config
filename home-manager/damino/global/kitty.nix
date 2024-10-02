@@ -2,7 +2,7 @@
   programs.kitty = {
 	enable = true;
 	font = {
-	  name = "Input";
+	  name = "Input Mono";
 	  package = pkgs.input-fonts;
 	  size = 10;
 	};
