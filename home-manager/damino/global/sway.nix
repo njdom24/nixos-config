@@ -9,6 +9,7 @@
 		enable = true;
 		systemd.enable = true;
 		checkConfig = false;
+		wrapperFeatures.gtk = true;
 		extraConfigEarly = ''
 		  set $map-to-active swaymsg input type:tablet_tool map_to_output `swaymsg -t get_outputs | jq -r '.[] | select(.focused == true) | .name'`
 		  exec $map-to-active
