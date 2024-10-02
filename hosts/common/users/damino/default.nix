@@ -50,6 +50,7 @@ in
     shell = pkgs.zsh;
     packages = with pkgs; [
       home-manager
+      selectdefaultapplication
       mesa-demos
       vulkan-tools
       nvtopPackages.full
