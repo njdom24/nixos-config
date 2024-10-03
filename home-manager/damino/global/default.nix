@@ -184,11 +184,8 @@
     "gtk-4.0/gtk-dark.css".source = pkgs.lib.mkIf (builtins.pathExists darkCssFile) darkCssFile;
   };
 
-  dconf = {
-    enable = true;
-    settings = {
-      "org/gnome/desktop/interface".color-scheme = "prefer-dark";
-    };
+  dconf.settings = {
+    "org/gnome/desktop/interface".color-scheme = "prefer-dark";
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
