@@ -139,7 +139,15 @@
     };
   };
 
-  gtk = {
+  gtk = let
+    commonExtraConfig = {
+      gtk-xft-antialias = 1;
+      gtk-xft-rgba = "none";
+      gtk-xft-hinting = 1;
+      gtk-xft-hintstyle = "slight";
+      gtk-decoration-layout = "menu:";
+      gtk-application-prefer-dark-theme = 1;
+    }; in {
     enable = true;
     theme = {
       name = "Fluent-Dark";
@@ -157,21 +165,30 @@
       size = 10;
     };
 
-    gtk3.extraConfig.gtk-xft-antialias = 1;
-    gtk3.extraConfig.gtk-xft-rgba = "none";
-    gtk3.extraConfig.gtk-xft-hinting = 1;
-    gtk3.extraConfig.gtk-xft-hintstyle = "slight";
-    gtk3.extraConfig.gtk-decoration-layout = "menu:";
-    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
-    #gtk3.extraConfig.gtk-toolbar-style = "GTK_TOOLBAR_BOTH_HORIZ";
-    #gtk3.extraConfig.gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
+    gtk3.extraConfig = commonExtraConfig;
+    gtk4.extraConfig = commonExtraConfig;
   };
 
-  # Preferred over setting GTK_THEME, to support runtime changes
-  xdg.configFile = {
-    "gtk-4.0/assets".source = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0/assets";
-    "gtk-4.0/gtk.css".source = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0/gtk${if config.gtk.gtk3.extraConfig.gtk-application-prefer-dark-theme == 1 then "-dark" else ""}.css"; # Force dark theme w/o dconf
-    "gtk-4.0/gtk-dark.css".source = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0/gtk-dark.css";
+  # Preferred over setting GTK_THEME, to support runtime changes for Libadwaita GTK4 apps
+  xdg.configFile = let
+    themePath = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0";
+    darkCssFile = "${themePath}/gtk-dark.css";
+    cssFile = if builtins.pathExists darkCssFile && config.gtk.gtk3.extraConfig.gtk-application-prefer-dark-theme == 1
+      then darkCssFile
+      else "${themePath}/gtk.css";
+  in {
+    "gtk-4.0/assets".source = "${themePath}/assets";
+
+    # Conditionally include the CSS files only if they exist
+    "gtk-4.0/gtk.css".source = cssFile;
+    "gtk-4.0/gtk-dark.css".source = pkgs.lib.mkIf (builtins.pathExists darkCssFile) darkCssFile;
+  };
+
+  dconf = {
+    enable = true;
+    settings = {
+      "org/gnome/desktop/interface".color-scheme = "prefer-dark";
+    };
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
