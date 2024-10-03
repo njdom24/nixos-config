@@ -144,7 +144,7 @@
       name = "Fluent-Dark";
     };
     iconTheme = {
-      name = "Kora";
+      name = "Breeze";
     };
     cursorTheme = {
       name = "XCursor-Pro-Dark";	
@@ -160,6 +160,7 @@
     gtk3.extraConfig.gtk-xft-hinting = 1;
     gtk3.extraConfig.gtk-xft-hintstyle = "slight";
     gtk3.extraConfig.gtk-decoration-layout = "menu:";
+    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     #gtk3.extraConfig.gtk-toolbar-style = "GTK_TOOLBAR_BOTH_HORIZ";
     #gtk3.extraConfig.gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
   };
