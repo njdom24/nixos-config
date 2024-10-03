@@ -144,7 +144,8 @@
       name = "Fluent-Dark";
     };
     iconTheme = {
-      name = "Breeze";
+      name = "kora";
+      package = pkgs.kora-icon-theme;
     };
     cursorTheme = {
       name = "XCursor-Pro-Dark";	
