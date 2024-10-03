@@ -24,6 +24,7 @@
     ./../../common/zsh
     ./sway.nix
     ./kitty.nix
+    ./theming
   ];
 
   colorScheme = inputs.nix-colors.colorSchemes.mocha;
