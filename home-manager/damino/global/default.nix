@@ -151,6 +151,7 @@
     enable = true;
     theme = {
       name = "Fluent-Dark";
+      package = pkgs.fluent-gtk-theme;
     };
     iconTheme = {
       name = "kora";
