@@ -71,7 +71,7 @@
     homeDirectory = "/home/damino";
     sessionPath = [ "$HOME/.local/bin" ];
     sessionVariables = {
-      GTK_THEME= "${config.gtk.theme.name}:dark";
+      # GTK_THEME= "${config.gtk.theme.name}:dark";
     };
 
     file = {
@@ -165,6 +165,13 @@
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     #gtk3.extraConfig.gtk-toolbar-style = "GTK_TOOLBAR_BOTH_HORIZ";
     #gtk3.extraConfig.gtk-toolbar-icon-size = "GTK_ICON_SIZE_LARGE_TOOLBAR";
+  };
+
+  # Preferred over setting GTK_THEME, to support runtime changes
+  xdg.configFile = {
+    "gtk-4.0/assets".source = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0/assets";
+    "gtk-4.0/gtk.css".source = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0/gtk${if config.gtk.gtk3.extraConfig.gtk-application-prefer-dark-theme == 1 then "-dark" else ""}.css"; # Force dark theme w/o dconf
+    "gtk-4.0/gtk-dark.css".source = "${config.gtk.theme.package}/share/themes/${config.gtk.theme.name}/gtk-4.0/gtk-dark.css";
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
