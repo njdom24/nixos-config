@@ -10,7 +10,7 @@ services:
     volumes:
       - /srv/docker/lazylibrarian/data:/config
       - /mnt/ext/Media/Books/:/books #optional
-      - /mnt/ext/Media/qbittorrent/data/downloads:/downloads
+      - /mnt/ext/Media/qbittorrent/downloads:/downloads
     ports:
       - 5299:5299
     restart: unless-stopped
