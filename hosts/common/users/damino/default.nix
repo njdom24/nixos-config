@@ -108,7 +108,7 @@ in
 	  vesktop
 	  unstable.ludusavi
 	  unstable.ryujinx
-	  citra-mk7
+	  # citra-mk7 TODO: https://github.com/NixOS/nixpkgs/pull/348927
 	  dolphin-emu
 	  unstable.cemu
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
