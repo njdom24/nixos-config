@@ -25,6 +25,7 @@ let
     	"/var/lib/sabnzbd"
     	"/srv/docker/lazylibrarian/data"
     	"/srv/docker/qbittorrent/config/qBittorrent/BT_backup"
+    	"/srv/docker/qbittorrent/qbit_manage/config.yml"
     	"/srv/docker/suwayomi/data/backups"
     	"/home/elpis/.local/state/syncthing/config.xml"
     	"/var/secrets"
