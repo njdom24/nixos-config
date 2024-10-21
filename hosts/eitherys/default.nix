@@ -72,7 +72,7 @@ in
       enable = true;
       settings = {
       	X11Forwarding = true;
-      	PasswordAuthentication = true;
+      	PasswordAuthentication = false;
       };
     };
 
