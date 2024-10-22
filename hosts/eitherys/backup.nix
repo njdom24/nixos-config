@@ -74,7 +74,7 @@ let
       ${pkgs.rclone}/bin/rclone sync -v "gdrive:/Server Backups" "../tars"  --config "$RCLONE_CONFIG"
     fi
     
-    BACKUP_FNAME="backup_$(date +%F%s).tar.xz"
+    BACKUP_FNAME="backup_$(date +%s_%F).tar.xz"
     ${pkgs.gnutar}/bin/tar -I ${pkgs.xz}/bin/xz -cf "../tars/$BACKUP_FNAME" *
     
     # Count the number of tar files in the directory
@@ -84,7 +84,7 @@ let
     if [ "$file_count" -gt 5 ]; then
         # List the tar files sorted by name, oldest first
         # Then use head to select the files to delete, keeping only the last 5
-        ls ../tars/backup_*.tar.xz | sort | head -n -"$((file_count - 5))" | while read -r file; do
+        ls ../tars/backup_*.tar.xz | sort | head -n "$((file_count - 5))" | while read -r file; do
             echo "Deleting $file"
             rm "$file"
         done
