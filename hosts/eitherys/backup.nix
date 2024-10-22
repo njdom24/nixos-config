@@ -84,7 +84,7 @@ let
     if [ "$file_count" -gt 5 ]; then
         # List the tar files sorted by name, oldest first
         # Then use head to select the files to delete, keeping only the last 5
-        ls ../tars/backup_*.tar.xz | sort | head -n "$((file_count - 5))" | while read -r file; do
+        ${pkgs.findutils}/bin/find ../tars/backup_*.tar.xz | sort | head -n "$((file_count - 5))" | while read -r file; do
             echo "Deleting $file"
             rm "$file"
         done
