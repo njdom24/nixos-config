@@ -1,5 +1,10 @@
 { inputs, outputs, config, pkgs, lib, ... }:
 {
+  imports =
+    [
+      ./wireguard.nix
+    ];
+
   security.acme = {
     acceptTerms = true;
     defaults = {
