@@ -4,6 +4,11 @@ let
   domain = "${subdomain}.duckdns.org";
 in
 {
+  imports =
+    [
+      ./wireguard.nix
+    ];
+
   security.acme = {
     acceptTerms = true;
     defaults = {

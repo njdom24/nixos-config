@@ -20,7 +20,7 @@ in
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./media.nix
-      ./routing.nix
+      ./routing
       ./storage.nix
       ./backup.nix
     ];
