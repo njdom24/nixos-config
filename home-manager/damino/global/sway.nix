@@ -123,6 +123,7 @@
 		  	"$mod+Return" = "exec kitty";
 		  	"$mod+Shift+q" = "kill";
 		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
+		  	"$mod+Shift+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun -drun-show-actions\"";
 			"$mod+h" = "split h";
 			"$mod+v" = "split v";
 			"$mod+f" = "fullscreen toggle";
