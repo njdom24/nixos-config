@@ -130,12 +130,12 @@
   };
 
   programs.steam.gamescopeSession.args = [
-  	"-w 2560"
-  	"-W 2560"
-  	"-h 1440"
+    "--mangoapp"
+  	"--adaptive-sync"
+  	"--expose-wayland"
   	"-H 1440"
-  	"-O HDMI-A-1"
   	"-r 120"
+  	"-O HDMI-A-1"
   ];
 
   # Enable touchpad support (enabled default in most desktopManager).
