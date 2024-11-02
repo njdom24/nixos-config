@@ -55,7 +55,7 @@ in
           serviceConfig = {
             Type = "forking";
             ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -t long ${device} && ${smartStatusScript} ${device} &'";
-            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -X ${device} && status=$(${pkgs.smartmontools}/bin/smartctl -a ${device}) && echo \"$status\" && echo -e \"Content-Type: text/plain\\r\\nSubject: SMART Status: ${device}\\r\\n\\r\\n$status\" | ${pkgs.msmtp}/bin/sendmail dom32400@gmail.com'";
+            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -X ${device} && status=$(${pkgs.smartmontools}/bin/smartctl -a ${device}); echo \"$status\" && echo -e \"Content-Type: text/plain\\r\\nSubject: SMART Status: ${device}\\r\\n\\r\\n$status\" | ${pkgs.msmtp}/bin/sendmail dom32400@gmail.com'";
           };
           restartIfChanged = true;
         };
