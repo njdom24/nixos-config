@@ -22,6 +22,7 @@ let
     	"${config.services.sonarr.dataDir}/Backups"
     	"${config.services.radarr.dataDir}/Backups"
     	"/var/lib/prowlarr/Backups"
+    	"/var/lib/bazarr/backup"
     	"/var/lib/sabnzbd"
     	"/srv/docker/lazylibrarian/data"
     	"/srv/docker/qbittorrent/config/qBittorrent/BT_backup"
