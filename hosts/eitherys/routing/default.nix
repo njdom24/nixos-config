@@ -167,6 +167,12 @@ in
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           }
+          location /bazarr/ {
+            proxy_pass http://127.0.0.1:6767;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          }
           location /komga/ {
             proxy_pass http://127.0.0.1:25600;
             proxy_set_header Host $host;

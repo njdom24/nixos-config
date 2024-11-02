@@ -68,6 +68,13 @@
       openFirewall = true;
     };
 
+    bazarr = {
+      enable = true;
+      openFirewall = true;
+      user = "jellyfin";
+      group = "jellyfin";
+    };
+
     sabnzbd = {
       enable = true;
       user = "jellyfin";
