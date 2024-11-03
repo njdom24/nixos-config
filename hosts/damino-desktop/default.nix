@@ -130,9 +130,6 @@
   };
 
   programs.steam.gamescopeSession.args = [
-    "--mangoapp"
-  	"--adaptive-sync"
-  	"--expose-wayland"
   	"-H 1440"
   	"-r 120"
   	"-O HDMI-A-1"

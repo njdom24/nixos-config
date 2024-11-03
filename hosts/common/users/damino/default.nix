@@ -70,6 +70,7 @@ in
       libva-utils
       steam-run
       steamtinkerlaunch
+      (if config.programs.steam.gamescopeSession.enable then gamescope-steam else null)
       samrewritten
       moonlight-qt
       unstable.lutris
@@ -206,7 +207,10 @@ in
       gamescopeSession = {
         enable = true;
         args = [
-          "-f"	
+          "-f"
+          "--mangoapp"
+          "--adaptive-sync"
+          "--expose-wayland"
         ];
       };
     };
