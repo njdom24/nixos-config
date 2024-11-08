@@ -30,6 +30,9 @@
 
 		  bindsym --locked XF86MonBrightnessUp exec light -A 4
 		  bindsym --locked XF86MonBrightnessDown exec light -U 4
+		  input "1356:3302:Sony_Interactive_Entertainment_DualSense_Wireless_Controller_Touchpad" {
+		    events disabled
+		  }
 		'';
 		extraConfig = ''
 		  exec systemctl --user restart xdg-desktop-portal
