@@ -15,6 +15,11 @@
   boot.kernelParams = [ "amdgpu.pcie_gen_cap=0x4000" "hid_apple.fnmode=2" ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
+  zramSwap = {
+  	enable = true;
+  	memoryPercent = 30;
+  };
+
   fileSystems."/" = {
       device = "/dev/disk/by-uuid/a4fa4d1f-24cc-45b6-890d-2526c32e922b";
       fsType = "btrfs";

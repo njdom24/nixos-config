@@ -27,6 +27,11 @@ in
   #	patch = ../../patches/enable-hdmi-freesync.mypatch;
   #}];
 
+  zramSwap = {
+  	enable = true;
+  	memoryPercent = 30;
+  };
+
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/68204c3c-28fc-4294-b954-3b69b21690e0";
       fsType = "btrfs";
