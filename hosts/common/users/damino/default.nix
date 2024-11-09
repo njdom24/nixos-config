@@ -339,7 +339,7 @@ in
                 bg #000000 solid_color
                 disable
               }
-              exec ${pkgs.bash}/bin/bash -c "${monitorQuery} > /tmp/outpud"
+              exec ${monitorQuery}
               exec ${pkgs.sway}/bin/swaymsg create_output "HEADLESS-1"
               exec ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1
             '';
