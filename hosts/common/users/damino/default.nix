@@ -281,6 +281,72 @@ in
   	  	Theme.CursorTheme = "XCursor-Pro-Dark";
   	  };
 
+  	  wayland = {
+  	    enable = true;
+  	    compositorCommand =
+  	      let
+  	        monitorQuery = pkgs.writeShellScript "monitor-query" ''
+              #!/usr/bin/env bash
+
+              # Define your list of preferred device names (or partial names) in order of priority
+              PREFERRED_DEVICES=("Acer Technologies VG271U" "Samsung Electric Company LC27T55 HCPW203589")  # Replace with actual display names or partial names
+
+              # Function to get all connected displays with their descriptions
+              get_connected_displays() {
+                  ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | .name + " " + (.make // "") + " " + (.model // "")'
+              }
+
+              # Retrieve the list of connected displays with their descriptions
+              CONNECTED_DISPLAYS=$(get_connected_displays)
+
+              # Filter out displays containing "HEADLESS"
+              CONNECTED_DISPLAYS=$(echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep -v "HEADLESS")
+              echo "$CONNECTED_DISPLAYS"
+
+              # Initialize PRIMARY_DISPLAY as empty
+              PRIMARY_DISPLAY=""
+
+              # Iterate through the preferred devices list and select the first connected display matching a device name
+              echo "Pref: ''\${PREFERRED_DEVICES[@]}"
+              for device_name in "''\${PREFERRED_DEVICES[@]}"; do
+				  echo "DEVICE: $device_name"
+                  if echo "$CONNECTED_DISPLAYS" | grep -q "$device_name"; then
+                      PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep "$device_name" | ${pkgs.gawk}/bin/awk '{print $1}')
+                      echo "Preferred monitor '$device_name' found: $PRIMARY_DISPLAY"
+                      break  # Exit the loop once a match is found
+                  fi
+              done
+              
+              # If no preferred device is connected, default to the first connected display
+              if [[ -z "$PRIMARY_DISPLAY" && -n "$CONNECTED_DISPLAYS" ]]; then
+                  PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" | head -n 1 | ${pkgs.gawk}/bin/awk '{print $1}')
+                  echo "No preferred monitor found; defaulting to first connected display: $PRIMARY_DISPLAY"
+              fi
+
+              # Export the primary display as an environment variable if a display was found
+              if [[ -n "$PRIMARY_DISPLAY" ]]; then
+                  export PRIMARY_DISPLAY
+                  echo "Primary display set to: $PRIMARY_DISPLAY"
+
+                  # Enable the primary display if it's disabled
+                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" enable
+              else
+                  echo "No connected displays found."
+              fi
+  	        '';
+            swayCfg = pkgs.writeText "sway.conf" ''
+              output "*" {
+                bg #000000 solid_color
+                disable
+              }
+              exec ${pkgs.bash}/bin/bash -c "${monitorQuery} > /tmp/outpud"
+              exec ${pkgs.sway}/bin/swaymsg create_output "HEADLESS-1"
+              exec ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1
+            '';
+          in
+          "/usr/bin/env WLR_BACKENDS=drm,headless,libinput ${pkgs.sway}/bin/sway -c ${swayCfg}";
+  	  };
+
   	  # https://github.com/NixOS/nixpkgs/issues/292761
   	  package = pkgs.lib.mkForce pkgs.libsForQt5.sddm;
   	  extraPackages = pkgs.lib.mkForce [];
