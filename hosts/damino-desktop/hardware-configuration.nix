@@ -27,11 +27,6 @@ in
   #	patch = ../../patches/enable-hdmi-freesync.mypatch;
   #}];
 
-  zramSwap = {
-  	enable = true;
-  	memoryPercent = 30;
-  };
-
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/68204c3c-28fc-4294-b954-3b69b21690e0";
       fsType = "btrfs";
@@ -67,7 +62,15 @@ in
       options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
 
-  swapDevices = [ ];
+  swapDevices = [{
+    device = "/var/lib/swapfile";
+    size = 16*1024;
+  }];
+
+  zramSwap = {
+    enable = true;
+    memoryPercent = 30;
+  };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
