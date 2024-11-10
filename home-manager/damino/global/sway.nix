@@ -218,7 +218,7 @@
 		  export XDG_CURRENT_DESKTOP=sway
 		  export NIXOS_OZONE_WL=1
 
-		  export REMOTE_ENABLED=$(pgrep -x wayvnc > /dev/null && echo 1 || echo 0)
+		  export REMOTE_ENABLED=$(${pkgs.nettools}/bin/netstat -an | ${pkgs.gnugrep}/bin/grep "ESTABLISHED" | ${pkgs.gnugrep}/bin/grep ":5900 " > /dev/null && echo 1 || echo 0)
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
 		  export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
 		    
