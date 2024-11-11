@@ -23,7 +23,7 @@
 	  	  	    status = "enable";
 	  	  	    mode = "2560x1440@179.877Hz";
 	  	  	    position = "2560,332";
-	  	  	    scale = 1.3;
+	  	  	    scale = 1.2;
 	  	  	    adaptiveSync = true;
 	  	  	  }
 	  	  	  {
