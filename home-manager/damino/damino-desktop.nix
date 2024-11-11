@@ -21,7 +21,7 @@
 	  	      {
 	  	  	    criteria = "Acer Technologies XV271U M3 1322131231233";
 	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@179.877Hz";
+	  	  	    mode = "2560x1440@119.998Hz";
 	  	  	    position = "2560,332";
 	  	  	    scale = 1.2;
 	  	  	    adaptiveSync = true;
