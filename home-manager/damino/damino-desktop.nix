@@ -11,19 +11,20 @@
 	  	  profile = {
 	  	    name = "desktop";
 	  	    outputs = [
-	  	  	  {
+	  	      {
 	  	  	    criteria = "Acer Technologies VG271U 0x0302811A";
 	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@143.999Hz";
+	  	  	    mode = "2560x1440@119.998Hz";
 	  	  	    position = "0,0";
 	  	  	    adaptiveSync = true;
 	  	  	  }
-	  	  	  {
-	  	  	    criteria = "Acer Technologies R240HY T4BAA0012411";
+	  	      {
+	  	  	    criteria = "Acer Technologies XV271U M3 1322131231233";
 	  	  	    status = "enable";
-	  	  	    mode = "1920x1080@60Hz";
-	  	  	    position = "2560,300";
-	  	  	    adaptiveSync = false;
+	  	  	    mode = "2560x1440@179.877Hz";
+	  	  	    position = "2560,332";
+	  	  	    scale = 1.3;
+	  	  	    adaptiveSync = true;
 	  	  	  }
 	  	  	  {
 	  	  	    criteria = "Technical Concepts Ltd 55R635 Unknown";
