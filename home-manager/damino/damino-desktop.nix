@@ -12,16 +12,16 @@
 	  	    name = "desktop";
 	  	    outputs = [
 	  	      {
-	  	        criteria = "Acer Technologies XV271U M3 1322131231233";
+	  	        criteria = "Acer Technologies VG271U 0x0302811A";
 	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@179.877Hz";
+	  	  	    mode = "2560x1440@143.999Hz";
 	  	  	    position = "0,0";
 	  	  	    adaptiveSync = true;
 	  	  	  }
 	  	      {
-	  	  	    criteria = "Acer Technologies VG271U 0x0302811A";
+	  	  	    criteria = "Acer Technologies XV271U M3 1322131231233";
 	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@143.999Hz";
+	  	  	    mode = "2560x1440@179.877Hz";
 	  	  	    position = "2560,332";
 	  	  	    scale = 1.2;
 	  	  	    adaptiveSync = true;
