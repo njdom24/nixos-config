@@ -19,12 +19,12 @@
 	  	  	    adaptiveSync = true;
 	  	  	  }
 	  	      {
-	  	  	    criteria = "Acer Technologies XV271U M3 1322131231233";
+	  	  	    criteria = "Acer Technologies R240HY T4BAA0012400";
 	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@179.877Hz";
-	  	  	    position = "2560,332";
-	  	  	    scale = 1.2;
-	  	  	    adaptiveSync = true;
+	  	  	    mode = "1920x1080@60.000Hz";
+	  	  	    position = "2560,800";
+	  	  	    scale = 1.0;
+	  	  	    adaptiveSync = false;
 	  	  	  }
 	  	  	  {
 	  	  	    criteria = "Technical Concepts Ltd 55R635 Unknown";
