@@ -217,6 +217,7 @@
 		  export MOZ_DBUS_REMOTE=1
 		  export XDG_CURRENT_DESKTOP=sway
 		  export NIXOS_OZONE_WL=1
+		  export WLR_RENDERER=vulkan
 
 		  export REMOTE_ENABLED=$(${pkgs.nettools}/bin/netstat -an | ${pkgs.gnugrep}/bin/grep "ESTABLISHED" | ${pkgs.gnugrep}/bin/grep ":5900 " > /dev/null && echo 1 || echo 0)
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
