@@ -15,7 +15,7 @@
 	  enable_audio_bell = false;
 	  cursor_shape = "block";
 	  cursor_beam_thickness = 6;
-	  background_opacity = "0.96";
+	  background_opacity = "0.98";
 	  touch_scroll_multiplier = "7.0";
 
 	  # Colors
