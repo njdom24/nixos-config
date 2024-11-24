@@ -162,7 +162,7 @@ window#waybar {
     color: @base07;
     transition-property: background-color;
     transition-duration: .5s;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 window#waybar.hidden {
