@@ -61,6 +61,34 @@
 	  	  	];
 	  	  };
 	  	}
+	  	{
+	  	  profile = {
+	  	  	name = "docked-dual";
+	  	  	outputs = [
+	  	  	  {
+	  	  	  	criteria = "eDP-1";
+	  	  	  	status = "disable";
+	  	  	  }
+	  	  	  {
+	  	  	  	criteria = "Samsung Electric Company LC27T55 HCPW203589";
+	  	  	    status = "enable";
+	  	  	    mode = "1920x1080@75Hz";
+	  	  	    position = "1920,0";
+	  	  	    scale = 0.875;
+	  	  	  }
+	  	  	  {
+	  	  	  	criteria = "AOC 24G1WG4 0x00042EBB";
+	  	  	    status = "enable";
+	  	  	    mode = "1920x1080@60Hz";
+	  	  	    position = "0,200";
+	  	  	  }
+	  	  	];
+	  	  	exec = [
+              "${pkgs.sway}/bin/swaymsg output '*' scale_filter smart"
+	  	  	  "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_00_1f.3 pro-audio"
+	  	  	];
+	  	  };
+	  	}
 	  ];
 	};
 }
