@@ -291,7 +291,7 @@ in
               #!/usr/bin/env bash
 
               # Define your list of preferred device names (or partial names) in order of priority
-              PREFERRED_DEVICES=("Acer Technologies VG271U" "Samsung Electric Company LC27T55 HCPW203589") # Replace with actual display names or partial names
+              PREFERRED_DEVICES=("Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
 
               # Function to get all connected displays with their descriptions
               get_connected_displays() {
@@ -312,7 +312,7 @@ in
               echo "Pref: ''\${PREFERRED_DEVICES[@]}"
               for device_name in "''\${PREFERRED_DEVICES[@]}"; do
 				  echo "DEVICE: $device_name"
-                  if echo "$CONNECTED_DISPLAYS" | grep -q "$device_name"; then
+                  if echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep -q "$device_name"; then
                       PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep "$device_name" | ${pkgs.gawk}/bin/awk '{print $1}')
                       echo "Preferred monitor '$device_name' found: $PRIMARY_DISPLAY"
                       break  # Exit the loop once a match is found
@@ -328,9 +328,11 @@ in
               # Export the primary display as an environment variable if a display was found
               if [[ -n "$PRIMARY_DISPLAY" ]]; then
                   export PRIMARY_DISPLAY
+                  echo "SWAYSOCK: $SWAYSOCK"
                   echo "Primary display set to: $PRIMARY_DISPLAY"
 
                   # Enable the primary display if it's disabled
+                  ${pkgs.sway}/bin/swaymsg output "*" disable
                   ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" enable
               else
                   echo "No connected displays found."
@@ -339,7 +341,6 @@ in
             swayCfg = pkgs.writeText "sway.conf" ''
               output "*" {
                 bg #000000 solid_color
-                disable
               }
               exec ${monitorQuery}
               exec ${pkgs.sway}/bin/swaymsg create_output "HEADLESS-1"
