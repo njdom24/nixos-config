@@ -33,8 +33,8 @@ in
     xdg-utils # for opening default programs when clicking links
     glib # gsettings
     dracula-theme # gtk theme
-    gnome3.adwaita-icon-theme  # default gnome cursors
-    gnome.gnome-tweaks
+    adwaita-icon-theme  # default gnome cursors
+    gnome-tweaks
     swaylock
     swayidle
     grim # screenshot functionality

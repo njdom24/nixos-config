@@ -62,8 +62,8 @@ in
       kate
       kitty
       ffmpeg-full
-      gnome.nautilus
-      gnome.file-roller
+      nautilus
+      file-roller
       loupe
       gimp
       vlc
@@ -92,10 +92,10 @@ in
 	  filezilla
 	  #gammastep
 	  blueberry
-	  cinnamon.warpinator
-	  gnome.gnome-font-viewer
-	  gnome.gnome-disk-utility
-	  gnome.gnome-system-monitor
+	  warpinator
+	  gnome-font-viewer
+	  gnome-disk-utility
+	  gnome-system-monitor
 	  libnotify
 	  xwaylandvideobridge
 	  #discord
@@ -120,15 +120,6 @@ in
 	      mgba
 	    ];
   	  })
-	  #obs-studio
-	  (wrapOBS {
-	  	plugins = with obs-studio-plugins; [
-	  		wlrobs
-	  		obs-pipewire-audio-capture
-	  		obs-vaapi
-	  		obs-gstreamer
-	  	];
-	  })
 	  jellyfin-media-player
 	  xorg.xeyes
 	  corefonts
@@ -155,7 +146,7 @@ in
   	inter
   	input-fonts
   	noto-fonts
-  	noto-fonts-cjk
+  	noto-fonts-cjk-sans
   	noto-fonts-emoji
   	nerdfonts
   ];
@@ -171,7 +162,7 @@ in
 	seahorse.enable = true;
 	ssh = {
 	  enableAskPassword = true;
-	  askPassword = pkgs.lib.mkForce "${pkgs.gnome.seahorse.out}/libexec/seahorse/ssh-askpass";
+	  askPassword = pkgs.lib.mkForce "${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass";
 	};
   
     zsh.enable = true;
@@ -228,6 +219,16 @@ in
       gpuOverclock.enable = true;	
     };
 
+    obs-studio = {
+      enable = true;
+      plugins = with pkgs.obs-studio-plugins; [
+	  	wlrobs
+	  	obs-pipewire-audio-capture
+	  	obs-vaapi
+	  	obs-gstreamer
+	  ];
+    };
+
     gamemode.enable = true;
     noisetorch.enable = true;
 
@@ -251,8 +252,8 @@ in
     	  };
     	};
     };
-  	opengl = {
-  		driSupport32Bit = true; # Enables support for 32bit libs that steam uses
+  	graphics = {
+  		enable32Bit = true; # Enables support for 32bit libs that steam uses
   		extraPackages = with pkgs; [ mangohud vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
   		extraPackages32 = with pkgs; [ mangohud ];
   	};
@@ -260,9 +261,10 @@ in
   	  # Modesetting is required.
       #modesetting.enable = true;
   	#};
-  	xpadneo.enable = true;
+  	# TODO: https://github.com/NixOS/nixpkgs/issues/357693
+  	#xpadneo.enable = true; 
   	xone.enable = true;
-  	openrazer.enable = true;
+  	#openrazer.enable = true;
   };
 
   fonts = {

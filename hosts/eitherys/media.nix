@@ -11,11 +11,10 @@
   environment.systemPackages = with pkgs; [
   ];
 
-  hardware.opengl = {
+  hardware.graphics = {
   	enable = true;
   	extraPackages = with pkgs; [
-  	  # vpl-gpu-rt After 24.10 releases
-  	  onevpl-intel-gpu
+  	  vpl-gpu-rt
 
   	  intel-media-sdk
   	  intel-compute-runtime
