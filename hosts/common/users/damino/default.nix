@@ -173,12 +173,17 @@ in
       enable = true;
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
-	  extest.enable = true;
+	  #extest.enable = true; # Breaks when Steam is run through gamescope. Maybe wait for 64-bit Steam (never)?
       package = pkgs.steam.override {
         # https://github.com/NixOS/nixpkgs/issues/279893
         extraProfile = ''
           unset TZ
         '';
+        # https://github.com/NixOS/nixpkgs/issues/271483
+        extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ]; 
+        #extraEnv = {
+        #  LD_PRELOAD = "${pkgs.pkgsi686Linux.extest}/lib/libextest.so:${pkgs.extest}/lib/libextest.so";
+        #};
       };
 
       extraPackages = with pkgs; [
