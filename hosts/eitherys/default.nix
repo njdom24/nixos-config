@@ -98,8 +98,7 @@ in
   };
 
   hardware = {
-  	#opengl.extraPackages = with pkgs; [ vpl-gpu-rt ]; #  24.10+
-  	opengl.extraPackages = with pkgs; [ onevpl-intel-gpu ];
+  	graphics.extraPackages = with pkgs; [ vpl-gpu-rt ];
   	intel-gpu-tools.enable = true;
   };
 
@@ -185,7 +184,7 @@ in
 	seahorse.enable = true;
 	ssh = {
 	  enableAskPassword = true;
-	  askPassword = pkgs.lib.mkForce "${pkgs.gnome.seahorse.out}/libexec/seahorse/ssh-askpass";
+	  askPassword = pkgs.lib.mkForce "${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass";
 	};
 
     zsh.enable = true;
@@ -270,6 +269,5 @@ in
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.05"; # Did you read the comment?
-
+  system.stateVersion = "24.11"; # Did you read the comment?
 }

@@ -97,7 +97,7 @@
   	  enable = true;
   	  package = pkgs.gitFull;
   	  extraConfig = {
-  	    safe.directory = "/etc/nixos/.git";
+  	    safe.directory = "/etc/nixos";
   	  	credential.helper = "libsecret";
   	  };
   	  userName = "Damino";
@@ -190,5 +190,5 @@
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "24.05";
+  home.stateVersion = "24.11";
 }

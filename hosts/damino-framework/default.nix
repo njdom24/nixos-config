@@ -29,7 +29,7 @@
   };
 
   hardware = {
-    opengl = {
+    graphics = {
       extraPackages = with pkgs; [
   	    intel-media-driver # LIBVA_DRIVER_NAME=iHD
   	    #intel-vaapi-driver # LIBVA_DRIVER_NAME=i965 (taken care of by nixos-hardware; older but works better for Firefox/Chromium)
@@ -96,7 +96,6 @@
   };
 
   # Enable sound with pipewire.
-  sound.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -170,6 +169,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.05"; # Did you read the comment?
+  system.stateVersion = "24.11"; # Did you read the comment?
 
 }
