@@ -173,17 +173,24 @@ in
       enable = true;
       remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
-	  #extest.enable = true; # Breaks when Steam is run through gamescope. Maybe wait for 64-bit Steam (never)?
+	  #extest.enable = true; # Breaks when Steam is run through gamescope. Alternatively needs https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
       package = pkgs.steam.override {
-        # https://github.com/NixOS/nixpkgs/issues/279893
+        
         extraProfile = ''
+          # https://github.com/NixOS/nixpkgs/issues/279893
           unset TZ
+          if [ -n "$SWAYSOCK" ]; then
+            if echo "$WAYLAND_DISPLAY" | ${pkgs.gnugrep}/bin/grep "gamescope" >/dev/null 2>&1; then
+              # Launched through gamescope. Could enable after https://github.com/Supreeeme/extest/issues/11 or portal issue below
+              echo "Disabling Extest"
+            else
+              # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
+              export LD_PRELOAD="${pkgs.pkgsi686Linux.extest}/lib/libextest.so"
+            fi
+          fi
         '';
         # https://github.com/NixOS/nixpkgs/issues/271483
         extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ]; 
-        #extraEnv = {
-        #  LD_PRELOAD = "${pkgs.pkgsi686Linux.extest}/lib/libextest.so:${pkgs.extest}/lib/libextest.so";
-        #};
       };
 
       extraPackages = with pkgs; [
