@@ -3,7 +3,7 @@
 	enable = true;
 	enableCompletion = true;
 	shellAliases = {
-	  update = "sudo nix flake update /etc/nixos";
+	  update = "sudo nix flake update --flake /etc/nixos/";
 	  upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#";
 	  update-home = "home-manager switch --flake /etc/nixos/.";
 	};
