@@ -356,7 +356,7 @@ in
               }
               exec ${monitorQuery}
               exec ${pkgs.sway}/bin/swaymsg create_output "HEADLESS-1"
-              exec ${pkgs.bash}/bin/bash -c "${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; sleep 60 && rm -f /tmp/wayvnc_login"
+              exec ${pkgs.bash}/bin/bash -c "${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; sleep 10 && rm -f /tmp/wayvnc_login"
             '';
           in
           "/usr/bin/env WLR_BACKENDS=drm,headless,libinput ${pkgs.sway}/bin/sway -c ${swayCfg}";
