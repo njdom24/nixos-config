@@ -185,7 +185,7 @@ in
               echo "Disabling Extest"
             else
               # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
-              export LD_PRELOAD="${pkgs.pkgsi686Linux.extest}/lib/libextest.so"
+              export LD_PRELOAD="$LD_PRELOAD:${pkgs.pkgsi686Linux.extest}/lib/libextest.so"
             fi
           fi
         '';
@@ -266,8 +266,8 @@ in
     };
   	graphics = {
   		enable32Bit = true; # Enables support for 32bit libs that steam uses
-  		extraPackages = with pkgs; [ mangohud vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
-  		extraPackages32 = with pkgs; [ mangohud ];
+  		extraPackages = with pkgs; [ vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
+  		extraPackages32 = with pkgs; [ ];
   	};
   	#nvidia = {
   	  # Modesetting is required.

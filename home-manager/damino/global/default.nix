@@ -36,6 +36,7 @@
       outputs.overlays.additions
       outputs.overlays.modifications
       outputs.overlays.unstable-packages
+      outputs.overlays.legacy-packages
 
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
@@ -72,6 +73,7 @@
     sessionPath = [ "$HOME/.local/bin" ];
     sessionVariables = {
       # GTK_THEME= "${config.gtk.theme.name}:dark";
+      MESA_VK_WSI_PRESENT_MODE = "fifo"; # MangoHud vsync is non-functional as of 24.11; https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379
     };
 
     file = {
@@ -106,11 +108,12 @@
 
 	mangohud = {
 	  enable = true;
+	  # package = pkgs.legacy.mangohud;
 	  enableSessionWide = true;
 	  settings = {
 	  	no_display = true;
-	  	vsync = 3;
-	  	gl_vsync = 1;
+	  	vsync = 3; # Currently broken due to https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379, set MESA_VK_WSI_PRESENT_MODE=fifo for Mesa instead
+ 	  	gl_vsync = 1;
 	  	gpu_name = true;
 	  	fps_limit_method = "early";
 	  	toggle_hud = "Shift_R+F12";
