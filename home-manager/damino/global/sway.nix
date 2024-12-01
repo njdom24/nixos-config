@@ -219,7 +219,22 @@
 		  export NIXOS_OZONE_WL=1
 		  export WLR_RENDERER=vulkan
 
-		  export REMOTE_ENABLED=$(${pkgs.nettools}/bin/netstat -an | ${pkgs.gnugrep}/bin/grep "ESTABLISHED" | ${pkgs.gnugrep}/bin/grep ":5900 " > /dev/null && echo 1 || echo 0)
+		  #export REMOTE_ENABLED=$(tail -n 2 /tmp/wayvnc_login | head -n 1 | ${pkgs.gnugrep}/bin/grep -q "Closing client connection" && echo 1 || echo 0)
+		  # Monitor the wayvnc process to see if it's still running
+		  if pgrep -x "wayvnc" > /dev/null; then
+		      sleep 1  # Wait a second if wayvnc is still running
+		  fi
+
+		  if ${pkgs.gawk}/bin/awk '
+		  /Exiting.../ {e=1}
+		  e && /Closing client connection/ {exit 0}
+		  e && !/Closing client connection/ {exit 1}
+		  ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/wayvnc_login); then
+		      export REMOTE_ENABLED=1
+		  else
+		      export REMOTE_ENABLED=0
+		  fi
+		  
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
 		  export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
 		    
