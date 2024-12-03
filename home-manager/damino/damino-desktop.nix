@@ -19,10 +19,10 @@
 	  	  	    adaptiveSync = true;
 	  	  	  }
 	  	      {
-	  	  	    criteria = "Acer Technologies R240HY T4BAA0012400";
+	  	  	    criteria = "AOC 24G1WG4 0x00042EBB";
 	  	  	    status = "enable";
 	  	  	    mode = "1920x1080@60.000Hz";
-	  	  	    position = "2560,800";
+	  	  	    position = "2560,360";
 	  	  	    scale = 1.0;
 	  	  	    adaptiveSync = false;
 	  	  	  }
