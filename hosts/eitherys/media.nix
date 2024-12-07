@@ -1,4 +1,21 @@
 { inputs, outputs, config, pkgs, lib, ... }:
+let
+  # https://github.com/NixOS/nixpkgs/issues/360592#issuecomment-2513490613
+  # Workaround for Sonarr breakage in 24.05. Remove ASAP 
+  insecure-unstable = import inputs.nixpkgs-unstable {
+    system = pkgs.system;
+    config = {
+      allowUnfree = true;
+      permittedInsecurePackages = [
+        "dotnet-runtime-wrapped-6.0.36"
+        "aspnetcore-runtime-6.0.36"
+        "aspnetcore-runtime-wrapped-6.0.36"
+        "dotnet-sdk-6.0.428"
+        "dotnet-sdk-wrapped-6.0.428"
+      ];
+    };
+  };
+in
 {
   imports = [
   	./containers
@@ -48,7 +65,7 @@
   services = {
     sonarr = {
       enable = true;
-      package = pkgs.unstable.sonarr;
+      package = insecure-unstable.sonarr;
       openFirewall = true;
       user = "jellyfin";
       group = "jellyfin";
