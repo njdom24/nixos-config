@@ -19,7 +19,8 @@
   services = {
     ddclient = {
       enable = true;
-      use = "web, web=wtfismyip.com/text";
+      usev4 = "web, web=wtfismyip.com/text";
+      usev6 = config.services.ddclient.usev4;
       protocol = "duckdns";
       domains = [ "daminop" ];
       passwordFile = "/var/secrets/duckdns";
@@ -32,7 +33,7 @@
 		"daminop.duckdns.org" = {
           forceSSL = true;  # Enforce HTTPS redirection
           enableACME = true; # Auto-renew cert
-          acmeRoot = null;
+          acmeRoot = null; # Commenting this fixed a temp issue, unsure why...
           listen = [
             { addr = "0.0.0.0"; port = 80; }
             { addr = "[::]"; port = 80; }
@@ -41,6 +42,7 @@
             "/" = {
               return = "301 https://$server_name$request_uri";
             };
+            "/.well-known/acme-challenge".root = config.security.acme.defaults.webroot;
           };
         };
 
