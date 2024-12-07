@@ -86,6 +86,10 @@
 		      	command = "border pixel 1";
 		      	criteria = { class = "^.*"; };
 		      }
+		      {
+		      	command = "inhibit_idle fullscreen";
+		      	criteria = { title = "Steam Big Picture Mode"; };
+		      }
 		    ];
 		  };
 		  bars = [{
