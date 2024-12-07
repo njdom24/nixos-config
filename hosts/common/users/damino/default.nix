@@ -223,9 +223,19 @@ in
       };
     };
 
+    # MangoHud-related options are blocked by https://github.com/flightlessmango/MangoHud/issues/1283
     gamescope = {
       enable = true;
       capSysNice = false; # Needed or gamescope fails within Steam
+      env = {
+        #MANGOHUD = "0";
+        WLR_RENDERER = "vulkan";
+        STEAM_MULTIPLE_XWAYLANDS = "1";
+      };
+      args = [
+        "--xwayland-count 2"
+        #"--mangoapp"
+      ];
     };
 
     corectrl = {
