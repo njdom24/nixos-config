@@ -151,8 +151,8 @@ in
 	  filezilla
 	  blueberry
 	  cinnamon.warpinator
-	  gnome.gnome-disk-utility
-	  gnome.gnome-system-monitor
+	  gnome-disk-utility
+	  gnome-system-monitor
 	  libnotify
 	  xwaylandvideobridge
 	  xorg.xeyes
