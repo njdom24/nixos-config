@@ -378,9 +378,13 @@ in
   	  	PasswordAuthentication = true;
   	  };
  	};
+ 	ananicy = {
+ 	  enable = true;
+ 	  package = pkgs.ananicy-cpp;
+ 	  rulesProvider = pkgs.ananicy-rules-cachyos;
+ 	};
  	gnome.gnome-keyring.enable = true;
  	gvfs.enable = true;
-
  	fstrim.enable = true;
   };
 
