@@ -241,9 +241,7 @@ in
 	  ];
     };
 
-    gamemode.enable = true;
     noisetorch.enable = true;
-
     virt-manager.enable = true;
   };
 
