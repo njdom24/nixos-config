@@ -209,8 +209,13 @@ in
 
       gamescopeSession = {
         enable = true;
+        env = {
+          WLR_RENDERER = "vulkan";
+          STEAM_MULTIPLE_XWAYLANDS = "1";
+        };
         args = [
           "-f"
+          "--xwayland-count 2"
           "--mangoapp"
           "--adaptive-sync"
           "--expose-wayland"
