@@ -75,6 +75,7 @@
       # GTK_THEME= "${config.gtk.theme.name}:dark";
       MESA_VK_WSI_PRESENT_MODE = "fifo"; # MangoHud vsync is non-functional as of 24.11; https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379
       RADV_PERFTEST = "nggc"; # https://www.phoronix.com/news/Mesa-24.3-NGG-Culling-RDNA1; redundant in 25.05
+      GSK_RENDERER = "ngl"; # https://bbs.archlinux.org/viewtopic.php?id=299488; probably fixed by 25.05
     };
 
     file = {
@@ -150,7 +151,6 @@
       gtk-xft-hinting = 1;
       gtk-xft-hintstyle = "slight";
       gtk-decoration-layout = "menu:";
-      gtk-application-prefer-dark-theme = 1;
     }; in {
     enable = true;
     theme = {
@@ -170,7 +170,12 @@
       size = 10;
     };
 
-    gtk3.extraConfig = commonExtraConfig;
+    gtk3.extraConfig = lib.mkMerge [
+      commonExtraConfig
+      {
+        gtk-application-prefer-dark-theme = 1;
+      }
+    ];
     gtk4.extraConfig = commonExtraConfig;
   };
 
