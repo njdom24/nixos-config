@@ -150,7 +150,7 @@ in
 	  remmina
 	  filezilla
 	  blueberry
-	  cinnamon.warpinator
+	  warpinator
 	  gnome-disk-utility
 	  gnome-system-monitor
 	  libnotify
