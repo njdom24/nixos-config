@@ -1,26 +1,4 @@
-{ inputs, outputs, config, pkgs, lib, ... }:
-
-let
-  # Might not be working
-  config = {
-  	security.wrappers = {
-  	  swayfx = {
-  	  	source = "${pkgs.swayfx}/bin/sway";
-	  	capabilities = "cap_sys_nice+ep";
- 	  };
- 	  sway = {
- 	    source = "${pkgs.sway}/bin/sway";
- 	  	capabilities = "cap_sys_nice+ep";
-	  }; 	  
-  	};
-  	security.pam.loginLimits = [
-  	  { domain = "@users"; item = "rtprio"; type = "-"; value = 1; }
-  	];
-  	
-  };
-
-in
-{
+{ inputs, outputs, config, pkgs, lib, ... }: {
   nixpkgs.overlays = [
     # wlroots currently broken, possibly from: https://github.com/nix-community/nixpkgs-wayland/pull/433
   	# inputs.nixpkgs-wayland.overlay
