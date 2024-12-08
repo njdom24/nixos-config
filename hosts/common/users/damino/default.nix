@@ -71,6 +71,7 @@ in
       steam-run
       steamtinkerlaunch
       (if config.programs.steam.gamescopeSession.enable then gamescope-steam else null)
+      (if config.programs.steam.gamescopeSession.enable then gamescope-wsi else null)
       samrewritten
       moonlight-qt
       unstable.lutris
@@ -195,6 +196,7 @@ in
 
       extraPackages = with pkgs; [
         gamescope
+        gamescope-wsi
         xorg.libXcursor
         xorg.libXi
         xorg.libXinerama
@@ -207,12 +209,21 @@ in
         keyutils
       ] ++ gst_plugins;
 
+      extraCompatPackages = with pkgs; [
+        gamescope-wsi
+        vulkan-loader
+      ];
+
       gamescopeSession = {
         enable = true;
         env = {
           WLR_RENDERER = "vulkan";
           STEAM_MULTIPLE_XWAYLANDS = "1";
           MANGOHUD = "0";
+          ENABLE_GAMESCOPE_WSI = "1";
+          ENABLE_HDR_WSI = "1";
+          DXVK_HDR = "1"; # Works with DXVK, confirmed required as of Proton 9.0-3
+          PROTON_ENABLE_AMD_AGS = "1";
         };
         args = [
           "-f"
@@ -220,6 +231,8 @@ in
           "--mangoapp"
           "--adaptive-sync"
           "--expose-wayland"
+          "--hdr-enabled"
+          #"--hdr-debug-force-output"
         ];
       };
     };
