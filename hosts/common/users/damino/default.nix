@@ -212,6 +212,7 @@ in
         env = {
           WLR_RENDERER = "vulkan";
           STEAM_MULTIPLE_XWAYLANDS = "1";
+          MANGOHUD = "0";
         };
         args = [
           "-f"
