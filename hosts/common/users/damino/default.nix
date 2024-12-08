@@ -217,11 +217,13 @@ in
       gamescopeSession = {
         enable = true;
         env = {
-          WLR_RENDERER = "vulkan";
+          #WLR_RENDERER = "vulkan";
           STEAM_MULTIPLE_XWAYLANDS = "1";
           MANGOHUD = "0";
+          MANGOHUD_CONFIG = "read_cfg,no_display";
           ENABLE_GAMESCOPE_WSI = "1";
           ENABLE_HDR_WSI = "1";
+          #STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
           DXVK_HDR = "1"; # Works with DXVK, confirmed required as of Proton 9.0-3
           PROTON_ENABLE_AMD_AGS = "1";
         };
@@ -230,7 +232,7 @@ in
           "--xwayland-count 2"
           "--mangoapp"
           "--adaptive-sync"
-          "--expose-wayland"
+          #"--expose-wayland" # Seems to break games when HDR enabled
           "--hdr-enabled"
           #"--hdr-debug-force-output"
         ];
