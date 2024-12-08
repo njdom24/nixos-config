@@ -125,6 +125,29 @@
       package = pkgs.unstable.sunshine.override {
         mesa = pkgs.mesa;
       };
+      applications.apps = [
+        {
+          name = "Desktop";
+          image-path = "desktop.png";
+          prep-cmd = [
+            {
+              do = pkgs.writeShellScript "set-client-res" ''
+                #!/usr/bin/env bash
+                if [ -z "$SWAYSOCK" && -z "$WAYLAND_DISPLAY" ]; then
+                  SWAYSOCK=/run/user/$(id -u)/sway-ipc.$(id -u).$(pgrep -x sway).sock
+                fi
+                
+                if swaymsg -t get_outputs | jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
+                  mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
+                  swaymsg output HEADLESS-1 mode $mode
+                else
+                  echo "Not headless"
+                fi
+              '';
+            }
+          ];
+        }
+      ];
     };
   };
 
