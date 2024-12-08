@@ -372,7 +372,7 @@ in
 
                   # Enable the primary display if it's disabled
                   ${pkgs.sway}/bin/swaymsg output "*" disable
-                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" enable
+                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" enable pos 0 0
               else
                   echo "No connected displays found."
               fi
