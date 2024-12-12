@@ -14,7 +14,6 @@ let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.
 	gst-libav
 	gst-vaapi
   ]);
-
 in
 {
   imports =
@@ -191,7 +190,7 @@ in
           fi
         '';
         # https://github.com/NixOS/nixpkgs/issues/271483
-        extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ]; 
+        extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ];
       };
 
       extraPackages = with pkgs; [
@@ -207,6 +206,14 @@ in
         stdenv.cc.cc.lib
         libkrb5
         keyutils
+        # Where gamescope-session looks for "Exit to Desktop" when -steamos3 is provided
+        (writeShellScriptBin "steamos-session-select" ''
+            /usr/bin/env steam -shutdown
+        '')
+        (writeScriptBin "steamos-polkit-helpers/steamos-update" ''
+          #!${pkgs.stdenv.shell}
+          exit 7
+        '')
       ] ++ gst_plugins;
 
       extraCompatPackages = with pkgs; [
@@ -417,6 +424,12 @@ in
  	  enable = true;
  	  package = pkgs.ananicy-cpp;
  	  rulesProvider = pkgs.ananicy-rules-cachyos;
+ 	  extraTypes = [
+ 	    {
+ 	      type = "LowLatency_RT";
+ 	      sched = "rr";
+ 	    }
+ 	  ];
  	};
  	gnome.gnome-keyring.enable = true;
  	gvfs.enable = true;
