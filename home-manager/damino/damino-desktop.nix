@@ -21,7 +21,7 @@
 	  	      {
 	  	  	    criteria = "AOC 24G1WG4 0x00042EBB";
 	  	  	    status = "enable";
-	  	  	    mode = "1920x1080@60.000Hz";
+	  	  	    mode = "1920x1080@144.001";
 	  	  	    position = "2560,360";
 	  	  	    scale = 1.0;
 	  	  	    adaptiveSync = false;
