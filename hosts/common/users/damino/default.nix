@@ -189,6 +189,10 @@ in
             fi
           fi
         '';
+        # Enable exiting via 'quit' in gamescope session
+        extraArgs = ''
+          -console
+        '';
         # https://github.com/NixOS/nixpkgs/issues/271483
         extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ];
       };
@@ -251,12 +255,15 @@ in
       enable = true;
       capSysNice = false; # Needed or gamescope fails within Steam
       env = {
-        #MANGOHUD = "0";
+        MANGOHUD = "0";
         WLR_RENDERER = "vulkan";
         STEAM_MULTIPLE_XWAYLANDS = "1";
       };
       args = [
+        "-f"
         "--xwayland-count 2"
+        "--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
+        "--adaptive-sync"
         #"--mangoapp"
       ];
     };
@@ -428,6 +435,16 @@ in
  	    {
  	      type = "LowLatency_RT";
  	      sched = "rr";
+ 	    }
+ 	  ];
+ 	  extraRules = [
+ 	    {
+ 	      name = "gamescope";
+ 	      type = "LowLatency_RT";
+ 	    }
+ 	    {
+ 	      name = "gamescope-wl";
+ 	      type = "LowLatency_RT";
  	    }
  	  ];
  	};

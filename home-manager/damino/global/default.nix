@@ -119,8 +119,8 @@
 	  	gpu_name = true;
 	  	fps_limit_method = "early";
 	  	toggle_hud = "Shift_R+F12";
-	  	toggle_logging = ""; # Unbind
-	  	reload_cfg = ""; # Unbind
+	  	toggle_logging = true; # Unbind
+	  	reload_cfg = true; # Unbind
 	  };
 	};
   };
