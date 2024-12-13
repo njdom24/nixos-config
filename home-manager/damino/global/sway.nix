@@ -90,6 +90,10 @@
 		      	command = "inhibit_idle fullscreen";
 		      	criteria = { title = "Steam Big Picture Mode"; };
 		      }
+		      {
+		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
+		        criteria = { app_id = ".gamescope-wrapped"; };
+		      }
 		    ];
 		  };
 		  bars = [{
