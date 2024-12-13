@@ -75,7 +75,7 @@
       # GTK_THEME= "${config.gtk.theme.name}:dark";
       MESA_VK_WSI_PRESENT_MODE = "fifo"; # MangoHud vsync is non-functional as of 24.11; https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379
       RADV_PERFTEST = "nggc"; # https://www.phoronix.com/news/Mesa-24.3-NGG-Culling-RDNA1; redundant in 25.05
-      #GSK_RENDERER = "ngl"; # https://bbs.archlinux.org/viewtopic.php?id=299488; probably fixed by 25.05
+      GSK_RENDERER = "ngl"; # https://bbs.archlinux.org/viewtopic.php?id=299488; probably fixed by 25.05
     };
 
     file = {
