@@ -431,12 +431,12 @@ in
  	  enable = true;
  	  package = pkgs.ananicy-cpp;
  	  rulesProvider = pkgs.ananicy-rules-cachyos;
- 	  extraTypes = [
- 	    {
- 	      type = "LowLatency_RT";
- 	      sched = "rr";
- 	    }
- 	  ];
+ 	  #extraTypes = [
+ 	  #  {
+ 	  #    type = "LowLatency_RT";
+ 	  #    sched = "rr";
+ 	  #  }
+ 	  #];
  	  extraRules = [
  	    {
  	      name = "gamescope";
