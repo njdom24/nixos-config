@@ -189,10 +189,6 @@ in
             fi
           fi
         '';
-        # Enable exiting via 'quit' in gamescope session
-        extraArgs = ''
-          -console
-        '';
         # https://github.com/NixOS/nixpkgs/issues/271483
         extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ];
       };
@@ -431,6 +427,7 @@ in
  	  enable = true;
  	  package = pkgs.ananicy-cpp;
  	  rulesProvider = pkgs.ananicy-rules-cachyos;
+      # Breaks login 50% of the time, possibly since Sway run under sddm?
  	  #extraTypes = [
  	  #  {
  	  #    type = "LowLatency_RT";
@@ -445,6 +442,10 @@ in
  	    {
  	      name = "gamescope-wl";
  	      type = "LowLatency_RT";
+ 	    }
+ 	    {
+ 	      name = "sunshine";
+ 	      type = "Player-Video";
  	    }
  	  ];
  	};
