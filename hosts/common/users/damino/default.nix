@@ -69,7 +69,15 @@ in
       libva-utils
       steam-run
       steamtinkerlaunch
-      (if config.programs.steam.gamescopeSession.enable then gamescope-steam else null)
+      (if config.programs.steam.gamescopeSession.enable then (pkgs.writeTextDir "share/applications/steam-gamescope.desktop" ''
+        [Desktop Entry]
+        Name=Steam (Gamescope)
+        Comment=Launch Steam via Gamescope (Embedded)
+        Exec=/usr/bin/env gamescope -e -- steam -tenfoot -pipewire-dmabuf -console
+        Icon=steam
+        Type=Application
+        Categories=Game;
+      '') else null)
       (if config.programs.steam.gamescopeSession.enable then gamescope-wsi else null)
       samrewritten
       moonlight-qt

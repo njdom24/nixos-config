@@ -3,7 +3,6 @@
 { pkgs, ...}: {
   # example = pkgs.callPackage ./example { };
   xcursor-pro = pkgs.callPackage ./xcursor-pro { };
-  gamescope-steam = pkgs.callPackage ./gamescope-steam { };
   citra-mk7 = pkgs.unstable.lime3ds.overrideAttrs (final: prev: {
     pname = "citra";
     version = "r5115f64"; # Git release version
