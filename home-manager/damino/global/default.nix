@@ -120,8 +120,8 @@
 	  	gpu_name = true;
 	  	fps_limit_method = "early";
 	  	toggle_hud = "Shift_R+F12";
-	  	toggle_logging = true; # Unbind
-	  	reload_cfg = true; # Unbind
+	  	toggle_logging = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
+	  	reload_cfg = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
 	  	blacklist = ".gamescope-wrapped,gamescope,gamescope-wl";
 	  };
 	};
