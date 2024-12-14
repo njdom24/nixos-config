@@ -444,6 +444,14 @@ in
  	  #];
  	  extraRules = [
  	    {
+ 	      name = "sway";
+ 	      nice = -20;
+ 	    }
+ 	    {
+ 	      name = ".sway-wrapped";
+ 	      nice = -20;
+ 	    }
+ 	    {
  	      name = "gamescope";
  	      type = "LowLatency_RT";
  	    }
