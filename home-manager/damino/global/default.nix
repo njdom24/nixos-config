@@ -122,6 +122,7 @@
 	  	toggle_hud = "Shift_R+F12";
 	  	toggle_logging = true; # Unbind
 	  	reload_cfg = true; # Unbind
+	  	blacklist = ".gamescope-wrapped,gamescope,gamescope-wl";
 	  };
 	};
   };
