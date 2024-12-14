@@ -528,7 +528,7 @@ in
   	] ++ gst_plugins;
 
   	variables = {
-  	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "1";
+  	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
   	  #"TZ" = "${config.time.timeZone}";
   	  #"MANGOHUD" = "1";
   	  "GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins;
