@@ -144,28 +144,6 @@ in
     zsh.enable = true;
     adb.enable = true;
 
-    # MangoHud-related options are blocked by https://github.com/flightlessmango/MangoHud/issues/1283
-    gamescope = {
-      enable = true;
-      capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
-      # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530, likely fixed by 25.05
-      package = pkgs.gamescope.overrideAttrs (_: {
-        NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
-      });
-      env = {
-        MANGOHUD = "0";
-        WLR_RENDERER = "vulkan";
-        STEAM_MULTIPLE_XWAYLANDS = "1";
-      };
-      args = [
-        "-f"
-        "--xwayland-count 2"
-        #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
-        "--adaptive-sync"
-        #"--mangoapp"
-      ];
-    };
-
     obs-studio = {
       enable = true;
       plugins = with pkgs.obs-studio-plugins; [
