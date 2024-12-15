@@ -19,6 +19,7 @@ in
   imports =
     [
       ../../desktops/sway
+      ./gaming.nix
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
@@ -68,24 +69,6 @@ in
       vlc
       libva-utils
       steam-run
-      steamtinkerlaunch
-      # https://github.com/ValveSoftware/steam-for-linux/issues/11479
-      (if config.programs.steam.gamescopeSession.enable then (pkgs.writeTextDir "share/applications/steam-gamescope.desktop" ''
-        [Desktop Entry]
-        Name=Steam (Gamescope)
-        Comment=Launch Steam via Gamescope (Embedded)
-        Exec=/usr/bin/env gamescope -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
-        Icon=steam
-        Type=Application
-        Categories=Game;
-      '') else null)
-      (if config.programs.steam.gamescopeSession.enable then gamescope-wsi else null)
-      samrewritten
-      moonlight-qt
-      unstable.lutris
-      vkbasalt
-      protontricks
-      protonup-qt
       fastfetch
       zsh
       oh-my-zsh
@@ -107,28 +90,12 @@ in
 	  gnome-system-monitor
 	  libnotify
 	  xwaylandvideobridge
-	  #discord
 	  (discord.override {
 	  	withOpenASAR = true; # If this breaks, set to false and re-run Discord. https://github.com/NixOS/nixpkgs/issues/208749
 	  })
-	  
 	  #betterdiscord-installer
-
 	  betterdiscordctl
 	  vesktop
-	  unstable.ludusavi
-	  unstable.ryujinx
-	  # citra-mk7 TODO: https://github.com/NixOS/nixpkgs/pull/348927
-	  dolphin-emu
-	  unstable.cemu
-	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
-	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
-	  }))
-	  (retroarch.override {
-	    cores = with unstable.libretro; [
-	      mgba
-	    ];
-  	  })
 	  jellyfin-media-player
 	  xorg.xeyes
 	  corefonts
@@ -175,85 +142,7 @@ in
 	};
   
     zsh.enable = true;
-
     adb.enable = true;
-
-    steam = {
-      enable = true;
-      remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-      dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
-	  #extest.enable = true; # Breaks when Steam is run through gamescope. Alternatively needs https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
-      package = pkgs.steam.override {
-        
-        extraProfile = ''
-          # https://github.com/NixOS/nixpkgs/issues/279893
-          unset TZ
-          if [ -n "$SWAYSOCK" ]; then
-            if echo "$WAYLAND_DISPLAY" | ${pkgs.gnugrep}/bin/grep "gamescope" >/dev/null 2>&1; then
-              # Launched through gamescope. Could enable after https://github.com/Supreeeme/extest/issues/11 or portal issue below
-              echo "Disabling Extest"
-            else
-              # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
-              export LD_PRELOAD="$LD_PRELOAD:${pkgs.pkgsi686Linux.extest}/lib/libextest.so"
-            fi
-          fi
-        '';
-        # https://github.com/NixOS/nixpkgs/issues/271483
-        extraLibraries = pkgs: [ pkgs.pkgsi686Linux.gperftools ];
-      };
-
-      extraPackages = with pkgs; [
-        gamescope
-        gamescope-wsi
-        xorg.libXcursor
-        xorg.libXi
-        xorg.libXinerama
-        xorg.libXScrnSaver
-        libpng
-        libpulseaudio
-        libvorbis
-        stdenv.cc.cc.lib
-        libkrb5
-        keyutils
-        # Where gamescope-session looks for "Exit to Desktop" when -steamos3 is provided
-        (writeShellScriptBin "steamos-session-select" ''
-            /usr/bin/env steam -shutdown
-        '')
-        (writeScriptBin "steamos-polkit-helpers/steamos-update" ''
-          #!${pkgs.stdenv.shell}
-          exit 7
-        '')
-      ] ++ gst_plugins;
-
-      extraCompatPackages = with pkgs; [
-        gamescope-wsi
-        vulkan-loader
-      ];
-
-      gamescopeSession = {
-        enable = true;
-        env = {
-          #WLR_RENDERER = "vulkan";
-          STEAM_MULTIPLE_XWAYLANDS = "1";
-          MANGOHUD = "0";
-          MANGOHUD_CONFIG = "read_cfg,no_display";
-          ENABLE_GAMESCOPE_WSI = "1";
-          ENABLE_HDR_WSI = "1";
-          #STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
-          DXVK_HDR = "1"; # Works with DXVK, confirmed required as of Proton 9.0-3
-          PROTON_ENABLE_AMD_AGS = "1";
-        };
-        args = [
-          "-f"
-          "--xwayland-count 2"
-          "--mangoapp"
-          "--adaptive-sync"
-          #"--expose-wayland" # Seems to break games when HDR enabled
-          "--hdr-enabled"
-          #"--hdr-debug-force-output"
-        ];
-      };
-    };
 
     # MangoHud-related options are blocked by https://github.com/flightlessmango/MangoHud/issues/1283
     gamescope = {
@@ -275,14 +164,6 @@ in
         "--adaptive-sync"
         #"--mangoapp"
       ];
-    };
-
-    corectrl = {
-      enable = true;
-      package = pkgs.unstable.corectrl.overrideAttrs (finalAttrs: prevAttrs: {
-      	qtWrapperArgs = ["--unset QT_QPA_PLATFORMTHEME"];
-      });
-      gpuOverclock.enable = true;	
     };
 
     obs-studio = {
@@ -307,28 +188,23 @@ in
   hardware = {
     enableRedistributableFirmware = true;
     bluetooth = {
-    	enable = true;
-    	powerOnBoot = true;
-    	# package = pkgs.legacy.bluez;
-    	settings = {
-    	  General = {
-    	  	UserspaceHID = "true";
-    	  };
-    	};
+      enable = true;
+      powerOnBoot = true;
+      # package = pkgs.legacy.bluez;
+      settings = {
+        General = {
+          UserspaceHID = "true";
+        };
+      };
     };
   	graphics = {
-  		enable32Bit = true; # Enables support for 32bit libs that steam uses
-  		extraPackages = with pkgs; [ vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
-  		extraPackages32 = with pkgs; [ ];
+  	  extraPackages = with pkgs; [ vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
+  	  extraPackages32 = with pkgs; [ ];
   	};
   	#nvidia = {
   	  # Modesetting is required.
       #modesetting.enable = true;
   	#};
-  	# TODO: https://github.com/NixOS/nixpkgs/issues/357693
-  	#xpadneo.enable = true; 
-  	xone.enable = true;
-  	#openrazer.enable = true;
   };
 
   fonts = {
@@ -419,10 +295,6 @@ in
   	  extraPackages = pkgs.lib.mkForce [];
     };
 
-    udev.extraRules = ''
-      ACTION=="add|change", KERNEL=="event[0-9]*", ATTRS{name}=="*Wireless Controller Touchpad", ENV{LIBINPUT_IGNORE_DEVICE}="1"
-    '';
-
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -436,40 +308,7 @@ in
   	  	PasswordAuthentication = true;
   	  };
  	};
- 	ananicy = {
- 	  enable = true;
- 	  package = pkgs.ananicy-cpp;
- 	  rulesProvider = pkgs.ananicy-rules-cachyos;
-      # Breaks login 50% of the time, possibly since Sway run under sddm?
- 	  #extraTypes = [
- 	  #  {
- 	  #    type = "LowLatency_RT";
- 	  #    sched = "rr";
- 	  #  }
- 	  #];
- 	  extraRules = [
- 	    {
- 	      name = "sway";
- 	      nice = -20;
- 	    }
- 	    {
- 	      name = ".sway-wrapped";
- 	      nice = -20;
- 	    }
- 	    {
- 	      name = "gamescope";
- 	      type = "LowLatency_RT";
- 	    }
- 	    {
- 	      name = "gamescope-wl";
- 	      type = "LowLatency_RT";
- 	    }
- 	    {
- 	      name = "sunshine";
- 	      type = "Player-Video";
- 	    }
- 	  ];
- 	};
+
  	gnome.gnome-keyring.enable = true;
  	gvfs.enable = true;
  	fstrim.enable = true;
@@ -524,9 +363,6 @@ in
   	  ethtool
   	  gtk3
   	  pcmanfm
-  	  #wineWowPackages.stagingFull
-  	  wineWowPackages.waylandFull
-  	  winetricks
   	  elegant-sddm
   	  xcursor-pro
   	  pciutils
@@ -541,9 +377,7 @@ in
   	] ++ gst_plugins;
 
   	variables = {
-  	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
   	  #"TZ" = "${config.time.timeZone}";
-  	  #"MANGOHUD" = "1";
   	  "GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins;
   	};
   	extraInit = "source ${config.users.users.damino.home}/.nix-profile/etc/profile.d/hm-session-vars.sh";
