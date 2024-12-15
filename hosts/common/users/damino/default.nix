@@ -69,11 +69,12 @@ in
       libva-utils
       steam-run
       steamtinkerlaunch
+      # https://github.com/ValveSoftware/steam-for-linux/issues/11479
       (if config.programs.steam.gamescopeSession.enable then (pkgs.writeTextDir "share/applications/steam-gamescope.desktop" ''
         [Desktop Entry]
         Name=Steam (Gamescope)
         Comment=Launch Steam via Gamescope (Embedded)
-        Exec=/usr/bin/env gamescope -e -- steam -tenfoot -pipewire-dmabuf -console
+        Exec=/usr/bin/env gamescope -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
         Icon=steam
         Type=Application
         Categories=Game;
@@ -257,7 +258,11 @@ in
     # MangoHud-related options are blocked by https://github.com/flightlessmango/MangoHud/issues/1283
     gamescope = {
       enable = true;
-      capSysNice = false; # Needed or gamescope fails within Steam
+      capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
+      # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530, likely fixed by 25.05
+      package = pkgs.gamescope.overrideAttrs (_: {
+        NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
+      });
       env = {
         MANGOHUD = "0";
         WLR_RENDERER = "vulkan";
@@ -266,7 +271,7 @@ in
       args = [
         "-f"
         "--xwayland-count 2"
-        "--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
+        #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
         "--adaptive-sync"
         #"--mangoapp"
       ];
