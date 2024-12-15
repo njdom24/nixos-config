@@ -13,6 +13,11 @@
 	  ''}
 	'';
 
+	# eGPU setup
+	wayland.windowManager.sway.extraSessionCommands = ''
+	  export WLR_DRM_DEVICES=/dev/dri/card1:/dev/dri/card0
+	'';
+
 	programs = {
 	  rofi.yoffset = 11;
 	  waybar.settings.mainBar.modules-right = [ "battery" ];
