@@ -69,7 +69,7 @@
   services = {
     xserver = {
    	  enable = true;
-   	  videoDrivers = [ "modesetting" "fbdev" ];
+   	  videoDrivers = [ "amdgpu" "modesetting" "fbdev" ];
    	  # Configure keymap in X11
       xkb = {
         layout = "us";
@@ -142,6 +142,18 @@
 
   programs = {
   	light.enable = true;
+  };
+
+  # eGPU setup
+  services.sunshine = {
+    enable = true;
+    autoStart = false;
+    openFirewall = true;
+  };
+  networking.firewall = {
+    allowedTCPPorts = [
+      5900
+    ];
   };
 
   # Some programs need SUID wrappers, can be configured further or are
