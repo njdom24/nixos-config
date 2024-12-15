@@ -109,6 +109,11 @@
   	  userEmail = "dom32400@aol.com";
   	};
 
+  	micro = {
+  	  enable = true;
+  	  settings.clipboard = "external";
+  	};
+
 	mangohud = {
 	  enable = true;
 	  # package = pkgs.legacy.mangohud;
