@@ -169,6 +169,7 @@
   	  samrewritten
   	  moonlight-qt
   	  unstable.lutris
+  	  unstable.xivlauncher
   	  vkbasalt
   	  protontricks
   	  protonup-qt
