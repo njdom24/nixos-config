@@ -91,6 +91,25 @@
       };
     };
 
+    # MangoHud-related options are blocked by https://github.com/flightlessmango/MangoHud/issues/1283
+    gamescope = {
+      enable = true;
+      capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
+      # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530, likely fixed by 25.05
+      env = {
+        MANGOHUD = "0";
+        WLR_RENDERER = "vulkan";
+        STEAM_MULTIPLE_XWAYLANDS = "1";
+      };
+      args = [
+        "-f"
+        "--xwayland-count 2"
+        #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
+        "--adaptive-sync"
+        #"--mangoapp"
+      ];
+    };
+
     corectrl = {
       enable = true;
       package = pkgs.unstable.corectrl.overrideAttrs (finalAttrs: prevAttrs: {
@@ -102,7 +121,7 @@
 
   hardware = {
   	graphics = {
-  		enable32Bit = true; # Enables support for 32bit libs that steam uses
+  	  enable32Bit = true; # Enables support for 32bit libs that steam uses
   	};
   	# TODO: https://github.com/NixOS/nixpkgs/issues/357693
   	#xpadneo.enable = true; 
