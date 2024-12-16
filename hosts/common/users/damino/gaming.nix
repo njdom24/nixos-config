@@ -25,12 +25,13 @@
           # https://github.com/NixOS/nixpkgs/issues/279893
           unset TZ
           if [ -n "$SWAYSOCK" ]; then
-            if echo "$WAYLAND_DISPLAY" | ${pkgs.gnugrep}/bin/grep "gamescope" >/dev/null 2>&1; then
+            if echo "$WAYLAND_DISPLAY" | ${pkgs.gnugrep}/bin/grep "gamescope" >/dev/null 2>&1 || pgrep "gamescope" > /dev/null; then
               # Launched through gamescope. Could enable after https://github.com/Supreeeme/extest/issues/11 or portal issue below
               echo "Disabling Extest"
             else
               # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
               export LD_PRELOAD="$LD_PRELOAD:${pkgs.pkgsi686Linux.extest}/lib/libextest.so"
+              echo "Enabling Extest"
             fi
           fi
         '';
@@ -96,6 +97,9 @@
       enable = true;
       capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
       # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530, likely fixed by 25.05
+      package = pkgs.gamescope.overrideAttrs (_: {
+        NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
+      });
       env = {
         MANGOHUD = "0";
         WLR_RENDERER = "vulkan";
@@ -105,7 +109,7 @@
         "-f"
         "--xwayland-count 2"
         #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
-        "--adaptive-sync"
+        #"--adaptive-sync"
         #"--mangoapp"
       ];
     };
@@ -175,11 +179,12 @@
   	  steam-run
   	  steamtinkerlaunch
   	  # https://github.com/ValveSoftware/steam-for-linux/issues/11479
+  	  # cd to /tmp to somehow avoid stutters with VRR
   	  (if config.programs.steam.gamescopeSession.enable then (pkgs.writeTextDir "share/applications/steam-gamescope.desktop" ''
   	    [Desktop Entry]
   	    Name=Steam (Gamescope)
   	    Comment=Launch Steam via Gamescope (Embedded)
-  	    Exec=/usr/bin/env gamescope -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
+  	    Exec=/usr/bin/env bash -c "cd /tmp && gamescope -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu"
   	    Icon=steam
   	    Type=Application
   	    Categories=Game;
