@@ -67,7 +67,7 @@
 
 		  exec_always timeout 10 kanshi
 		  exec mako
-		  exec QT_QPA_PLATFORMTHEME= corectrl
+		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
 		  exec gtk-launch vesktop.desktop
 		  exec gtk-launch steam.desktop
