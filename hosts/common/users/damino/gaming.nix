@@ -213,6 +213,7 @@
   	  #wineWowPackages.stagingFull
   	  wineWowPackages.waylandFull
   	  winetricks
+  	  lact # TODO: Should become a module in 25.05
   	];
 
   	variables = {
@@ -220,4 +221,7 @@
   	  #"MANGOHUD" = "1";
   	};
   };
+
+  systemd.packages = with pkgs; [ lact ];
+  systemd.services.lactd.wantedBy = ["multi-user.target"];
 }
