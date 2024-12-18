@@ -83,6 +83,8 @@
       '';
     };
 
+    auto-cpufreq.enable = true;
+
     #xserver.displayManager.gdm.enable = true;
     # Enable the KDE Plasma Desktop Environment.
     #xserver.displayManager.sddm.enable = true;
