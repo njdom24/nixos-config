@@ -15,7 +15,7 @@
 
 	# eGPU setup
 	wayland.windowManager.sway.extraSessionCommands = ''
-	  export WLR_DRM_DEVICES=/dev/dri/card1:/dev/dri/card0
+	  export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
 	'';
 
 	programs = {
