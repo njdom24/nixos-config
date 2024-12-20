@@ -83,6 +83,7 @@
       '';
     };
 
+    power-profiles-daemon.enable = false;
     auto-cpufreq.enable = true;
 
     #xserver.displayManager.gdm.enable = true;
