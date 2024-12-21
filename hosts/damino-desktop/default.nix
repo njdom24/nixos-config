@@ -65,6 +65,16 @@
   	pulseaudio.enable = false;
   };
   security.rtkit.enable = true;
+
+  hardware.nvidia = {
+    modesetting.enable = true;
+    open = false;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    powerManagement.enable = false;
+    powerManagement.finegrained = false;
+    nvidiaSettings = true;
+  };
+  
   services = {
     udev = {
       extraHwdb = ''
@@ -80,7 +90,7 @@
   	    layout = "us";
   	    variant = "";
   	  };
-  	  videoDrivers = [ "amdgpu" "modesetting" ];
+  	  videoDrivers = [ "nvidia" "amdgpu" "modesetting" ];
   	  # Only show login screen on primary monitor when it's connected
   	  displayManager.setupCommands = ''  	  
   	    if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
@@ -203,6 +213,7 @@
     micro
     x11vnc
     wayvnc
+    nvidia-vaapi-driver
     #sunshine
   ];
 
