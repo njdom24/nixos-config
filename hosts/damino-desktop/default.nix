@@ -75,10 +75,6 @@
     open = false;
     package = config.boot.kernelPackages.nvidiaPackages.beta;
   };
-  boot.kernelParams = [
-    "nvidia_drm.modeset=1"
-    "nvidia_drm.fbdev=1"
-  ];
   
   services = {
     udev = {
