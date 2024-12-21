@@ -12,7 +12,7 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
-  boot.kernelParams = [ "amdgpu.pcie_gen_cap=0x4000" "hid_apple.fnmode=2" ];
+  boot.kernelParams = [ "amdgpu.pcie_gen_cap=0x40000" "hid_apple.fnmode=2" ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   fileSystems."/" = {
