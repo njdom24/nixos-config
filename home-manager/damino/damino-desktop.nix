@@ -5,6 +5,8 @@
 	  rofi.yoffset = 24;
 	};
 
+	wayland.windowManager.sway.extraOptions = [ "--unsupported-gpu "];
+
 	services = {
 	  kanshi.settings = [
 	  	{
