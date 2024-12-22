@@ -65,16 +65,6 @@
   	pulseaudio.enable = false;
   };
   security.rtkit.enable = true;
-
-  hardware.nvidia = {
-    modesetting.enable = true;
-    powerManagement = {
-      enable = false;
-      finegrained = false;
-    };
-    open = false;
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
-  };
   
   services = {
     udev = {
@@ -91,7 +81,7 @@
   	    layout = "us";
   	    variant = "";
   	  };
-  	  videoDrivers = [ "nvidia" "amdgpu" "modesetting" "fbdev" ];
+  	  videoDrivers = [ "amdgpu" "modesetting" "fbdev" ];
   	  # Only show login screen on primary monitor when it's connected
   	  displayManager.setupCommands = ''  	  
   	    if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'DisplayPort-0 connected')" ]; then
