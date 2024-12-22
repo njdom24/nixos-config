@@ -15,7 +15,11 @@
 
 	# eGPU setup
 	wayland.windowManager.sway.extraSessionCommands = ''
-	  export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
+	  if [ -e /dev/dri/card0 ]; then
+	    export WLR_DRM_DEVICES=/dev/dri/card0
+	  else
+	    export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
+	  fi
 	'';
 
 	programs = {
@@ -94,6 +98,7 @@
 	  	  	];
 	  	  };
 	  	}
+	  	# eGPU hybrid
 	  	{
 	  	  profile = {
 	  	  	name = "docked-dual-egpu";
@@ -102,6 +107,32 @@
 	  	  	  	criteria = "eDP-1";
 	  	  	  	status = "disable";
 	  	  	  }
+	  	  	  {
+	  	  	  	criteria = "Samsung Electric Company LC27T55 HCPW203589";
+	  	  	    status = "enable";
+	  	  	    mode = "1920x1080@75Hz";
+	  	  	    position = "0,0";
+	  	  	    scale = 0.75;
+	  	  	  }
+	  	  	  {
+	  	  	  	criteria = "Acer Technologies VG271U 0x0302811A";
+	  	  	    status = "enable";
+	  	  	    mode = "2560x1440@144Hz";
+	  	  	    position = "2560,0";
+	  	  	  }
+	  	  	];
+	  	  	exec = [
+              "${pkgs.sway}/bin/swaymsg output '*' scale_filter smart"
+              "${pkgs.sway}/bin/swaymsg output '*' adaptive_sync on"
+	  	  	  "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_00_1f.3 pro-audio"
+	  	  	];
+	  	  };
+	  	}
+	  	# eGPU only
+	  	{
+	  	  profile = {
+	  	  	name = "docked-solo-egpu";
+	  	  	outputs = [
 	  	  	  {
 	  	  	  	criteria = "Samsung Electric Company LC27T55 HCPW203589";
 	  	  	    status = "enable";
