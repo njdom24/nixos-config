@@ -4,11 +4,11 @@
 	  exec ${ pkgs.writeShellScript "check_wifi" ''
 	  #! /usr/bin/env bash
 
-	  if [ "$(ip a | grep -E 'eth|enp' | grep UP)" ]; then
+	  if [ "$(ip a | grep -E 'eth|enp' | grep 'state UP')" ]; then
 	    ${pkgs.iwd}/bin/iwctl device wlan0 set-property Powered off
 	  else
 	    ${pkgs.iwd}/bin/iwctl device wlan0 set-property Powered on
-	    ${pkgs.iwgtk}/bin/iwgtk -i
+	    exec ${pkgs.iwgtk}/bin/iwgtk -i
 	  fi
 	  ''}
 	'';
