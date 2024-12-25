@@ -209,7 +209,7 @@ in
               #!/usr/bin/env bash
 
               # Define your list of preferred device names (or partial names) in order of priority
-              PREFERRED_DEVICES=("Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
+              PREFERRED_DEVICES=("Xiaomi Corporation Mi Monitor" "Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
 
               # Function to get all connected displays with their descriptions
               get_connected_displays() {
