@@ -297,6 +297,13 @@ in
  	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chgrp video /sys/class/backlight/%k/brightness"
  	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chmod a+w /sys/class/backlight/%k/brightness"
  	  '';
+ 	  packages = [
+ 	    (lib.optionals config.services.sunshine.enable (pkgs.writeTextFile {
+ 	      name = "60-sunshine-extra.rules";
+ 	      text = ''KERNEL=="uhid", TAG+="uaccess"'';
+ 	      destination = "/etc/udev/rules.d/60-sunshine-extra.rules";
+ 	    }))
+ 	  ];
  	};
 
  	gnome.gnome-keyring.enable = true;
