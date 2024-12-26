@@ -348,7 +348,7 @@ in
               echo Successfully attached ddcci to $1
               break
             fi
-            sleep 1
+            sleep 5
             counter=$((counter - 1))
           done
         '';
