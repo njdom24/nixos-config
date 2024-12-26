@@ -46,6 +46,7 @@ in
     	"plugdev"
     	"corectrl"
     	"adbusers"
+    	"i2c"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
@@ -183,6 +184,7 @@ in
   	  # Modesetting is required.
       #modesetting.enable = true;
   	#};
+  	i2c.enable = true;
   };
 
   fonts = {
@@ -302,7 +304,8 @@ in
   };
 
   boot = {
-  	kernelModules = [ "ecryptfs" ];
+  	kernelModules = [ "ecryptfs" "i2c-dev" "ddcci_backlight" ];
+  	extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   	kernel.sysctl."kernel.sysrq" = 1;
   	tmp = {
       useTmpfs = true;
@@ -352,6 +355,7 @@ in
   	  python3
   	  distrobox
   	  waypipe
+  	  ddcutil
   	] ++ gst_plugins;
 
   	variables = {
