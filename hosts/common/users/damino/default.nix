@@ -289,6 +289,16 @@ in
   	  };
  	};
 
+ 	udev = {
+ 	  extraRules = ''
+ 	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="AMDGPU DM*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
+ 	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="DPMST", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
+ 	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="NVIDIA i2c adapter*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
+ 	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chgrp video /sys/class/backlight/%k/brightness"
+ 	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chmod a+w /sys/class/backlight/%k/brightness"
+ 	  '';
+ 	};
+
  	gnome.gnome-keyring.enable = true;
  	gvfs.enable = true;
  	fstrim.enable = true;
@@ -304,7 +314,7 @@ in
   };
 
   boot = {
-  	kernelModules = [ "ecryptfs" "i2c-dev" "ddcci_backlight" ];
+  	kernelModules = lib.mkAfter [ "ecryptfs" "i2c-dev" "ddcci_backlight" ];
   	extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   	kernel.sysctl."kernel.sysrq" = 1;
   	tmp = {
@@ -326,6 +336,24 @@ in
     # If a kernel-level OOM event does occur anyway,
     # strongly prefer killing nix-daemon child processes
     services."nix-daemon".serviceConfig.OOMScoreAdjust = 1000;
+    services."ddcci@" = {
+        scriptArgs = "%i";
+        script = ''
+          echo Trying to attach ddcci to $1
+          id=$(echo $1 | cut -d "-" -f 2)
+          counter=5
+          while [ $counter -gt 0 ]; do
+            if ${pkgs.ddcutil}/bin/ddcutil getvcp 10 -b $id; then
+              echo ddcci 0x37 > /sys/bus/i2c/devices/$1/new_device
+              echo Successfully attached ddcci to $1
+              break
+            fi
+            sleep 1
+            counter=$((counter - 1))
+          done
+        '';
+        serviceConfig.Type = "oneshot";
+      };
   };
 
   environment = {
