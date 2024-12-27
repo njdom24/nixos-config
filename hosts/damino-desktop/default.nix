@@ -205,6 +205,24 @@
     x11vnc
     wayvnc
     #sunshine
+
+    # Monitor scripts
+    (pkgs.writeShellScriptBin "enable-dimming" ''
+      #!/usr/bin/env bash
+      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6c 50 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 70 50 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6e 50 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+      
+      #while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 69 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+    '')
+    (pkgs.writeShellScriptBin "disable-dimming" ''
+      #!/usr/bin/env bash
+      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6c 51 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 70 51 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6e 51 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+      
+      #while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 64 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
+    '')
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
