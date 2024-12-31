@@ -351,13 +351,17 @@ in
         scriptArgs = "%i";
         script = ''
           echo Trying to attach ddcci to $1
+          lockfile="/tmp/ddcutil.lock"
+          exec 200>"$lockfile"
           id=$(echo $1 | cut -d "-" -f 2)
           counter=5
           while [ $counter -gt 0 ]; do
+            if timeout 10s flock 200; then
             if ${pkgs.ddcutil}/bin/ddcutil getvcp 10 -b $id; then
               echo ddcci 0x37 > /sys/bus/i2c/devices/$1/new_device
               echo Successfully attached ddcci to $1
               break
+            fi
             fi
             sleep 5
             counter=$((counter - 1))
