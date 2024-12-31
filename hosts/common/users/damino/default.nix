@@ -291,7 +291,7 @@ in
 
  	udev = {
  	  extraRules = ''
- 	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="AMDGPU DM*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
+ 	    #ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="AMDGPU DM*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
  	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="DPMST", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
  	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="NVIDIA i2c adapter*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
  	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chgrp video /sys/class/backlight/%k/brightness"
@@ -321,9 +321,12 @@ in
   };
 
   boot = {
-  	kernelModules = lib.mkAfter [ "ecryptfs" "i2c-dev" "ddcci_backlight" ];
+  	kernelModules = lib.mkAfter [ "ecryptfs" "ddcci_backlight" ];
   	extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
-  	kernel.sysctl."kernel.sysrq" = 1;
+  	kernel.sysctl = {
+  	  "kernel.sysrq" = 1;
+  	  "kernel.panic" = 30;
+  	};
   	tmp = {
       useTmpfs = true;
       tmpfsSize = "80%";
@@ -332,6 +335,7 @@ in
 
   # OOM configuration: https://discourse.nixos.org/t/nix-build-ate-my-ram/35752
   systemd = {
+    watchdog.runtimeTime = "30s";
     # Create a separate slice for nix-daemon that is
     # memory-managed by the userspace systemd-oomd killer
     slices."nix-daemon".sliceConfig = {
