@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 let
   # List of devices for Btrfs scrub and SMART monitoring
-  btrfsDevices = [ "/" ];  # Adjust paths as needed
+  btrfsDevices = [ "/" "/mnt/emet" ];  # Adjust paths as needed
   smartDevices = [ "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0" ];  # Adjust device names as needed
 
   # Create a script for the Btrfs scrub status check
