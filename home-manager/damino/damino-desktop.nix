@@ -16,7 +16,7 @@
 	          {
 	            criteria = "Xiaomi Corporation Mi Monitor 5745300000795";
 	      	    status = "enable";
-	      	    mode = "2560x1440@143.999Hz";
+	      	    mode = "2560x1440@180Hz";
 	      	    position = "0,0";
 	      	    adaptiveSync = true;
 	      	  }
@@ -35,9 +35,10 @@
 	      	  }
 	        ];
 	        exec = [
-	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
+	          "${pkgs.sway}/bin/swaymsg output DP-2 render_bit_depth 10"
+	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-2 --primary"
 	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
-	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-10"
+	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-8"
 	        ];
 	      };
 	    }
