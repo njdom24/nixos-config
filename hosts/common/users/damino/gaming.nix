@@ -88,6 +88,7 @@
           #"--expose-wayland" # Seems to break games when HDR enabled
           "--hdr-enabled"
           #"--hdr-debug-force-output"
+          "--hdr-sdr-content-nits 500"
         ];
       };
     };
