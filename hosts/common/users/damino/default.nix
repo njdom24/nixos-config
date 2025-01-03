@@ -292,10 +292,10 @@ in
  	udev = {
  	  extraRules = ''
  	    #ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="AMDGPU DM*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
- 	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="DPMST", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
- 	    ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="NVIDIA i2c adapter*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
- 	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chgrp video /sys/class/backlight/%k/brightness"
- 	    ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chmod a+w /sys/class/backlight/%k/brightness"
+ 	    #ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="DPMST", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
+ 	    #ACTION=="add", SUBSYSTEM=="i2c-dev", ATTR{name}=="NVIDIA i2c adapter*", TAG+="ddcci", TAG+="systemd", ENV{SYSTEMD_WANTS}+="ddcci@$kernel.service"
+ 	    #ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chgrp video /sys/class/backlight/%k/brightness"
+ 	    #ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="ddcci*", RUN+="${pkgs.coreutils-full}/bin/chmod a+w /sys/class/backlight/%k/brightness"
  	  '';
  	  packages = [
  	    (lib.optionals config.services.sunshine.enable (pkgs.writeTextFile {
@@ -321,8 +321,8 @@ in
   };
 
   boot = {
-  	kernelModules = lib.mkAfter [ "ecryptfs" "ddcci_backlight" ];
-  	extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+  	kernelModules = lib.mkAfter [ "ecryptfs" ]; # "ddcci_backlight"
+  	#extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   	kernel.sysctl = {
   	  "kernel.sysrq" = 1;
   	  "kernel.panic" = 30;
