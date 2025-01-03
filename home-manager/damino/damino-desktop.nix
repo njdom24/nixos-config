@@ -76,6 +76,6 @@
 	  	}
 	  ];
 
-	  mako.output = "DP-2";	
+	  mako.output = "HDMI-A-1";
 	};
 }
