@@ -1,8 +1,8 @@
 { pkgs, lib, ... }:
 let
   # List of devices for Btrfs scrub and SMART monitoring
-  btrfsDevices = [ "/" "/mnt/emet" ];  # Adjust paths as needed
-  smartDevices = [ "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0" ];  # Adjust device names as needed
+  btrfsDevices = [ "/" "/mnt/emet" ]; # Adjust paths as needed
+  smartDevices = [ "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0" "/dev/disk/by-uuid/7176ddba-0ff9-4127-bd55-cbfa3c8be768" ];  # Adjust device names as needed
 
   # Create a script for the Btrfs scrub status check
   smartStatusScript = pkgs.writeShellScript "smart-mon-status" ''
@@ -11,7 +11,7 @@ let
 
     sleep 5
     while true; do
-      smart_output=$(${pkgs.smartmontools}/bin/smartctl -a $device)
+      smart_output=$(${pkgs.smartmontools}/bin/smartctl -d sat -a $device)
       if ! echo "$smart_output" | grep -q "test remaining"; then
         break
       fi
@@ -29,7 +29,10 @@ in
   services.smartd = {
     enable = true;
     devices = lib.concatMap (device: [
-      { device = device; }
+      {
+        device = device;
+        options = "-d sat";
+      }
     ]) smartDevices;
   };
 #echo -e "Content-Type: text/plain\r\nSubject: Test\r\n\r\nHello World" | tee >(sudo sendmail dom32400@gmail.com)
@@ -54,8 +57,8 @@ in
           after = [ "network.target" ];
           serviceConfig = {
             Type = "forking";
-            ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -t long ${device} && ${smartStatusScript} ${device} &'";
-            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -X ${device} && status=$(${pkgs.smartmontools}/bin/smartctl -a ${device}); echo \"$status\" && echo -e \"Content-Type: text/plain\\r\\nSubject: SMART Status: ${device}\\r\\n\\r\\n$status\" | ${pkgs.msmtp}/bin/sendmail dom32400@gmail.com'";
+            ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -d sat -t long ${device} && ${smartStatusScript} ${device} &'";
+            ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.smartmontools}/bin/smartctl -d sat -X ${device} && status=$(${pkgs.smartmontools}/bin/smartctl -d sat -a ${device}); echo \"$status\" && echo -e \"Content-Type: text/plain\\r\\nSubject: SMART Status: ${device}\\r\\n\\r\\n$status\" | ${pkgs.msmtp}/bin/sendmail dom32400@gmail.com'";
           };
           restartIfChanged = true;
         };

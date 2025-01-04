@@ -46,6 +46,12 @@ in
       options = [ "nosuid" "nodev" "nofail" ];
     };
 
+  fileSystems."/mnt/emet" =
+    { device = "/dev/disk/by-uuid/7176ddba-0ff9-4127-bd55-cbfa3c8be768";
+      fsType = "btrfs";
+      options = [ "nosuid" "nodev" "nofail" ];
+    };
+
   swapDevices =
     [ { device = "/dev/disk/by-uuid/704fc96f-3966-4b93-8ddc-2812321743fb"; }
     ];
