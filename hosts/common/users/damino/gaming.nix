@@ -72,8 +72,8 @@
         env = {
           #WLR_RENDERER = "vulkan";
           STEAM_MULTIPLE_XWAYLANDS = "1";
-          MANGOHUD = "0";
-          MANGOHUD_CONFIG = "read_cfg,no_display";
+          #MANGOHUD = "0";
+          #MANGOHUD_CONFIG = "read_cfg,no_display";
           ENABLE_GAMESCOPE_WSI = "1";
           ENABLE_HDR_WSI = "1";
           #STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
@@ -83,7 +83,7 @@
         args = [
           "-f"
           "--xwayland-count 2"
-          "--mangoapp"
+          #"--mangoapp"
           "--adaptive-sync"
           #"--expose-wayland" # Seems to break games when HDR enabled
           "--hdr-enabled"
