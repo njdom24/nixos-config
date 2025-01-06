@@ -47,7 +47,7 @@ in
     };
 
   fileSystems."/mnt/emet" =
-    { device = "/dev/disk/by-uuid/7176ddba-0ff9-4127-bd55-cbfa3c8be768";
+    { device = "/dev/disk/by-uuid/07f94a08-6b3f-4a30-ab62-f100af1b706b";
       fsType = "btrfs";
       options = [ "nosuid" "nodev" "nofail" ];
     };
