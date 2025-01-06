@@ -2,7 +2,7 @@
 let
   # List of devices for Btrfs scrub and SMART monitoring
   btrfsDevices = [ "/" "/mnt/emet" ]; # Adjust paths as needed
-  smartDevices = [ "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0" "/dev/disk/by-uuid/7176ddba-0ff9-4127-bd55-cbfa3c8be768" ];  # Adjust device names as needed
+  smartDevices = [ "/dev/disk/by-id/usb-WD_My_Passport_2626_575839324435334152364A43-0:0" "/dev/disk/by-uuid/07f94a08-6b3f-4a30-ab62-f100af1b706b" ];  # Adjust device names as needed
 
   # Create a script for the Btrfs scrub status check
   smartStatusScript = pkgs.writeShellScript "smart-mon-status" ''
