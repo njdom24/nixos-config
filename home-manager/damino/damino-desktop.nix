@@ -5,8 +5,6 @@
 	  rofi.yoffset = 24;
 	};
 
-	wayland.windowManager.sway.extraOptions = [ "--unsupported-gpu "];
-
 	services = {
 	  kanshi.settings = [
 	    {
@@ -35,10 +33,10 @@
 	      	  }
 	        ];
 	        exec = [
-	          "${pkgs.sway}/bin/swaymsg output DP-2 render_bit_depth 10"
-	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-2 --primary"
+	          "${pkgs.sway}/bin/swaymsg output '*' render_bit_depth 10"
+	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
 	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
-	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-8"
+	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-10"
 	        ];
 	      };
 	    }
@@ -76,6 +74,6 @@
 	  	}
 	  ];
 
-	  mako.output = "HDMI-A-1";
+	  mako.output = "DP-2";
 	};
 }
