@@ -16,10 +16,10 @@ in
     ];
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-  boot.initrd.kernelModules = [ "amdgpu" "i915" "vfio_pci" "vfio" "vfio_iommu_type1" ];
+  boot.initrd.kernelModules = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "amd_iommu=on" "pci_acs_override=downstream,multifunction" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
+  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
   # https://gitlab.freedesktop.org/drm/amd/-/issues/3149
   boot.kernelPackages = pkgs.linuxPackages_latest;
   #boot.kernelPatches = [ {
