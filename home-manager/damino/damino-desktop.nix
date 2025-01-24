@@ -33,7 +33,7 @@
 	      	  }
 	        ];
 	        exec = [
-	          "${pkgs.sway}/bin/swaymsg output '*' render_bit_depth 10"
+	          "sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'"
 	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
 	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
 	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-10"

@@ -93,7 +93,7 @@
 	  	  	  }
 	  	  	];
 	  	  	exec = [
-              "${pkgs.sway}/bin/swaymsg output '*' scale_filter smart"
+              "sh -c '${pkgs.sway}/bin/swaymsg output \"*\" scale_filter smart'"
 	  	  	  "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_00_1f.3 pro-audio"
 	  	  	];
 	  	  };
@@ -122,8 +122,7 @@
 	  	  	  }
 	  	  	];
 	  	  	exec = [
-              "${pkgs.sway}/bin/swaymsg output '*' scale_filter smart"
-              "${pkgs.sway}/bin/swaymsg output '*' adaptive_sync on"
+              "sh -c '${pkgs.sway}/bin/swaymsg output \"*\" scale_filter smart'"
 	  	  	  "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_00_1f.3 pro-audio"
 	  	  	];
 	  	  };
@@ -148,8 +147,7 @@
 	  	  	  }
 	  	  	];
 	  	  	exec = [
-              "${pkgs.sway}/bin/swaymsg output '*' scale_filter smart"
-              "${pkgs.sway}/bin/swaymsg output '*' adaptive_sync on"
+	  	  	  "sh -c '${pkgs.sway}/bin/swaymsg output \"*\" scale_filter smart'"
 	  	  	  "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_00_1f.3 pro-audio"
 	  	  	];
 	  	  };
@@ -177,8 +175,7 @@
 	  	  	  }
 	  	  	];
 	  	  	exec = [
-              "${pkgs.sway}/bin/swaymsg output '*' scale_filter smart"
-              "${pkgs.sway}/bin/swaymsg output '*' adaptive_sync on"
+              "sh -c '${pkgs.sway}/bin/swaymsg output \"*\" scale_filter smart'"
 	  	  	  "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_00_1f.3 pro-audio"
 	  	  	];
 	  	  };
