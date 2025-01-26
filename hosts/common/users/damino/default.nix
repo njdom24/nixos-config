@@ -344,6 +344,11 @@ in
     };
     services."nix-daemon".serviceConfig.Slice = "nix-daemon.slice";
 
+    services."systemd-journald".serviceConfig = {
+      TimeoutStartSec = "10s";
+      TimeoutStopSec = "10s";
+    };
+
     # If a kernel-level OOM event does occur anyway,
     # strongly prefer killing nix-daemon child processes
     services."nix-daemon".serviceConfig.OOMScoreAdjust = 1000;
