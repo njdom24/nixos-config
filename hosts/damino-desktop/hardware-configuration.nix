@@ -47,13 +47,13 @@ in
   fileSystems."/mnt/WD_BLACK" =
     { device = "dev/disk/by-uuid/38c2bd3d-7f9e-47a5-8385-7b970e6ac656";
       fsType = "btrfs";
-      options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
+      options = [ "noauto" "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
 
   fileSystems."/mnt/WD_BLACK2" =
     { device = "dev/disk/by-uuid/417a6a41-7168-4ad1-b945-6cd820914983";
       fsType = "btrfs";
-      options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
+      options = [ "noauto" "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
 
   fileSystems."/mnt/s860" =
