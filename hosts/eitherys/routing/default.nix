@@ -33,7 +33,7 @@
 		"daminop.duckdns.org" = {
           forceSSL = true;  # Enforce HTTPS redirection
           enableACME = true; # Auto-renew cert
-          acmeRoot = null; # Commenting this fixed a temp issue, unsure why...
+          #acmeRoot = null; # Commenting this fixed a temp issue, unsure why...
           listen = [
             { addr = "0.0.0.0"; port = 80; }
             { addr = "[::]"; port = 80; }
