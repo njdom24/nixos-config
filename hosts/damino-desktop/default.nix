@@ -9,6 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ../common/users/damino
+      ./openrgb
     ];
 
   # Bootloader.
@@ -117,10 +118,6 @@
         ANNOYDELAY 60
         BEEPSTATE T
       '';
-    };
-    hardware.openrgb = {
-      enable = true;
-      package = pkgs.openrgb-with-all-plugins;
     };
     sunshine = {
       enable = true;
