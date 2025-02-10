@@ -31,26 +31,24 @@
 
   systemd.services.openrgb-post-resume = {
     description = "Reload OpenRGB profile after resume";
-    wantedBy = [ "default.target" "post-resume.target" "suspend.target" ];
+    wantedBy = [ "post-resume.target" "suspend.target" ];
     after = [ "openrgb.service" "suspend.target" ];
     requires = [ "openrgb.service" ];
     partOf = [ "openrgb.service" ];
     serviceConfig = {
       Type = "oneshot";
       TimeoutStartSec = "10s";
-      ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 3 && ${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}'";
+      ExecStart = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
     };
   };
 
   systemd.services.openrgb = {
-    requires = [ "openrgb-pre-suspend.service" ]; # Ensure it runs before shutting down
-    wantedBy = [ "poweroff.target" "reboot.target" ];
-    before = [ "shutdown.target" "poweroff.target" "reboot.target" ]; # Guarantees the pre-shutdown service runs first
+    after = [ "network.target" ];
     serviceConfig = {
       TimeoutStopSec = "20s";
       ExecStartPost = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
       ExecStop = "${pkgs.openrgb}/bin/openrgb --mode static --color 000000";
     };
   };
-  
+
 }
