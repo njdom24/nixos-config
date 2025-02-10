@@ -17,11 +17,14 @@
   };
 
   systemd.services.openrgb-pre-suspend = {
-    description = "Set OpenRGB to static black before suspend or shutdown";
-    wantedBy = [ "poweroff.target" "halt.target" "reboot.target" "sleep.target" "suspend.target" ];
-    before = [ "shutdown.target" "sleep.target" "suspend.target" ];
+    description = "Set OpenRGB to static black before suspend";
+    wantedBy = [ "halt.target" "sleep.target" "suspend.target" ];
+    before = [ "sleep.target" "suspend.target" ];
+    partOf = [ "openrgb.service" ];
+    requires = [ "openrgb.service" ];
     serviceConfig = {
       Type = "oneshot";
+      TimeoutStartSec = "20s";
       ExecStart = "${pkgs.openrgb}/bin/openrgb --mode static --color 000000";
     };
   };
@@ -29,10 +32,25 @@
   systemd.services.openrgb-post-resume = {
     description = "Reload OpenRGB profile after resume";
     wantedBy = [ "default.target" "post-resume.target" "suspend.target" ];
-    after = [ "suspend.target" ];
+    after = [ "openrgb.service" "suspend.target" ];
+    requires = [ "openrgb.service" ];
+    partOf = [ "openrgb.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
+      TimeoutStartSec = "10s";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 3 && ${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}'";
     };
   };
+
+  systemd.services.openrgb = {
+    requires = [ "openrgb-pre-suspend.service" ]; # Ensure it runs before shutting down
+    wantedBy = [ "poweroff.target" "reboot.target" ];
+    before = [ "shutdown.target" "poweroff.target" "reboot.target" ]; # Guarantees the pre-shutdown service runs first
+    serviceConfig = {
+      TimeoutStopSec = "20s";
+      ExecStartPost = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
+      ExecStop = "${pkgs.openrgb}/bin/openrgb --mode static --color 000000";
+    };
+  };
+  
 }
