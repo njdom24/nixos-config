@@ -78,8 +78,9 @@ in
 
     gnome.gnome-keyring.enable = true;
     gvfs.enable = true;
-
     fstrim.enable = true;
+
+    auto-cpufreq.enable = true;
 
     apcupsd = {
       enable = true;
