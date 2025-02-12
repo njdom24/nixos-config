@@ -9,6 +9,8 @@
     [
     ];
 
+  boot.kernelParams = [ "acpi_enforce_resources=lax"]; # Fix Gigabyte RAM (ref: https://gitlab.com/CalcProgrammer1/OpenRGB/-/blob/master/Documentation/SMBusAccess.md?ref_type=heads)
+
   services = {
     hardware.openrgb = {
       enable = true;
