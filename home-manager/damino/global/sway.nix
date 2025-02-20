@@ -243,6 +243,7 @@
 		    e && !/Closing client connection/ {exit 1}
 		    ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/wayvnc_login); then
 		      export REMOTE_ENABLED=1
+		      export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
 		    else
 		      export REMOTE_ENABLED=0
 		    fi
