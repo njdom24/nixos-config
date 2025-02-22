@@ -17,6 +17,7 @@
   };
 
   services = {
+    fail2ban.enable = true;
     ddclient = {
       enable = true;
       usev4 = "web, web=wtfismyip.com/text";
