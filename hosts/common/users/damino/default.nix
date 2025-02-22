@@ -288,6 +288,7 @@ in
   	  	PasswordAuthentication = true;
   	  };
  	};
+ 	fail2ban.enable = true;
 
  	udev = {
  	  extraRules = ''
