@@ -66,6 +66,10 @@
   	pulseaudio.enable = false;
   };
   security.rtkit.enable = true;
+
+  environment.sessionVariables = {
+    RADV_DEBUG = "nofastclears"; # Fix for 5700 XT (https://gitlab.freedesktop.org/mesa/mesa/-/issues/6113)
+  };
   
   services = {
     udev = {
