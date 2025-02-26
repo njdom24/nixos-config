@@ -110,9 +110,6 @@
       #media-session.enable = true;
     };
 
-    power-profiles-daemon.enable = false;
-    auto-cpufreq.enable = true;
-
     apcupsd = {
       enable = true;
       configText = ''

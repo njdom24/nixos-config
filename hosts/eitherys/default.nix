@@ -66,6 +66,8 @@ in
   };
 
   services = {
+    power-profiles-daemon.enable = true;
+
     resolved.enable = true;
 
     openssh = {
@@ -79,8 +81,6 @@ in
     gnome.gnome-keyring.enable = true;
     gvfs.enable = true;
     fstrim.enable = true;
-
-    auto-cpufreq.enable = true;
 
     apcupsd = {
       enable = true;
@@ -97,6 +97,8 @@ in
       '';
     };
   };
+
+  systemd.services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];
 
   hardware = {
   	graphics.extraPackages = with pkgs; [ vpl-gpu-rt ];

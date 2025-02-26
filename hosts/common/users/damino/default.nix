@@ -196,6 +196,8 @@ in
   };
 
   services = {
+    power-profiles-daemon.enable = true;
+
     displayManager.sddm = {
   	  enable = true;
   	  theme = "Elegant";
@@ -336,6 +338,7 @@ in
 
   # OOM configuration: https://discourse.nixos.org/t/nix-build-ate-my-ram/35752
   systemd = {
+    services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];
     watchdog.runtimeTime = "30s";
     # Create a separate slice for nix-daemon that is
     # memory-managed by the userspace systemd-oomd killer
