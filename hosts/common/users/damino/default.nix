@@ -197,6 +197,7 @@ in
 
   services = {
     power-profiles-daemon.enable = true;
+    fwupd.enable = true;
 
     displayManager.sddm = {
   	  enable = true;
@@ -409,6 +410,7 @@ in
   	  distrobox
   	  waypipe
   	  ddcutil
+  	  gnome-firmware
   	] ++ gst_plugins;
 
   	variables = {
