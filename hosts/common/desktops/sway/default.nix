@@ -30,7 +30,6 @@
     kanshi
     jq
     vulkan-validation-layers # for WLR_RENDERER=vulkan
-    unstable.xwaylandvideobridge
   ];
 
   # xdg-desktop-portal works by exposing a series of D-Bus interfaces

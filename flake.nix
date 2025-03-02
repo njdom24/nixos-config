@@ -73,6 +73,15 @@
         ];
       };
 
+      damino-secondary = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          # > Our main nixos configuration file <
+          ./hosts/damino-desktop/secondary.nix
+          hardware.nixosModules.common-cpu-amd
+        ];
+      };
+
       damino-framework = nixpkgs.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
@@ -96,6 +105,17 @@
     # Available through 'home-manager --flake .#your-username@your-hostname'
     homeConfigurations = {
       "damino@damino-desktop" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+        extraSpecialArgs = {
+          inherit inputs outputs;
+        };
+        modules = [
+          # > Our main home-manager configuration file <
+          ./home-manager/damino/damino-desktop.nix
+        ];
+      };
+
+      "damino@damino-secondary" = home-manager.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
         extraSpecialArgs = {
           inherit inputs outputs;
