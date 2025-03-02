@@ -35,4 +35,8 @@
         usePersistenced = false;                                                                                
     };
   };
+
+  environment.systemPackages = with pkgs; [
+  	nvidia-vaapi-driver
+  ];
 }
