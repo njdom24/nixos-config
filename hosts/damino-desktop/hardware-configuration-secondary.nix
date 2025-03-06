@@ -16,7 +16,7 @@ in
     ];
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
-  #boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.initrd.kernelModules = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
   boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
