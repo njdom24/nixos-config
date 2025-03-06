@@ -5,7 +5,6 @@
 { inputs, outputs, config, lib, pkgs, ... }: {
   imports =
     [
-      inputs.chaotic.nixosModules.default
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
@@ -13,9 +12,6 @@
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
   ];
-
-  # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
-  #chaotic.mesa-git.enable = true;
 
   programs = {
     steam = {

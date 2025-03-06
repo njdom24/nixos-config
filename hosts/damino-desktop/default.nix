@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, inputs, lib, ... }:
 
 {
   imports =
@@ -10,13 +10,17 @@
       ./hardware-configuration.nix
       ./common.nix
       ./openrgb
+      inputs.chaotic.nixosModules.default
     ];
 
   networking.hostName = "damino-desktop"; # Define your hostname.
   networking.interfaces.enp10s0.wakeOnLan.enable = true;
 
+  # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
+  chaotic.mesa-git.enable = true;
+  hardware.firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
+
   environment.sessionVariables = {
-    RADV_DEBUG = "nofastclears"; # Fix for 5700 XT (https://gitlab.freedesktop.org/mesa/mesa/-/issues/6113)
   };
   
   services = {
