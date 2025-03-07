@@ -22,7 +22,7 @@
 	      	    criteria = "AOC 24G1WG4 0x00042EBB";
 	      	    status = "enable";
 	      	    mode = "1920x1080@144.001";
-	      	    position = "2560,360";
+	      	    position = "2560,250";
 	      	    scale = 1.0;
 	      	    adaptiveSync = false;
 	      	  }
@@ -34,9 +34,9 @@
 	        ];
 	        exec = [
 	          #"sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'" # Breaks xdg-desktop-portal-wlr/pipewire capture
-	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
-	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
-	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-10"
+	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-3 --primary"
+	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
+	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-8"
 	        ];
 	      };
 	    }
@@ -101,6 +101,6 @@
 	  	}
 	  ];
 
-	  mako.output = "DP-2";
+	  mako.output = "HDMI-A-1";
 	};
 }
