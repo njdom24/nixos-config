@@ -18,9 +18,20 @@
 
   # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
   chaotic.mesa-git.enable = true;
-  hardware.firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
+  hardware = {
+    firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
+    graphics = {
+      extraPackages = with pkgs; [
+        amdvlk
+      ];
+      extraPackages32 = with pkgs; [
+        driversi686Linux.amdvlk
+      ];
+    };
+  };
 
   environment.sessionVariables = {
+    AMD_VULKAN_ICD = "RADV";
   };
   
   services = {
