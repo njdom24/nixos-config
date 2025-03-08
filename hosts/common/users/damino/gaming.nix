@@ -208,11 +208,9 @@
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
-	  (retroarch.override {
-	    cores = with unstable.libretro; [
-	      mgba
-	    ];
-  	  })
+      (retroarch.withCores (cores: with cores; [
+        mgba
+      ]))
   	  #wineWowPackages.stagingFull
   	  wineWowPackages.waylandFull
   	  winetricks

@@ -23,6 +23,7 @@ in
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
+    outputs.overlays.stable-packages
   	outputs.overlays.unstable-packages
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
@@ -60,7 +61,7 @@ in
       firefox
       vdhcoapp
       (chromium.override { enableWideVine = true; })
-      kate
+      kdePackages.kate
       kitty
       ffmpeg-full
       nautilus
@@ -125,8 +126,7 @@ in
   	noto-fonts
   	noto-fonts-cjk-sans
   	noto-fonts-emoji
-  	nerdfonts
-  ];
+  ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
 
   qt = {
   	enable = true;

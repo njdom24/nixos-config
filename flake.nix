@@ -3,16 +3,19 @@
 
   inputs = {
     # Nixpkgs
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
     # You can access packages and modules from different nixpkgs revs
     # at the same time. Here is an working example:
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     # Also see the 'unstable-packages' overlay at 'overlays/default.nix'.
 	nixpkgs-legacy.url = "github:nixos/nixpkgs/nixos-24.05";
 
     # Home manager
-    home-manager.url = "github:nix-community/home-manager/release-24.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager-stable.url = "github:nix-community/home-manager/release-24.11";
+    home-manager-stable.inputs.nixpkgs.follows = "nixpkgs-stable";
+
+    home-manager-unstable.url = "github:nix-community/home-manager";
+    home-manager-unstable.inputs.nixpkgs.follows = "nixpkgs";
 
     # TODO: Add any other flake you might need
     hardware.url = "github:nixos/nixos-hardware";
@@ -26,8 +29,10 @@
 
   outputs = {
     self,
+    nixpkgs-stable,
     nixpkgs,
     home-manager,
+    home-manager-stable,
     hardware,
     chaotic,
     ...
@@ -91,7 +96,7 @@
         ];
       };
 
-      eitherys = nixpkgs.lib.nixosSystem {
+      eitherys = nixpkgs-stable.lib.nixosSystem {
         specialArgs = {inherit inputs outputs;};
         modules = [
           # > Our main nixos configuration file <
@@ -137,8 +142,8 @@
         ];
       };
 
-      "elpis@eitherys" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+      "elpis@eitherys" = home-manager-stable.lib.homeManagerConfiguration {
+        pkgs = nixpkgs-stable.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
         extraSpecialArgs = {
           inherit inputs outputs;
         };
