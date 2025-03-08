@@ -270,7 +270,7 @@ in
               exec ${pkgs.bash}/bin/bash -c "${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; sleep 10 && rm -f /tmp/wayvnc_login"
             '';
           in
-          "/usr/bin/env WLR_BACKENDS=drm,headless,libinput ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
+          "/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=vulkan ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
   	  };
 
   	  # https://github.com/NixOS/nixpkgs/issues/292761
