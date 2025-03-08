@@ -18,6 +18,12 @@
     RADV_DEBUG = "nofastclears"; # Fix for 5700 XT (https://gitlab.freedesktop.org/mesa/mesa/-/issues/6113)
   };
 
+  programs.steam.gamescopeSession.args = [
+  	"-H 1440"
+  	"-r 120"
+  	"-O HDMI-A-1"
+  ];
+
   environment.systemPackages = with pkgs; [
   ];
 }

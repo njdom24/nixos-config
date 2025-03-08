@@ -77,7 +77,7 @@
           ENABLE_GAMESCOPE_WSI = "1";
           ENABLE_HDR_WSI = "1";
           #STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
-          DXVK_HDR = "1"; # Works with DXVK, confirmed required as of Proton 9.0-3
+          DXVK_HDR = "1"; # Works with VKD3D-Proton, confirmed required as of Proton 9.0-3
           PROTON_ENABLE_AMD_AGS = "1";
         };
         args = [
@@ -89,6 +89,9 @@
           "--hdr-enabled"
           #"--hdr-debug-force-output"
           "--hdr-sdr-content-nits 500"
+          "--hdr-itm-enable"
+          "--hdr-itm-target-nits=700"
+          "--hdr-itm-sdr-nits=300"
         ];
       };
     };

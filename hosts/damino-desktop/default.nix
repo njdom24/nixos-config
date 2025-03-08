@@ -30,6 +30,12 @@
     };
   };
 
+  programs.steam.gamescopeSession.args = [
+  	"-H 1440"
+  	"-r 120"
+  	"-O DP-3"
+  ];
+
   environment.sessionVariables = {
     AMD_VULKAN_ICD = "RADV";
   };

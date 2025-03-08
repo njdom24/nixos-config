@@ -127,12 +127,6 @@
     };
   };
 
-  programs.steam.gamescopeSession.args = [
-  	"-H 1440"
-  	"-r 120"
-  	"-O HDMI-A-1"
-  ];
-
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
