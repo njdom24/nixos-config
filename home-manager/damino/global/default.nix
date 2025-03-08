@@ -35,6 +35,7 @@
       # Add overlays your own flake exports (from overlays and pkgs dir):
       outputs.overlays.additions
       outputs.overlays.modifications
+      outputs.overlays.stable-packages
       outputs.overlays.unstable-packages
       outputs.overlays.legacy-packages
 
@@ -87,7 +88,7 @@
       nwg-look
       nwg-displays
       fluent-gtk-theme
-      fluent-icon-theme
+      stable.fluent-icon-theme
       kora-icon-theme
       flavours
       gradience
