@@ -33,7 +33,7 @@
   programs.steam.gamescopeSession.args = [
   	"-H 1440"
   	"-r 120"
-  	"-O DP-3"
+  	"-O HDMI-A-1"
   ];
 
   environment.sessionVariables = {
