@@ -21,10 +21,10 @@
   hardware = {
     firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
     graphics = {
-      extraPackages = with pkgs; [
+      extraPackages = with pkgs.unstable; [
         amdvlk
       ];
-      extraPackages32 = with pkgs; [
+      extraPackages32 = with pkgs.unstable; [
         driversi686Linux.amdvlk
       ];
     };
