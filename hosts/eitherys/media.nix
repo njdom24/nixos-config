@@ -109,4 +109,19 @@ in
       logDir = "/srv/media/jellyfin/log";
     };
   };
+
+  # Create /tmp/transcodes directory before Jellyfin starts as the jellyfin user
+  systemd.services.jellyfin-transcodes-directory = {
+    description = "Create temporary transcode directory for Jellyfin";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "jellyfin.service" ];
+
+    serviceConfig = {
+      User = config.services.jellyfin.user;
+      Group = config.services.jellyfin.group;
+      ExecStart = ''
+        ${pkgs.coreutils}/bin/mkdir -p /tmp/transcodes
+      '';
+    };
+  };
 }
