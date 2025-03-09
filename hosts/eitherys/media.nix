@@ -2,7 +2,7 @@
 let
   # https://github.com/NixOS/nixpkgs/issues/360592#issuecomment-2513490613
   # Workaround for Sonarr breakage in 24.05. Remove ASAP 
-  insecure-unstable = import inputs.nixpkgs-unstable {
+  insecure-unstable = import inputs.nixpkgs {
     system = pkgs.system;
     config = {
       allowUnfree = true;
