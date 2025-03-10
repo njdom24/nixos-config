@@ -1,31 +1,17 @@
-diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-index 075429bea427..d39fc96eba7c 100644
---- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-+++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
-@@ -11584,19 +11584,13 @@ void amdgpu_dm_update_freesync_caps(struct drm_connector *connector,
- 			}
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c	2025-03-09 15:08:32.126635922 -0400
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c	2025-03-09 18:05:52.736241685 -0400
+@@ -12444,6 +12444,14 @@
  		}
- 	} else if (edid && sink->sink_signal == SIGNAL_TYPE_HDMI_TYPE_A) {
--		i = parse_hdmi_amd_vsdb(amdgpu_dm_connector, edid, &vsdb_info);
--		if (i >= 0 && vsdb_info.freesync_supported) {
--			timing  = &edid->detailed_timings[i];
--			data    = &timing->data.other_data;
--
--			amdgpu_dm_connector->min_vfreq = vsdb_info.min_refresh_rate_hz;
--			amdgpu_dm_connector->max_vfreq = vsdb_info.max_refresh_rate_hz;
--			if (amdgpu_dm_connector->max_vfreq - amdgpu_dm_connector->min_vfreq > 10)
--				freesync_capable = true;
-+		amdgpu_dm_connector->min_vfreq = 48;
-+		amdgpu_dm_connector->max_vfreq = 120;
-+		if (amdgpu_dm_connector->max_vfreq - amdgpu_dm_connector->min_vfreq > 10)
-+			freesync_capable = true;
- 
--			connector->display_info.monitor_range.min_vfreq = vsdb_info.min_refresh_rate_hz;
--			connector->display_info.monitor_range.max_vfreq = vsdb_info.max_refresh_rate_hz;
--		}
-+		connector->display_info.monitor_range.min_vfreq = 48;
-+		connector->display_info.monitor_range.max_vfreq = 120;
  	}
  
++	if(!freesync_capable) {
++		freesync_capable = true;
++		amdgpu_dm_connector->min_vfreq = 48;
++		amdgpu_dm_connector->max_vfreq = 120;
++		connector->display_info.monitor_range.min_vfreq = 48;
++		connector->display_info.monitor_range.max_vfreq = 120;
++	}
++
  update:
-
+ 	if (dm_con_state)
+ 		dm_con_state->freesync_capable = freesync_capable;
