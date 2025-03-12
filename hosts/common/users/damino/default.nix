@@ -133,6 +133,15 @@ in
   	platformTheme = "qt5ct";
   };
 
+  # Enable networking
+  networking = {
+    networkmanager = {
+      enable = true;
+      # dns = "systemd-resolved";
+      wifi.backend = "iwd";
+    };
+  };
+
   programs = {
 	dconf.enable = true;
 	#ssh.startAgent = true;
@@ -396,6 +405,7 @@ in
   	  xdotool
   	  ecryptfs
   	  ethtool
+  	  networkmanagerapplet
   	  gtk3
   	  pcmanfm
   	  elegant-sddm

@@ -68,6 +68,8 @@
 
 		  exec_always timeout 10 kanshi
 		  exec mako
+		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
+
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
 		  exec gtk-launch vesktop.desktop

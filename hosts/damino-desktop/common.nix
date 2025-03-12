@@ -14,12 +14,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Enable networking
-  networking = {
-  	dhcpcd.enable = true;
-  	wireless.iwd.enable = false;
-  };
-
   # Set your time zone.
   time = {
   	timeZone = "America/New_York";
@@ -45,8 +39,6 @@
   # Enable the KDE Plasma Desktop Environment.
   #services.xserver.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
-
-  services.resolved.enable = true;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;

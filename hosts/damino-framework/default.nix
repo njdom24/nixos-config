@@ -22,12 +22,6 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable networking
-  networking = {
-  	dhcpcd.enable = true;
-  	wireless.iwd.enable = true;
-  };
-
   hardware = {
     graphics = {
       extraPackages = with pkgs; [
@@ -88,8 +82,6 @@
     #xserver.displayManager.sddm.enable = true;
     desktopManager.plasma6.enable = true;
     #xserver.desktopManager.gnome.enable = true;
-
-    resolved.enable = true;
 
     # Enable CUPS to print documents.
     printing.enable = true;
