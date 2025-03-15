@@ -75,7 +75,6 @@ in
       zsh
       oh-my-zsh
       mission-center
-      iwgtk
       fd
       btop
       killall
