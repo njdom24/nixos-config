@@ -39,8 +39,10 @@ in
 
   # Enable networking
   networking = {
-  	dhcpcd.enable = true;
-  	wireless.iwd.enable = false;
+  	networkmanager = {
+  	  enable = true;
+  	  wifi.backend = "iwd";
+  	};
   	interfaces.enp1s0.wakeOnLan.enable = true;
   };
 
@@ -67,8 +69,6 @@ in
 
   services = {
     power-profiles-daemon.enable = true;
-
-    resolved.enable = true;
 
     openssh = {
       enable = true;
