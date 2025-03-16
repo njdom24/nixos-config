@@ -17,7 +17,10 @@
   networking.interfaces.enp10s0.wakeOnLan.enable = true;
 
   # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
-  chaotic.mesa-git.enable = true;
+  chaotic.mesa-git = {
+    enable = true;
+    extraPackages = [ config.hardware.amdgpu.amdvlk.package ];
+  };
   hardware = {
     firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
     # https://github.com/NixOS/nixpkgs/pull/279789#issuecomment-2148560802
@@ -32,14 +35,20 @@
       ];
     };
 
-    graphics = {
-      extraPackages = with pkgs.unstable; [
-        amdvlk
-      ];
-      extraPackages32 = with pkgs.unstable; [
-        driversi686Linux.amdvlk
-      ];
+    amdgpu.amdvlk = {
+      enable = true;
+      package = pkgs.unstable.amdvlk;
+      support32Bit = {
+        enable = true;
+        package = pkgs.unstable.driversi686Linux.amdvlk;
+      };
     };
+  };
+
+  environment.sessionVariables = {
+    AMD_VULKAN_ICD = "RADV";
+    #DISABLE_LAYER_AMD_SWITCHABLE_GRAPHICS_1 = "1";
+    #VK_ICD_FILENAMES = "${pkgs.amdvlk}/share/vulkan/icd.d/amd_icd64.json:${pkgs.driversi686Linux.amdvlk}/share/vulkan/icd.d/amd_icd32.json";
   };
 
   programs.steam.gamescopeSession.args = [
@@ -47,10 +56,6 @@
   	"-r 120"
   	"-O HDMI-A-1"
   ];
-
-  environment.sessionVariables = {
-    AMD_VULKAN_ICD = "RADV";
-  };
   
   services = {
     apcupsd = {
