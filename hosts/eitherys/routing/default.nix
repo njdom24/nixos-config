@@ -20,8 +20,8 @@
     fail2ban.enable = true;
     ddclient = {
       enable = true;
-      usev4 = "web, web=wtfismyip.com/text";
-      usev6 = config.services.ddclient.usev4;
+      usev4 = "webv4, webv4=wtfismyip.com/text"; # Alt: ipv4.icanhazip.com
+      usev6 = "webv6, webv6=wtfismyip.com/text"; # Alt: ipv6.icanhazip.com
       protocol = "duckdns";
       domains = [ "daminop" ];
       passwordFile = "/var/secrets/duckdns";
