@@ -37,7 +37,16 @@
 
     amdgpu.amdvlk = {
       enable = true;
-      package = pkgs.unstable.amdvlk;
+      #package = pkgs.unstable.amdvlk;
+      package = pkgs.amdvlk.overrideAttrs (oldAttrs: rec {
+        version = "2025.Q1.3";
+        src = pkgs.fetchRepoProject {
+          name = "amdvlk-src";
+          manifest = "https://github.com/GPUOpen-Drivers/AMDVLK.git";
+          rev = "refs/tags/v-${version}";
+          hash = "sha256-ZXou5g0emeK++NyV/hQllZAdZAMEY9TYs9c+umFdcfo=";
+        };
+      });
       support32Bit = {
         enable = true;
         package = pkgs.unstable.driversi686Linux.amdvlk;
