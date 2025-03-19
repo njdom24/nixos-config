@@ -295,4 +295,10 @@ text-color=#${config.colorScheme.palette.base08}
 '';
 	  };
 	};
+
+  home = {
+    packages = with pkgs; [
+      wl-gammarelay-rs
+    ];
+  };
 }
