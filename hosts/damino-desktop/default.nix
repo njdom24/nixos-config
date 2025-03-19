@@ -19,7 +19,6 @@
   # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
   chaotic.mesa-git = {
     enable = true;
-    extraPackages = [ config.hardware.amdgpu.amdvlk.package ];
   };
   hardware = {
     firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
@@ -34,30 +33,9 @@
         '')
       ];
     };
-
-    amdgpu.amdvlk = {
-      enable = true;
-      #package = pkgs.unstable.amdvlk;
-      package = pkgs.amdvlk.overrideAttrs (oldAttrs: rec {
-        version = "2025.Q1.3";
-        src = pkgs.fetchRepoProject {
-          name = "amdvlk-src";
-          manifest = "https://github.com/GPUOpen-Drivers/AMDVLK.git";
-          rev = "refs/tags/v-${version}";
-          hash = "sha256-ZXou5g0emeK++NyV/hQllZAdZAMEY9TYs9c+umFdcfo=";
-        };
-      });
-      support32Bit = {
-        enable = true;
-        package = pkgs.unstable.driversi686Linux.amdvlk;
-      };
-    };
   };
 
   environment.sessionVariables = {
-    AMD_VULKAN_ICD = "RADV";
-    #DISABLE_LAYER_AMD_SWITCHABLE_GRAPHICS_1 = "1";
-    #VK_ICD_FILENAMES = "${pkgs.amdvlk}/share/vulkan/icd.d/amd_icd64.json:${pkgs.driversi686Linux.amdvlk}/share/vulkan/icd.d/amd_icd32.json";
   };
 
   programs.steam.gamescopeSession.args = [
