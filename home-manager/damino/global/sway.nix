@@ -69,10 +69,11 @@
 		  exec_always timeout 10 kanshi
 		  exec mako
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
+		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
 
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
-		  exec gtk-launch vesktop.desktop
+		  exec sh -c "jq '.windowBounds.width = 0 | .windowBounds.height = 0' ~/.config/vesktop/state.json > ~/.config/vesktop/state.json.tmp && mv ~/.config/vesktop/state.json.tmp ~/.config/vesktop/state.json && gtk-launch vesktop.desktop"
 		  exec gtk-launch steam.desktop
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 1048576 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
 		'';
