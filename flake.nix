@@ -127,7 +127,7 @@
         };
         modules = [
           # > Our main home-manager configuration file <
-          ./home-manager/damino/damino-desktop.nix
+          ./home-manager/damino/damino-secondary.nix
         ];
       };
 
