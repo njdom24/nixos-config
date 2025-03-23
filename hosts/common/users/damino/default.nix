@@ -218,8 +218,13 @@ in
   	    enable = true;
   	    compositorCommand =
   	      let
+  	        settingsFormat = pkgs.formats.keyValue { };
+  	        sunshineCfg = settingsFormat.generate "sunshine.conf" config.services.sunshine.settings;
   	        monitorQuery = pkgs.writeShellScript "monitor-query" ''
               #!/usr/bin/env bash
+
+              ${pkgs.sway}/bin/swaymsg create_output "HEADLESS-1"
+              ${pkgs.sway}/bin/swaymsg output "HEADLESS-1" pos 0 0
 
               # Define your list of preferred device names (or partial names) in order of priority
               PREFERRED_DEVICES=("Xiaomi Corporation Mi Monitor" "Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
@@ -274,8 +279,9 @@ in
                 bg #000000 solid_color
               }
               exec ${monitorQuery}
-              exec ${pkgs.sway}/bin/swaymsg create_output "HEADLESS-1"
-              exec ${pkgs.bash}/bin/bash -c "${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; sleep 10 && rm -f /tmp/wayvnc_login"
+              exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; ${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`; sleep 10 && rm -f /tmp/wayvnc_login"
+              exec ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`"
+              exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.sunshine}/bin/sunshine ${sunshineCfg} > /tmp/sunshine_login"
             '';
           in
           "/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=vulkan ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";

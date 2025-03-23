@@ -76,6 +76,8 @@
 		  exec sh -c "jq '.windowBounds.width = 0 | .windowBounds.height = 0' ~/.config/vesktop/state.json > ~/.config/vesktop/state.json.tmp && mv ~/.config/vesktop/state.json.tmp ~/.config/vesktop/state.json && gtk-launch vesktop.desktop"
 		  exec gtk-launch steam.desktop
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 1048576 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
+		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then sleep 5 && systemctl --user start sunshine; fi'
+		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg create_output && swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; fi'
 		'';
 
 		config = {
@@ -246,7 +248,24 @@
 		    e && !/Closing client connection/ {exit 1}
 		    ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/wayvnc_login); then
 		      export REMOTE_ENABLED=1
-		      export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
+		      export WLR_DRM_DEVICES=/dev/dri/card1
+		      #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
+		    else
+		      export REMOTE_ENABLED=0
+		    fi
+		  else
+		    export REMOTE_ENABLED=0
+		  fi
+
+		  if [ -f /tmp/sunshine_login ]; then
+		    if ${pkgs.gawk}/bin/awk '
+		    /CLIENT CONNECTED/ {e=1}
+		    e && /CLIENT DISCONNECTED/ {exit 1}
+		    e && !/CLIENT DISCONNECTED/ {exit 0}
+		    ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
+		      export REMOTE_ENABLED=1
+		      export WLR_DRM_DEVICES=/dev/dri/card1
+		      #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
 		    else
 		      export REMOTE_ENABLED=0
 		    fi
@@ -255,7 +274,7 @@
 		  fi
 
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
-		  export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
+		  #export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
 		    
 		  eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
 		  export SSH_AUTH_SOCK
