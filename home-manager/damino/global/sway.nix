@@ -66,7 +66,9 @@
 		  client.placeholder      $base00 $base00 $base05 $base00 $base00
 		  client.background       $base07
 
-		  exec_always sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg create_output && swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; else timeout 10 kanshi; fi'
+          #exec_always timeout 10 kanshi
+		  #exec_always sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg create_output && swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; else timeout 10 kanshi; fi'
+		  exec_always sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg -t get_outputs | jq -e ".[] | select(.name | test(\"HEADLESS\"))" > /dev/null || swaymsg create_output; swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; else timeout 10 kanshi; fi'
 		  exec mako
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
@@ -259,8 +261,8 @@
 		  if [ -f /tmp/sunshine_login ]; then
 		    if ${pkgs.gawk}/bin/awk '
 		    /CLIENT CONNECTED/ {e=1}
-		    e && /CLIENT DISCONNECTED/ {exit 1}
-		    e && !/CLIENT DISCONNECTED/ {exit 0}
+		    e && /CLIENT DISCONNECTED/ {cancel=1}
+		    END { if (e && !cancel) exit 0; else exit 1 }
 		    ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
 		      export REMOTE_ENABLED=1
 		      export WLR_DRM_DEVICES=/dev/dri/card1
