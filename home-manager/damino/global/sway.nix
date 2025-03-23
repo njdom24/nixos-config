@@ -66,7 +66,7 @@
 		  client.placeholder      $base00 $base00 $base05 $base00 $base00
 		  client.background       $base07
 
-		  exec_always timeout 10 kanshi
+		  exec_always sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg create_output && swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; else timeout 10 kanshi; fi'
 		  exec mako
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
@@ -77,7 +77,6 @@
 		  exec gtk-launch steam.desktop
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 1048576 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
 		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then sleep 5 && systemctl --user start sunshine; fi'
-		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg create_output && swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; fi'
 		'';
 
 		config = {
