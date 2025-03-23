@@ -11,7 +11,8 @@
 		checkConfig = false;
 		wrapperFeatures.gtk = true;
 		extraOptions = [ "--unsupported-gpu" ];
-		extraConfigEarly = ''
+		extraConfigEarly =
+		''
 		  set $map-to-active swaymsg input type:tablet_tool map_to_output `swaymsg -t get_outputs | jq -r '.[] | select(.focused == true) | .name'`
 		  exec $map-to-active
 		  # Super
@@ -38,7 +39,27 @@
 		    events disabled
 		  }
 		'';
-		extraConfig = ''
+		extraConfig = let
+		  displaySetup = pkgs.writeShellScript "sway-headless-output.sh" ''
+		    #!/bin/bash
+		
+		    if [ "$REMOTE_ENABLED" = "1" ]; then
+		      # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
+		      existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+		      
+		      if [ -z "$existing_headless" ]; then
+		        # If no HEADLESS output exists, create one
+		        ${pkgs.sway}/bin/swaymsg create_output
+		      fi
+		      # Disable all non-HEADLESS outputs
+		      ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+		    else
+		      # If not remote, run kanshi
+		      ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
+		    fi
+		  '';
+		in
+		''
 		  exec systemctl --user restart xdg-desktop-portal
 		  exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 		  
@@ -67,8 +88,8 @@
 		  client.background       $base07
 
           #exec_always timeout 10 kanshi
-		  #exec_always sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg create_output && swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; else timeout 10 kanshi; fi'
-		  exec_always sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then swaymsg -t get_outputs | jq -e ".[] | select(.name | test(\"HEADLESS\"))" > /dev/null || swaymsg create_output; swaymsg -t get_outputs | jq -r ".[] | select(.name | test(\"HEADLESS\") | not) | .name" | xargs -I {} swaymsg output {} disable; else timeout 10 kanshi; fi'
+          exec_always ${displaySetup}
+          
 		  exec mako
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
