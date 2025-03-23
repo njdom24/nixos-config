@@ -105,9 +105,9 @@
                   SWAYSOCK=/run/user/$(id -u)/sway-ipc.$(id -u).$(pgrep -x sway).sock
                 fi
                 
-                if swaymsg -t get_outputs | jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
+                if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
                   mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
-                  swaymsg output HEADLESS-1 mode $mode
+                  ${pkgs.sway}/bin/swaymsg output HEADLESS-1 mode $mode
                 else
                   echo "Not headless"
                 fi
