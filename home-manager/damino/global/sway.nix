@@ -35,6 +35,9 @@
 		  input "1356:3302:Sony_Interactive_Entertainment_DualSense_Wireless_Controller_Touchpad" {
 		    events disabled
 		  }
+		  input "1356:3302:Sunshine_DualSense_(virtual)_pad_Touchpad" {
+		    events disabled
+		  }
 		  input "1356:3302:DualSense_Wireless_Controller_Touchpad" {
 		    events disabled
 		  }
