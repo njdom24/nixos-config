@@ -332,14 +332,13 @@ in
   security = {
     rtkit.enable = true;
     pam = {
-      enableEcryptfs = true;
       services.gdm.enableGnomeKeyring = true;
       services.sddm.enableGnomeKeyring = true;	
     };
   };
 
   boot = {
-  	kernelModules = lib.mkAfter [ "ecryptfs" ]; # "ddcci_backlight"
+  	# kernelModules = lib.mkAfter [ "ddcci_backlight" ];
   	#extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   	kernel.sysctl = {
   	  "kernel.sysrq" = 1;
@@ -408,7 +407,6 @@ in
   	  zip
   	  duperemove
   	  xdotool
-  	  ecryptfs
   	  ethtool
   	  networkmanagerapplet
   	  gtk3
