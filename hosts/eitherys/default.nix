@@ -232,7 +232,6 @@ in
     unzip
     duperemove
     xdotool
-    ecryptfs
     ethtool
     wineWowPackages.waylandFull
     winetricks
