@@ -96,6 +96,7 @@
 		  exec mako
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
+		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
 
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
