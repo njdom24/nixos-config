@@ -90,9 +90,6 @@
       autoStart = false;
       capSysAdmin = true;
       openFirewall = true;
-      package = pkgs.unstable.sunshine.override {
-      	libgbm = pkgs.mesa; # TODO: Change to pkgs.libgbm in 25.05
-      };
       applications.apps = [
         {
           name = "Desktop";
