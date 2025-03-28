@@ -255,6 +255,7 @@
 		  export GDK_BACKEND=wayland,x11
 		  export CLUTTER_BACKEND=wayland
 		  export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+		  export QT_QPA_PLATFORMTHEME=qt6ct
 		  export _JAVA_AWT_WM_NONREPARENTING=1
 		  export MOZ_ENABLE_WAYLAND=1
 		  export MOZ_DBUS_REMOTE=1
@@ -345,6 +346,8 @@ text-color=#${config.colorScheme.palette.base08}
   home = {
     packages = with pkgs; [
       wl-gammarelay-rs
+      libsForQt5.qt5ct
+      qt6Packages.qt6ct
     ];
   };
 }
