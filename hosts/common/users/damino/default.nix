@@ -129,7 +129,7 @@ in
 
   qt = {
   	enable = true;
-  	platformTheme = "qt5ct";
+  	# platformTheme = "qt5ct";
   };
 
   # Enable networking
