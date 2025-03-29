@@ -27,7 +27,7 @@
 	      	    adaptiveSync = false;
 	      	  }
 	      	  {
-	      	    criteria = "Technical Concepts Ltd 55R635 Unknown";
+	      	    criteria = "Technical Concepts Ltd Beyond TV 0x00010000";
 	      	    status = "disable";
 	      	    adaptiveSync = true;
 	      	  }
@@ -60,7 +60,7 @@
 	  	  	    adaptiveSync = false;
 	  	  	  }
 	  	  	  {
-	  	  	    criteria = "Technical Concepts Ltd 55R635 Unknown";
+	  	  	    criteria = "Technical Concepts Ltd Beyond TV 0x00010000";
 	  	  	    status = "disable";
 	  	  	    adaptiveSync = true;
 	  	  	  }
