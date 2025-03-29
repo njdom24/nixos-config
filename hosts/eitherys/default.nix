@@ -109,8 +109,9 @@ in
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.elpis = {
-    isNormalUser = true;
     description = "elpis";
+    isNormalUser = true;
+    linger = true;
     extraGroups = [ 
     	"networkmanager"
     	"wheel"
