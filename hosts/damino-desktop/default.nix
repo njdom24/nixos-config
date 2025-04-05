@@ -24,14 +24,14 @@
     firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
     # https://github.com/NixOS/nixpkgs/pull/279789#issuecomment-2148560802
     display = {
-      #outputs."HDMI-A-1".edid = "edid_55r635.bin";
-      #outputs."HDMI-A-1".mode = "e";
-      #edid.packages = [
-      #  (pkgs.runCommand "custom-edid" {} ''
-      #    mkdir -p $out/lib/firmware/edid
-      #    cp ${./edid_55r635.bin} $out/lib/firmware/edid/edid_55r635.bin
-      #  '')
-      #];
+      outputs."HDMI-A-1".edid = "edid_qm851g.bin";
+      outputs."HDMI-A-1".mode = "e";
+      edid.packages = [
+        (pkgs.runCommand "custom-edid" {} ''
+          mkdir -p $out/lib/firmware/edid
+          cp ${./edid_qm851g.bin} $out/lib/firmware/edid/edid_qm851g.bin
+        '')
+      ];
     };
   };
 
