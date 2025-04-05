@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }: {
+{ inputs, pkgs, lib, ... }: {
 	imports = [ ./global ];
 
 	programs = {
@@ -101,6 +101,9 @@
 	  	}
 	  ];
 
-	  mako.output = "DP-3";
+	  mako = {
+	    output = "DP-2";
+	    anchor = lib.mkForce "top-left";
+	  };
 	};
 }
