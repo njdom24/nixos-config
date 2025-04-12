@@ -170,7 +170,8 @@
       package = pkgs.kora-icon-theme;
     };
     cursorTheme = {
-      name = "XCursor-Pro-Dark";	
+      name = "XCursor-Pro-Dark";
+      package = pkgs.xcursor-pro;
     };
     font = {
       name = "Inter";
