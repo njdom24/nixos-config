@@ -39,7 +39,6 @@ let
     exit 1
   '';
   hdrWatcher = pkgs.writeShellScript "trigger-hdr" ''
-    exec > >(tee "/tmp/somefile.log") 2>&1
     TIME_THRESHOLD=1
     LAST_TIMESTAMP=0
 
