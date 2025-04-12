@@ -21,7 +21,7 @@ let
                     echo "Error: VCP 0x16 (Red gain) is below 60 — value = $value"
                     exit 1
                 fi
-
+                sleep 0.1
                 echo "Success on attempt $attempt: Current value = $value"
                 while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 0x16 "$value" --model="Mi Monitor" --sleep-multiplier=0.025; do
                     sleep 0.1
@@ -84,6 +84,8 @@ in
       ExecStart = "${hdrWatcher}";
       Restart = "always";
       RestartSec = "5s";
+      Nice = "19";
+      IOSchedulingClass = "idle";
     };
   };
 
