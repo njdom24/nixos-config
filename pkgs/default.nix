@@ -2,7 +2,6 @@
 # You can build them using 'nix build .#example'
 { pkgs, ...}: {
   # example = pkgs.callPackage ./example { };
-  xcursor-pro = pkgs.callPackage ./xcursor-pro { };
   citra-mk7 = pkgs.unstable.lime3ds.overrideAttrs (final: prev: {
     pname = "citra";
     version = "r5115f64"; # Git release version
