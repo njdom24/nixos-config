@@ -5,7 +5,7 @@
 	shellAliases = {
 	  update = "sudo nix flake update --flake /etc/nixos/";
 	  upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#";
-	  update-home = "home-manager switch --flake /etc/nixos/.";
+	  hm-upgrade = "home-manager switch --flake /etc/nixos/.";
 	};
 	oh-my-zsh = {
 	 enable = true;
