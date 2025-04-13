@@ -10,34 +10,38 @@ let
     max_attempts=3
     attempt=1
 
-    # Check VCP 0x16 (Video gain: Red)
     while (( attempt <= max_attempts )); do
-        output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --sleep-multiplier=0.025 getvcp 0x16 2>&1)
+        output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --permit-unknown-feature --sleep-multiplier=0.025 getvcp 16 18 1A 2>&1)
 
-        if echo "$output" | grep -q 'current value'; then
-            value=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*current value = *([0-9]+).*/\1/p')
-            if [[ -n "$value" ]]; then
-                if (( value < 60 )); then
-                    echo "Error: VCP 0x16 (Red gain) is below 60 — value = $value"
-                    exit 1
-                fi
-                sleep 0.1
-                echo "Success on attempt $attempt: Current value = $value"
-                #while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 0x16 "$value" --model="Mi Monitor" --sleep-multiplier=0.025; do
-                while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 16 63 18 63 1A 64 --model="Mi Monitor" --sleep-multiplier=0.025; do
-                    sleep 0.1
-                done
-                exit 0
+        # Extract current values
+        red=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x16.*current value = *([0-9]+),.*/\1/p')
+        green=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x18.*current value = *([0-9]+),.*/\1/p')
+        blue=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x1a.*current value = *([0-9]+),.*/\1/p')
+
+        if [[ -n "$red" && -n "$green" && -n "$blue" ]]; then
+            echo "Attempt $attempt: R=$red G=$green B=$blue"
+            if (( red < 60 || green < 60 || blue < 60 )); then
+                echo "Error: One or more values below 60 — R=$red G=$green B=$blue"
+                exit 1
             fi
+
+            sleep 0.1
+
+            while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 16 "$red" 18 "$green" 1A "$blue" --model="Mi Monitor" --sleep-multiplier=0.025; do
+                sleep 0.1
+            done
+
+            echo "Success: VCP values set to R=$red G=$green B=$blue"
+            exit 0
+        else
+            echo "Attempt $attempt failed to parse values:"
+            echo "$output"
         fi
 
-        echo "Attempt $attempt failed: $output"
         ((attempt++))
         sleep 1
     done
-
-    echo "Failed to get VCP value after $max_attempts attempts."
-    exit 1
+    echo "Failed to get VCP values after $max_attempts attempts."
   '';
   hdrWatcher = pkgs.writeShellScript "trigger-hdr" ''
     TIME_THRESHOLD=1
@@ -56,9 +60,12 @@ let
                   if [ -f "$edid" ]; then
                     monitor_name=$(${pkgs.coreutils}/bin/cat "$edid" | ${pkgs.edid-decode}/bin/edid-decode | ${pkgs.gawk}/bin/awk -F ': ' '/Display Product Name/ { print $2; exit }')
                     if [ -n "$monitor_name" ]; then
-                      echo "$monitor_name"
-                      FOUND=1
-                      break
+                      echo "Found $monitor_name"
+                      connector_dir=$(dirname "$edid")
+                      if [ "$(${pkgs.coreutils}/bin/cat "$connector_dir/enabled" 2>/dev/null)" = "enabled" ]; then
+                        FOUND=1
+                        break
+                      fi
                     fi
                   fi
                 done
