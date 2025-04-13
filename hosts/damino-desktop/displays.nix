@@ -23,7 +23,8 @@ let
                 fi
                 sleep 0.1
                 echo "Success on attempt $attempt: Current value = $value"
-                while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 0x16 "$value" --model="Mi Monitor" --sleep-multiplier=0.025; do
+                #while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 0x16 "$value" --model="Mi Monitor" --sleep-multiplier=0.025; do
+                while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 16 63 18 63 1A 64 --model="Mi Monitor" --sleep-multiplier=0.025; do
                     sleep 0.1
                 done
                 exit 0
