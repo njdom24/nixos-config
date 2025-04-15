@@ -14,12 +14,13 @@ let
         output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --permit-unknown-feature --sleep-multiplier=0.025 getvcp 16 18 1A 2>&1)
 
         # Extract current values
+        contrast=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x12.*current value = *([0-9]+),.*/\1/p')
         red=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x16.*current value = *([0-9]+),.*/\1/p')
         green=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x18.*current value = *([0-9]+),.*/\1/p')
         blue=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x1a.*current value = *([0-9]+),.*/\1/p')
 
-        if [[ -n "$red" && -n "$green" && -n "$blue" ]]; then
-            echo "Attempt $attempt: R=$red G=$green B=$blue"
+        if [[ -n "$contrast" && -n "$red" && -n "$green" && -n "$blue" ]]; then
+            echo "Attempt $attempt: C=$contrast R=$red G=$green B=$blue"
             if (( red < 60 || green < 60 || blue < 60 )); then
                 echo "Error: One or more values below 60 — R=$red G=$green B=$blue"
                 exit 1
@@ -27,11 +28,11 @@ let
 
             sleep 0.1
 
-            while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 16 "$red" 18 "$green" 1A "$blue" --model="Mi Monitor" --sleep-multiplier=0.025; do
+            while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 "$contrast" 16 "$red" 18 "$green" 1A "$blue" --model="Mi Monitor" --sleep-multiplier=0.025; do
                 sleep 0.1
             done
 
-            echo "Success: VCP values set to R=$red G=$green B=$blue"
+            echo "Success: VCP values set to C=$contrast R=$red G=$green B=$blue"
             exit 0
         else
             echo "Attempt $attempt failed to parse values:"
