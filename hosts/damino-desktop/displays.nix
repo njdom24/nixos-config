@@ -101,13 +101,10 @@ in
     display = {
       outputs."HDMI-A-1".edid = "edid_qm851g.bin"; # Fix 1440p144hz, VRR to 70+ to work around judder (LFC instead)
       outputs."HDMI-A-1".mode = "e";
-      outputs."DP-1".edid = "edid_xiaomi.bin"; # Fix MaxCLL, MaxFALL to 1300 nits (measured)
-      outputs."DP-1".mode = "e";
       edid.packages = [
         (pkgs.runCommand "custom-edid" {} ''
           mkdir -p $out/lib/firmware/edid
           cp ${./edid_qm851g.bin} $out/lib/firmware/edid/edid_qm851g.bin
-          cp ${./edid_xiaomi.bin} $out/lib/firmware/edid/edid_xiaomi.bin
         '')
       ];
     };
