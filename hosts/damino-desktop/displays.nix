@@ -11,7 +11,7 @@ let
     attempt=1
 
     while (( attempt <= max_attempts )); do
-        output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --permit-unknown-feature --sleep-multiplier=0.025 getvcp 16 18 1A 2>&1)
+        output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --permit-unknown-feature --sleep-multiplier=0.025 getvcp 12 16 18 1A 2>&1)
 
         # Extract current values
         contrast=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x12.*current value = *([0-9]+),.*/\1/p')
