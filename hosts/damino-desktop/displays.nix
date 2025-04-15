@@ -11,7 +11,7 @@ let
     attempt=1
 
     while (( attempt <= max_attempts )); do
-        output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --permit-unknown-feature --sleep-multiplier=0.025 getvcp 12 16 18 1A 2>&1)
+        output=$(${pkgs.ddcutil}/bin/ddcutil --model="Mi Monitor" --disable-dynamic-sleep --sleep-multiplier=0.025 getvcp 12 16 18 1A 2>&1)
 
         # Extract current values
         contrast=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x12.*current value = *([0-9]+),.*/\1/p')
@@ -23,12 +23,14 @@ let
             echo "Attempt $attempt: C=$contrast R=$red G=$green B=$blue"
             if (( red < 60 || green < 60 || blue < 60 )); then
                 echo "Error: One or more values below 60 — R=$red G=$green B=$blue"
-                exit 1
+                ((attempt++))
+                sleep 0.5
+                continue
             fi
 
             sleep 0.1
 
-            while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 "$contrast" 16 "$red" 18 "$green" 1A "$blue" --model="Mi Monitor" --sleep-multiplier=0.025; do
+            while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 "$contrast" 16 "$red" 18 "$green" 1A "$blue" --model="Mi Monitor" --disable-dynamic-sleep --sleep-multiplier=0.025; do
                 sleep 0.1
             done
 
@@ -43,9 +45,10 @@ let
         sleep 1
     done
     echo "Failed to get VCP values after $max_attempts attempts."
+    exit 1
   '';
   hdrWatcher = pkgs.writeShellScript "trigger-hdr" ''
-    TIME_THRESHOLD=1
+    TIME_THRESHOLD=2
     LAST_TIMESTAMP=0
 
     ${pkgs.systemd}/bin/journalctl -kf | ${pkgs.gnugrep}/bin/grep --line-buffered "HDR SB" | while read -r line; do
