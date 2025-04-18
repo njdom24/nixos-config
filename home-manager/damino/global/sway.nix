@@ -101,7 +101,9 @@
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
 		  exec sh -c "jq '.windowBounds.width = 0 | .windowBounds.height = 0' ~/.config/vesktop/state.json > ~/.config/vesktop/state.json.tmp && mv ~/.config/vesktop/state.json.tmp ~/.config/vesktop/state.json && gtk-launch vesktop.desktop"
-		  exec gtk-launch steam.desktop
+		  #exec gtk-launch steam.desktop
+		  # Temporary until https://gitlab.freedesktop.org/DadSchoorse/mesa/-/commits/radv-float8-hack3
+		  exec distrobox enter arch-toolbox-latest -- steam
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 1048576 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
 		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then sleep 5 && systemctl --user start sunshine; fi'
 		'';
