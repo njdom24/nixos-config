@@ -219,6 +219,7 @@
   	  wineWowPackages.waylandFull
   	  winetricks
   	  lact # TODO: Should become a module in 25.05
+  	  latencyflex-vulkan
   	];
 
   	variables = {
