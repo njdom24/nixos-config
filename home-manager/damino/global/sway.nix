@@ -56,6 +56,7 @@
 		      fi
 		      # Disable all non-HEADLESS outputs
 		      ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+		      ${pkgs.sway}/bin/swaymsg output "*" render_bit_depth 10
 		    else
 		      # If not remote, run kanshi
 		      ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
