@@ -105,8 +105,8 @@ in
     display = {
       outputs."HDMI-A-1".edid = "edid_qm851g.bin"; # Fix 1440p144hz, VRR to 70+ to work around judder (LFC instead)
       outputs."HDMI-A-1".mode = "e";
-      outputs."DP-2".edid = "edid_55r635.bin"; # For "headless" streaming through unused DP port on GPU
-      outputs."DP-2".mode = "e";
+      #outputs."DP-3".edid = "edid_55r635.bin"; # For "headless" streaming through unused DP port on GPU
+      #outputs."DP-3".mode = "e";
       edid.packages = [
         (pkgs.runCommand "custom-edid" {} ''
           mkdir -p $out/lib/firmware/edid
