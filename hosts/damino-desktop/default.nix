@@ -11,7 +11,7 @@
       ./common.nix
       ./displays.nix
       ./openrgb
-      inputs.chaotic.nixosModules.default
+      #inputs.chaotic.nixosModules.default
     ];
 
   networking.hostName = "damino-desktop"; # Define your hostname.
@@ -30,7 +30,7 @@
 
   programs.steam.gamescopeSession.args = [
   	"-H 1440"
-  	"-r 120"
+  	"-r 144"
   	"-O HDMI-A-1"
   ];
   
