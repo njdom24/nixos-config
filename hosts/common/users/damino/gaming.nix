@@ -5,6 +5,7 @@
 { inputs, outputs, config, lib, pkgs, ... }: {
   imports =
     [
+      inputs.chaotic.nixosModules.default
     ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
