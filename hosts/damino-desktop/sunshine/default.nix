@@ -40,7 +40,7 @@
           
           # Detect running compositor by process name
           for comp in ''\${known_compositors[@]}''\; do
-            if ${pkgs.procps}/bin/pgrep -u "$user" -x "$comp" > /dev/null; then
+            if ${pkgs.procps}/bin/pgrep -u "$user" -f "$comp" > /dev/null; then
               echo "Compositor: $comp"
               
               case "$comp" in
