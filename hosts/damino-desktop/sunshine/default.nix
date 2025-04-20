@@ -32,11 +32,13 @@
 	          wayland_display=$(${pkgs.coreutils}/bin/tr '\0' '\n' < "$envfile" | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | ${pkgs.coreutils}/bin/cut -d= -f2-)
 	          if [ -n "$wayland_display" ]; then
 	            export WAYLAND_DISPLAY=$wayland_display
-	            echo "WAYLAND_DISPLAY=$wayland_display"
+	            echo "WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
 	            break
 	          fi
 	        done
           fi
+
+          echo "WAYLAND_DISPLAY: $WAYLAND_DISPLAY"
           
           # Detect running compositor by process name
           for comp in ''\${known_compositors[@]}''\; do
@@ -84,12 +86,23 @@
                   DUMMY="DP-3"
 
                   # Configure display to match client
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"
+
+                  if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
+                    SUNSHINE_CLIENT_FPS=120
+                  fi
+
+                  if [ "$SUNSHINE_CLIENT_HEIGHT" -gt 1440 ]; then
+                    SUNSHINE_CLIENT_FPS=60
+                  fi
+                  
                   ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
                   
                   output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o)
                   
                   # Extract the names of the connected displays
-                  displays=$(echo "$output" | ${pkgs.gnugrep}/bin/grep -oP 'Output: \d+ \K[^\n]+')
+                  displays=$(echo "$output" | ${pkgs.gawk}/bin/awk '/Output:/ { print $3 }')
+                  echo "Displays found: $displays"
 
                   # Check if the dummy display is present
                   echo "$displays" | grep -qx "$DUMMY"
@@ -114,6 +127,7 @@
                   else
                     echo "Disabling HDR"
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable
+                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferEfficiency
                   fi
 
                   ;;
