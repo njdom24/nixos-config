@@ -16,33 +16,34 @@
       capSysAdmin = true;
       openFirewall = true;
       applications.apps = let
-        # Core script
-        displayConfig = pkgs.writeShellScript "displayConfig" ''
+        getWaylandDisplay = pkgs.writeShellScript "getWaylandDisplay" ''
           #!/usr/bin/env bash
-          
-          user="$(${pkgs.coreutils}/bin/whoami)"
-          declare -a known_compositors=("sway" "kwin_wayland")
 
           if [ -z "$WAYLAND_DISPLAY" ]; then
 	        # Get WAYLAND_DISPLAY from a running process
-	        for pid in $(${pkgs.procps}/bin/pgrep -u "$user"); do
+	        for pid in $(${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)"); do
 	          envfile="/proc/$pid/environ"
 	          [ -r "$envfile" ] || continue
 	          
 	          wayland_display=$(${pkgs.coreutils}/bin/tr '\0' '\n' < "$envfile" | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | ${pkgs.coreutils}/bin/cut -d= -f2-)
 	          if [ -n "$wayland_display" ]; then
-	            export WAYLAND_DISPLAY=$wayland_display
-	            echo "WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
-	            break
+	            echo "$wayland_display"
+	            exit 0
 	          fi
 	        done
           fi
+          echo $WAYLAND_DISPLAY
+        '';
+        # Core script
+        displayConfig = pkgs.writeShellScript "displayConfig" ''
+          #!/usr/bin/env bash
 
-          echo "WAYLAND_DISPLAY: $WAYLAND_DISPLAY"
-          
+          echo "Using display: $WAYLAND_DISPLAY"
+          declare -a known_compositors=("sway" "kwin_wayland")
+
           # Detect running compositor by process name
           for comp in ''\${known_compositors[@]}''\; do
-            if ${pkgs.procps}/bin/pgrep -u "$user" -f "$comp" > /dev/null; then
+            if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)" -f "$comp" > /dev/null; then
               echo "Compositor: $comp"
               
               case "$comp" in
@@ -86,8 +87,6 @@
                   DUMMY="DP-3"
 
                   # Configure display to match client
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"
-
                   if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
                     SUNSHINE_CLIENT_FPS=120
                   fi
@@ -149,8 +148,11 @@
       gamescopeConfig = pkgs.writeShellScript "gamescopeConfig" ''
         #!/usr/bin/env bash
         
-        if ${pkgs.procps}/bin/pgrep -f gamescope > /dev/null; then
-          echo "gamescope is running. Adjusting"
+        if ${pkgs.procps}/bin/pgrep -f ".gamescope-wrapped" > /dev/null || \
+           ${pkgs.procps}/bin/pgrep -x "gamescope" > /dev/null || \
+           ${pkgs.procps}/bin/pgrep -x "gamescope-wl" > /dev/null; then
+
+          echo "Gamescope is running. Adjusting"
           
           if [[ "$1" == "hdr" ]]; then
             echo "Enabling HDR"
@@ -167,9 +169,9 @@
           export PROTON_ENABLE_AMD_AGS=1
           export STEAM_MULTIPLE_XWAYLANDS=1
           if [[ "$1" == "hdr" ]]; then
-            gamescope --steam --hdr-enabled -- steam -tenfoot -pipewire-dmabuf
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam --hdr-enabled -f --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
           else
-            gamescope --steam -- steam -tenfoot -pipewire-dmabuf
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam -f --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
           fi
         fi
       '';
@@ -181,7 +183,8 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "desktop-hdr" ''
-                #!/usr/bin/env bash > /tmp/sunshine_log.txt 2>&1
+                #!/usr/bin/env bash
+                export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} hdr > /tmp/sunshine_log.txt 2>&1
               '';
             }
@@ -194,7 +197,8 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "desktop-sdr" ''
-                #!/usr/bin/env bash > /tmp/sunshine_log.txt 2>&1
+                #!/usr/bin/env bash
+                export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} sdr > /tmp/sunshine_log.txt 2>&1
               '';
             }
@@ -208,6 +212,7 @@
             {
               do = pkgs.writeShellScript "steam-hdr" ''
                 #!/usr/bin/env bash
+                export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} hdr > /tmp/sunshine_log.txt 2>&1
                 ${gamescopeConfig} hdr > /tmp/sunshine_log.txt 2>&1
               '';
@@ -222,6 +227,7 @@
             {
               do = pkgs.writeShellScript "steam-sdr" ''
                 #!/usr/bin/env bash
+                export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} sdr > /tmp/sunshine_log.txt 2>&1
                 ${gamescopeConfig} sdr > /tmp/sunshine_log.txt 2>&1
               '';
