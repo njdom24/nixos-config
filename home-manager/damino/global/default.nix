@@ -80,8 +80,30 @@
       LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.xorg.libX11}/lib"; # Fixed MangoHud for Wayland apps: https://github.com/ValveSoftware/gamescope/pull/1666 https://github.com/flightlessmango/MangoHud/issues/1497
     };
 
-    file = {
+    file =
+    let sunshine-login = pkgs.writeShellScript "sunshine-login" ''
+      if [ -f /tmp/sunshine_login ]; then
+        if ${pkgs.gawk}/bin/awk '
+        /CLIENT CONNECTED/ {e=1}
+        e && /CLIENT DISCONNECTED/ {cancel=1}
+        END { if (e && !cancel) exit 0; else exit 1 }
+        ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
+          systemctl --user start sunshine
+        fi
+      fi
+    '';
+    in {
       ".face.icon".source = ./.face.icon;
+      ".config/autostart/sunshine-remote.desktop".text = ''
+          [Desktop Entry]
+          Type=Application
+          Exec=${sunshine-login}
+          Hidden=false
+          NoDisplay=true
+          X-GNOME-Autostart-enabled=true
+          Name=My Script
+          Comment=Checks for remote login and starts sunshine
+        '';
     };
 
     packages = with pkgs; [
