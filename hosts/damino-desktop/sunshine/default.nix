@@ -38,6 +38,9 @@
         displayConfig = pkgs.writeShellScript "displayConfig" ''
           #!/usr/bin/env bash
 
+          # Disable RGB
+          ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
+
           echo "Using display: $WAYLAND_DISPLAY"
           declare -a known_compositors=("sway" "kwin_wayland")
 

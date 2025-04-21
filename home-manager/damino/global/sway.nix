@@ -280,6 +280,7 @@
 		      export REMOTE_ENABLED=1
 		      export WLR_DRM_DEVICES=/dev/dri/card1
 		      #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
+		      ${pkgs.openrgb}/bin/openrgb --mode static --color 000000 2> /dev/null || true
 		    else
 		      export REMOTE_ENABLED=0
 		    fi
