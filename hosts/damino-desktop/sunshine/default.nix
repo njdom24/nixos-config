@@ -17,8 +17,6 @@
       openFirewall = true;
       applications.apps = let
         getWaylandDisplay = pkgs.writeShellScript "getWaylandDisplay" ''
-          #!/usr/bin/env bash
-
           if [ -z "$WAYLAND_DISPLAY" ]; then
 	        # Get WAYLAND_DISPLAY from a running process
 	        for pid in $(${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)"); do
@@ -36,8 +34,6 @@
         '';
         # Core script
         displayConfig = pkgs.writeShellScript "displayConfig" ''
-          #!/usr/bin/env bash
-
           # Disable RGB
           ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
 
@@ -149,8 +145,6 @@
         '';
 
       gamescopeConfig = pkgs.writeShellScript "gamescopeConfig" ''
-        #!/usr/bin/env bash
-        
         if ${pkgs.procps}/bin/pgrep -f ".gamescope-wrapped" > /dev/null || \
            ${pkgs.procps}/bin/pgrep -x "gamescope" > /dev/null || \
            ${pkgs.procps}/bin/pgrep -x "gamescope-wl" > /dev/null; then
@@ -192,7 +186,6 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "desktop-hdr" ''
-                #!/usr/bin/env bash
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} hdr > /tmp/sunshine_log.txt 2>&1
               '';
@@ -206,7 +199,6 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "desktop-sdr" ''
-                #!/usr/bin/env bash
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} sdr > /tmp/sunshine_log.txt 2>&1
               '';
@@ -220,7 +212,6 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "steam-hdr" ''
-                #!/usr/bin/env bash
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} hdr > /tmp/sunshine_log.txt 2>&1
                 ${gamescopeConfig} hdr > /tmp/sunshine_log.txt 2>&1
@@ -235,7 +226,6 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "steam-sdr" ''
-                #!/usr/bin/env bash
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} sdr > /tmp/sunshine_log.txt 2>&1
                 ${gamescopeConfig} sdr > /tmp/sunshine_log.txt 2>&1
@@ -250,7 +240,6 @@
           prep-cmd = [
             {
               do = pkgs.writeShellScript "set-client-res" ''
-                #!/usr/bin/env bash
                 if [ -z "$SWAYSOCK" && -z "$WAYLAND_DISPLAY" ]; then
                   SWAYSOCK=/run/user/$(id -u)/sway-ipc.$(id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
                 fi
