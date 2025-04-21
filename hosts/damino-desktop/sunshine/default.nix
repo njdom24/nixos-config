@@ -164,6 +164,7 @@
             echo "Disabling HDR"
             ${pkgs.gamescope}/bin/gamescopectl hdr_enabled 0
           fi
+          ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS
         else
           echo "gamescope is not running. Starting"
           export DXVK_HDR=1 # Can't be adjusted at runtime. Toggle in-game if need be
@@ -172,9 +173,9 @@
           export PROTON_ENABLE_AMD_AGS=1
           export STEAM_MULTIPLE_XWAYLANDS=1
           if [[ "$1" == "hdr" ]]; then
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam --hdr-enabled -f --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam --hdr-enabled -f -r $SUNSHINE_CLIENT_FPS --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
           else
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam -f --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam -f -r $SUNSHINE_CLIENT_FPS --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
           fi
         fi
       '';
