@@ -167,16 +167,21 @@
           ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS
         else
           echo "gamescope is not running. Starting"
+          ${pkgs.systemd}/bin/systemctl --user reset-failed
+          ${pkgs.gamescope}/bin/gamescopectl shutdown 2> /dev/null || true
+          ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service >2 /dev/null || true
+          ${pkgs.systemd}/bin/systemctl --user reset-failed
           export DXVK_HDR=1 # Can't be adjusted at runtime. Toggle in-game if need be
           export ENABLE_GAMESCOPE_WSI=1
           export ENABLE_HDR_WSI=1
           export PROTON_ENABLE_AMD_AGS=1
           export STEAM_MULTIPLE_XWAYLANDS=1
           if [[ "$1" == "hdr" ]]; then
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam --hdr-enabled -f -r $SUNSHINE_CLIENT_FPS --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam --hdr-enabled -f --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
           else
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam -f -r $SUNSHINE_CLIENT_FPS --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam -f --xwayland-count 2 --force-grab-cursor -- distrobox enter arch-toolbox-latest -- env PROTON_ENABLE_AMD_AGS=1 steam -console -tenfoot -pipewire-dmabuf'
           fi
+          bash -c 'sleep 5 && ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS' &
         fi
       '';
       in
