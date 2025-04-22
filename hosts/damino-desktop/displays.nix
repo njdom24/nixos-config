@@ -49,37 +49,35 @@ let
   '';
   hdrWatcher = pkgs.writeShellScript "trigger-hdr" ''
     TIME_THRESHOLD=2
-    LAST_TIMESTAMP=0
+    LAST_TIMESTAMP=$(${pkgs.coreutils}/bin/date -d "$TIMESTAMP" +%s)
 
-    ${pkgs.systemd}/bin/journalctl -kf | ${pkgs.gnugrep}/bin/grep --line-buffered "HDR SB" | while read -r line; do
+    ${pkgs.systemd}/bin/journalctl -kf --no-pager --since "5 seconds ago" | ${pkgs.gnugrep}/bin/grep --line-buffered "HDR SB" | while read -r line; do
         TIMESTAMP=$(echo "$line" | ${pkgs.gawk}/bin/awk '{print $1 " " $2 " " $3}')
         CURRENT_TIMESTAMP=$(${pkgs.coreutils}/bin/date -d "$TIMESTAMP" +%s)
 
-        if [ $LAST_TIMESTAMP -ne 0 ]; then
-            TIME_DIFF=$((CURRENT_TIMESTAMP - LAST_TIMESTAMP))
-            if [ $TIME_DIFF -ge $TIME_THRESHOLD ]; then
-                echo "Time threshold reached. Triggering action..."
-                FOUND=0
-                for edid in /sys/class/drm/card*/card*/edid; do
-                  if [ -f "$edid" ]; then
-                    monitor_name=$(${pkgs.coreutils}/bin/cat "$edid" | ${pkgs.edid-decode}/bin/edid-decode | ${pkgs.gawk}/bin/awk -F ': ' '/Display Product Name/ { print $2; exit }')
-                    if [ -n "$monitor_name" ]; then
-                      echo "Found $monitor_name"
-                      connector_dir=$(dirname "$edid")
-                      if [ "$(${pkgs.coreutils}/bin/cat "$connector_dir/enabled" 2>/dev/null)" = "enabled" ]; then
-                        FOUND=1
-                        break
-                      fi
-                    fi
+        TIME_DIFF=$((CURRENT_TIMESTAMP - LAST_TIMESTAMP))
+        if [ $TIME_DIFF -ge $TIME_THRESHOLD ]; then
+            echo "Time threshold reached. Triggering action..."
+            FOUND=0
+            for edid in /sys/class/drm/card*/card*/edid; do
+              if [ -f "$edid" ]; then
+                monitor_name=$(${pkgs.coreutils}/bin/cat "$edid" | ${pkgs.edid-decode}/bin/edid-decode | ${pkgs.gawk}/bin/awk -F ': ' '/Display Product Name/ { print $2; exit }')
+                if [ -n "$monitor_name" ]; then
+                  echo "Found $monitor_name"
+                  connector_dir=$(dirname "$edid")
+                  if [ "$(${pkgs.coreutils}/bin/cat "$connector_dir/enabled" 2>/dev/null)" = "enabled" ]; then
+                    FOUND=1
+                    break
                   fi
-                done
-                
-                if [ "$FOUND" -eq 0 ]; then
-                    echo "Monitor not found. Ignoring."
                 fi
-
-                ${xiaomiFix}
+              fi
+            done
+            
+            if [ "$FOUND" -eq 0 ]; then
+                echo "Monitor not found. Ignoring."
             fi
+
+            ${xiaomiFix}
         fi
 
         LAST_TIMESTAMP=$CURRENT_TIMESTAMP
