@@ -51,7 +51,7 @@ let
     TIME_THRESHOLD=2
     LAST_TIMESTAMP=$(${pkgs.coreutils}/bin/date -d "$TIMESTAMP" +%s)
 
-    ${pkgs.systemd}/bin/journalctl -kf --no-pager --since "5 seconds ago" | ${pkgs.gnugrep}/bin/grep --line-buffered "HDR SB" | while read -r line; do
+    ${pkgs.systemd}/bin/journalctl -kf --no-pager --since "2 seconds ago" | ${pkgs.gnugrep}/bin/grep --line-buffered "HDR SB" | while read -r line; do
         TIMESTAMP=$(echo "$line" | ${pkgs.gawk}/bin/awk '{print $1 " " $2 " " $3}')
         CURRENT_TIMESTAMP=$(${pkgs.coreutils}/bin/date -d "$TIMESTAMP" +%s)
 
