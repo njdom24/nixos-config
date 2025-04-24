@@ -59,7 +59,7 @@ let
         if [ $TIME_DIFF -ge $TIME_THRESHOLD ]; then
             echo "Time threshold reached. Triggering action..."
             FOUND=0
-            for edid in /sys/class/drm/card*/card*/edid; do
+            for edid in /sys/class/drm/card*/card*DP*/edid; do
               if [ -f "$edid" ]; then
                 monitor_name=$(${pkgs.coreutils}/bin/cat "$edid" | ${pkgs.edid-decode}/bin/edid-decode | ${pkgs.gawk}/bin/awk -F ': ' '/Display Product Name/ { print $2; exit }')
                 if [ -n "$monitor_name" ]; then
