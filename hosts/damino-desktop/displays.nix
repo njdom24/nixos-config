@@ -103,7 +103,7 @@ in
     display = {
       outputs."HDMI-A-1".edid = "edid_qm851g.bin"; # Fix 1440p144hz, VRR to 70+ to work around judder (LFC instead) HDR Metadata MaxFALL 800 MaxCLL 3000 MinCLL 0.1
       outputs."HDMI-A-1".mode = "e";
-      #outputs."DP-3".edid = "edid_55r635.bin"; # For "headless" streaming through unused DP port on GPU
+      #outputs."DP-3".edid = "edid_55r635.bin"; # For "headless" streaming through unused DP port on GPU. Add VRR range (48-120), EDID MaxFALL 686 MaxCLL 1114 MinCLL 0.1
       #outputs."DP-3".mode = "e";
       edid.packages = [
         (pkgs.runCommand "custom-edid" {} ''
