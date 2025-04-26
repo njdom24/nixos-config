@@ -12,6 +12,7 @@
   	outputs.overlays.unstable-packages
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
+  	outputs.overlays.modifications
   ];
 
   programs = {
@@ -97,14 +98,9 @@
       };
     };
 
-    # MangoHud-related options are blocked by https://github.com/flightlessmango/MangoHud/issues/1283
     gamescope = {
       enable = true;
       capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
-      # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530, likely fixed by 25.05
-      package = pkgs.gamescope.overrideAttrs (_: {
-        NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
-      });
       env = {
         MANGOHUD = "0";
         WLR_RENDERER = "vulkan";
@@ -114,7 +110,7 @@
         "-f"
         "--xwayland-count 2"
         #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
-        #"--adaptive-sync"
+        "--adaptive-sync"
         #"--mangoapp"
       ];
     };
@@ -197,7 +193,7 @@
   	    Type=Application
   	    Categories=Game;
   	  '') else null)
-  	  (if config.programs.steam.gamescopeSession.enable then gamescope-wsi else null)
+  	  (if config.programs.gamescope.enable then gamescope-wsi else null)
   	  samrewritten
   	  moonlight-qt
   	  unstable.lutris
