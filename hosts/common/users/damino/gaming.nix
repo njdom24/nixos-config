@@ -134,7 +134,7 @@
   	};
   	# TODO: https://github.com/NixOS/nixpkgs/issues/357693
   	#xpadneo.enable = true; 
-  	xone.enable = true;
+  	#xone.enable = true;
   	#openrazer.enable = true;
   };
 
