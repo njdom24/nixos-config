@@ -349,9 +349,14 @@ in
       tmpfsSize = "80%";
     };
   };
-
-  # OOM configuration: https://discourse.nixos.org/t/nix-build-ate-my-ram/35752
+  
   systemd = {
+    # Hail Mary to prevent remote shutdown hangs
+    extraConfig = ''
+      DefaultTimeoutStopSec=10min
+      DefaultTimeoutStartSec=10min
+      DefaultTimeoutAbortSec=30s
+    '';
     services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];
     watchdog.runtimeTime = "30s";
     # Create a separate slice for nix-daemon that is
@@ -369,6 +374,7 @@ in
 
     # If a kernel-level OOM event does occur anyway,
     # strongly prefer killing nix-daemon child processes
+    # OOM configuration: https://discourse.nixos.org/t/nix-build-ate-my-ram/35752
     services."nix-daemon".serviceConfig.OOMScoreAdjust = 1000;
     services."ddcci@" = {
         scriptArgs = "%i";
