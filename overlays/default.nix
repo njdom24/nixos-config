@@ -10,6 +10,20 @@
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });
+    #mesa = prev.mesa.overrideAttrs (oldAttrs: {
+    #  patches = (oldAttrs.patches or []) ++ [
+    #    #./my-mesa-fix.patch
+    #  ];
+    #});
+    gamescope = prev.gamescope.overrideAttrs (oldAttrs: {
+      # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530
+      NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
+
+      # https://github.com/ValveSoftware/gamescope/issues/1604#issuecomment-2603198783
+      patches = (oldAttrs.patches or []) ++ [
+        ../patches/gamescope-sway-fix.patch
+      ];
+    });
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
