@@ -16,7 +16,7 @@
 	      	    status = "enable";
 	      	    mode = "2560x1440@180Hz";
 	      	    position = "0,0";
-	      	    adaptiveSync = true;
+	      	    #adaptiveSync = true;
 	      	  }
 	          {
 	      	    criteria = "AOC 24G1WG4 0x00042EBB";

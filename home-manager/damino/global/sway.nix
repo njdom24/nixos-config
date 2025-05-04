@@ -62,6 +62,38 @@
 		      ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
 		    fi
 		  '';
+
+		  # Taken from https://gist.github.com/GrabbenD/adc5a7a863cbd1553461376cf4c50467
+		  vrrFullscreen = pkgs.writeShellScript "sway-vrr-fullscreen.sh" ''
+		    #!/usr/bin/env bash
+		    # List of supported outputs for VRR
+		    # TODO: Populate this from NixOS config, and/or convert from display names instead
+		    output_vrr_whitelist=(
+		      "DP-1"
+		      "HDMI-A-1"
+		    )
+		    
+		    # Toggle VRR for fullscreened apps in prespecified displays to avoid stutters while in desktop
+		    swaymsg -t subscribe -m '[ "window" ]' | while read window_json; do
+		      window_event=$(echo ''\${window_json} | jq -r '.change')
+
+		      # Process only focus change and fullscreen toggle
+		      if [[ $window_event = "focus" || $window_event = "fullscreen_mode" ]]; then
+		        output_json=$(swaymsg -t get_outputs | jq -r '.[] | select(.focused == true)')
+		        output_name=$(echo ''\${output_json} | jq -r '.name')
+
+		        # Use only VRR in whitelisted outputs
+		        if [[ ''\${output_vrr_whitelist[*]} =~ ''\${output_name} ]]; then
+		          output_vrr_status=$(echo ''\${output_json} | jq -r '.adaptive_sync_status')
+		          window_fullscreen_status=$(echo ''\${window_json} | jq -r '.container.fullscreen_mode')
+
+		          # Only update output if nesseccary to avoid flickering
+		          [[ $output_vrr_status = "disabled" && $window_fullscreen_status = "1" ]] && swaymsg output "''\${output_name}" adaptive_sync 1
+		          [[ $output_vrr_status = "enabled" && $window_fullscreen_status = "0" ]] && swaymsg output "''\${output_name}" adaptive_sync 0
+		        fi
+		      fi
+		    done
+		  '';
 		in
 		''
 		  exec systemctl --user restart xdg-desktop-portal
@@ -98,6 +130,7 @@
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
 		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
+		  exec ${vrrFullscreen}
 
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
