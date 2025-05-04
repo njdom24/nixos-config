@@ -227,7 +227,7 @@ in
               ${pkgs.sway}/bin/swaymsg output "HEADLESS-1" pos 0 0
 
               # Define your list of preferred device names (or partial names) in order of priority
-              PREFERRED_DEVICES=("Xiaomi Corporation Mi Monitor" "Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
+              PREFERRED_DEVICES=("AOC Q27G40XMN" "Xiaomi Corporation Mi Monitor" "Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
 
               # Function to get all connected displays with their descriptions
               get_connected_displays() {
