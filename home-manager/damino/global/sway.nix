@@ -134,7 +134,7 @@
 
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  exec gtk-launch firefox.desktop
-		  exec sh -c "jq '.windowBounds.width = 0 | .windowBounds.height = 0' ~/.config/vesktop/state.json > ~/.config/vesktop/state.json.tmp && mv ~/.config/vesktop/state.json.tmp ~/.config/vesktop/state.json && gtk-launch vesktop.desktop"
+		  exec gtk-launch vesktop.desktop
 		  #exec gtk-launch steam.desktop
 		  # Temporary until https://gitlab.freedesktop.org/DadSchoorse/mesa/-/commits/radv-float8-hack3
 		  exec distrobox enter arch-toolbox-latest -- steam
