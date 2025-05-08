@@ -76,8 +76,9 @@
           STEAM_MULTIPLE_XWAYLANDS = "1";
           #MANGOHUD = "0";
           #MANGOHUD_CONFIG = "read_cfg,no_display";
+          #VK_LOADER_LAYERS_DISABLE = "VK_LAYER_MANGOHUD_overlay_64_x86_64,VK_LAYER_MANGOHUD_overlay_32_x86";
           ENABLE_GAMESCOPE_WSI = "1";
-          ENABLE_HDR_WSI = "1";
+          ENABLE_HDR_WSI = "0";
           #STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
           DXVK_HDR = "1"; # Works with VKD3D-Proton, confirmed required as of Proton 9.0-3
           PROTON_ENABLE_AMD_AGS = "1";
@@ -90,10 +91,10 @@
           #"--expose-wayland" # Seems to break games when HDR enabled
           "--hdr-enabled"
           #"--hdr-debug-force-output"
-          "--hdr-sdr-content-nits 500"
-          "--hdr-itm-enable"
-          "--hdr-itm-target-nits=700"
-          "--hdr-itm-sdr-nits=300"
+          #"--hdr-sdr-content-nits 500"
+          #"--hdr-itm-enable"
+          #"--hdr-itm-target-nits=700"
+          #"--hdr-itm-sdr-nits=300"
         ];
       };
     };
@@ -103,8 +104,13 @@
       capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
       env = {
         MANGOHUD = "0";
+        #VK_LOADER_LAYERS_DISABLE = "VK_LAYER_MANGOHUD_overlay_64_x86_64,VK_LAYER_MANGOHUD_overlay_32_x86";
+        MANGOHUD_CONFIGFILE="~/.config/MangoHud/MangoHud.conf";
         WLR_RENDERER = "vulkan";
+        ENABLE_GAMESCOPE_WSI = "1";
+        ENABLE_HDR_WSI = "0";
         STEAM_MULTIPLE_XWAYLANDS = "1";
+        PROTON_ENABLE_AMD_AGS = "1";
       };
       args = [
         "-f"
@@ -217,6 +223,7 @@
   	  winetricks
   	  lact # TODO: Should become a module in 25.05
   	  latencyflex-vulkan
+  	  vulkan-hdr-layer-kwin6
   	];
 
   	variables = {
