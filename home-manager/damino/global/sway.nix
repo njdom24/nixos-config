@@ -355,28 +355,29 @@
 
 	  mako = {
 	    enable = true;
+        settings = {
+          font = "${config.gtk.font.name} 11";
+          layer = "overlay";
+          defaultTimeout = 4000;
+          borderRadius = 6;
+          borderSize = 2;
+          maxIconSize = 32;
+          anchor = "top-right";
 
-	  	font = "${config.gtk.font.name} 11";
-	  	layer = "overlay";
-	  	defaultTimeout = 4000;
-	  	borderRadius = 6;
-	  	borderSize = 2;
-	  	maxIconSize = 32;
-	  	anchor = "top-right";
+          backgroundColor = "#${config.colorScheme.palette.base00}";
+          borderColor = "#${config.colorScheme.palette.base0D}";
+          progressColor = "#${config.colorScheme.palette.base0D}";
+          textColor = "#${config.colorScheme.palette.base05}";
+        };
 
-	  	backgroundColor = "#${config.colorScheme.palette.base00}";
-	  	borderColor = "#${config.colorScheme.palette.base0D}";
-	  	progressColor = "#${config.colorScheme.palette.base0D}";
-	  	textColor = "#${config.colorScheme.palette.base05}";
-
-	  	extraConfig =
-''
-[urgency=low]
-text-color=#${config.colorScheme.palette.base0A}
-
-[urgency=high]
-text-color=#${config.colorScheme.palette.base08}
-'';
+	  	criteria = {
+	  	  "urgency=low" = {
+	  	    text-color = "#${config.colorScheme.palette.base0A}";
+	  	  };
+	  	  "urgency=high" = {
+	  	    text-color = "#${config.colorScheme.palette.base08}";
+	  	  };
+	  	};
 	  };
 	};
 
