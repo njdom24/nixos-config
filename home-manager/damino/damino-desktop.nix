@@ -134,7 +134,7 @@
 	  	}
 	  ];
 
-	  mako = {
+	  mako.settings = {
 	    output = "DP-2";
 	    anchor = lib.mkForce "top-left";
 	  };
