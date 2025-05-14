@@ -105,7 +105,7 @@
       env = {
         MANGOHUD = "0";
         #VK_LOADER_LAYERS_DISABLE = "VK_LAYER_MANGOHUD_overlay_64_x86_64,VK_LAYER_MANGOHUD_overlay_32_x86";
-        MANGOHUD_CONFIGFILE="~/.config/MangoHud/MangoHud.conf";
+        #MANGOHUD_CONFIGFILE="~/.config/MangoHud/MangoHud.conf";
         WLR_RENDERER = "vulkan";
         ENABLE_GAMESCOPE_WSI = "1";
         ENABLE_HDR_WSI = "0";
