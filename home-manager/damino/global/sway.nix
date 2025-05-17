@@ -368,16 +368,14 @@
           borderColor = "#${config.colorScheme.palette.base0D}";
           progressColor = "#${config.colorScheme.palette.base0D}";
           textColor = "#${config.colorScheme.palette.base05}";
-        };
 
-	  	criteria = {
-	  	  "urgency=low" = {
-	  	    text-color = "#${config.colorScheme.palette.base0A}";
-	  	  };
-	  	  "urgency=high" = {
-	  	    text-color = "#${config.colorScheme.palette.base08}";
-	  	  };
-	  	};
+          "urgency=low" = {
+            text-color = "#${config.colorScheme.palette.base0A}";
+          };
+          "urgency=high" = {
+            ext-color = "#${config.colorScheme.palette.base08}";
+          };
+        };
 	  };
 	};
 
