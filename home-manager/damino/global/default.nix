@@ -201,6 +201,7 @@
       size = 10;
     };
 
+    gtk2.force = true;
     gtk3.extraConfig = lib.mkMerge [
       commonExtraConfig
       {
