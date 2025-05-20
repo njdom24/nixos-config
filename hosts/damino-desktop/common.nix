@@ -109,33 +109,22 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-    git
-    micro
-    x11vnc
-    wayvnc
-    #sunshine
+  environment = {
+    # 'rec' allows accessing $VARS. See https://nixos.wiki/wiki/Environment_variables
+  	sessionVariables = rec {
+  	  POWERDEVIL_NO_DDCUTIL = "1";
+  	};
 
-    # Monitor scripts
-    (pkgs.writeShellScriptBin "enable-dimming" ''
-      #!/usr/bin/env bash
-      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6c 50 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 70 50 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6e 50 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-      
-      #while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 69 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-    '')
-    (pkgs.writeShellScriptBin "disable-dimming" ''
-      #!/usr/bin/env bash
-      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6c 51 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 70 51 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-      while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6e 51 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-      
-      #while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 64 --model="Mi Monitor" --sleep-multiplier=0.025; do sleep 0.1; done
-    '')
-  ];
+    systemPackages = with pkgs; [
+    #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    #  wget
+      git
+      micro
+      x11vnc
+      wayvnc
+      #sunshine
+    ];
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
