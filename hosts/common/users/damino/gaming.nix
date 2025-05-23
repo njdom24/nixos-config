@@ -72,24 +72,24 @@
       gamescopeSession = {
         enable = true;
         env = {
-          #WLR_RENDERER = "vulkan";
-          STEAM_MULTIPLE_XWAYLANDS = "1";
           #MANGOHUD = "0";
           #MANGOHUD_CONFIG = "read_cfg,no_display";
+          #MANGOHUD_CONFIGFILE="~/.config/MangoHud/MangoHud.conf";
           #VK_LOADER_LAYERS_DISABLE = "VK_LAYER_MANGOHUD_overlay_64_x86_64,VK_LAYER_MANGOHUD_overlay_32_x86";
+          #WLR_RENDERER = "vulkan";
+          DXVK_HDR = "1"; # Works with VKD3D-Proton, confirmed required as of Proton 9.0-3
           ENABLE_GAMESCOPE_WSI = "1";
           ENABLE_HDR_WSI = "0";
-          #STEAM_GAMESCOPE_FORCE_HDR_DEFAULT = "1";
-          DXVK_HDR = "1"; # Works with VKD3D-Proton, confirmed required as of Proton 9.0-3
+          STEAM_MULTIPLE_XWAYLANDS = "1";
           PROTON_ENABLE_AMD_AGS = "1";
         };
         args = [
           "-f"
           "--xwayland-count 2"
           #"--mangoapp"
-          "--adaptive-sync"
           #"--expose-wayland" # Seems to break games when HDR enabled
           "--hdr-enabled"
+          "--adaptive-sync"
           #"--hdr-debug-force-output"
           #"--hdr-sdr-content-nits 500"
           #"--hdr-itm-enable"
@@ -103,10 +103,12 @@
       enable = true;
       capSysNice = false; # Needed or gamescope fails within Steam; Band-aided with ananicy
       env = {
-        MANGOHUD = "0";
-        #VK_LOADER_LAYERS_DISABLE = "VK_LAYER_MANGOHUD_overlay_64_x86_64,VK_LAYER_MANGOHUD_overlay_32_x86";
+        #MANGOHUD = "0";
+        #MANGOHUD_CONFIG = "read_cfg,no_display,blacklist=test";
         #MANGOHUD_CONFIGFILE="~/.config/MangoHud/MangoHud.conf";
-        WLR_RENDERER = "vulkan";
+        #VK_LOADER_LAYERS_DISABLE = "VK_LAYER_MANGOHUD_overlay_64_x86_64,VK_LAYER_MANGOHUD_overlay_32_x86";
+        #WLR_RENDERER = "vulkan";
+        DXVK_HDR = "1";
         ENABLE_GAMESCOPE_WSI = "1";
         ENABLE_HDR_WSI = "0";
         STEAM_MULTIPLE_XWAYLANDS = "1";
@@ -116,6 +118,7 @@
         "-f"
         "--xwayland-count 2"
         #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
+        "--hdr-enabled"
         "--adaptive-sync"
         #"--mangoapp"
       ];
