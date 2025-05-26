@@ -107,7 +107,7 @@
 	  	}
 	  	{
 	  	  profile = {
-	  	    name = "desktop-secondary";
+	  	    name = "desktop-secondary-old";
 	  	    outputs = [
 	  	      {
 	  	        criteria = "Acer Technologies VG271U 0x0302811A";
@@ -116,6 +116,33 @@
 	  	  	    position = "2560,0";
 	  	  	    adaptiveSync = true;
 	  	  	  }
+	  	      {
+	  	  	    criteria = "Samsung Electric Company LC27T55 HCPW203589";
+	  	  	    status = "enable";
+	  	  	    mode = "1920x1080@75";
+	  	  	    position = "0,0";
+	  	  	    scale = 0.75;
+	  	  	    adaptiveSync = true;
+	  	  	  }
+	  	    ];
+	  	    exec = [
+	  	      "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
+	  	      "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0a_00.1 pro-audio"
+	  	      "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0a_00.1.pro-output-3"
+	  	    ];
+	  	  };
+	  	}
+	  	{
+	  	  profile = {
+	  	    name = "desktop-secondary";
+	  	    outputs = [
+	          {
+	            criteria = "Xiaomi Corporation Mi Monitor 5745300000795";
+	      	    status = "enable";
+	      	    mode = "2560x1440@180Hz";
+	      	    position = "2560,0";
+	      	    adaptiveSync = true;
+	      	  }
 	  	      {
 	  	  	    criteria = "Samsung Electric Company LC27T55 HCPW203589";
 	  	  	    status = "enable";
