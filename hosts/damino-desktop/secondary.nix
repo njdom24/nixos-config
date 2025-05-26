@@ -9,6 +9,7 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration-secondary.nix
       ./common.nix
+      ./displays-secondary.nix
     ];
 
   networking.hostName = "damino-secondary"; # Define your hostname.
