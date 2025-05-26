@@ -18,9 +18,12 @@ let
         red=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x16.*current value = *([0-9]+),.*/\1/p')
         green=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x18.*current value = *([0-9]+),.*/\1/p')
         blue=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x1a.*current value = *([0-9]+),.*/\1/p')
+        black_red=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x6c.*current value = *([0-9]+),.*/\1/p')
+        black_green=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x6e.*current value = *([0-9]+),.*/\1/p')
+        black_blue=$(echo "$output" | ${pkgs.gnused}/bin/sed -nE 's/.*0x70.*current value = *([0-9]+),.*/\1/p')
 
         if [[ -n "$contrast" && -n "$red" && -n "$green" && -n "$blue" ]]; then
-            echo "Attempt $attempt: C=$contrast R=$red G=$green B=$blue"
+            echo "Attempt $attempt: C=$contrast R=$red G=$green B=$blue BR=$black_red BG=$black_green BB=$black_blue"
             if (( red < 60 || green < 60 || blue < 60 )); then
                 echo "Error: One or more values below 60 — R=$red G=$green B=$blue"
                 ((attempt++))
@@ -31,6 +34,10 @@ let
             sleep 0.1
 
             while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 12 "$contrast" 16 "$red" 18 "$green" 1A "$blue" --model="Mi Monitor" --disable-dynamic-sleep --sleep-multiplier=0.025; do
+                sleep 0.1
+            done
+
+            while ! ${pkgs.ddcutil}/bin/ddcutil setvcp 6c "$black_red" 6e "$black_green" 70 "$black_blue" --model="Mi Monitor" --disable-dynamic-sleep --sleep-multiplier=0.025; do
                 sleep 0.1
             done
 
