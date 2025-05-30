@@ -18,9 +18,9 @@
   networking.interfaces.enp10s0.wakeOnLan.enable = true;
 
   # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
-  chaotic.mesa-git = {
-    enable = true;
-  };
+  #chaotic.mesa-git = {
+  #  enable = true;
+  #};
   hardware = {
     firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
   };
