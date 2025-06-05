@@ -7,7 +7,7 @@
 	  #upgrade = "sudo nixos-rebuild switch --flake /etc/nixos/.#";
 	  #hm-upgrade = "home-manager switch --flake /etc/nixos/.";
 	};
-	initExtra = ''
+	initContent = ''
 	  upgrade() {
 	    sudo nixos-rebuild switch --flake /etc/nixos/.# "$@"
 	  }
