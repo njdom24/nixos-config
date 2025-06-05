@@ -75,7 +75,8 @@
     sessionVariables = {
       # GTK_THEME= "${config.gtk.theme.name}:dark";
       MESA_VK_WSI_PRESENT_MODE = "fifo"; # MangoHud vsync is non-functional as of 24.11; https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379
-      GSK_RENDERER = "ngl"; # https://bbs.archlinux.org/viewtopic.php?id=299488; probably fixed by 25.05
+      # DXVK_CONFIG="dxgi.syncInterval = 1" # DXVK equivalent for MESA_VK_WSI_PRESENT_MODE=fifo. GPU-agnostic, but only works on DXVK/VKD3D-Proton games
+      GSK_RENDERER = "ngl"; # https://bbs.archlinux.org/viewtopic.php?id=299488; Wait for https://github.com/flightlessmango/MangoHud/issues/1305#issuecomment-2706502698 to make it into a release (above 0.8.1)
       LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.xorg.libX11}/lib"; # Fixed MangoHud for Wayland apps: https://github.com/ValveSoftware/gamescope/pull/1666 https://github.com/flightlessmango/MangoHud/issues/1497
     };
 
