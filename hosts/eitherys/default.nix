@@ -159,7 +159,6 @@ in
 	  gnome-disk-utility
 	  gnome-system-monitor
 	  libnotify
-	  xwaylandvideobridge
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
