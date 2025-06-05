@@ -124,17 +124,10 @@
         #"--mangoapp"
       ];
     };
-
-    corectrl = {
-      enable = true;
-      package = pkgs.unstable.corectrl.overrideAttrs (finalAttrs: prevAttrs: {
-      	qtWrapperArgs = ["--unset QT_QPA_PLATFORMTHEME"];
-      });
-      gpuOverclock.enable = true;	
-    };
   };
 
   hardware = {
+    amdgpu.overdrive.enable = true;
   	graphics = {
   	  enable32Bit = true; # Enables support for 32bit libs that steam uses
   	};
