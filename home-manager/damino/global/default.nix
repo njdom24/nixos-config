@@ -76,6 +76,7 @@
       # GTK_THEME= "${config.gtk.theme.name}:dark";
       MESA_VK_WSI_PRESENT_MODE = "fifo"; # MangoHud vsync is non-functional as of 24.11; https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379
       # DXVK_CONFIG="dxgi.syncInterval = 1" # DXVK equivalent for MESA_VK_WSI_PRESENT_MODE=fifo. GPU-agnostic, but only works on DXVK/VKD3D-Proton games
+      vblank_mode = "3"; # Force OpenGL Vsync (Mesa). NV equivalent is __GL_SYNC_TO_VBLANK=1, or consider LD_PRELOAD for MangoHud (details in MangoHud block)
       GSK_RENDERER = "ngl"; # https://bbs.archlinux.org/viewtopic.php?id=299488; Wait for https://github.com/flightlessmango/MangoHud/issues/1305#issuecomment-2706502698 to make it into a release (above 0.8.1)
       LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.xorg.libX11}/lib"; # Fixed MangoHud for Wayland apps: https://github.com/ValveSoftware/gamescope/pull/1666 https://github.com/flightlessmango/MangoHud/issues/1497
     };
@@ -141,6 +142,7 @@
 	  enable = true;
 	  # package = pkgs.legacy.mangohud;
 	  enableSessionWide = true;
+	  # Consider LD_PRELOAD = "${pkgs.mangohud}/lib/mangohud/libMangoHud.so" for global OpenGL
 	  settings = {
 	  	no_display = true;
 	  	vsync = 3; # Currently broken due to https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379, set MESA_VK_WSI_PRESENT_MODE=fifo for Mesa instead
