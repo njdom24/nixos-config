@@ -145,6 +145,7 @@
     '';
 
     cpupower-gui.enable = true;
+    lact.enable = true;
 
  	ananicy = {
  	  enable = true;
@@ -219,7 +220,6 @@
   	  #wineWowPackages.stagingFull
   	  wineWowPackages.waylandFull
   	  winetricks
-  	  lact # TODO: Should become a module in 25.05
   	  latencyflex-vulkan
   	  vulkan-hdr-layer-kwin6
   	];
@@ -230,13 +230,9 @@
   	};
   };
 
-  systemd.packages = with pkgs; [ lact ];
-  systemd.services.lactd.wantedBy = ["multi-user.target"];
-
   # Sourced from https://github.com/Jovian-Experiments/Jovian-NixOS/blob/c40d2f31f92571bf341497884174a132829ef0fc/modules/steamos/sysctl.nix#L38
   boot.kernel.sysctl = {
     "kernel.split_lock_mitigate" = lib.mkDefault 0;
-
     # > This is required due to some games being unable to reuse their TCP ports
     # > if they're killed and restarted quickly - the default timeout is too large.
     #  - https://github.com/Jovian-Experiments/steamos-customizations-jupiter/commit/4c7b67cc5553ef6c15d2540a08a737019fc3cdf1
