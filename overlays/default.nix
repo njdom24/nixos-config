@@ -24,6 +24,43 @@
         ../patches/gamescope-sway-fix.patch
       ];
     });
+
+    sunshine = prev.sunshine.overrideAttrs (oldAttrs: rec {
+      src = prev.fetchFromGitHub {
+      owner = "LizardByte";
+      repo = "Sunshine";
+      rev = "958d783d9431f029719dafd9cd451fb5397476b2"; # desired commit
+      hash = "sha256-J4llOaYk93lgI4RQZx6UeywUF3LcGIv/foMSbAvS+G4="; # update via `nix-prefetch`
+      fetchSubmodules = true;
+    };
+
+      postPatch = ''
+      # remove upstream dependency on systemd and udev
+      substituteInPlace cmake/packaging/linux.cmake \
+        --replace-fail 'find_package(Systemd)' "" \
+        --replace-fail 'find_package(Udev)' ""
+
+      # don't look for npm since we build webui separately
+      substituteInPlace cmake/targets/common.cmake \
+        --replace-fail 'find_program(NPM npm REQUIRED)' ""
+
+      substituteInPlace packaging/linux/dev.lizardbyte.app.Sunshine.desktop \
+        --subst-var-by PROJECT_NAME 'Sunshine' \
+        --subst-var-by PROJECT_DESCRIPTION 'Self-hosted game stream host for Moonlight' \
+        --subst-var-by SUNSHINE_DESKTOP_ICON 'sunshine' \
+        --subst-var-by CMAKE_INSTALL_FULL_DATAROOTDIR "$out/share" \
+        --replace-fail '/usr/bin/env systemctl start --u sunshine' 'sunshine'
+
+      substituteInPlace packaging/linux/sunshine.service.in \
+        --subst-var-by PROJECT_DESCRIPTION 'Self-hosted game stream host for Moonlight' \
+        --subst-var-by SUNSHINE_EXECUTABLE_PATH $out/bin/sunshine \
+        --replace-fail '/bin/sleep' '${prev.coreutils}/bin/sleep'
+      '';
+
+      postInstall = ''
+        install -Dm644 ../packaging/linux/dev.lizardbyte.app.Sunshine.desktop $out/share/applications/dev.lizardbyte.app.Sunshine.desktop
+      '';
+    });
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
