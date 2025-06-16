@@ -15,6 +15,11 @@
       autoStart = false;
       capSysAdmin = true;
       openFirewall = true;
+      settings = {
+        key_rightalt_to_key_win = "enabled";
+        capture = "kms"; # Sway 1.11 has broken wlr capture
+        vaapi_strict_rc_buffer = "enabled";
+      };
       applications.apps = let
         getWaylandDisplay = pkgs.writeShellScript "getWaylandDisplay" ''
           if [ -z "$WAYLAND_DISPLAY" ]; then
