@@ -284,7 +284,9 @@ in
               exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.sunshine}/bin/sunshine ${sunshineCfg} > /tmp/sunshine_login"
             '';
           in
-          "/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=vulkan ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
+          #"/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=vulkan ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
+          # Vulkan backend breaks with sunshine: https://github.com/swaywm/sway/issues/8765#issuecomment-2975196895
+          "/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=gles2 ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
   	  };
 
   	  # https://github.com/NixOS/nixpkgs/issues/292761
