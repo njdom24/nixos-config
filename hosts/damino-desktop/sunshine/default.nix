@@ -17,7 +17,7 @@
       openFirewall = true;
       settings = {
         key_rightalt_to_key_win = "enabled";
-        capture = "kms"; # Sway 1.11 has broken wlr capture
+        #capture = "kms"; # Sway 1.11 has broken wlr capture over Vulkan
         vaapi_strict_rc_buffer = "enabled";
       };
       applications.apps = let

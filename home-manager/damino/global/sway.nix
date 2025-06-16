@@ -295,7 +295,7 @@
 		  export MOZ_DBUS_REMOTE=1
 		  export XDG_CURRENT_DESKTOP=sway
 		  export NIXOS_OZONE_WL=1
-		  export WLR_RENDERER=vulkan
+		  #export WLR_RENDERER=vulkan
 
 		  # Monitor the wayvnc process to see if it's still running
 		  if pgrep -x "wayvnc" > /dev/null; then
@@ -337,6 +337,8 @@
 
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
 		  #export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
+		  export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "gles2" || echo "vulkan")
+		  #export WLR_RENDER_NO_EXPLICIT_SYNC=1
 		    
 		  eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
 		  export SSH_AUTH_SOCK
