@@ -2,7 +2,53 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ inputs, outputs, config, lib, pkgs, ... }: {
+{ inputs, outputs, config, lib, pkgs, ... }:
+let
+  # Gamescope helper to auto-fill mode
+  gsc = pkgs.writeShellScriptBin "gsc" ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Skip wrapping if we're already inside Gamescope and first arg is a command
+    if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
+      if [ "$#" -gt 0 ] && [ "$(echo "$1" | cut -c1)" != "-" ]; then
+        exec "$@"
+      fi
+    fi
+
+    # Resolution & refresh detection
+    get_display_info() {
+      if [ -n "''${SWAYSOCK-}" ]; then #"'''
+        swaymsg -t get_outputs | jq -r '
+          .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
+        '
+      elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
+        kscreen-doctor -o |
+          grep -i primary |
+          grep -oE '[0-9]+x[0-9]+ *@[0-9.]+' |
+          sed -E 's/x/ /; s/ @/ /' |
+          awk '{ split($3, r, "."); print $1, $2, r[1] }'
+
+        read width height refresh < <(
+          kscreen-doctor -j | jq -r '
+            (.outputs | map(select(.enabled == true)) | sort_by(.priority))[0] as $out |
+            ($out.currentModeId) as $curId |
+            ($out.modes[] | select(.id == $curId)) |
+            "\(.size.width) \(.size.height) \(.refreshRate)"
+          '
+        )
+        
+        echo "$width $height $refresh"
+      fi
+    }
+
+    read width height refresh <<< "$(get_display_info || echo "1920 1080 60")"
+    refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
+    echo "Launching gamescope at $width"x"$height@$refresh"
+    exec gamescope -r "$refresh" -W "$width" -H "$height" "$@"
+  '';
+in 
+{
   imports =
     [
       inputs.chaotic.nixosModules.default
@@ -185,6 +231,7 @@
 
   environment = {
   	systemPackages = with pkgs; [
+  	  gsc
   	  steam-run
   	  steamtinkerlaunch
   	  # https://github.com/ValveSoftware/steam-for-linux/issues/11479
