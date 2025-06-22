@@ -274,6 +274,10 @@ in
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
   	  #"MANGOHUD" = "1";
+  	  "MESA_GIT" = lib.concatStringsSep ":" [
+  	    "${pkgs.mesa_git}/share/vulkan/icd.d/radeon_icd.x86_64.json"
+  	    "${pkgs.mesa32_git}/share/vulkan/icd.d/radeon_icd.i686.json"
+  	  ];
   	};
   };
 
