@@ -88,16 +88,6 @@
                   ;;
                 kwin_wayland)
                   echo "→ Running KDE/KWin-specific logic"
-
-                  # Back up existing display settings
-                  backup_dir="$HOME/.local/share/kscreen.bak"
-                  if [ -d "$HOME/.local/share/kscreen" ]; then
-                      rm -rf "$backup_dir"
-                      cp -r "$HOME/.local/share/kscreen" "$backup_dir"
-                      echo "Backup saved to $backup_dir"
-                  else
-                      echo "No KScreen config found to back up."
-                  fi
                   
                   # Assume DP-3 is a dummy display used for headless
                   DUMMY="DP-3"
@@ -146,15 +136,6 @@
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferEfficiency
                   fi
-
-                  if [ -d "$backup_dir" ]; then
-                      rm -rf "$HOME/.local/share/kscreen"
-                      cp -r "$backup_dir" "$HOME/.local/share/kscreen"
-                      echo "Restored from backup."
-                  else
-                      echo "No backup found at $backup_dir"
-                  fi
-
                   ;;
                 "")
                   echo "→ No known compositor found"

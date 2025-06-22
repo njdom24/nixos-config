@@ -204,4 +204,52 @@
 	    anchor = lib.mkForce "top-left";
 	  };
 	};
+
+	home.file =
+	let plasma-display-restore = pkgs.writeShellScript "plasma-display-restore" ''
+	  if [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]]; then
+	    outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o | ${pkgs.colorized-logs}/bin/ansi2txt | ${pkgs.gawk}/bin/awk '
+	      /^Output:/ {
+	        if (in_block && enabled && connected)
+	          print name
+	        name = $3
+	        enabled = 0
+	        connected = 0
+	        in_block = 1
+	        next
+	      }
+	      /enabled/ { enabled = 1 }
+	      /connected/ { connected = 1 }
+	      END {
+	        if (in_block && enabled && connected)
+	          print name
+	      }
+	    '))
+	    
+	    len=$(echo "''${outputs[@]}" | wc -w)
+	    first=$(echo "''${outputs[@]}" | awk '{print $1}')
+	    
+	    if [[ $len -eq 1 && "$first" == "DP-3" ]]; then
+	      echo "Only DP-3 is enabled and connected. Restoring..."
+	      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
+	      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
+	      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
+	    else
+	      echo "DP-3 is not the only enabled connected output"
+	    fi
+	    
+	  fi
+	'';
+	in {
+	  ".config/autostart/plasma-display-restore.desktop".text = ''
+	      [Desktop Entry]
+	      Type=Application
+	      Exec=${plasma-display-restore}
+	      Hidden=false
+	      NoDisplay=true
+	      X-GNOME-Autostart-enabled=true
+	      Name=My Script
+	      Comment=Checks for previous Sunshine display config and restores to desktop usability
+	    '';
+	};
 }
