@@ -356,8 +356,8 @@ in
   systemd = {
     # Hail Mary to prevent remote shutdown hangs
     extraConfig = ''
-      DefaultTimeoutStopSec=10min
-      DefaultTimeoutStartSec=10min
+      DefaultTimeoutStopSec=1min
+      DefaultTimeoutStartSec=1min
       DefaultTimeoutAbortSec=30s
     '';
     services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];
