@@ -360,26 +360,34 @@ in
       DefaultTimeoutStartSec=1min
       DefaultTimeoutAbortSec=30s
     '';
-    services.power-profiles-daemon.wantedBy = [ "multi-user.target" ];
     watchdog.runtimeTime = "30s";
+
     # Create a separate slice for nix-daemon that is
     # memory-managed by the userspace systemd-oomd killer
-    slices."nix-daemon".sliceConfig = {
-      ManagedOOMMemoryPressure = "kill";
-      ManagedOOMMemoryPressureLimit = "50%";
-    };
-    services."nix-daemon".serviceConfig.Slice = "nix-daemon.slice";
-
-    services."systemd-journald".serviceConfig = {
-      TimeoutStartSec = "10s";
-      TimeoutStopSec = "10s";
+    slices."nix-daemon" = {
+      sliceConfig = {
+        ManagedOOMMemoryPressure = "kill";
+        ManagedOOMMemoryPressureLimit = "50%";
+      };
     };
 
-    # If a kernel-level OOM event does occur anyway,
-    # strongly prefer killing nix-daemon child processes
-    # OOM configuration: https://discourse.nixos.org/t/nix-build-ate-my-ram/35752
-    services."nix-daemon".serviceConfig.OOMScoreAdjust = 1000;
-    services."ddcci@" = {
+    services = {
+      "nix-daemon".serviceConfig = {
+        Slice = "nix-daemon.slice";
+
+        # If a kernel-level OOM event does occur anyway,
+        # strongly prefer killing nix-daemon child processes
+        # OOM configuration: https://discourse.nixos.org/t/nix-build-ate-my-ram/35752
+        OOMScoreAdjust = 1000;
+      };
+      power-profiles-daemon.wantedBy = [ "multi-user.target" ];
+
+      "systemd-journald".serviceConfig = {
+        TimeoutStartSec = "10s";
+        TimeoutStopSec = "10s";
+      };
+
+      "ddcci@" = {
         scriptArgs = "%i";
         script = ''
           echo Trying to attach ddcci to $1
@@ -387,21 +395,22 @@ in
           exec 200>"$lockfile"
           id=$(echo $1 | cut -d "-" -f 2)
           counter=5
-          while [ $counter -gt 0 ]; do
-            if timeout 10s flock 200; then
-            sleep 0.1
-            if ${pkgs.ddcutil}/bin/ddcutil getvcp 10 -b $id; then
-              echo ddcci 0x37 > /sys/bus/i2c/devices/$1/new_device
-              echo Successfully attached ddcci to $1
-              break
-            fi
-            fi
-            sleep 5
-            counter=$((counter - 1))
-          done
-        '';
+            while [ $counter -gt 0 ]; do
+              if timeout 10s flock 200; then
+                sleep 0.1
+                if ${pkgs.ddcutil}/bin/ddcutil getvcp 10 -b $id; then
+                  echo ddcci 0x37 > /sys/bus/i2c/devices/$1/new_device
+                  echo Successfully attached ddcci to $1
+                  break
+                fi
+              fi
+              sleep 5
+              counter=$((counter - 1))
+            done
+          '';
         serviceConfig.Type = "oneshot";
       };
+    };
   };
 
   environment = {
