@@ -15,7 +15,7 @@
     #    #./my-mesa-fix.patch
     #  ];
     #});
-    gamescope = prev.gamescope.overrideAttrs (oldAttrs: {
+    gamescope = inputs.chaotic.packages.${prev.system}.gamescope_git.overrideAttrs (oldAttrs: {
       # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530
       NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
 
