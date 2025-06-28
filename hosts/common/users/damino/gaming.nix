@@ -247,12 +247,13 @@ in
   	  '') else null)
   	  (if config.programs.gamescope.enable then gamescope-wsi else null)
   	  samrewritten
+  	  sgdboop
   	  moonlight-qt
   	  unstable.lutris
   	  unstable.xivlauncher
   	  vkbasalt
   	  protontricks
-  	  protonup-qt
+  	  protonplus
 	  unstable.ludusavi
 	  unstable.ryujinx
 	  # citra-mk7 TODO: https://github.com/NixOS/nixpkgs/pull/348927
