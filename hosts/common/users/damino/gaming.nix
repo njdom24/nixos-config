@@ -23,12 +23,6 @@ let
           .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
         '
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
-        kscreen-doctor -o |
-          grep -i primary |
-          grep -oE '[0-9]+x[0-9]+ *@[0-9.]+' |
-          sed -E 's/x/ /; s/ @/ /' |
-          awk '{ split($3, r, "."); print $1, $2, r[1] }'
-
         read width height refresh < <(
           kscreen-doctor -j | jq -r '
             (.outputs | map(select(.enabled == true)) | sort_by(.priority))[0] as $out |
