@@ -9,11 +9,18 @@ let
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Skip wrapping if we're already inside Gamescope and first arg is a command
+    # Skip wrapping if we're already inside Gamescope. Execute everything after '--'
     if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
-      if [ "$#" -gt 0 ] && [ "$(echo "$1" | cut -c1)" != "-" ]; then
-        exec "$@"
-      fi
+      while [ "$#" -gt 0 ]; do
+        if [ "$1" = "--" ]; then
+          shift
+          exec "$@"
+        fi
+        shift
+      done
+    
+      echo "Error: '--' not found. No command to run." >&2
+      exit 1
     fi
 
     # Resolution & refresh detection
