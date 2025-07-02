@@ -83,13 +83,57 @@
 
     file =
     let sunshine-login = pkgs.writeShellScript "sunshine-login" ''
-      if [ -f /tmp/sunshine_login ]; then
+      if [ -f /tmp/sunshine_login ] && [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]]; then
         if ${pkgs.gawk}/bin/awk '
         /CLIENT CONNECTED/ {e=1}
         e && /CLIENT DISCONNECTED/ {cancel=1}
         END { if (e && !cancel) exit 0; else exit 1 }
         ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
+          # Assume DP-3 is a dummy display used for headless
+          DUMMY="DP-3"
+          
+          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
+          
+          output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o)
+          
+          # Extract the names of the connected displays
+          displays=$(echo "$output" | ${pkgs.gawk}/bin/awk '/Output:/ { print $3 }')
+          echo "Displays found: $displays"
+
+          # Check if the dummy display is present
+          echo "$displays" | grep -qx "$DUMMY"
+          if [ $? -ne 0 ]; then
+            echo "$DUMMY is not connected."
+          fi
+          
+          # Loop through each display and disable all except DP-3
+          while read -r display; do
+            if [[ "$display" != "$DUMMY" ]]; then
+              echo "Disabling display: $display"
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$display".disable
+            fi
+          done <<< "$displays"
+
           systemctl --user start sunshine
+        else
+          # Get all connected and enabled outputs
+          outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+            .outputs[]
+            | select(.connected == true and .enabled == true)
+            | .name
+          '))
+          
+          len=''${#outputs[@]}
+          first=''${outputs[0]:-}
+          
+          if [[ $len -eq 1 && "$first" == "DP-3" ]]; then
+            echo "Only DP-3 is enabled and connected. Restoring..."
+            $kscreen_doctor output.DP-1.enable
+            $kscreen_doctor output.DP-2.enable
+            $kscreen_doctor output.DP-3.disable
+          else
+            echo "DP-3 is not the only enabled connected output"
+          fi
         fi
       fi
     '';
