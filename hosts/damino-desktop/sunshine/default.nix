@@ -101,6 +101,7 @@
                     SUNSHINE_CLIENT_FPS=60
                   fi
                   
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
                   ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
                   
                   output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o)
