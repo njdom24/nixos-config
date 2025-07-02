@@ -4,27 +4,24 @@
   plasma-toggle-hdr = pkgs.writeShellScriptBin "plasma-toggle-hdr" ''
     #!/usr/bin/env bash
 
-    hdr_enabled_outputs=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o | ${pkgs.colorized-logs}/bin/ansi2txt | ${pkgs.gawk}/bin/awk '/^Output:/ {if(hdr) print out; out=$3; hdr=0; next} {l=$0; sub(/^[ \t]+/, "", l); if(l=="HDR: enabled") hdr=1} END {if(hdr) print out}')
-    hdr_disabled_outputs=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o | ${pkgs.colorized-logs}/bin/ansi2txt | ${pkgs.gawk}/bin/awk '/^Output:/ {if(hdr) print out; out=$3; hdr=0; next} {l=$0; sub(/^[ \t]+/, "", l); if(l=="HDR: disabled") hdr=1} END {if(hdr) print out}')
+    json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
     
-    if [ -z "$hdr_enabled_outputs" ]; then
-      echo "HDR-disabled displays: $hdr_disabled_outputs"
-      if [ -n "$hdr_disabled_outputs" ]; then
-        for display in $hdr_disabled_outputs; do
-          echo "Enabling HDR for '$display'"
-          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.$display.wcg.enable
-          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.$display.hdr.enable
-        done
-      fi
+    mapfile -t enabled < <(jq -r '.outputs[] | select(.connected and .enabled and has("hdr") and .hdr == true) | .name' <<< "$json")
+    mapfile -t disabled < <(jq -r '.outputs[] | select(.connected and .enabled and has("hdr") and .hdr == false) | .name' <<< "$json")
+
+    ''$() # Fix syntax highlighting
+    if [ ''${#enabled[@]} -eq 0 ]; then
+      echo "HDR-disabled displays: ''${disabled[*]}"
+      for d in "''${disabled[@]}"; do
+        echo "Enabling HDR for '$d'"
+        ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.$d.wcg.enable output.$d.hdr.enable
+      done
     else
-      echo "HDR-enabled displays: $hdr_enabled_outputs"
-      if [ -n "$hdr_enabled_outputs" ]; then
-        for display in $hdr_enabled_outputs; do
-          echo "Disabling HDR for '$display'"
-          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.$display.hdr.disable
-          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.$display.wcg.disable
-        done
-      fi
+      echo "HDR-enabled displays: ''${enabled[*]}"
+      for d in "''${enabled[@]}"; do
+        echo "Disabling HDR for '$d'"
+        ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.$d.hdr.disable output.$d.wcg.disable
+      done
     fi
   '';
 }
