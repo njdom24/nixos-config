@@ -46,7 +46,20 @@ let
     read width height refresh <<< "$(get_display_info || echo "1920 1080 60")"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     echo "Launching gamescope at $width"x"$height@$refresh"
-    exec gamescope -r "$refresh" -W "$width" -H "$height" "$@"
+    #exec gamescope -r "$refresh" -W "$width" -H "$height" "$@"
+
+    while true; do
+      gamescope -r "$refresh" -W "$width" -H "$height" "$@"
+      code=$?
+    
+      # Exit codes 0 and 143 (SIGTERM) are normal
+      if [ $code -eq 0 ] || [ $code -eq 143 ]; then
+        break
+      fi
+    
+      echo "gamescope exited with code $code, retrying in 1 second..."
+      sleep 1
+    done
   '';
 in 
 {
