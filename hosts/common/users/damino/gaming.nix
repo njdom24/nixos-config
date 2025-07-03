@@ -9,6 +9,9 @@ let
     #!/usr/bin/env bash
     set -euo pipefail
 
+    # Set environment variables
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}='${lib.escapeShellArg v}'") config.programs.gamescope.env)}
+
     # Skip wrapping if we're already inside Gamescope. Execute everything after '--'
     if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
       while [ "$#" -gt 0 ]; do
@@ -46,10 +49,12 @@ let
     read width height refresh <<< "$(get_display_info || echo "1920 1080 60")"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     echo "Launching gamescope at $width"x"$height@$refresh"
-    #exec gamescope -r "$refresh" -W "$width" -H "$height" "$@"
 
     while true; do
-      if gamescope -r "$refresh" -W "$width" -H "$height" "$@"; then
+      if gamescope ${
+        lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
+        config.programs.gamescope.args
+      } -r "$refresh" -W "$width" -H "$height" "$@"; then
         break
       else
         code=$?
@@ -182,7 +187,7 @@ in
         "--hdr-enabled"
         "--adaptive-sync"
         "--force-grab-cursor"
-        "-r 360" # Default that is a multiple of 120 and 180
+        #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
       ];
     };
