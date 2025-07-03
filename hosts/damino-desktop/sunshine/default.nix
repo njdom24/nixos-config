@@ -82,7 +82,7 @@
                     ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 10
                   else
                     echo "Disabling HDR"
-                    ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 10
+                    ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 8
                   fi
                   
                   ;;
@@ -127,14 +127,14 @@
                   
                   if [[ "$1" == "hdr" ]]; then
                     echo "Enabling HDR"
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.enable
+                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".wcg.enable output."$DUMMY".hdr.enable
                     # https://github.com/LizardByte/Sunshine/issues/3298#issuecomment-2670218658
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferAccuracy
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".sdr-brightness.203 # Standard reference luminance
                     ${pkgs.kdePackages.full}/bin/qdbus org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/Actions/BrightnessControl org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness 10000 # Max 100.00% brightness
                   else
                     echo "Disabling HDR"
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable
+                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable output."$DUMMY".wcg.disable
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferEfficiency
                   fi
                   ;;
