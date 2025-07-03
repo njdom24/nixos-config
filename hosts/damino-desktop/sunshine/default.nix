@@ -180,9 +180,9 @@
           export PROTON_ENABLE_AMD_AGS=1
           export STEAM_MULTIPLE_XWAYLANDS=1
           if [[ "$1" == "hdr" ]]; then
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam --hdr-enabled -f --xwayland-count 2 --force-grab-cursor -r $SUNSHINE_CLIENT_FPS -- steam -console -tenfoot -pipewire-dmabuf'
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gsc --steam --hdr-enabled -f --xwayland-count 2 --force-grab-cursor -r $SUNSHINE_CLIENT_FPS -- steam -console -tenfoot -pipewire-dmabuf'
           else
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gamescope --steam -f --xwayland-count 2 --force-grab-cursor -r $SUNSHINE_CLIENT_FPS -- steam -console -tenfoot -pipewire-dmabuf'
+            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gsc --steam -f --xwayland-count 2 --force-grab-cursor -r $SUNSHINE_CLIENT_FPS -- steam -console -tenfoot -pipewire-dmabuf'
           fi
           bash -c 'sleep 5 && ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS' &
         fi
