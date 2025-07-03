@@ -49,16 +49,17 @@ let
     #exec gamescope -r "$refresh" -W "$width" -H "$height" "$@"
 
     while true; do
-      gamescope -r "$refresh" -W "$width" -H "$height" "$@"
-      code=$?
-    
-      # Exit codes 0 and 143 (SIGTERM) are normal
-      if [ $code -eq 0 ] || [ $code -eq 143 ]; then
+      if gamescope -r "$refresh" -W "$width" -H "$height" "$@"; then
         break
+      else
+        code=$?
+        if [ $code -eq 143 ]; then
+          echo "gamescope exited gracefully"
+          break
+        fi
+        echo "gamescope exited with code $code, retrying in 1 second..."
+        sleep 1
       fi
-    
-      echo "gamescope exited with code $code, retrying in 1 second..."
-      sleep 1
     done
   '';
 in 
