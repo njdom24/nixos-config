@@ -254,7 +254,7 @@ in
   	    [Desktop Entry]
   	    Name=Steam (Gamescope)
   	    Comment=Launch Steam via Gamescope (Embedded)
-  	    Exec=/usr/bin/env bash -c "cd /tmp && gamescope -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu"
+  	    Exec=/usr/bin/env bash -c "cd /tmp && gsc -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu"
   	    Icon=steam
   	    Type=Application
   	    Categories=Game;
