@@ -89,6 +89,9 @@
         e && /CLIENT DISCONNECTED/ {cancel=1}
         END { if (e && !cancel) exit 0; else exit 1 }
         ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
+          # Disable RGB
+          ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
+
           # Assume DP-3 is a dummy display used for headless
           DUMMY="DP-3"
           
