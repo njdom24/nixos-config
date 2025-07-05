@@ -28,19 +28,19 @@ in
   #}];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/cfc4b885-fefa-4b9b-b9d9-a77e936fb46e";
+    { device = "/dev/disk/by-uuid/fe2055ca-3525-4b13-bcd6-d578f0a416fb";
       fsType = "btrfs";
       options = [ "subvol=root" "compress=zstd" ];
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/cfc4b885-fefa-4b9b-b9d9-a77e936fb46e";
+    { device = "/dev/disk/by-uuid/fe2055ca-3525-4b13-bcd6-d578f0a416fb";
       fsType = "btrfs";
       options = [ "subvol=home" "compress=zstd" ];
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/8074-0A6C";
+    { device = "/dev/disk/by-uuid/66F1-B84B";
       fsType = "vfat";
     };
 
