@@ -31,8 +31,8 @@
       src = prev.fetchFromGitHub {
       owner = "LizardByte";
       repo = "Sunshine";
-      rev = "958d783d9431f029719dafd9cd451fb5397476b2"; # desired commit
-      hash = "sha256-J4llOaYk93lgI4RQZx6UeywUF3LcGIv/foMSbAvS+G4="; # update via `nix-prefetch`
+      rev = "5a401908309ba8d5d3403919e509ea8c19063ebd"; # desired commit
+      hash = "sha256-edhjp6gii88syCv3XisNZGa9uqBbUVGePPFMfyAJKj8=";
       fetchSubmodules = true;
     };
 
