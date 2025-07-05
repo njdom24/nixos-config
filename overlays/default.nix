@@ -25,6 +25,8 @@
       ];
     });
 
+    mangohud = inputs.chaotic.packages.${prev.system}.mangohud_git;
+
     sunshine = prev.sunshine.overrideAttrs (oldAttrs: rec {
       src = prev.fetchFromGitHub {
       owner = "LizardByte";

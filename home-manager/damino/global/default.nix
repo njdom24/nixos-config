@@ -195,6 +195,7 @@
 	  	vsync = 3; # Currently broken due to https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379, set MESA_VK_WSI_PRESENT_MODE=fifo for Mesa instead
  	  	gl_vsync = 1;
 	  	gpu_name = true;
+	  	fps_limit = 180;
 	  	fps_limit_method = "early";
 	  	toggle_hud = "Shift_R+F12";
 	  	toggle_logging = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
