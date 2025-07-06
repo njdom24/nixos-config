@@ -266,4 +266,26 @@
       ];
     };
   };
+
+  environment.systemPackages = with pkgs; [
+    (writeShellScriptBin "sunshine-pin" ''
+      #!/usr/bin/env bash
+
+      read -p "Username: " username
+      read -s -p "Password: " password
+      echo
+      read -p "Name: " name
+      read -p "PIN: " pin
+
+      url="https://localhost:47990/api/pin"
+
+      response=$(curl -s -k -u "$username:$password" \
+        -H "Content-Type: application/json" \
+        -d "{\"name\":\"$name\",\"pin\":\"$pin\"}" \
+        "$url")
+
+      echo "Server response:"
+      echo "$response"
+    '')
+  ];
 }
