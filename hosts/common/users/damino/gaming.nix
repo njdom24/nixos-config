@@ -9,9 +9,6 @@ let
     #!/usr/bin/env bash
     set -euo pipefail
 
-    # Set environment variables
-    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}='${lib.escapeShellArg v}'") config.programs.gamescope.env)}
-
     get_hdr() {
       if [ -n "''${SWAYSOCK-}" ]; then #"'''
         echo "0"
@@ -125,6 +122,10 @@ let
 
     read width height refresh <<< "$(get_display_mode || echo "1920 1080 60")"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
+
+    # Set environment variables
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}='${lib.escapeShellArg v}'") config.programs.gamescope.env)}
+
     echo "Launching gamescope at $width"x"$height@$refresh"
 
     while true; do
