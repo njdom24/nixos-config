@@ -29,16 +29,13 @@ let
     hdr_enabled="$(get_hdr)"
 
     # Try to enable/disable RenoDX HDR ReShade automatically
-    if [[ "$RENODX_HDR" == "1" ]]; then
-      echo "HDR: $hdr_enabled" > /home/damino/test.log
+    if [[ -v RENODX_HDR && "$RENODX_HDR" == "1" ]]; then
       reshade_file="$(${pkgs.coreutils}/bin/timeout 5 ${pkgs.findutils}/bin/find "$PWD" -type f -name 'ReShade.ini' | ${pkgs.coreutils}/bin/head -n 1)"
 
       if [[ -n "$reshade_file" ]]; then
-        echo "Found ReShade.ini at: $reshade_file" >> /home/damino/test.log
         reshade_dir="$(dirname "$reshade_file")"
         # Find matching .addon64 file containing 'renodx'
         addon_file="$(${pkgs.findutils}/bin/find "$reshade_dir" -maxdepth 1 -type f -name '*.addon64' -printf '%f\n' | ${pkgs.gnugrep}/bin/grep renodx | head -n1)"
-        echo "Found addon at: $addon_file" >> /home/damino/test.log
         addon_id="RenoDX@$addon_file"
         
         # Read current DisabledAddons value from [ADDON] section
