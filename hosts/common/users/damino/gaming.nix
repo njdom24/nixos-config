@@ -12,6 +12,83 @@ let
     # Set environment variables
     ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}='${lib.escapeShellArg v}'") config.programs.gamescope.env)}
 
+    get_hdr() {
+      if [ -n "''${SWAYSOCK-}" ]; then #"'''
+        echo "0"
+      elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
+        json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
+        mapfile -t enabled < <(${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected and .enabled and has("hdr") and .hdr == true) | .name' <<< "$json")
+        ''$() # Fix syntax highlighting
+        if [ ''${#enabled[@]} -eq 0 ]; then
+          echo "0"
+        else
+          echo "1"
+        fi
+      else
+        echo "0"
+      fi
+    }
+
+    hdr_enabled="$(get_hdr)"
+
+    # Try to enable/disable RenoDX HDR ReShade automatically
+    if [[ "$RENODX_HDR" == "1" ]]; then
+      echo "HDR: $hdr_enabled" > /home/damino/test.log
+      reshade_file="$(${pkgs.coreutils}/bin/timeout 5 ${pkgs.findutils}/bin/find "$PWD" -type f -name 'ReShade.ini' | ${pkgs.coreutils}/bin/head -n 1)"
+
+      if [[ -n "$reshade_file" ]]; then
+        echo "Found ReShade.ini at: $reshade_file" >> /home/damino/test.log
+        reshade_dir="$(dirname "$reshade_file")"
+        # Find matching .addon64 file containing 'renodx'
+        addon_file="$(${pkgs.findutils}/bin/find "$reshade_dir" -maxdepth 1 -type f -name '*.addon64' -printf '%f\n' | ${pkgs.gnugrep}/bin/grep renodx | head -n1)"
+        echo "Found addon at: $addon_file" >> /home/damino/test.log
+        addon_id="RenoDX@$addon_file"
+        
+        # Read current DisabledAddons value from [ADDON] section
+        current=$(${pkgs.gawk}/bin/awk -F= '/^\[ADDON\]/{f=1} f && /^DisabledAddons=/{print substr($0, index($0,$2)) ; exit}' "$reshade_file" | ${pkgs.coreutils}/bin/tr -d '\r\n' | ${pkgs.gnused}/bin/sed 's/^,*//; s/,*$//; s/ //g')
+        # Helper function
+        contains() {
+          [[ ",$1," == *",$2,"* ]]
+        }
+        
+        if [[ "$hdr_enabled" == "0" ]]; then
+          # Append addon_id if missing
+          if ! contains "$current" "$addon_id"; then
+            if [[ -z "$current" ]]; then
+              new_disabled_addons="$addon_id"
+            else
+              new_disabled_addons="$current,$addon_id"
+            fi
+          fi
+        elif [[ "$hdr_enabled" == "1" ]]; then
+          # Remove addon_id if present
+          if contains "$current" "$addon_id"; then
+            # Filter the addon_id from the list
+            IFS=',' read -ra arr <<< "$current"
+            new_arr=()
+            for addon in "''${arr[@]}"; do
+              if [[ "$addon" != "$addon_id" && -n "$addon" ]]; then
+                new_arr+=("$addon")
+              fi
+            done
+            new_disabled_addons=$(IFS=, ; echo "''${new_arr[*]}")
+          fi
+        fi
+
+        if [[ -v new_disabled_addons ]]; then
+          temp_file="$(${pkgs.mktemp}/bin/mktemp)"
+          # Update the INI file DisabledAddons= line inside [ADDON]
+          ${pkgs.gawk}/bin/awk -v new="$new_disabled_addons" '
+          BEGIN{in_addon=0}
+           /^\[ADDON\]/ {in_addon=1; print; next}
+           /^\[/ && !/^\[ADDON\]/ {in_addon=0}
+           in_addon && /^DisabledAddons=/ {print "DisabledAddons=" new; next}
+           {print}
+          ' "$reshade_file" > "$temp_file" && mv "$temp_file" "$reshade_file"
+        fi
+      fi
+    fi
+
     # Skip wrapping if we're already inside Gamescope. Execute everything after '--'
     if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
       while [ "$#" -gt 0 ]; do
@@ -27,7 +104,7 @@ let
     fi
 
     # Resolution & refresh detection
-    get_display_info() {
+    get_display_mode() {
       if [ -n "''${SWAYSOCK-}" ]; then #"'''
         swaymsg -t get_outputs | jq -r '
           .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
@@ -46,7 +123,7 @@ let
       fi
     }
 
-    read width height refresh <<< "$(get_display_info || echo "1920 1080 60")"
+    read width height refresh <<< "$(get_display_mode || echo "1920 1080 60")"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     echo "Launching gamescope at $width"x"$height@$refresh"
 
