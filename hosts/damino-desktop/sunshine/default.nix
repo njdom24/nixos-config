@@ -30,7 +30,7 @@
 	          envfile="/proc/$pid/environ"
 	          [ -r "$envfile" ] || continue
 	          
-	          wayland_display=$(${pkgs.coreutils}/bin/tr '\0' '\n' < "$envfile" | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | ${pkgs.coreutils}/bin/cut -d= -f2-)
+	          wayland_display=$(${pkgs.coreutils}/bin/tr '\0' '\n' < "$envfile" 2>/dev/null | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | ${pkgs.coreutils}/bin/cut -d= -f2-)
 	          if [ -n "$wayland_display" ]; then
 	            echo "$wayland_display"
 	            exit 0
@@ -55,6 +55,7 @@
               case "$comp" in
                 sway)
                   echo "→ Running sway-specific logic"
+                  export XDG_CURRENT_DESKTOP="sway"
                   if [ -z "$SWAYSOCK" ]; then
                     export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
                   fi
@@ -89,6 +90,7 @@
                   ;;
                 kwin_wayland)
                   echo "→ Running KDE/KWin-specific logic"
+                  export XDG_CURRENT_DESKTOP="KDE"
                   
                   # Assume DP-3 is a dummy display used for headless
                   DUMMY="DP-3"
@@ -131,7 +133,7 @@
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".wcg.enable output."$DUMMY".hdr.enable
                     # https://github.com/LizardByte/Sunshine/issues/3298#issuecomment-2670218658
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferAccuracy
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".sdr-brightness.203 # Standard reference luminance
+                    #${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".sdr-brightness.203 # Standard reference luminance
                     ${pkgs.kdePackages.full}/bin/qdbus org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/Actions/BrightnessControl org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness 10000 # Max 100.00% brightness
                   else
                     echo "Disabling HDR"
@@ -173,19 +175,10 @@
           echo "gamescope is not running. Starting"
           ${pkgs.systemd}/bin/systemctl --user reset-failed
           ${pkgs.gamescope}/bin/gamescopectl shutdown 2> /dev/null || true
-          ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service >2 /dev/null || true
+          ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service 2> /dev/null || true
           ${pkgs.systemd}/bin/systemctl --user reset-failed
-          export DXVK_HDR=1 # Can't be adjusted at runtime. Toggle in-game if need be
-          export ENABLE_GAMESCOPE_WSI=1
-          export ENABLE_HDR_WSI=1
-          export PROTON_ENABLE_AMD_AGS=1
-          export STEAM_MULTIPLE_XWAYLANDS=1
-          if [[ "$1" == "hdr" ]]; then
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gsc --steam --hdr-enabled -f --xwayland-count 2 --force-grab-cursor -r $SUNSHINE_CLIENT_FPS -- steam -console -tenfoot -pipewire-dmabuf'
-          else
-            ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gsc --steam -f --xwayland-count 2 --force-grab-cursor -r $SUNSHINE_CLIENT_FPS -- steam -console -tenfoot -pipewire-dmabuf'
-          fi
-          bash -c 'sleep 5 && ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS' &
+
+          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gsc -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
         fi
       '';
       in
