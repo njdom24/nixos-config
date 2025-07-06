@@ -20,6 +20,7 @@
         back_button_timeout = 2000;
         #capture = "kms"; # Sway 1.11 has broken wlr capture over Vulkan
         vaapi_strict_rc_buffer = "enabled";
+        min_fps_factor = 3;
       };
       applications.apps = let
         getWaylandDisplay = pkgs.writeShellScript "getWaylandDisplay" ''
