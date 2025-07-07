@@ -221,7 +221,6 @@ let
 
         if [[ "$steam_mode" == "1" ]]; then
           # MangoApp's keybinds don't work in Steam mode
-          MANGOHUD_CONFIGFILE="$mangoapp_file"
           mangoapp_flag=""
         else
           MANGOHUD=0
@@ -235,7 +234,6 @@ let
       fi
 
       export MANGOHUD_CONFIGFILE="$mangoapp_file"
-      #MANGOHUD=0
 
       #if [[ "$1" == "--" ]]; then
       #  # Remove the leading '--' from the args
