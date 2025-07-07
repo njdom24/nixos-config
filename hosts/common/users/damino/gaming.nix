@@ -218,7 +218,6 @@ let
 
       mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
       #mangohud_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)"
-      # TODO: See about bringing MangoHud back for its limiter
 
       if [[ -v mangohud_path ]]; then
         ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
@@ -235,7 +234,9 @@ let
           # MangoApp's keybinds don't work in Steam mode
           mangoapp_flag=""
         else
-          MANGOHUD=0
+          # TODO: Testing bringing MangoHud back for its limiter
+          mangoapp_flag=""
+          #MANGOHUD=0
         fi
         
         #keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
@@ -262,8 +263,9 @@ let
       if gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
-        echo "''$()"
+      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
+      #} -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
+        #echo "''$()"
         break
       else
         code=$?
