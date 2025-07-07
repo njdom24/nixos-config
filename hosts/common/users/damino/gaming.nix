@@ -159,6 +159,9 @@ let
         if [ "$1" = "--" ]; then
           shift
           #exec "$@"
+          if [[ "$hdr_enabled" == "1" ]]; then
+            gamescopectl hdr_enabled 1
+          fi
           if [[ -v rate ]]; then
             echo "Setting FPS limit to $rate"
             gamescopectl debug_set_fps_limit $rate
@@ -168,6 +171,7 @@ let
             echo "Re-setting FPS limit from $rate to $refresh"
             gamescopectl debug_set_fps_limit $refresh
           fi
+          exit 0
         fi
         shift
       done
