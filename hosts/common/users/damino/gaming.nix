@@ -267,10 +267,12 @@ let
       #} -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         #echo "''$()"
         break
+      elif [[ "$steam_mode" == "1" ]]; then
+        break
       else
         code=$?
-        if [ $code -eq 143 ]; then
-          echo "gamescope exited gracefully"
+        if [[ "$code" -eq 143 || "$code" -eq 137 ]]; then
+          echo "gamescope exited normally"
           break
         fi
         echo "gamescope exited with code $code, retrying in 1 second..."
