@@ -117,6 +117,7 @@ let
     while [ $i -lt $# ]; do
       arg="''${@:$((i+1)):1}"
       echo "''$()"
+      echo "Looping arg $arg"
     
       # Check for MANGOHUD_CONFIG
       if [[ "$arg" == MANGOHUD_CONFIG=* ]]; then
@@ -146,24 +147,26 @@ let
     done
     echo "''$()"
 
+    if [[ -n "$refresh_rate" ]]; then
+      rate="$refresh_rate"
+    elif [[ -n "$fps_limit" ]]; then
+      rate="$fps_limit"
+    fi
+
     # Skip wrapping if we're already inside Gamescope. Execute everything after '--'
     if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
       while [ "$#" -gt 0 ]; do
         if [ "$1" = "--" ]; then
           shift
           #exec "$@"
+          if [[ -v rate ]]; then
+            echo "Setting FPS limit to $rate"
+            gamescopectl debug_set_fps_limit $rate
+          fi
           "$@"
           if [[ -v rate ]]; then
             echo "Re-setting FPS limit from $rate to $refresh"
             gamescopectl debug_set_fps_limit $refresh
-          fi
-        elif [ "$1" = "-r" ]; then
-          shift
-          if [ -n "$1" ]; then
-            rate="$1"
-            echo "Setting FPS limit to $rate"
-            gamescopectl debug_set_fps_limit $rate
-            shift
           fi
         fi
         shift
@@ -174,12 +177,6 @@ let
     fi
 
     echo "Limits: $fps_limit,$refresh_rate"
-
-    if [[ -v refresh_rate ]]; then
-      rate="$refresh_rate"
-    elif [[ -v fps_limit ]]; then
-      rate="$fps_limit"
-    fi
 
     # Set environment variables
     ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}='${lib.escapeShellArg v}'") config.programs.gamescope.env)}
@@ -229,7 +226,8 @@ let
       if gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
+      } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
+        echo "''$()"
         break
       else
         code=$?
