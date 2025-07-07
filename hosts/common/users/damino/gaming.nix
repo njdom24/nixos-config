@@ -491,7 +491,6 @@ in
   	  wineWowPackages.waylandFull
   	  winetricks
   	  latencyflex-vulkan
-  	  vulkan-hdr-layer-kwin6
   	];
 
   	variables = {
