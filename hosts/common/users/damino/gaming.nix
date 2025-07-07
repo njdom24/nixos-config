@@ -134,24 +134,27 @@ let
           fi
         done
       fi
-    
-      # Check for -r <value>
-      if [[ "$arg" == "-r" ]]; then
-        next="''${@:$((i+2)):1}"
-        if [[ -n "$next" ]]; then
-          refresh_rate="$next"
+
+      # Check for gamescope args
+      if [[ ! -v scope_vars_done ]]; then
+        # Check for -r <value>
+        if [[ "$arg" == "-r" ]]; then
+          next="''${@:$((i+2)):1}"
+          if [[ -n "$next" ]]; then
+            refresh_rate="$next"
+          fi
+          i=$((i+1)) # skip the next one too
         fi
-        i=$((i+1)) # skip the next one too
+
+        if [[ "$arg" == "--steam" || "$arg" == "-e" ]]; then
+          steam_mode=1
+        fi
+
+        if [[ "$arg" == "--" ]]; then
+          scope_vars_done=1
+        fi
       fi
 
-      if [[ "$arg" == "--steam" || "$arg" == "-e" ]]; then
-        steam_mode=1
-      fi
-
-      if [[ "$arg" == "--" ]]; then
-        break
-      fi
-    
       i=$((i+1))
     done
     echo "''$()"
