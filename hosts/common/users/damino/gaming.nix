@@ -111,6 +111,7 @@ let
 
     fps_limit=""
     refresh_rate=""
+    steam_mode=0
 
     # Use a loop to walk through the args
     i=0
@@ -141,6 +142,14 @@ let
           refresh_rate="$next"
         fi
         i=$((i+1)) # skip the next one too
+      fi
+
+      if [[ "$arg" == "--steam" || "$arg" == "-e" ]]; then
+        steam_mode=1
+      fi
+
+      if [[ "$arg" == "--" ]]; then
+        break
       fi
     
       i=$((i+1))
@@ -196,14 +205,27 @@ let
         mangohud_path="/home/$USER/.config/MangoHud/MangoHud.conf"
       fi
 
-      mangoapp_file="$(${pkgs.mktemp}/bin/mktemp)"
+      mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
       #mangohud_file="$(${pkgs.mktemp}/bin/mktemp)"
 
       if [[ -v mangohud_path ]]; then
         ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
         #${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangohud_file" # Copy current config
 
+        # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
         ${pkgs.gnused}/bin/sed -i '/^blacklist=/d' "$mangoapp_file" # Remove blacklist
+        ${pkgs.gnused}/bin/sed -i '/^vsync=/d' "$mangoapp_file" # Remove Vulkan vsync
+        ${pkgs.gnused}/bin/sed -i '/^gl_vsync=/d' "$mangoapp_file" # Remove OpenGL vsync
+        ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
+        ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
+
+        if [[ "$steam_mode" == "1" ]]; then
+          # MangoApp's keybinds don't work in Steam mode
+          MANGOHUD_CONFIGFILE="$mangoapp_file"
+          mangoapp_flag=""
+        else
+          MANGOHUD=0
+        fi
         
         #keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
         #keybind_disable="Shift_R+F11" # MangoHud cannot unset keybinds, so work around
@@ -212,8 +234,8 @@ let
         #echo "fps_limit_method=late" >> "$mangohud_file"
       fi
 
-      MANGOHUD_CONFIGFILE="$mangoapp_file"
-      MANGOHUD=0
+      export MANGOHUD_CONFIGFILE="$mangoapp_file"
+      #MANGOHUD=0
 
       #if [[ "$1" == "--" ]]; then
       #  # Remove the leading '--' from the args
@@ -358,7 +380,6 @@ in
         ENABLE_GAMESCOPE_WSI = "1";
         ENABLE_HDR_WSI = "0";
         STEAM_MULTIPLE_XWAYLANDS = "1";
-        PROTON_ENABLE_AMD_AGS = "1";
       };
       args = [
         "-f"
