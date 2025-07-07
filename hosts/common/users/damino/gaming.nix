@@ -217,7 +217,8 @@ let
       fi
 
       mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
-      #mangohud_file="$(${pkgs.mktemp}/bin/mktemp)"
+      #mangohud_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)"
+      # TODO: See about bringing MangoHud back for its limiter
 
       if [[ -v mangohud_path ]]; then
         ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
