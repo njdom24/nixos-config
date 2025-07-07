@@ -109,7 +109,11 @@ let
     read width height refresh <<< "$(get_display_mode || echo "1920 1080 60")"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
 
-    fps_limit=""
+    if [[ -v MANGOHUD_FPS_LIMIT ]]; then
+      fps_limit="$MANGOHUD_FPS_LIMIT"
+    else
+      fps_limit=""
+    fi
     refresh_rate=""
     steam_mode=0
 
@@ -133,6 +137,10 @@ let
             break
           fi
         done
+
+      elif [[ "$arg" == MANGOHUD_FPS_LIMIT=* ]]; then
+        fps_limit="''${arg#*=}"
+        echo '''
       fi
 
       # Check for gamescope args
