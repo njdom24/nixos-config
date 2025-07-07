@@ -131,9 +131,9 @@
           
           if [[ $len -eq 1 && "$first" == "DP-3" ]]; then
             echo "Only DP-3 is enabled and connected. Restoring..."
-            $kscreen_doctor output.DP-1.enable
-            $kscreen_doctor output.DP-2.enable
-            $kscreen_doctor output.DP-3.disable
+            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
+            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
+            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
           else
             echo "DP-3 is not the only enabled connected output"
           fi
