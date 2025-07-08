@@ -12,7 +12,7 @@
 	        name = "desktop";
 	        outputs = [
 	          {
-	            criteria = "AOC Q27G40XMN 2QTR1JA000129";
+	            criteria = "AOC Q27G40XMN 0x00000081";
 	      	    status = "enable";
 	      	    mode = "2560x1440@180Hz";
 	      	    position = "0,0";
@@ -45,7 +45,7 @@
 	        name = "desktop-headless";
 	        outputs = [
 	          {
-	            criteria = "AOC Q27G40XMN 2QTR1JA000129";
+	            criteria = "AOC Q27G40XMN 0x00000081";
 	      	    status = "enable";
 	      	    mode = "2560x1440@180Hz";
 	      	    position = "0,0";
@@ -65,7 +65,7 @@
 	      	    adaptiveSync = false;
 	      	  }
 	      	  {
-	      	    criteria = "Samsung Electric Company Odyssey G8 HCPTB00064"; # Dummy display
+	      	    criteria = "Samsung Electric Company Odyssey G8 HCPTB00064"; # Dummy display, still broken
 	      	    status = "disable";
 	      	    adaptiveSync = false;
 	      	  }
