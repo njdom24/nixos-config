@@ -146,6 +146,9 @@ let
       elif [[ "$arg" == MANGOHUD_FPS_LIMIT=* ]]; then
         fps_limit="''${arg#*=}"
         echo '''
+
+      elif [[ "$arg" == "ENABLE_LSFG=1" ]]; then
+        export LSFG_HDR=1
       fi
 
       # Check for gamescope args
