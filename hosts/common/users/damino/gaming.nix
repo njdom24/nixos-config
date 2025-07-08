@@ -207,7 +207,8 @@ let
 
     # If MangoHud is enabled, translate to mangoapp
     mangoapp_flag=""
-    if [[ -v MANGOHUD && "$MANGOHUD" = "1" ]]; then
+    # Avoid this path for now
+    if [[ -v NO_MANGOHUD && "$MANGOHUD" = "1" ]]; then
       mangoapp_flag="--mangoapp"
       
       if [[ -v MANGOHUD_CONFIGFILE && -f "$MANGOHUD_CONFIGFILE" ]]; then
@@ -234,9 +235,8 @@ let
           # MangoApp's keybinds don't work in Steam mode
           mangoapp_flag=""
         else
-          # TODO: Testing bringing MangoHud back for its limiter
-          mangoapp_flag=""
-          #MANGOHUD=0
+          mangoapp_flag="--mangoapp"
+          MANGOHUD=0
         fi
         
         #keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
@@ -440,25 +440,29 @@ in
  	  #  }
  	  #];
  	  extraRules = [
- 	    {
- 	      name = "sway";
- 	      nice = -20;
- 	    }
- 	    {
- 	      name = ".sway-wrapped";
- 	      nice = -20;
- 	    }
- 	    {
- 	      name = "gamescope";
- 	      type = "LowLatency_RT";
- 	    }
- 	    {
- 	      name = "gamescope-wl";
- 	      type = "LowLatency_RT";
- 	    }
+ 	    # -12: https://github.com/CachyOS/ananicy-rules/blob/master/00-default/DEs-and-WMs/sway.rules
+ 	    #{
+ 	    #  name = "sway";
+ 	    #  nice = -20;
+ 	    #}
+ 	    # 
+ 	    # No longer needed: https://github.com/NixOS/nixpkgs/pull/319634
+ 	    #{
+ 	    #  name = ".sway-wrapped";
+ 	    #  nice = -20;
+ 	    #}
+ 	    # -20: https://github.com/CachyOS/ananicy-rules/blob/master/00-default/games/gamescope.rules
+ 	    #{
+ 	    #  name = "gamescope";
+ 	    #  type = "LowLatency_RT";
+ 	    #}
+ 	    #{
+ 	    #  name = "gamescope-wl";
+ 	    #  type = "LowLatency_RT";
+ 	    #}
  	    {
  	      name = "sunshine";
- 	      type = "Player-Video";
+ 	      type = "LowLatency_RT";
  	    }
  	  ];
  	};
