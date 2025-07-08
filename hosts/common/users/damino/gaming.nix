@@ -11,13 +11,14 @@ let
 
     # Resolution & refresh detection
     get_display_mode() {
-      if [ -n "''${SWAYSOCK-}" ]; then #"'''
-        swaymsg -t get_outputs | jq -r '
+      # Sway 1.11 sets this OOTB now
+      if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+        ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
           .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
         '
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
         read width height refresh < <(
-          kscreen-doctor -j | jq -r '
+          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
             (.outputs | map(select(.enabled == true)) | sort_by(.priority))[0] as $out |
             ($out.currentModeId) as $curId |
             ($out.modes[] | select(.id == $curId)) |
@@ -30,7 +31,7 @@ let
     }
 
     get_hdr() {
-      if [ -n "''${SWAYSOCK-}" ]; then #"'''
+      if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
         echo "0"
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
         json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
@@ -106,7 +107,11 @@ let
       fi
     fi
 
-    read width height refresh <<< "$(get_display_mode || echo "1920 1080 60")"
+    if mode="$(get_display_mode)"; then
+      read width height refresh <<< "$mode"
+    else
+      width=1920 height=1080 refresh=60
+    fi
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
 
     if [[ -v MANGOHUD_FPS_LIMIT ]]; then
