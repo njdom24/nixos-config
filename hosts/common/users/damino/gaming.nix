@@ -280,7 +280,9 @@ let
       fi
     done
 
-    rm -f "$mangoapp_file"
+    if [[ -v mangoapp_file ]]; then
+      rm -f "$mangoapp_file"
+    fi
     #rm -f "$mangohud_file"
   '';
 in 
