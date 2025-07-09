@@ -209,6 +209,7 @@ let
     steam_mode=0
 
     # Use a loop to walk through the args
+    to_run=()
     i=0
     while [ $i -lt $# ]; do
       arg="''${@:$((i+1)):1}"
@@ -237,7 +238,9 @@ let
       fi
 
       # Check for gamescope args
-      if [[ ! -v scope_vars_done ]]; then
+      if [[ -v scope_vars_done ]]; then
+        to_run+=("$arg")
+      else
         # Check for -r <value>
         if [[ "$arg" == "-r" ]]; then
           next="''${@:$((i+2)):1}"
@@ -258,8 +261,19 @@ let
 
       i=$((i+1))
     done
-    echo "''$()"
+    # "''$()"
 
+    if [ -v scope_vars_done ]; then
+      echo "Commands to run: $to_run"
+      for arg in "''${to_run[@]}"; do
+        printf "[%s] " "$arg"
+      done
+      echo "''$()"
+    else
+      echo "gsc requires explicit arg separation with '--'"
+      exit 1
+    fi
+    
     if [[ -n "$refresh_rate" ]]; then
       rate="$refresh_rate"
     elif [[ -n "$fps_limit" ]]; then
@@ -291,6 +305,10 @@ let
     
       echo "Error: '--' not found. No command to run." >&2
       exit 1
+    else
+      if [[ -n "$refresh_rate" ]]; then
+        refresh="$refresh_rate"
+      fi
     fi
 
     echo "Limits: $fps_limit,$refresh_rate"
@@ -356,9 +374,9 @@ let
       if gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
-      #} -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
-        #echo "''$()"
+      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "''${to_run[@]}"; then
+        ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
+        ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
       elif [[ "$steam_mode" == "1" ]]; then
         break
