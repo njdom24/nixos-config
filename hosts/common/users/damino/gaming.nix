@@ -92,9 +92,15 @@ let
       # --- MANGOHUD_CONFIG ---
       if [ -n "$MANGOHUD_CONFIG" ]; then
         if [[ "$MANGOHUD_CONFIG" =~ fps_limit=([0-9]+) ]]; then
-          original="''${BASH_REMATCH[1]}"
-          echo "''$()"
-          new_limit=$((original * 2))
+          last_fps_limit=""
+          IFS=',' read -ra cfg_parts <<< "$MANGOHUD_CONFIG"
+          for part in "''${cfg_parts[@]}"; do
+            if [[ "$part" =~ ^fps_limit=([0-9]+)$ ]]; then
+              last_fps_limit="''${BASH_REMATCH[1]}"
+            fi
+          done
+          
+          new_limit=$((last_fps_limit * 2))
     
           # Remove existing fps_limit, normalize commas
           cleaned=$(echo "$MANGOHUD_CONFIG" | ${pkgs.gnused}/bin/sed -E 's/(^|,)fps_limit=[0-9]+//g' | ${pkgs.gnused}/bin/sed -E 's/^,+|,+$//g' | ${pkgs.gnused}/bin/sed -E 's/,+/,/g')
