@@ -4,31 +4,88 @@
 
 { inputs, outputs, config, lib, pkgs, ... }:
 let
+  # Resolution & refresh detection
+  get_display_mode = pkgs.writeShellScript "get-display-mode.sh" ''
+    # Sway 1.11 sets this OOTB now
+    if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+      ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
+        .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
+      '
+    elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
+      read width height refresh < <(
+        ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+          (.outputs | map(select(.enabled == true)) | sort_by(.priority))[0] as $out |
+          ($out.currentModeId) as $curId |
+          ($out.modes[] | select(.id == $curId)) |
+          "\(.size.width) \(.size.height) \(.refreshRate)"
+        '
+      )
+      
+      echo "$width $height $refresh"
+    fi
+  '';
+
+  # LSFG helper (place after FPS limits to be smart about them)
+  # Only activate above a set refresh rate
+  lsfg-min = pkgs.writeShellScriptBin "lsfg-min" ''
+    #!/usr/bin/env bash
+    set -eo pipefail
+    
+    # Early exit if explicitly disabled
+    if [ "$ENABLE_LSFG" = "0" ]; then
+      exec "$@"
+    fi
+    
+    if [ $# -lt 2 ]; then
+      echo "Usage: $(basename "$0") <min_refresh_rate> <command> [args...]" >&2
+      exit 1
+    fi
+    
+    min="$1"
+    shift
+
+    if mode="$(${get_display_mode})"; then
+      read width height refresh <<< "$mode"
+    else
+      width=1920 height=1080 refresh=60
+    fi
+    refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
+    
+    if [ "$refresh" -ge "$min" ]; then
+      export ENABLE_LSFG=1
+    
+      # --- MANGOHUD_FPS_LIMIT ---
+      if [ -n "$MANGOHUD_FPS_LIMIT" ]; then
+        new_limit=$((MANGOHUD_FPS_LIMIT * 2))
+        export MANGOHUD_FPS_LIMIT="$new_limit"
+        echo "New MANGOHUD_FPS_LIMIT: $MANGOHUD_FPS_LIMIT"
+      fi
+    
+      # --- MANGOHUD_CONFIG ---
+      if [ -n "$MANGOHUD_CONFIG" ]; then
+        if [[ "$MANGOHUD_CONFIG" =~ fps_limit=([0-9]+) ]]; then
+          original="''${BASH_REMATCH[1]}"
+          echo "''$()"
+          new_limit=$((original * 2))
+    
+          # Remove existing fps_limit, normalize commas
+          cleaned=$(echo "$MANGOHUD_CONFIG" | ${pkgs.gnused}/bin/sed -E 's/(^|,)fps_limit=[0-9]+//g' | ${pkgs.gnused}/bin/sed -E 's/^,+|,+$//g' | ${pkgs.gnused}/bin/sed -E 's/,+/,/g')
+    
+          export MANGOHUD_CONFIG="$cleaned,fps_limit=$new_limit"
+          echo "New MANGOHUD_CONFIG: $MANGOHUD_CONFIG"
+        fi
+      fi
+    else
+      echo "Refresh rate $refresh below minimum. Not enabling LSFG"
+    fi
+    
+    exec "$@"
+  '';
+
   # Gamescope helper to auto-fill mode
   gsc = pkgs.writeShellScriptBin "gsc" ''
     #!/usr/bin/env bash
     set -euo pipefail
-
-    # Resolution & refresh detection
-    get_display_mode() {
-      # Sway 1.11 sets this OOTB now
-      if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-        ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
-          .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
-        '
-      elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
-        read width height refresh < <(
-          ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
-            (.outputs | map(select(.enabled == true)) | sort_by(.priority))[0] as $out |
-            ($out.currentModeId) as $curId |
-            ($out.modes[] | select(.id == $curId)) |
-            "\(.size.width) \(.size.height) \(.refreshRate)"
-          '
-        )
-        
-        echo "$width $height $refresh"
-      fi
-    }
 
     get_hdr() {
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
@@ -107,7 +164,7 @@ let
       fi
     fi
 
-    if mode="$(get_display_mode)"; then
+    if mode="$(${get_display_mode})"; then
       read width height refresh <<< "$mode"
     else
       width=1920 height=1080 refresh=60
@@ -481,6 +538,7 @@ in
   environment = {
   	systemPackages = with pkgs; [
   	  gsc
+  	  lsfg-min
   	  steam-run
   	  steamtinkerlaunch
   	  # https://github.com/ValveSoftware/steam-for-linux/issues/11479
