@@ -75,8 +75,6 @@ let
       width=1920 height=1080 refresh=60
     fi
 
-    echo "PATH: ${get_display_mode}"
-    echo "DIMS: $width $height $refresh"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     
     if [ "$refresh" -ge "$min" ]; then
