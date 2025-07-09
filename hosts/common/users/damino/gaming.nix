@@ -359,22 +359,19 @@ let
 
       export MANGOHUD_CONFIGFILE="$mangoapp_file"
 
-      #if [[ "$1" == "--" ]]; then
-      #  # Remove the leading '--' from the args
-      #  shift
-      #fi
-
       #mangoapp_flag="--mangoapp -- env MANGOHUD_CONFIGFILE=$mangohud_file "
       #echo "$mangoapp_flag $@" > /home/damino/test.log
     fi
 
     echo "Launching gamescope at $width"x"$height@$refresh"
-
+    ld_preload_pass="''${LD_PRELOAD-}"
+    # "''$()"
+    
     while true; do
-      if gamescope ${
+      if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "''${to_run[@]}"; then
+      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag -- env LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
