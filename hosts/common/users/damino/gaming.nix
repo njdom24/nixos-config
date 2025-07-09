@@ -20,8 +20,33 @@ let
           "\(.size.width) \(.size.height) \(.refreshRate)"
         '
       )
-      
       echo "$width $height $refresh"
+      
+    # XWayland / X11 fallback (nested gamescope)
+    elif ${pkgs.xorg.xrandr}/bin/xrandr >/dev/null 2>&1; then
+      # Get primary or first
+      primary=$(${pkgs.xorg.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk '/ connected/ {if(/ primary /){print $1;exit}else if(!f)f=$1} END{print f}')
+
+      read resolution refresh_raw < <(
+        ${pkgs.xorg.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk -v primary="$primary" '
+          $1 == primary {in_primary=1; next}
+          in_primary && /\*/ {
+            print $1, $2
+            exit
+          }
+        '
+      )
+
+      # Parse width and height from resolution (e.g., 2560x1440)
+      width="''${resolution%x*}"
+      height="''${resolution#*x}"
+      
+      # Clean refresh rate (e.g., remove *+)
+      refresh="''${refresh_raw//[^0-9.]}"
+
+      # echo "''$()"
+      echo "$width $height $refresh"
+      
     fi
   '';
 
@@ -49,6 +74,9 @@ let
     else
       width=1920 height=1080 refresh=60
     fi
+
+    echo "PATH: ${get_display_mode}"
+    echo "DIMS: $width $height $refresh"
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     
     if [ "$refresh" -ge "$min" ]; then
