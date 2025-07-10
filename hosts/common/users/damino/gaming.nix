@@ -379,7 +379,7 @@ let
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
-      elif [[ "$steam_mode" == "1" ]]; then
+      elif [[ "$steam_mode" == "0" ]]; then
         break
       else
         code=$?
@@ -515,7 +515,7 @@ in
         #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
         "--hdr-enabled"
         "--adaptive-sync"
-        #"--force-grab-cursor" # Breaks games with launchers (Elden Ring)
+        "--force-grab-cursor" # Breaks games with launchers (Elden Ring)
         #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
       ];
