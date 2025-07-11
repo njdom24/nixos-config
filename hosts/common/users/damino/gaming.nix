@@ -75,6 +75,10 @@ let
       width=1920 height=1080 refresh=60
     fi
 
+    flow_scale=$(echo "scale=2; 1080 / $height" | ${pkgs.bc}/bin/bc)
+    export LSFG_FLOW_SCALE=$(echo "$flow_scale" | ${pkgs.gnused}/bin/sed -E 's/^(-?)\./\10./')
+    echo "Using LSFG flow scale: $LSFG_FLOW_SCALE"
+
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     
     if [ "$refresh" -ge "$min" ]; then
