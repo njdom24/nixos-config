@@ -115,7 +115,7 @@ let
     exec "$@"
   '';
 
-  # Gamescope helper to auto-fill mode
+  # Gamescope helper to auto-fill mode, HDR, update settings
   gsc = pkgs.writeShellScriptBin "gsc" ''
     #!/usr/bin/env bash
     set -euo pipefail
@@ -213,6 +213,7 @@ let
     steam_mode=0
 
     # Use a loop to walk through the args
+    extra_flags=()
     to_run=()
     i=0
     while [ $i -lt $# ]; do
@@ -251,7 +252,8 @@ let
           if [[ -n "$next" ]]; then
             refresh_rate="$next"
           fi
-          i=$((i+1)) # skip the next one too
+          i=$((i+2)) # skip the next one too
+          continue
         fi
 
         if [[ "$arg" == "--steam" || "$arg" == "-e" ]]; then
@@ -260,6 +262,8 @@ let
 
         if [[ "$arg" == "--" ]]; then
           scope_vars_done=1
+        else
+          extra_flags+=("$arg")
         fi
       fi
 
@@ -369,13 +373,12 @@ let
 
     echo "Launching gamescope at $width"x"$height@$refresh"
     ld_preload_pass="''${LD_PRELOAD-}"
-    # "''$()"
     
     while true; do
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag -- env LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
+      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
