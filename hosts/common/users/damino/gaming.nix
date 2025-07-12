@@ -427,6 +427,7 @@ in
         #extraEnv = {
         #  TZDIR = "/usr/share/zoneinfo";
         #};
+        privateTmp = false; # Fixes gamescope HDR screenshots (they go in /tmp)
         extraProfile = ''
           # https://github.com/NixOS/nixpkgs/issues/279893
           unset TZ
