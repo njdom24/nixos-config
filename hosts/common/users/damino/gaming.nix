@@ -82,6 +82,10 @@ let
     
     if [ "$refresh" -ge "$min" ]; then
       export ENABLE_LSFG=1
+
+      # Default to performancemode
+      export LSFG_PERF_MODE="''${LSFG_PERF_MODE:-1}"
+      # "''$()
     
       # --- MANGOHUD_FPS_LIMIT ---
       if [ -n "$MANGOHUD_FPS_LIMIT" ]; then
