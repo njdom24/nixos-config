@@ -46,7 +46,6 @@ let
 
       # echo "''$()"
       echo "$width $height $refresh"
-      
     fi
   '';
 
@@ -109,7 +108,7 @@ let
     
           export MANGOHUD_CONFIG="$cleaned,fps_limit=$new_limit"
           echo "New MANGOHUD_CONFIG: $MANGOHUD_CONFIG"
-          echo "LSFG_HDR: $LSFG_HDR"
+          #echo "LSFG_HDR: $LSFG_HDR"
         fi
       fi
     else
@@ -242,8 +241,9 @@ let
       elif [[ "$arg" == MANGOHUD_FPS_LIMIT=* ]]; then
         fps_limit="''${arg#*=}"
         echo '''
-      elif [[ ( "$arg" == "ENABLE_LSFG=1" || "$arg" == "lsfg-min" ) && -v hdr_enabled ]]; then
-        export LSFG_HDR="$hdr_enabled"
+      # Found to be unnecessary / potentially worse
+      #elif [[ ( "$arg" == "ENABLE_LSFG=1" || "$arg" == "lsfg-min" ) && -v hdr_enabled ]]; then
+      #  export LSFG_HDR="$hdr_enabled"
       fi
 
       # Check for gamescope args
