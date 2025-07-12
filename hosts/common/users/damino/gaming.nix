@@ -419,7 +419,10 @@ in
       dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server	
 	  #extest.enable = true; # Breaks when Steam is run through gamescope. Alternatively needs https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
       package = pkgs.steam.override {
-        
+        # https://github.com/NixOS/nixpkgs/issues/279893#issuecomment-3066010773
+        #extraEnv = {
+        #  TZDIR = "/usr/share/zoneinfo";
+        #};
         extraProfile = ''
           # https://github.com/NixOS/nixpkgs/issues/279893
           unset TZ
