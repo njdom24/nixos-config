@@ -285,12 +285,6 @@ let
       echo "gsc requires explicit arg separation with '--'"
       exit 1
     fi
-    
-    if [[ -n "$refresh_rate" ]]; then
-      rate="$refresh_rate"
-    elif [[ -n "$fps_limit" ]]; then
-      rate="$fps_limit"
-    fi
 
     # Skip wrapping if we're already inside Gamescope. Execute everything after '--'
     if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
@@ -301,13 +295,13 @@ let
           if [[ "$hdr_enabled" == "1" ]]; then
             ${pkgs.gamescope}/bin/gamescopectl hdr_enabled 1
           fi
-          if [[ -v rate ]]; then
-            echo "Setting FPS limit to $rate"
-            ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $rate
+          if [[ -n "$refresh_rate" ]]; then
+            echo "Setting FPS limit to $refresh_rate"
+            ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $refresh_rate
           fi
           "$@"
-          if [[ -v rate ]]; then
-            echo "Re-setting FPS limit from $rate to $refresh"
+          if [[ -n "$refresh_rate" ]]; then
+            echo "Re-setting FPS limit from $refresh_rate to $refresh"
             ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $refresh
           fi
           exit 0
