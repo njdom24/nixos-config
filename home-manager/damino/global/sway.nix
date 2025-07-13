@@ -83,14 +83,14 @@
 		        output_name=$(echo ''\${output_json} | jq -r '.name')
 
 		        # Use only VRR in whitelisted outputs
-		        if [[ ''\${output_vrr_whitelist[*]} =~ ''\${output_name} ]]; then
+		        #if [[ ''\${output_vrr_whitelist[*]} =~ ''\${output_name} ]]; then
 		          output_vrr_status=$(echo ''\${output_json} | jq -r '.adaptive_sync_status')
 		          window_fullscreen_status=$(echo ''\${window_json} | jq -r '.container.fullscreen_mode')
 
 		          # Only update output if nesseccary to avoid flickering
 		          [[ $output_vrr_status = "disabled" && $window_fullscreen_status = "1" ]] && swaymsg output "''\${output_name}" adaptive_sync 1
 		          [[ $output_vrr_status = "enabled" && $window_fullscreen_status = "0" ]] && swaymsg output "''\${output_name}" adaptive_sync 0
-		        fi
+		        #fi
 		      fi
 		    done
 		  '';
