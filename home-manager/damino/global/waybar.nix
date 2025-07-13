@@ -9,7 +9,7 @@
 	  	height = 22;
 	  	modules-left = [ "sway/workspaces" "sway/mode" ];
 	  	modules-center = [ "clock" ];
-	  	modules-right = [ "pulseaudio" "custom/weather" "tray" "custom/nwg-menu" ];
+	  	modules-right = [ "pulseaudio" "custom/weather" "tray" "custom/menu" ];
 
 	  	"sway/workspaces" = {
           disable-scroll = true;
@@ -94,14 +94,14 @@
           interval = 3600;
     	};
 
-    	"custom/nwg-menu" = {
+    	"custom/menu" = {
     	  #format = "{}";
     	  interval = 10;
     	  format = "{icon}    ";
 	      format-icons = {
             default = "";
           };
-		  on-click = "${pkgs.nwg-menu}/bin/nwg-menu -fm nautilus -ha right -va top";
+		  on-click = '' ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/pgrep -x rofi && ${pkgs.procps}/bin/pkill -x rofi || ${pkgs.rofi-wayland}/bin/rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun -location 3" '';
     	};
 
     	"pulseaudio" = {
