@@ -125,8 +125,6 @@
 
           #exec_always timeout 10 kanshi
           exec_always ${displaySetup}
-          # Alleviates stutter in games, Works fine in testing w/ MangoHud vsync=3
-          exec_always swaymsg output "*" max_render_time 1
           
 		  exec mako
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet

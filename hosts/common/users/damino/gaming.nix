@@ -331,46 +331,56 @@ let
     # Avoid this path for now
     if [[ -v NO_MANGOHUD && "$MANGOHUD" = "1" ]]; then
       mangoapp_flag="--mangoapp"
-      
-      if [[ -v MANGOHUD_CONFIGFILE && -f "$MANGOHUD_CONFIGFILE" ]]; then
-        mangohud_path="$MANGOHUD_CONFIGFILE"
-      elif [[ -f "/home/$USER/.config/MangoHud/MangoHud.conf" ]]; then
-        mangohud_path="/home/$USER/.config/MangoHud/MangoHud.conf"
+    fi
+    if [[ -v MANGOHUD_CONFIGFILE && -f "$MANGOHUD_CONFIGFILE" ]]; then
+      mangohud_path="$MANGOHUD_CONFIGFILE"
+    elif [[ -f "/home/$USER/.config/MangoHud/MangoHud.conf" ]]; then
+      mangohud_path="/home/$USER/.config/MangoHud/MangoHud.conf"
+    fi
+
+    #mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
+    mangohud_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)"
+
+    if [[ -v mangohud_path ]]; then
+      #${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
+      ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangohud_file" # Copy current config
+
+      # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
+      #${pkgs.gnused}/bin/sed -i '/^blacklist=/d' "$mangoapp_file" # Remove blacklist
+      #${pkgs.gnused}/bin/sed -i '/^vsync=/d' "$mangoapp_file" # Remove Vulkan vsync
+      #${pkgs.gnused}/bin/sed -i '/^gl_vsync=/d' "$mangoapp_file" # Remove OpenGL vsync
+      #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
+      #${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
+      # Force "late" FPS limiter, since gamescope stutters with early
+      if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
+        ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
+      elif ! grep -q '^fps_limit_method=' "$mangohud_file"; then
+        echo 'fps_limit_method=late' >> "$mangohud_file"
       fi
 
-      mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
-      #mangohud_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)"
-
-      if [[ -v mangohud_path ]]; then
-        ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
-        #${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangohud_file" # Copy current config
-
-        # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
-        ${pkgs.gnused}/bin/sed -i '/^blacklist=/d' "$mangoapp_file" # Remove blacklist
-        ${pkgs.gnused}/bin/sed -i '/^vsync=/d' "$mangoapp_file" # Remove Vulkan vsync
-        ${pkgs.gnused}/bin/sed -i '/^gl_vsync=/d' "$mangoapp_file" # Remove OpenGL vsync
-        ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
-        ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
-
-        if [[ "$steam_mode" == "1" ]]; then
-          # MangoApp's keybinds don't work in Steam mode
-          mangoapp_flag=""
-        else
-          mangoapp_flag="--mangoapp"
-          MANGOHUD=0
-        fi
+      #if [[ "$steam_mode" == "1" ]]; then
+      #  # MangoApp's keybinds don't work in Steam mode
+      #  mangoapp_flag=""
+      #else
+      #  mangoapp_flag="--mangoapp"
+      #  MANGOHUD=0
+      #fi
         
-        #keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
-        #keybind_disable="Shift_R+F11" # MangoHud cannot unset keybinds, so work around
-        #${pkgs.gnused}/bin/sed -i "s/^toggle_hud=.*/toggle_hud=$keybind_disable/" "$mangohud_file"
-        #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Fix VRR by removing fps_limit_method(=early)
-        #echo "fps_limit_method=late" >> "$mangohud_file"
-      fi
+      #keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
+      #keybind_disable="Shift_R+F11" # MangoHud cannot unset keybinds, so work around
+      #${pkgs.gnused}/bin/sed -i "s/^toggle_hud=.*/toggle_hud=$keybind_disable/" "$mangohud_file"
+      #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Fix VRR by removing fps_limit_method(=early)
+      #echo "fps_limit_method=late" >> "$mangohud_file"
 
-      export MANGOHUD_CONFIGFILE="$mangoapp_file"
+      export MANGOHUD_CONFIGFILE="$mangohud_file"
 
       #mangoapp_flag="--mangoapp -- env MANGOHUD_CONFIGFILE=$mangohud_file "
       #echo "$mangoapp_flag $@" > /home/damino/test.log
+    fi
+
+    if [[ -v MANGOHUD_CONFIG ]]; then
+      export MANGOHUD_CONFIG="''${MANGOHUD_CONFIG:+$MANGOHUD_CONFIG,}fps_limit_early"
+      # "''$()"
     fi
 
     echo "Launching gamescope at $width"x"$height@$refresh"
@@ -397,10 +407,12 @@ let
       fi
     done
 
-    if [[ -v mangoapp_file ]]; then
-      rm -f "$mangoapp_file"
+    #if [[ -v mangoapp_file ]]; then
+    #  rm -f "$mangoapp_file"
+    #fi
+    if [[ -v mangohud_file ]]; then
+      rm -f "$mangohud_file"
     fi
-    #rm -f "$mangohud_file"
   '';
 in 
 {
