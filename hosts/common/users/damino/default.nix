@@ -221,6 +221,40 @@ in
   	      let
   	        settingsFormat = pkgs.formats.keyValue { };
   	        sunshineCfg = settingsFormat.generate "sunshine.conf" config.services.sunshine.settings;
+  	        highestRefresh = pkgs.writeShellScript "sway-highest-refresh" ''
+  	          #!/usr/bin/env bash
+  	          # Get JSON of outputs with best mode
+  	          outputs_json=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq '
+  	            [ .[]
+  	              | .current_mode.width as $cw
+  	              | .current_mode.height as $ch
+  	              | {
+  	                  name,
+  	                  current_mode,
+  	                  best_mode:
+  	                    (.modes
+  	                     | map(select(.width == $cw and .height == $ch))
+  	                     | max_by(.refresh))
+  	                }
+  	            ]
+  	          ')
+  	          
+  	          # Iterate over each output and set the mode
+  	          echo "$outputs_json" | ${pkgs.jq}/bin/jq -c '.[]' | while read -r output; do
+  	            name=$(${pkgs.jq}/bin/jq -r '.name' <<<"$output")
+  	            width=$(${pkgs.jq}/bin/jq -r '.best_mode.width' <<<"$output")
+  	            height=$(${pkgs.jq}/bin/jq -r '.best_mode.height' <<<"$output")
+  	            refresh_milli=$(${pkgs.jq}/bin/jq -r '.best_mode.refresh' <<<"$output")
+  	          
+  	            # Convert millihertz to hertz with 3 decimal places
+  	            refresh=$(${pkgs.gawk}/bin/awk "BEGIN {printf \"%.3f\", $refresh_milli/1000}")
+
+  	            if [ "$width" != "null" ]; then
+  	              echo "Setting output '$name' to mode ''${width}x''${height}@''${refresh}Hz"
+  	              ${pkgs.sway}/bin/swaymsg output "$name" mode "''${width}x''${height}@''${refresh}Hz"
+  	            fi
+  	          done
+  	        '';
   	        monitorQuery = pkgs.writeShellScript "monitor-query" ''
               #!/usr/bin/env bash
 
@@ -280,6 +314,7 @@ in
                 bg #000000 solid_color
               }
               exec ${monitorQuery}
+              exec ${highestRefresh}
               exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; ${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`; sleep 10 && rm -f /tmp/wayvnc_login"
               exec ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`"
               exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.sunshine}/bin/sunshine ${sunshineCfg} > /tmp/sunshine_login"
