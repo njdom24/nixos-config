@@ -1,0 +1,51 @@
+From 77ed5340ab3580743c2c7102ed624dab821069d8 Mon Sep 17 00:00:00 2001
+From: Attila Fidan <dev@print0.net>
+Date: Sun, 3 Nov 2024 00:48:36 +0000
+Subject: [PATCH] WaylandBackend: Re-map toplevel upon becoming visible
+
+When becoming invisible, a NULL buffer is attached to the toplevel's
+surface which unmaps it. The compositor resets their state and the
+surface may also be considered unconfigured. Upon becoming visible, the
+surface must be re-mapped using the same process during initialization
+(commit without a buffer and wait for configure) before we begin
+attaching an actual buffer. The default properties should also be
+recovered.
+
+Fixes: https://github.com/ValveSoftware/gamescope/issues/1456
+---
+ src/Backends/WaylandBackend.cpp | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
+index e924ac865..789d4ae0a 100644
+--- a/src/Backends/WaylandBackend.cpp
++++ b/src/Backends/WaylandBackend.cpp
+@@ -1145,6 +1145,28 @@ namespace gamescope
+             return;
+ 
+         m_bVisible = bVisible;
++
++        // Surface must be re-mapped before using it again, and default
++        // properties should be recovered as the compositor resets the state
++        if (m_bVisible && !m_Planes[0].GetCurrentState())
++        {
++            wl_surface_commit( m_Planes[0].GetSurface() );
++            wl_display_roundtrip( m_pBackend->GetDisplay() );
++
++            libdecor_frame_set_title( m_Planes[0].GetFrame(), "Gamescope" );
++            libdecor_frame_set_app_id( m_Planes[0].GetFrame(), "gamescope" );
++
++            g_nOutputWidth = g_nPreferredOutputWidth;
++            g_nOutputHeight = g_nPreferredOutputHeight;
++            if ( g_nOutputHeight == 0 )
++                g_nOutputHeight = 720;
++            if ( g_nOutputWidth == 0 )
++                g_nOutputWidth = g_nOutputHeight * 16 / 9;
++
++            m_Planes[0].CommitLibDecor( nullptr );
++            wl_display_roundtrip( m_pBackend->GetDisplay() );
++        }
++
+         force_repaint();
+     }
+     void CWaylandConnector::SetTitle( std::shared_ptr<std::string> pAppTitle )
