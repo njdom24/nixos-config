@@ -134,6 +134,7 @@
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
+            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.primary
           else
             echo "DP-3 is not the only enabled connected output"
           fi
