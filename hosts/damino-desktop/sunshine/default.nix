@@ -92,8 +92,8 @@
                   echo "→ Running KDE/KWin-specific logic"
                   export XDG_CURRENT_DESKTOP="KDE"
                   
-                  # Assume DP-3 is a dummy display used for headless
-                  DUMMY="DP-3"
+                  # Assume dummy display used for headless
+                  DUMMY="HDMI-A-1"
 
                   # Configure display to match client
                   if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
@@ -120,7 +120,7 @@
                       exit 1
                   fi
                   
-                  # Loop through each display and disable all except DP-3
+                  # Loop through each display and disable all except DUMMY
                   while read -r display; do
                     if [[ "$display" != "$DUMMY" ]]; then
                       echo "Disabling display: $display"

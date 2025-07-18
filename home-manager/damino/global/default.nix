@@ -92,8 +92,8 @@
           # Disable RGB
           ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
 
-          # Assume DP-3 is a dummy display used for headless
-          DUMMY="DP-3"
+          # Assume dummy display used for headless
+          DUMMY="HDMI-A-1"
           
           ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
           
@@ -109,7 +109,7 @@
             echo "$DUMMY is not connected."
           fi
           
-          # Loop through each display and disable all except DP-3
+          # Loop through each display and disable all except DUMMY
           while read -r display; do
             if [[ "$display" != "$DUMMY" ]]; then
               echo "Disabling display: $display"
@@ -129,14 +129,15 @@
           len=''${#outputs[@]}
           first=''${outputs[0]:-}
           
-          if [[ $len -eq 1 && "$first" == "DP-3" ]]; then
-            echo "Only DP-3 is enabled and connected. Restoring..."
+          if [[ $len -eq 1 && "$first" == "$DUMMY" ]]; then
+            echo "Only dummy is enabled and connected. Restoring..."
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
-            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
+            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable
+            ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".disable
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.primary
           else
-            echo "DP-3 is not the only enabled connected output"
+            echo "Dummy is not the only enabled connected output"
           fi
         fi
       fi
