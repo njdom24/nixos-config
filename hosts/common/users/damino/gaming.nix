@@ -390,7 +390,7 @@ let
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
+      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
@@ -507,6 +507,7 @@ in
           #"--expose-wayland" # Seems to break games when HDR enabled
           "--hdr-enabled"
           "--adaptive-sync"
+          "-F fsr"
           #"--hdr-debug-force-output"
           #"--hdr-sdr-content-nits 500"
           #"--hdr-itm-enable"
