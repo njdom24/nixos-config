@@ -463,7 +463,6 @@ in
   	  ethtool
   	  networkmanagerapplet
   	  gtk3
-  	  pcmanfm
   	  elegant-sddm
   	  xcursor-pro
   	  pciutils
