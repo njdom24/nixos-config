@@ -56,7 +56,7 @@ let
     set -eo pipefail
     
     # Early exit if explicitly disabled
-    if [ "$ENABLE_LSFG" = "0" ]; then
+    if [[ "$ENABLE_LSFG" = "0" || "$LSFG_LEGACY" = "0" ]]; then
       exec "$@"
     fi
     
@@ -81,10 +81,12 @@ let
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     
     if [ "$refresh" -ge "$min" ]; then
-      export ENABLE_LSFG=1
+      export ENABLE_LSFG=1 # Removed in later versions
+      export LSFG_LEGACY=1
 
       # Default to performancemode
       export LSFG_PERF_MODE="''${LSFG_PERF_MODE:-1}"
+      export LSFG_PERFORMANCE_MODE="$LSFG_PERF_MODE" # Seems to be renamed as of https://github.com/PancakeTAS/lsfg-vk/commit/5f033eca0d2d16ea519ef74f0fdc422a71eff56e
       # "''$()
     
       # --- MANGOHUD_FPS_LIMIT ---
@@ -113,6 +115,7 @@ let
           export MANGOHUD_CONFIG="$cleaned,fps_limit=$new_limit"
           echo "New MANGOHUD_CONFIG: $MANGOHUD_CONFIG"
           #echo "LSFG_HDR: $LSFG_HDR"
+          #echo "LSFG_HDR: $LSFG_HDR_MODE" # Also renamed to this
         fi
       fi
     else
@@ -246,7 +249,7 @@ let
         fps_limit="''${arg#*=}"
         echo '''
       # Found to be unnecessary / potentially worse
-      #elif [[ ( "$arg" == "ENABLE_LSFG=1" || "$arg" == "lsfg-min" ) && -v hdr_enabled ]]; then
+      #elif [[ ( "$arg" == "ENABLE_LSFG=1" || "$arg" == "LSFG_LEGACY=1" || "$arg" == "lsfg-min" ) && -v hdr_enabled ]]; then
       #  export LSFG_HDR="$hdr_enabled"
       fi
 
