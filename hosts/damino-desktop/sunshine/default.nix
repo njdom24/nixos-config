@@ -19,7 +19,7 @@
         key_rightalt_to_key_win = "enabled";
         back_button_timeout = 2000;
         #capture = "kms"; # Sway 1.11 has broken wlr capture over Vulkan
-        vaapi_strict_rc_buffer = "enabled";
+        # vaapi_strict_rc_buffer = "enabled"; https://github.com/LizardByte/Sunshine/issues/3817#issuecomment-3092532936
         min_fps_factor = 3;
       };
       applications.apps = let
