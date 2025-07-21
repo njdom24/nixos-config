@@ -222,8 +222,6 @@ let
            in_addon && /^DisabledAddons=/ {print "DisabledAddons=" new; next}
            {print}
           ' "$reshade_file" > "$temp_file" && mv "$temp_file" "$reshade_file"
-
-          rm "$temp_file"
         fi
       fi
     fi
