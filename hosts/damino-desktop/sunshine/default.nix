@@ -93,7 +93,7 @@
                   export XDG_CURRENT_DESKTOP="KDE"
                   
                   # Assume dummy display used for headless
-                  DUMMY="DP-3"
+                  DUMMY="HDMI-A-1"
 
                   # Configure display to match client
                   if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
