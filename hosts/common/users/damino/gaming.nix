@@ -128,9 +128,25 @@ let
   # Gamescope helper to auto-fill mode, HDR, update settings
   gsc = pkgs.writeShellScriptBin "gsc" ''
     #!/usr/bin/env bash
-    set -euo pipefail
+    set -eo pipefail
+
+    export _GSC_PARENT_DESKTOP="''${_GSC_PARENT_DESKTOP:-$XDG_CURRENT_DESKTOP}"
+    export _GSC_PARENT_DISPLAY="''${_GSC_PARENT_DISPLAY:-$DISPLAY}"
+    export _GSC_PARENT_WAYLAND_DISPLAY="''${_GSC_PARENT_WAYLAND_DISPLAY:-$WAYLAND_DISPLAY}"
+    export _GSC_PARENT_SESSION_TYPE="''${_GSC_PARENT_SESSION_TYPE:-$XDG_SESSION_TYPE}"
 
     get_hdr() {
+      # Account for nested case
+      desktop="$XDG_CURRENT_DESKTOP"
+      display="$DISPLAY"
+      wdisplay="$WAYLAND_DISPLAY"
+      session="$XDG_SESSION_TYPE"
+
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
         echo "0"
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
@@ -145,6 +161,11 @@ let
       else
         echo "0"
       fi
+
+      XDG_CURRENT_DESKTOP="$desktop"
+      DISPLAY="$display"
+      WAYLAND_DISPLAY="$wdisplay"
+      XDG_SESSION_TYPE="$session"
     }
 
     hdr_enabled="$(get_hdr)"
