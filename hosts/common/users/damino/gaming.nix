@@ -156,9 +156,12 @@ let
         echo "0 0 0"
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
         json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
-        mapfile -t enabled < <(${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected and .enabled and has("hdr") and .hdr == true) | .name' <<< "$json")
-        ''$() # Fix syntax highlighting
-        if [ ''${#enabled[@]} -eq 0 ]; then
+        enabled=$(${pkgs.jq}/bin/jq -r '
+          .outputs
+          | map(select(.enabled == true and .priority == 1))
+          | .[0].hdr
+        ' <<< "$json")
+        if [[ "$enabled" != "true" ]]; then
           echo "0 0 0"
         else
           # Get paper white
