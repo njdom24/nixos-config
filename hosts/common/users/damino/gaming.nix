@@ -153,14 +153,21 @@ let
       XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
 
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-        echo "0 0"
+        echo "0 0 0"
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
         json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
         mapfile -t enabled < <(${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected and .enabled and has("hdr") and .hdr == true) | .name' <<< "$json")
         ''$() # Fix syntax highlighting
         if [ ''${#enabled[@]} -eq 0 ]; then
-          echo "0 0"
+          echo "0 0 0"
         else
+          # Get paper white
+          paper_white=$(${pkgs.jq}/bin/jq -r '
+            .outputs
+            | map(select(.enabled == true and .priority == 1))
+            | .[0]["sdr-brightness"]
+          ' <<< "$json")
+          
           # Get peak brightness (Currently not exposed to JSON)
           output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o | strip_ansi)
     
@@ -175,11 +182,11 @@ let
           line=$(${pkgs.gnugrep}/bin/grep -m1 "Peak brightness:" <<< "$block")
           peak=$(echo "$line" | ${pkgs.gnugrep}/bin/grep -o '[0-9]\+' | ${pkgs.coreutils}/bin/head -n1)
     
-          echo "1 ''${peak:-1000}"
+          echo "1 $paper_white ''${peak:-1000}"
           # "''$()"
         fi
       else
-        echo "0 0"
+        echo "0 0 0"
       fi
 
       XDG_CURRENT_DESKTOP="$desktop"
@@ -188,7 +195,7 @@ let
       XDG_SESSION_TYPE="$session"
     }
 
-    read hdr_enabled hdr_peak <<< "$(get_hdr)"
+    read hdr_enabled hdr_paper_white hdr_peak <<< "$(get_hdr)"
 
     # Try to enable/disable RenoDX HDR ReShade automatically
     if [[ -v RENODX_HDR && "$RENODX_HDR" == "1" ]]; then
@@ -217,8 +224,11 @@ let
             fi
           fi
         elif [[ "$hdr_enabled" == "1" ]]; then
+          # Scale peak brightness by luminance multiplier from base of 203 nits
+          scale=$(echo "scale=4; $hdr_paper_white / 203" | ${pkgs.bc}/bin/bc)
+          adjusted_peak=$(echo "$hdr_peak / $scale" | ${pkgs.bc}/bin/bc)
           # Set peak brightness
-          ${pkgs.gnused}/bin/sed -i "s/^ToneMapPeakNits=.*/ToneMapPeakNits=$hdr_peak/" "$reshade_file"
+          ${pkgs.gnused}/bin/sed -i "s/^ToneMapPeakNits=.*/ToneMapPeakNits=$adjusted_peak/" "$reshade_file"
         
           # Remove addon_id if present
           if contains "$current" "$addon_id"; then
