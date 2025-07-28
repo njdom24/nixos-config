@@ -4,6 +4,24 @@
 
 { inputs, outputs, config, lib, pkgs, ... }:
 let
+  # Work around HDR needing an extra "push" with VMM7100 Firmware v124 (VRR, HDR, 4k144Hz)
+  vmm7100_hdr_fix = pkgs.writeShellScript "vmm7100-hdr-fix" ''
+    #!/usr/bin/env bash
+    
+    if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+    fi
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.wcg.enable output.DP-3.hdr.enable 
+      # TODO: Get current mode and reapply
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@60 && kscreen-doctor output.DP-3.mode.3840x2160@120
+    fi
+  '';
+
   # Resolution & refresh detection
   get_display_mode = pkgs.writeShellScript "get-display-mode.sh" ''
     # Sway 1.11 sets this OOTB now
