@@ -18,7 +18,7 @@ let
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.wcg.enable output.DP-3.hdr.enable 
       # TODO: Get current mode and reapply
-      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@60 && kscreen-doctor output.DP-3.mode.3840x2160@120
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@60 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@120
     fi
   '';
 
