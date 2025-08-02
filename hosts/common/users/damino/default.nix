@@ -390,12 +390,12 @@ in
   
   systemd = {
     # Hail Mary to prevent remote shutdown hangs
-    extraConfig = ''
-      DefaultTimeoutStopSec=1min
-      DefaultTimeoutStartSec=1min
-      DefaultTimeoutAbortSec=30s
-    '';
-    watchdog.runtimeTime = "30s";
+    settings.Manager = {
+      DefaultTimeoutStopSec = "1min";
+      DefaultTimeoutStartSec = "1min";
+      DefaultTimeoutAbortSec = "30s";
+      RuntimeWatchdogSec = "30s";
+    };
 
     # Create a separate slice for nix-daemon that is
     # memory-managed by the userspace systemd-oomd killer
