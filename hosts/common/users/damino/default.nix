@@ -143,6 +143,10 @@ in
   };
 
   programs = {
+    appimage = {
+      enable = true;
+      binfmt = true;
+    };
 	dconf.enable = true;
 	#ssh.startAgent = true;
 	seahorse.enable = true;
