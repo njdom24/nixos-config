@@ -213,6 +213,10 @@
   	gammastep = {
   	  enable = true;
   	  provider = "manual";
+  	  temperature = {
+  	    day = 3700;
+  	    night = 3700;
+  	  };
   	  latitude = 40.0;
   	  longitude = 74.0;
   	};
