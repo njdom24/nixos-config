@@ -490,6 +490,18 @@ let
       rm -f "$mangohud_file"
     fi
   '';
+
+  # Convenience script. Hacky, but seems to get VRR going stable too
+  gsc-vmm7100 = pkgs.writeShellScriptBin "gsc-vmm7100" ''
+    pushd ~
+    ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-8 # TV speakers
+    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable output.DP-1.disable output.DP-2.disable
+    timeout 5 ${gsc}/bin/gsc -- ${pkgs.vulkan-tools}/bin/vkcube
+    $(sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
+    sleep 3 && ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
+    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
+    ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
+  '';
 in 
 {
   imports =
@@ -683,6 +695,7 @@ in
   environment = {
   	systemPackages = with pkgs; [
   	  gsc
+  	  gsc-vmm7100
   	  lsfg-min
   	  steam-run
   	  steamtinkerlaunch
