@@ -340,12 +340,13 @@
 		  export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "gles2" || echo "vulkan")
 		  #export WLR_RENDER_NO_EXPLICIT_SYNC=1
 		    
-		  eval $(gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
+		  eval $(${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
 		  # eval returns nothing if keyring is already running, so check known location for existing socket
 		  if [[ ! -v SSH_AUTH_SOCK && -S "$XDG_RUNTIME_DIR/gcr/ssh" ]]; then
 		    SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/gcr/ssh"
 		  fi
 		  export SSH_AUTH_SOCK
+		  export SSH_ASKPASS=${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass
 	    '';
 	};
 

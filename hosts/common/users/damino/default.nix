@@ -149,11 +149,13 @@ in
     };
 	dconf.enable = true;
 	#ssh.startAgent = true;
-	seahorse.enable = true;
-	ssh = {
-	  enableAskPassword = true;
-	  askPassword = pkgs.lib.mkForce "${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass";
-	};
+
+	# Enabling Seahorse globally has issues with Plasma -- Manually using for Sway instead
+	#seahorse.enable = true;
+	#ssh = {
+	#  enableAskPassword = true;
+	#  askPassword = pkgs.lib.mkForce "${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass";
+	#};
   
     zsh.enable = true;
     adb.enable = true;
@@ -480,6 +482,7 @@ in
   	  waypipe
   	  ddcutil
   	  gnome-firmware
+  	  seahorse
   	] ++ gst_plugins;
 
   	variables = {
