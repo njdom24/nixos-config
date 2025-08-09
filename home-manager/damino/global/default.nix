@@ -23,6 +23,7 @@
     inputs.nix-colors.homeManagerModules.default
     ./../../common/zsh
     ./sway.nix
+    #./hyprland.nix
     ./kitty.nix
     ./theming
   ];
