@@ -65,7 +65,7 @@
 	      	    adaptiveSync = false;
 	      	  }
 	      	  {
-	      	    criteria = "Samsung Electric Company Odyssey G8 HCPTB00064"; # Dummy display, still broken
+	      	    criteria = "Samsung Electric Company SAMSUNG 0x01000E00"; # Dummy display
 	      	    status = "disable";
 	      	    adaptiveSync = false;
 	      	  }
