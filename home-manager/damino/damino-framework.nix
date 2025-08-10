@@ -8,6 +8,7 @@
 	  else
 	    export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
 	  fi
+	  export AQ_DRM_DEVICES="$WLR_DRM_DEVICES"
 	'';
 
 	programs = {

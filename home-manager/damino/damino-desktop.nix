@@ -35,8 +35,8 @@
 	        exec = [
 	          #"sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'" # Breaks xdg-desktop-portal-wlr/pipewire capture
 	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
-	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
-	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
+	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
+	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
 	        ];
 	      };
 	    }
@@ -73,8 +73,8 @@
 	        exec = [
 	          #"sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'" # Breaks xdg-desktop-portal-wlr/pipewire capture
 	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
-	          "${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
-	          "${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
+	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
+	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
 	        ];
 	      };
 	    }
@@ -144,4 +144,56 @@
 	    anchor = lib.mkForce "top-left";
 	  };
 	};
+
+	home.file = {
+	  ".config/hypr/hm/displays.conf" = {
+	    text = ''
+	      monitorv2 {
+	        output = DP-1
+            mode = 2560x1440@180
+            position = 0x0
+            scale = 1
+            transform = 0
+            vrr = 2
+            sdr_min_luminance = 0.005
+            sdr_max_luminance = 203
+            min_luminance = 0.005
+            max_luminance = 1200
+            max_avg_luminance = 700
+            cm = srgb
+          }
+
+          monitorv2 {
+            output = DP-2
+            mode = 1920x1080@144
+            position = 2560x250
+            scale = 1
+            transform = 0
+            vrr = 0
+            cm = srgb
+          }
+
+          monitor = DP-3, disable
+          monitor = HDMI-A-1, disable
+	    '';
+	  };
+	  ".config/hypr/hm/displays/tv.conf" = {
+	    text = ''
+	      monitorv2 {
+	        output = DP-3
+	        mode = 3840x2160@120
+	        position = 0x0
+	        scale = 1
+	        transform = 0
+	        vrr = 2
+	        sdr_min_luminance = 0.005
+	        sdr_max_luminance = 203
+	        min_luminance = 0.005
+	        max_luminance = 880
+	        max_avg_luminance = 600
+	        cm = hdr
+	      }
+	    '';
+	  };
+    };
 }

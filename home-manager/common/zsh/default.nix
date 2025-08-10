@@ -12,7 +12,7 @@
 	    sudo nixos-rebuild switch --flake /etc/nixos/.# "$@"
 	  }
 	  hm-upgrade() {
-	    home-manager switch --flake /etc/nixos/. "$@"
+	    home-manager switch --flake /etc/nixos/. "$@" -b old
 	  }
 	'';
 	oh-my-zsh = {

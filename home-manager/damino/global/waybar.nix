@@ -7,7 +7,7 @@
 	    ipc = true;
 	  	layer = "top";
 	  	height = 22;
-	  	modules-left = [ "sway/workspaces" "sway/mode" ];
+	  	modules-left = [ "sway/workspaces" "sway/mode" "hyprland/workspaces" "hyprland/submap" ];
 	  	modules-center = [ "clock" ];
 	  	modules-right = [ "pulseaudio" "custom/weather" "tray" "custom/menu" ];
 
@@ -22,6 +22,20 @@
      	};
 
      	"sway/mode" = {
+          format = "<span style=\"italic\">{}</span>";
+		};
+
+		"hyprland/workspaces" = {
+          disable-scroll = true;
+          all-outputs = true;
+          format-icons = {
+            urgent = "";
+            focused = "";
+            default = "";
+          };
+     	};
+
+     	"hyprland/submap" = {
           format = "<span style=\"italic\">{}</span>";
 		};
 
@@ -122,7 +136,7 @@
             car = "";
             default = [ "" "" "" ];
           };
-          on-click = "${pkgs.pavucontrol}/bin/pavucontrol";
+          on-click = "kill `pgrep pavucontrol` || ${pkgs.pavucontrol}/bin/pavucontrol";
     	};
 	  };
 	};
