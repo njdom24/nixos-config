@@ -131,8 +131,9 @@
           color = "rgba(1a1a1aee)";
         };
         # https://wiki.hypr.land/Configuring/Variables/#blur
+        # Screen transitions look weird with blur enabled
         blur = {
-          enabled = true;
+          enabled = false;
           size = 3;
           passes = 1;
           vibrancy = 0.1696;
@@ -262,10 +263,10 @@
         "$mainMod SHIFT, right, hy3:movewindow, r"
         "$mainMod SHIFT, up,    hy3:movewindow, u"
         "$mainMod SHIFT, down,  hy3:movewindow, d"
-        # $mainMod SHIFT, left,  movewindow, l
-        # $mainMod SHIFT, right, movewindow, r
-        # $mainMod SHIFT, up,    movewindow, u
-        # $mainMod SHIFT, down,  movewindow, d
+        #"$mainMod SHIFT, left,  movewindow, l"
+        #"$mainMod SHIFT, right, movewindow, r"
+        #"$mainMod SHIFT, up,    movewindow, u"
+        #"$mainMod SHIFT, down,  movewindow, d"
 
         # Switch workspaces with mainMod + [0-9]
         "$mainMod, 1, workspace, 1"
@@ -409,7 +410,7 @@
     };
     packages = with pkgs; [
       hyprpaper
-      #hyprlandPlugins.hy3
+      hyprlandPlugins.hy3
       #edid-decode
     ];
 
