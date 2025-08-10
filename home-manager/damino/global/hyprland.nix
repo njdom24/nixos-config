@@ -210,9 +210,9 @@
         cm_auto_hdr = 0;
       };
 
-      debug = {
-        full_cm_proto = true;
-      };
+      #debug = {
+      #  full_cm_proto = true;
+      #};
 
       ### INPUT ###
 
