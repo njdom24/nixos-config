@@ -193,6 +193,9 @@
 	        max_avg_luminance = 600
 	        cm = hdr
 	      }
+	      monitor = DP-1, disable
+	      monitor = DP-2, disable
+	      monitor = HDMI-A-1, disable
 	    '';
 	  };
     };
