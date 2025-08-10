@@ -394,11 +394,6 @@ let
     done
     # "''$()"
 
-    # Workaround for https://github.com/ValveSoftware/gamescope/issues/1825#issuecomment-3172291484
-    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$hdr_enabled" == "1" ]]; then
-      extra_flags+=("--hdr-debug-force-output")
-    fi
-
     if [ -v scope_vars_done ]; then
       echo "Commands to run: $to_run"
       for arg in "''${to_run[@]}"; do
