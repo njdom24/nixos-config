@@ -205,6 +205,7 @@
       };
 
       render = {
+        direct_scanout = 1;
         cm_fs_passthrough = 0;
         cm_auto_hdr = 0;
       };
@@ -234,6 +235,7 @@
 
       cursor = {
         no_warps = true;
+        no_break_fs_vrr = 1;
       };
 
       ### KEYBINDINGS ###
