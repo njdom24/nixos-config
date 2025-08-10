@@ -19,6 +19,9 @@ let
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.wcg.enable output.DP-3.hdr.enable 
       # TODO: Get current mode and reapply
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@60 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@120
+    elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+      ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3,3840x2160@60,auto,1,cm,hdr
+      ${pkgs.hyprland}/bin/hyprctl reload
     fi
   '';
 
@@ -29,6 +32,14 @@ let
       ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
         .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
       '
+    elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
+      read width height refresh <<< $(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '
+        .[] 
+        | select(.focused == true) 
+        | [.width, .height, (.refreshRate | floor)] 
+        | @tsv
+      ')
+      echo "$width $height $refresh"
     elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
       read width height refresh < <(
         ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
@@ -172,6 +183,34 @@ let
 
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
         echo "0 0 0"
+      elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
+        conf="$HOME/.config/hypr/displays.conf"
+        
+        focused_monitor=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+        
+        block=$(${pkgs.gawk}/bin/awk -v mon="$focused_monitor" '
+          /^[[:space:]]*monitorv2[[:space:]]*{/ { inblock=1; block="" }
+          inblock {
+            block = block $0 "\n"
+            if ($0 ~ /^[[:space:]]*}/) {
+              if (block ~ ("output[[:space:]]*=[[:space:]]*" mon)) {
+                print block
+                exit
+              }
+              inblock=0
+            }
+          }
+        ' "$conf")
+        
+        cm=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*cm[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
+        sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
+        max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
+     
+        if [[ "$cm" = "hdr" ]]; then
+          echo "1 $sdr_max $max_lum"
+        else
+          echo "0 0 0"
+        fi
       elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
         json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
         enabled=$(${pkgs.jq}/bin/jq -r '
@@ -355,6 +394,11 @@ let
     done
     # "''$()"
 
+    # Workaround for https://github.com/ValveSoftware/gamescope/issues/1825#issuecomment-3172291484
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$hdr_enabled" == "1" ]]; then
+      extra_flags+=("--hdr-debug-force-output")
+    fi
+
     if [ -v scope_vars_done ]; then
       echo "Commands to run: $to_run"
       for arg in "''${to_run[@]}"; do
@@ -466,7 +510,7 @@ let
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
+      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
@@ -495,11 +539,26 @@ let
   gsc-vmm7100 = pkgs.writeShellScriptBin "gsc-vmm7100" ''
     pushd ~
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-8 # TV speakers
-    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable output.DP-1.disable output.DP-2.disable
+    if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable output.DP-1.disable output.DP-2.disable
+    elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+      cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
+      cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
+    fi
+    
     timeout 5 ${gsc}/bin/gsc -- ${pkgs.vulkan-tools}/bin/vkcube
-    $(sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
+
+    # TODO: Make extra confs for Hyprland if VRR is still an issue
+    if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+      $(sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
+    fi
     sleep 3 && ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
-    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
+    elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+      mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
+    fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
   '';
 in 
