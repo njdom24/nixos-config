@@ -774,7 +774,7 @@ in
   	  protontricks
   	  protonplus
 	  unstable.ludusavi
-	  unstable.ryujinx
+	  unstable.ryubing
 	  # citra-mk7 TODO: https://github.com/NixOS/nixpkgs/pull/348927
 	  dolphin-emu
 	  unstable.cemu

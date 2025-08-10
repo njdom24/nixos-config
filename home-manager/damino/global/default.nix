@@ -162,7 +162,7 @@
       nwg-displays
       fluent-gtk-theme
       stable.fluent-icon-theme
-      kora-icon-theme
+      stable.kora-icon-theme
       flavours
       gradience
       adw-gtk3
@@ -246,7 +246,7 @@
     };
     iconTheme = {
       name = "kora";
-      package = pkgs.kora-icon-theme;
+      package = pkgs.stable.kora-icon-theme;
     };
     cursorTheme = {
       name = "XCursor-Pro-Dark";
