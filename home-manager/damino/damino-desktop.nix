@@ -160,6 +160,7 @@
             min_luminance = 0.005
             max_luminance = 1200
             max_avg_luminance = 700
+            bitdepth = 10
             cm = srgb
           }
 
@@ -170,6 +171,7 @@
             scale = 1
             transform = 0
             vrr = 0
+            bitdepth = 8
             cm = srgb
           }
 
@@ -191,6 +193,7 @@
 	        min_luminance = 0.005
 	        max_luminance = 880
 	        max_avg_luminance = 600
+	        bitdepth = 10
 	        cm = hdr
 	      }
 	      monitor = DP-1, disable
