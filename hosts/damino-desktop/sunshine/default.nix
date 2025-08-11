@@ -45,7 +45,7 @@
           ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
 
           echo "Using display: $WAYLAND_DISPLAY"
-          declare -a known_compositors=("sway" "kwin_wayland")
+          declare -a known_compositors=("kwin_wayland" "sway")
 
           # Detect running compositor by process name
           for comp in ''\${known_compositors[@]}''\; do
