@@ -128,6 +128,14 @@
         ];
       }
     ];
+
+    configFile = {
+      "kwinrc"."Desktops"."Number" = {
+        value = 8;
+        # Forces kde to not change this value (even through the settings app).
+        immutable = true;
+      };
+    };
   };
 
   home = {
