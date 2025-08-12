@@ -361,6 +361,14 @@
   };
 
   services = {
+    hyprpaper = {
+      enable = true;
+      settings = {
+        preload = [ "${./theming/wallpapers/new_gridania.jpg}" ];
+        wallpaper = ",${./theming/wallpapers/new_gridania.jpg}";
+      };
+    };
+
     swaync = {
       enable = true;
       settings = {
@@ -413,9 +421,7 @@
       };
     };
     packages = with pkgs; [
-      hyprpaper
       hyprlandPlugins.hy3
-      #edid-decode
     ];
 
     activation = {
