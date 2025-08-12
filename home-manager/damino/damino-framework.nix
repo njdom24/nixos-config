@@ -1,15 +1,18 @@
 { inputs, pkgs, ... }: {
 	imports = [ ./global ];
 
-	# eGPU setup
-	wayland.windowManager.sway.extraSessionCommands = ''
-	  if [ -e /dev/dri/card0 ]; then
-	    export WLR_DRM_DEVICES=/dev/dri/card0
-	  else
-	    export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
-	  fi
-	  export AQ_DRM_DEVICES="$WLR_DRM_DEVICES"
-	'';
+	wayland.windowManager = {
+	  # eGPU setup
+	  sway.extraSessionCommands = ''
+	    if [ -e /dev/dri/card0 ]; then
+	      export WLR_DRM_DEVICES=/dev/dri/card0
+	    else
+	      export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
+	    fi
+	  '';
+
+	  hyprland.settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+	};
 
 	programs = {
 	  rofi.yoffset = 11;
@@ -27,7 +30,7 @@
 	  	  	  	status = "enable";
 	  	  	  	mode = "2256x1504@59.999Hz";
 	  	  	  	position = "0,0";
-	  	  	  	scale = 1.25;
+	  	  	  	scale = 1.175;
 	  	  	  }
 	  	  	];
 	  	  	exec = [

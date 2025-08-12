@@ -80,7 +80,6 @@
 
       ### ENVIRONMENT VARIABLES ###
       env = [
-        "AQ_DRM_DEVICES,/dev/dri/card0"
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
         "HYPRCURSOR_THEME,$cursorTheme"
@@ -341,6 +340,7 @@
 
     extraConfig = ''
       plugin = ${pkgs.hyprlandPlugins.hy3}/lib/libhy3.so
+      debug:disable_scale_checks = true
       ## Resize mode/submap
       bind=$mainMod,R,submap,resize
       submap=resize
