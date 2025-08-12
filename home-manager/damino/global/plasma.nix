@@ -112,6 +112,22 @@
       "services/org.kde.spectacle.desktop"."CurrentMonitorScreenShot" = "Ctrl+Shift+Home";
       "services/org.kde.spectacle.desktop"."RectangularRegionScreenShot" = ["Meta+Shift+Print" "Ctrl+Shift+PgUp"];
     };
+
+    panels = [
+      {
+        screen = "all";
+        location = "top";
+        height = 32;
+        widgets = [
+          "org.kde.plasma.kickoff"
+          "org.kde.plasma.pager"
+          "org.kde.plasma.icontasks"
+          "org.kde.plasma.marginsseparator"
+          "org.kde.plasma.systemtray"
+          "org.kde.plasma.digitalclock"
+        ];
+      }
+    ];
   };
 
   home = {
