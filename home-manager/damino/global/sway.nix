@@ -168,8 +168,7 @@
 		  }];
 		  output = {
 		  	"*" = {
-		  	  #bg = "${config.home.homeDirectory}/Pictures/Wallpapers/New Gridania.jpeg fill";
-		  	  bg = "${(builtins.toString ./theming/wallpapers/new_gridania.jpg)} fill";
+		  	  bg = "${./theming/wallpapers/new_gridania.jpg} fill";
 		  	};
 		  };
 		  input = {
