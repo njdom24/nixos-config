@@ -1,5 +1,6 @@
 { inputs, lib, config, pkgs, ... }: {
   imports = [
+    #inputs.hyprland.homeManagerModules.default
     ./wlogout.nix
     ./waybar.nix
     ./rofi.nix

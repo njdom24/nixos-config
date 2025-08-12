@@ -23,6 +23,7 @@
     inputs.nix-colors.homeManagerModules.default
     ./../../common/zsh
     ./plasma.nix
+    #./plasma-config_orig.nix
     ./sway.nix
     ./hyprland.nix
     ./kitty.nix

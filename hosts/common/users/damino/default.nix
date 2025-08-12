@@ -173,7 +173,10 @@ in
     noisetorch.enable = true;
     virt-manager.enable = true;
 
-    hyprland.enable = true; # I don't condone Vaxry, but I need tiling + HDR
+    hyprland = {	
+      enable = true; # I don't condone Vaxry, but I need tiling + HDR
+      #package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    };
   };
 
   virtualisation = {

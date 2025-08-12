@@ -22,6 +22,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    #hyprland.url = "github:UjinT34/Hyprland/subsurface-fixes?submodules=1";
 
     # TODO: Add any other flake you might need
     hardware.url = "github:nixos/nixos-hardware";
@@ -40,6 +42,7 @@
     home-manager,
     home-manager-stable,
     plasma-manager,
+    #hyprland,
     hardware,
     chaotic,
     ...
