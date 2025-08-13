@@ -541,7 +541,7 @@ let
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
     fi
     
-    timeout 5 ${gsc}/bin/gsc -- ${pkgs.vulkan-tools}/bin/vkcube
+    timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
 
     # TODO: Make extra confs for Hyprland if VRR is still an issue
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
