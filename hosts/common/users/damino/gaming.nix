@@ -7,7 +7,7 @@ let
   # Work around HDR needing an extra "push" with VMM7100 Firmware v124 (VRR, HDR, 4k144Hz)
   vmm7100_hdr_fix = pkgs.writeShellScript "vmm7100-hdr-fix" ''
     #!/usr/bin/env bash
-    
+
     if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
       XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
       DISPLAY="$_GSC_PARENT_DISPLAY"
@@ -533,6 +533,12 @@ let
   # Convenience script. Hacky, but seems to get VRR going stable too
   gsc-vmm7100 = pkgs.writeShellScriptBin "gsc-vmm7100" ''
     pushd ~
+    
+    if pgrep -x steam >/dev/null; then
+        echo "Error: Steam is already running." >&2
+        exit 1
+    fi
+    
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-8 # TV speakers
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable output.DP-1.disable output.DP-2.disable
