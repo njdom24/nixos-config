@@ -17,7 +17,19 @@
 	  }
 	  {
 		label = "logout";
-		action = "${pkgs.sway}/bin/swaymsg exit";
+		action = pkgs.writeShellScript "wm-exit" ''
+		  case "$XDG_CURRENT_DESKTOP" in
+		    sway)
+		      ${pkgs.sway}/bin/swaymsg exit
+		      ;;
+		    Hyprland)
+		      ${pkgs.hyprland}/bin/hyprctl dispatch exit
+		      ;;
+		    *)
+		      echo "Unknown desktop: $XDG_CURRENT_DESKTOP" >&2
+		      ;;
+		  esac
+		'';
 		text = "Logout";
 		keybind = "e";
 	  }

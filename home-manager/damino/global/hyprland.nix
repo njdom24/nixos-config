@@ -244,7 +244,7 @@
       bind = [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
-        "$mainMod SHIFT, E, exit,"
+        "$mainMod SHIFT, E, wlogout,"
         "$mainMod SHIFT, Space, togglefloating,"
         "$mainMod, D, exec, $menu"
         # $mainMod, H, togglesplit, # dwindle
