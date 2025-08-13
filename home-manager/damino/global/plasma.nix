@@ -56,6 +56,11 @@
 	    #"plasmashell"."activate task manager entry 9" = "none,Meta+9,Activate Task Manager Entry 9";
 	    #"plasmashell"."activate task manager entry 10" = "none,,Activate Task Manager Entry 10";
       #"kwin"."Show Desktop" = "none,Meta+D,Peek at Desktop";
+
+      ksmserver = {
+        "Lock Session" = "";
+      };
+
       kwin = {
         "Window Close" = "Meta+Shift+Q";
         "Window Fullscreen" = "Meta+F";
@@ -163,6 +168,12 @@
           FocusPolicy = "FocusFollowsMouse";
         };
         "Effect-slide"."SlideBackground" = false;
+      };
+      kscreenlockerrc = {
+        Daemon = {
+          Autolock = false;
+          Timeout = 0;
+        };
       };
     };
   };
