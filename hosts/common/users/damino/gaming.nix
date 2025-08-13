@@ -535,8 +535,8 @@ let
     pushd ~
     
     if pgrep -x steam >/dev/null; then
-        echo "Error: Steam is already running." >&2
-        exit 1
+      echo "Error: Steam is already running." >&2
+      exit 1
     fi
     
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-8 # TV speakers
