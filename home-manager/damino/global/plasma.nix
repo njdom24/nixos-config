@@ -64,6 +64,7 @@
       kwin = {
         "Window Close" = "Meta+Shift+Q";
         "Window Fullscreen" = "Meta+F";
+        "Edit Tiles" = "Meta+T";
 
         "Switch to Desktop 1" = "Meta+1";
         "Switch to Desktop 2" = "Meta+2";
