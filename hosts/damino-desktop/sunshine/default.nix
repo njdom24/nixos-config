@@ -45,7 +45,7 @@
           ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
 
           echo "Using display: $WAYLAND_DISPLAY"
-          declare -a known_compositors=("kwin_wayland" "sway")
+          declare -a known_compositors=("kwin_wayland" "Hyprland" "sway")
 
           # Detect running compositor by process name
           for comp in ''\${known_compositors[@]}''\; do
@@ -100,10 +100,6 @@
                     SUNSHINE_CLIENT_FPS=120
                   fi
 
-                  if [ "$SUNSHINE_CLIENT_HEIGHT" -gt 1440 ]; then
-                    SUNSHINE_CLIENT_FPS=60
-                  fi
-                  
                   ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
                   ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
                   
@@ -141,6 +137,50 @@
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable output."$DUMMY".wcg.disable
                     ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferEfficiency
                   fi
+                  ;;
+                Hyprland)
+                  echo "→ Running Hyprland-specific logic"
+                  export XDG_CURRENT_DESKTOP="Hyprland"
+                  cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
+
+                  # Configure display to match client
+                  if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
+                    SUNSHINE_CLIENT_FPS=120
+                  fi
+
+                  tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+
+                  ${pkgs.coreutils}/bin/printf "%s\n" \
+                    "monitorv2 {" \
+                    "	output = HDMI-A-1" \
+                    "	mode = ''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}"  \ "''$()"
+                    "	position = 0x0" \
+                    "	scale = 1" \
+                    "	transform = 0" \
+                    "	vrr = 0" \
+                    "	sdr_min_luminance = 0.005" \
+                    "	sdr_max_luminance = 203" \
+                    "	min_luminance = 0" \
+                    "	max_luminance = 1000" \
+                    "	max_avg_luminance = 400" \
+                    "	cm = srgb" \
+                    "	supports_wide_color = 1" \
+                    "	supports_hdr = 1" \
+                    "	bitdepth = 8" \
+                    "}" \
+                    "" \
+                    "monitor = DP-1, disable" \
+                    "monitor = DP-2, disable" \
+                    "monitor = DP-3, disable" \
+                    > "$tmpfile"
+
+                  if [[ "$1" == "hdr" ]]; then
+                    echo "Enabling HDR"
+                    ${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
+                    ${pkgs.gnused}/bin/sed -i 's/bitdepth = 8/bitdepth = 10/' "$tmpfile"
+                  fi
+
+                  mv "$tmpfile" ~/.config/hypr/displays.conf
                   ;;
                 "")
                   echo "→ No known compositor found"

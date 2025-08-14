@@ -63,6 +63,31 @@
         echo "HDR not supported on $monitor; no changes made."
       fi
     '';
+    set-displays = pkgs.writeShellScript "set-displays.sh" ''
+      if [ -f /tmp/sunshine_login ]; then
+        if ${pkgs.gawk}/bin/awk '
+        /CLIENT CONNECTED/ {e=1}
+        e && /CLIENT DISCONNECTED/ {cancel=1}
+        END { if (e && !cancel) exit 0; else exit 1 }
+        ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
+          ${pkgs.openrgb}/bin/openrgb --mode static --color 000000 2> /dev/null || true
+
+          # Enable headless display if remote
+          ${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1, 1920x1080@60,0x0,1
+          ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-1, disable
+          ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-2, disable
+          ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3, disable
+
+          exit 0
+        fi
+      fi
+
+      # Restore desktop config if not remote
+      displays="~/.config/hypr/displays.conf.gsc"
+      if [ -f "$displays" ]; then
+        mv "$displays" "~/.config/hypr/displays.conf"
+      fi
+    '';
   in {
     enable = true;
     systemd.enable = true;
@@ -326,6 +351,7 @@
 
       ### AUTOSTART ###
       exec-once = [
+        "${set-displays}"
         "nm-applet &"
         "hyprpaper & firefox"
         # Work around cursor config option unreliability
