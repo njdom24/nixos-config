@@ -254,6 +254,10 @@
           Comment=Checks for remote login and starts sunshine
         '';
     };
+    sessionVariables = {
+      # https://bugs.kde.org/show_bug.cgi?id=506645
+      KWIN_DISABLE_TONEMAPPING = "1";
+    };
 
     packages = with pkgs; [
     ];
