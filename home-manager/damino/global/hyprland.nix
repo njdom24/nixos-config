@@ -78,6 +78,8 @@
           ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-2, disable
           ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3, disable
 
+          sleep 5 && systemctl --user start sunshine
+
           exit 0
         fi
       fi
