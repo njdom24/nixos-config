@@ -103,6 +103,7 @@ in
 	  corefonts
 	  vistafonts
 	  vscode
+	  linux-wifi-hotspot
     ];
   };
 
