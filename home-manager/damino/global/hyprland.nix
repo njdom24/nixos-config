@@ -354,6 +354,7 @@
       ### AUTOSTART ###
       exec-once = [
         "${set-displays}"
+        "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
         "nm-applet &"
         "hyprpaper & firefox"
         # Work around cursor config option unreliability
