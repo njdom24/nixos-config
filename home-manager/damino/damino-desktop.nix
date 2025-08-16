@@ -120,15 +120,17 @@
 	  	        criteria = "Acer Technologies VG271U 0x0302811A";
 	  	  	    status = "enable";
 	  	  	    mode = "2560x1440@143.999Hz";
-	  	  	    position = "2560,0";
+	  	  	    position = "1920,0";
+	  	  	    #position = "2560,0";
 	  	  	    #adaptiveSync = true;
 	  	  	  }
 	  	      {
 	  	  	    criteria = "Samsung Electric Company LC27T55 HCPW203589";
 	  	  	    status = "enable";
 	  	  	    mode = "1920x1080@75";
-	  	  	    position = "0,0";
-	  	  	    scale = 0.75;
+	  	  	    position = "0,180";
+	  	  	    #position = "0,0";
+	  	  	    #scale = 0.75;
 	  	  	    #adaptiveSync = true;
 	  	  	  }
 	  	    ];
