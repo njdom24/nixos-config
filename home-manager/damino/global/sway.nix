@@ -126,7 +126,8 @@
           #exec_always timeout 10 kanshi
           exec_always ${displaySetup}
           
-		  exec mako
+		  #exec mako
+		  exec ${pkgs.swaynotificationcenter}/bin/swaync
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
 		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
@@ -197,8 +198,10 @@
 		  	"XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
 		  	"XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
 		  	"XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SINK@ toggle";
-		  	"Control+grave" = "exec makoctl restore";
-		  	"Control+space" = "exec makoctl dismiss";
+		  	"Control+grave" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --toggle-panel";
+		  	"Control+space" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --hide-latest";
+		  	#"Control+grave" = "exec makoctl restore";
+		  	#"Control+space" = "exec makoctl dismiss";
 		  	"$mod+Return" = "exec kitty";
 		  	"$mod+Shift+q" = "kill";
 		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
