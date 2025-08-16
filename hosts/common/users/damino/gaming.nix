@@ -469,7 +469,7 @@ let
       # Force "late" FPS limiter, since gamescope stutters with early
       if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
         ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
-      elif ! grep -q '^fps_limit_method=' "$mangohud_file"; then
+      elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
         echo 'fps_limit_method=late' >> "$mangohud_file"
       fi
 
