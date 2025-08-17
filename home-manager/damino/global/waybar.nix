@@ -9,7 +9,7 @@
 	  	height = 22;
 	  	modules-left = [ "sway/workspaces" "sway/mode" "hyprland/workspaces" "hyprland/submap" ];
 	  	modules-center = [ "clock" ];
-	  	modules-right = [ "pulseaudio" "custom/weather" "tray" "custom/menu" ];
+	  	modules-right = [ "pulseaudio" "bluetooth" "custom/weather" "tray" "custom/menu" ];
 
 	  	"sway/workspaces" = {
           disable-scroll = true;
@@ -19,6 +19,16 @@
             focused = "";
             default = "";
           };
+     	};
+
+     	"bluetooth" = {
+     	  format-on = "󰂯 ";
+     	  format-off = "󰂲 ";
+     	  format-disabled = "";
+     	  format-connected = "󰂱 {num_connections} ";
+     	  tooltip-format-connected = "{device_enumerate}";
+     	  tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+     	  on-click = "kill `pgrep blueberry` || ${pkgs.blueberry}/bin/blueberry";
      	};
 
      	"sway/mode" = {
