@@ -24,6 +24,7 @@
     };
     #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
     #hyprland.url = "github:UjinT34/Hyprland/fp16?submodules=1";
+    hyprland.url = "github:UjinT34/Hyprland/subsurface-fixes?submodules=1";
     #hy3 = {
     #  url = "github:outfoxxed/hy3";
     #  #url = "github:outfoxxed/hy3?ref=hl{version}"; # where {version} is the hyprland release version
@@ -31,6 +32,9 @@
     #  # (you may encounter issues if you dont do the same for hyprland)
     #  inputs.hyprland.follows = "hyprland";
     #};
+    # Waiting on:
+      # https://github.com/outfoxxed/hy3/issues/162
+      # https://github.com/outfoxxed/hy3/issues/223
 
     # TODO: Add any other flake you might need
     hardware.url = "github:nixos/nixos-hardware";
@@ -49,7 +53,7 @@
     home-manager,
     home-manager-stable,
     plasma-manager,
-    #hyprland,
+    hyprland,
     #hy3,
     hardware,
     chaotic,

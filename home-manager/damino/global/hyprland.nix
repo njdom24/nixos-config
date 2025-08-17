@@ -1,6 +1,6 @@
 { inputs, lib, config, pkgs, ... }: {
   imports = [
-    #inputs.hyprland.homeManagerModules.default
+    inputs.hyprland.homeManagerModules.default
     ./wlogout.nix
     ./waybar.nix
     ./rofi.nix
@@ -94,7 +94,7 @@
     enable = true;
     systemd.enable = true;
     #importantPrefixes = [ "output" ];
-    plugins = [ pkgs.hyprlandPlugins.hy3 ];
+    #plugins = [ pkgs.hyprlandPlugins.hy3 ];
     #plugins = [ inputs.hy3.packages.x86_64-linux.hy3 ];
     settings = {
       "$mainMod" = "SUPER";
@@ -125,11 +125,11 @@
         "REMOTE_ENABLED,0"
       ];
 
-      plugin = {
-        hy3 = {
-          autotile.enable = true;
-        };
-      };
+      #plugin = {
+        #hy3 = {
+        #  autotile.enable = true;
+        #};
+      #};
 
       general = {
         gaps_in = 3;
@@ -142,8 +142,8 @@
         resize_on_border = false;
         # Please see https://wiki.hypr.land/Configuring/Tearing/ before you turn this on
         allow_tearing = false;
-        #layout = dwindle
-        layout = "hy3";
+        layout = "dwindle";
+        #layout = "hy3";
       };
 
       decoration = {
@@ -263,7 +263,7 @@
       };
 
       cursor = {
-        no_warps = true;
+        no_warps = false;
         no_break_fs_vrr = 1;
       };
 
@@ -276,28 +276,28 @@
         "$mainMod, D, exec, $menu"
         # $mainMod, H, togglesplit, # dwindle
         "$mainMod, F, fullscreen"
-        "$mainMod, left, hy3:movefocus, l"
-        "$mainMod, right, hy3:movefocus, r"
-        "$mainMod, up, hy3:movefocus, u"
-        "$mainMod, down, hy3:movefocus, d"
-        # $mainMod, left, movefocus, l
-        # $mainMod, right, movefocus, r
-        # $mainMod, up, movefocus, u
-        # $mainMod, down, movefocus, d
-        "$mainMod, H, hy3:makegroup, h"
-        "$mainMod, V, hy3:makegroup, v"
-        # $mainMod, space, exec, $(hyprctl activewindow -j | jq '.floating') && hyprctl dispatch cyclenext tiled || hyprctl dispatch cyclenext floating
-        "$mainMod, space, hy3:togglefocuslayer, nowarp"
+        #"$mainMod, left, hy3:movefocus, l"
+        #"$mainMod, right, hy3:movefocus, r"
+        #"$mainMod, up, hy3:movefocus, u"
+        #"$mainMod, down, hy3:movefocus, d"
+        "$mainMod, left, movefocus, l"
+        "$mainMod, right, movefocus, r"
+        "$mainMod, up, movefocus, u"
+        "$mainMod, down, movefocus, d"
+        #"$mainMod, H, hy3:makegroup, h"
+        #"$mainMod, V, hy3:makegroup, v"
+        "$mainMod, space, exec, $(hyprctl activewindow -j | jq '.floating') && hyprctl dispatch cyclenext tiled || hyprctl dispatch cyclenext floating"
+        #"$mainMod, space, hy3:togglefocuslayer, nowarp"
 
         # Move the active window (use SHIFT as the extra modifier)
-        "$mainMod SHIFT, left,  hy3:movewindow, l"
-        "$mainMod SHIFT, right, hy3:movewindow, r"
-        "$mainMod SHIFT, up,    hy3:movewindow, u"
-        "$mainMod SHIFT, down,  hy3:movewindow, d"
-        #"$mainMod SHIFT, left,  movewindow, l"
-        #"$mainMod SHIFT, right, movewindow, r"
-        #"$mainMod SHIFT, up,    movewindow, u"
-        #"$mainMod SHIFT, down,  movewindow, d"
+        #"$mainMod SHIFT, left,  hy3:movewindow, l"
+        #"$mainMod SHIFT, right, hy3:movewindow, r"
+        #"$mainMod SHIFT, up,    hy3:movewindow, u"
+        #"$mainMod SHIFT, down,  hy3:movewindow, d"
+        "$mainMod SHIFT, left,  movewindow, l"
+        "$mainMod SHIFT, right, movewindow, r"
+        "$mainMod SHIFT, up,    movewindow, u"
+        "$mainMod SHIFT, down,  movewindow, d"
 
         # Switch workspaces with mainMod + [0-9]
         "$mainMod, 1, workspace, 1"
@@ -369,8 +369,8 @@
     };
 
     extraConfig = ''
-      plugin = ${pkgs.hyprlandPlugins.hy3}/lib/libhy3.so
-      #plugin = $inputs.hy3.packages.x86_64-linux.hy3}/lib/libhy3.so
+      #plugin = ${pkgs.hyprlandPlugins.hy3}/lib/libhy3.so
+      plugin = $inputs.hy3.packages.x86_64-linux.hy3}/lib/libhy3.so
       debug:disable_scale_checks = true
       ## Resize mode/submap
       bind=$mainMod,R,submap,resize
