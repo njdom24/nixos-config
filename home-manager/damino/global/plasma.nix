@@ -211,6 +211,11 @@
       };
       kdeglobals.Sounds.Enable = false;
       plasmaparc.General.AudioFeedback = false;
+
+      kdeglobals = {
+        # For non-KDE desktops
+        UiSettings.ColorScheme = "qt5ct";
+      };
     };
 
     powerdevil = {
