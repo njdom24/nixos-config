@@ -172,11 +172,11 @@
 }
 
 window#waybar {
-    background-color: @base00;
+    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.9);
     color: @base07;
     transition-property: background-color;
     transition-duration: .5s;
-    opacity: 0.9;
+    opacity: 1;
 }
 
 window#waybar.hidden {
