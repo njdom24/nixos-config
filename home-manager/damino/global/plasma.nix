@@ -210,6 +210,7 @@
         };
       };
       kdeglobals.Sounds.Enable = false;
+      plasmaparc.General.AudioFeedback = false;
     };
 
     powerdevil = {
