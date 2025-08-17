@@ -46,18 +46,9 @@
         family = config.programs.plasma.fonts.general.family;
         pointSize = 8;
       };
-      toolbar = {
-        family = config.programs.plasma.fonts.general.family;
-        pointSize = 10;
-      };
-      menu = {
-        family = config.programs.plasma.fonts.general.family;
-        pointSize = 10;
-      };
-      windowTitle = {
-        family = config.programs.plasma.fonts.general.family;
-        pointSize = 10;
-      };
+      toolbar = config.programs.plasma.fonts.general;
+      menu = config.programs.plasma.fonts.general;
+      windowTitle = config.programs.plasma.fonts.general;
     };
     
     kwin = {
