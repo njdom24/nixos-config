@@ -74,7 +74,7 @@
           box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--base02); /* Border color */
           border-radius: 6.6px;
           margin: 18px;
-          background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.7); /* base00 with 70% opacity */
+          background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.8); /* base00 with 80% opacity */
           color: var(--base05);
           padding: 0;
         }
