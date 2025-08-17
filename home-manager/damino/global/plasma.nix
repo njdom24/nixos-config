@@ -59,7 +59,19 @@
     };
 
     workspace = {
+      # plasma-apply-desktoptheme --list-themes
+      theme = "breeze-dark";
+      # plasma-apply-colorscheme --list-schemes
+      colorScheme = "BreezeDark";
+      cursor = {
+        theme = "XCursor-Pro-Dark";
+        size = 24;
+      };
+      # ~/.config/kdeglobals
+      iconTheme = "breeze-dark";
       wallpaper = "${./theming/wallpapers/new_gridania.jpg}";
+      # plasma-apply-lookandfeel --list
+      #lookAndFeel = "org.kde.breezedark.desktop";
     };
 
     # May need to delete ~/.config/kglobalshortcutsrc first to avoid weird shortcut clobbering
