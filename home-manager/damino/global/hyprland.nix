@@ -90,6 +90,23 @@
         mv "$displays" "~/.config/hypr/displays.conf"
       fi
     '';
+    # Bodge to work around gamescope cursor grab not working on games with launchers
+    gamescope-cursor-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
+      SOCK="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+      
+      ${pkgs.socat}/bin/socat -U - UNIX-CONNECT:"$SOCK" | while read -r line; do
+        if [[ "$line" =~ ^openwindow.*gamescope ]]; then
+          # wait a moment to ensure window is mapped
+          sleep 0.1
+          # move to temp workspace 11, then back to current
+          current_ws=$(${pkgs.hyprland}/bin/hyprctl activeworkspace -j | ${pkgs.jq}/bin/jq -r '.id')
+          ${pkgs.hyprland}/bin/hyprctl dispatch movetoworkspacesilent 11,class:gamescope
+          sleep 0.05
+          ${pkgs.hyprland}/bin/hyprctl dispatch movetoworkspacesilent "$current_ws",class:gamescope
+          ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow class:gamescope
+        fi
+      done
+    '';
   in {
     enable = true;
     systemd.enable = true;
@@ -168,7 +185,9 @@
         };
       };
 
-      "windowrulev2" = "noblur,class:^()$,title:^()$";
+      windowrulev2 = [
+        "noblur,class:^()$,title:^()$"
+      ];
 
       animations = {
         enabled = true;
@@ -215,6 +234,7 @@
         "suppressevent maximize, class:.*"
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
+        "content game, class:^gamescope$"
       ];
 
       dwindle = {
@@ -355,6 +375,7 @@
       ### AUTOSTART ###
       exec-once = [
         "${set-displays}"
+        "${gamescope-cursor-fix}"
         "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
         "nm-applet &"
         "hyprpaper & firefox"
