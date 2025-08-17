@@ -208,6 +208,7 @@
           Timeout = 0;
         };
       };
+      kdeglobals.Sounds.Enable = false;
     };
 
     powerdevil = {
