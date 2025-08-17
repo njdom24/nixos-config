@@ -232,6 +232,9 @@
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "content game, class:^gamescope$"
+        # Help deal with gamescope input going through to Steam
+        #"stayfocused, class:^gamescope$"
+        "noinitialfocus, class:^(steam)$"
 
         # Temporary(?) blur workspace change glitching workaround
         "noblur,class:^()$,title:^()$"
