@@ -236,6 +236,9 @@
         #"stayfocused, class:^gamescope$"
         "noinitialfocus, class:^(steam)$"
 
+        "workspace 2, class:^(vesktop)$"
+        "workspace 4, class:^(steam)$"
+
         # Temporary(?) blur workspace change glitching workaround
         "noblur,class:^()$,title:^()$"
       ];
@@ -390,10 +393,13 @@
         "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
         "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 1048576 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'"
         "nm-applet &"
-        "hyprpaper & firefox"
+        "hyprpaper &"
         # Work around cursor config option unreliability
         "hyprctl setcursor $cursorTheme 24"
         "swaync &"
+        "firefox"
+        "vesktop"
+        "steam"
       ];
       exec = [
         #"timeout 10 kanshi &"
