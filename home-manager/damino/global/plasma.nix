@@ -200,6 +200,7 @@
         Windows = {
           FocusPolicy = "FocusFollowsMouse";
         };
+        EdgeBarrier.EdgeBarrier = 0;
         "Effect-slide"."SlideBackground" = false;
       };
       kscreenlockerrc = {
