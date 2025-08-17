@@ -466,11 +466,19 @@ let
       #${pkgs.gnused}/bin/sed -i '/^gl_vsync=/d' "$mangoapp_file" # Remove OpenGL vsync
       #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
       #${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
-      # Force "late" FPS limiter, since gamescope stutters with early
-      if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
-        ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
-      elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
-        echo 'fps_limit_method=late' >> "$mangohud_file"
+      # Force FPS limiter that seems to behave better with specific DEs, since gamescope stutters with the wrong one
+      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then # Early
+        if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=late' "$mangohud_file"; then
+          ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=late/fps_limit_method=early/' "$mangohud_file"
+        elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
+          echo 'fps_limit_method=early' >> "$mangohud_file"
+        fi
+      else # Late
+        if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
+          ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
+        elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
+          echo 'fps_limit_method=late' >> "$mangohud_file"
+        fi
       fi
 
       #if [[ "$steam_mode" == "1" ]]; then
