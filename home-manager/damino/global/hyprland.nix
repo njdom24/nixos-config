@@ -4,6 +4,7 @@
     ./wlogout.nix
     ./waybar.nix
     ./rofi.nix
+    ./swaync.nix
   ];
 
   wayland.windowManager.hyprland =
@@ -178,7 +179,7 @@
         # https://wiki.hypr.land/Configuring/Variables/#blur
         # Screen transitions look weird with blur enabled
         blur = {
-          enabled = false;
+          enabled = true;
           size = 3;
           passes = 1;
           vibrancy = 0.1696;
@@ -234,6 +235,14 @@
 
         # Temporary(?) blur workspace change glitching workaround
         "noblur,class:^()$,title:^()$"
+      ];
+
+      layerrule = [
+        # https://github.com/ErikReider/SwayNotificationCenter/issues/424#issuecomment-2694101051
+        "blur, swaync-notification-window"
+        "ignorealpha 0.5, swaync-notification-window"
+        "blur, swaync-control-center"
+        "ignorealpha 0.5, swaync-control-center"
       ];
 
       dwindle = {
@@ -419,46 +428,6 @@
         preload = [ "${./theming/wallpapers/new_gridania.jpg}" ];
         wallpaper = ",${./theming/wallpapers/new_gridania.jpg}";
       };
-    };
-
-    swaync = {
-      enable = true;
-      settings = {
-        timeout = 4;
-        notification-window-preferred-output = "DP-2";
-        notification-window-width = 350;
-      };
-      style = ''
-        window {
-            font-family: Inter;
-            font-size: 11px;
-        }
-        
-        .notification {
-            background: #${config.colorScheme.palette.base00};
-            border: 2px solid #${config.colorScheme.palette.base0D};
-            border-radius: 6px;
-            color: #${config.colorScheme.palette.base05};
-        }
-        
-        .notification.low {
-            color: #${config.colorScheme.palette.base0A};
-        }
-        
-        .notification.high {
-            border-color: #${config.colorScheme.palette.base08};
-        }
-        
-        .progressbar {
-            background-color: transparent;
-            color: #${config.colorScheme.palette.base0D};
-        }
-        
-        .image {
-            max-width: 16px;
-            max-height: 16px;
-        }
-      '';
     };
   };
 
