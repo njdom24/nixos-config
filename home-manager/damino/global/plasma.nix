@@ -216,6 +216,10 @@
         # For non-KDE desktops
         UiSettings.ColorScheme = "qt5ct";
       };
+
+      dolphinrc = {
+        DetailsMode.PreviewSize = 16; # Small icons in detail view
+      };
     };
 
     powerdevil = {
