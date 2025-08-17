@@ -177,6 +177,43 @@
         };
       };
     };
+
+    powerdevil = {
+      AC = {
+        autoSuspend = {
+          action = "nothing";
+          idleTimeout = null;
+        };
+        turnOffDisplay = {
+          idleTimeout = "never";
+          #idleTimeoutWhenLocked = 600;
+        };
+        dimDisplay = {
+          enable = false;
+          idleTimeout = null;
+        };
+        powerButtonAction = "lockScreen";
+        whenSleepingEnter = "standby";
+        inhibitLidActionWhenExternalMonitorConnected = true;
+      };
+      battery = {
+        autoSuspend = {
+          action = "nothing";
+          idleTimeout = null;
+        };
+        turnOffDisplay = {
+          idleTimeout = "never";
+          #idleTimeoutWhenLocked = 600;
+        };
+        dimDisplay = {
+          enable = false;
+          idleTimeout = null;
+        };
+        powerButtonAction = "lockScreen";
+        whenSleepingEnter = "standby";
+        inhibitLidActionWhenExternalMonitorConnected = true;
+      };
+    };
   };
 
   home = {
