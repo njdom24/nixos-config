@@ -19,7 +19,8 @@
 		lightfg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base06}, 100 % )";
 		lightbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 100 % )";
 		foreground = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base05}, 100 % )";
-		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 100 % )";
+		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 50 % )";
+		elementbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 00 % )";
 		background-color = mkLiteral "@background";
 
 		separatorcolor = mkLiteral "@foreground";
@@ -31,7 +32,7 @@
 		selected-urgent-foreground = mkLiteral "@background";
 		selected-urgent-background = mkLiteral "@red";
 		normal-foreground = mkLiteral "@foreground";
-		normal-background = mkLiteral "@background";
+		normal-background = mkLiteral "@elementbg";
 		active-foreground = mkLiteral "@blue";
 		active-background = mkLiteral "@background";
 		urgent-foreground = mkLiteral "@red";

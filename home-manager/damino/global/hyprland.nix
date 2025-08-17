@@ -249,6 +249,8 @@
         "ignorealpha 0.5, swaync-notification-window"
         "blur, swaync-control-center"
         "ignorealpha 0.5, swaync-control-center"
+        "blur, rofi"
+        "ignorealpha 0.5, rofi"
       ];
 
       dwindle = {
