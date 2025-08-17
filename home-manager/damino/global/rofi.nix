@@ -20,7 +20,7 @@
 		lightbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 100 % )";
 		foreground = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base05}, 100 % )";
 		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 50 % )";
-		elementbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 00 % )";
+		transparent = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 00 % )";
 		background-color = mkLiteral "@background";
 
 		separatorcolor = mkLiteral "@foreground";
@@ -32,7 +32,7 @@
 		selected-urgent-foreground = mkLiteral "@background";
 		selected-urgent-background = mkLiteral "@red";
 		normal-foreground = mkLiteral "@foreground";
-		normal-background = mkLiteral "@elementbg";
+		normal-background = mkLiteral "@transparent";
 		active-foreground = mkLiteral "@blue";
 		active-background = mkLiteral "@background";
 		urgent-foreground = mkLiteral "@red";
@@ -60,11 +60,17 @@
 
 	  "#mainbox" = {
 		children = map mkLiteral [ "entry" "listview" "mode-switcher" ];
+		background-color = mkLiteral "@normal-background";
+	  };
+
+	  "mode-switcher" = {
+	    background-color = mkLiteral "@normal-background";
 	  };
 
 	  "entry" = {
 		expand = false;
 		margin = mkLiteral "8px";
+		background-color = mkLiteral "@normal-background";
 	  };
 
 	  "element" = {
