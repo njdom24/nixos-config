@@ -399,9 +399,10 @@
         # Work around cursor config option unreliability
         "hyprctl setcursor $cursorTheme 24"
         "swaync &"
-        "firefox"
+        "[workspace 1 silent] firefox"
         "vesktop"
         "steam"
+        "hyprctl dispatch workspace 1"
       ];
       exec = [
         #"timeout 10 kanshi &"
