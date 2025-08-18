@@ -10,11 +10,11 @@
 	  };
 	  initContent = ''
 	    upgrade() {
-	      ${pkgs.nh}/bin/nh os switch /etc/nixos "$@"
+	      ${pkgs.nh}/bin/nh os switch /etc/nixos -- "$@"
 	      #sudo nixos-rebuild switch --flake /etc/nixos/.# "$@"
 	    }
 	    hm-upgrade() {
-	      ${pkgs.nh}/bin/nh home switch /etc/nixos "$@" -b old
+	      ${pkgs.nh}/bin/nh home switch /etc/nixos -b old -- "$@"
 	      #home-manager switch --flake /etc/nixos/. "$@" -b old
 	    }
 	  '';
