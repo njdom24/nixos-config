@@ -9,10 +9,12 @@
 	};
 	initContent = ''
 	  upgrade() {
-	    sudo nixos-rebuild switch --impure --flake /etc/nixos/.# "$@"
+	    ${pkgs.nh}/bin/nh os switch /etc/nixos -- --impure "$@"
+	    #sudo nixos-rebuild switch --impure --flake /etc/nixos/.# "$@"
 	  }
 	  hm-upgrade() {
-	    home-manager switch --flake /etc/nixos/. "$@"
+	    ${pkgs.nh}/bin/nh home switch /etc/nixos -- "$@"
+	    #home-manager switch --flake /etc/nixos/. "$@"
 	  }
 	'';
 	oh-my-zsh = {

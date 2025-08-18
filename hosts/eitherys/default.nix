@@ -114,18 +114,18 @@ in
     isNormalUser = true;
     linger = true;
     extraGroups = [ 
-    	"networkmanager"
-    	"wheel"
-    	"video"
-    	"audio"
-    	"render"
-    	"input"
-    	"kvm"
+      "networkmanager"
+      "wheel"
+      "video"
+      "audio"
+      "render"
+      "input"
+      "kvm"
     ] ++ ifTheyExist [
-    	"docker"
-    	"libvirtd"
-    	"plugdev"
-    	"jellyfin"
+      "docker"
+      "libvirtd"
+      "plugdev"
+      "jellyfin"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
@@ -176,7 +176,7 @@ in
       experimental-features = [ "nix-command" "flakes" ];
   	};
   	gc = {
-  	  automatic = true;
+  	  automatic = !(config.programs.nh.enable && config.programs.nh.clean.enable);
   	  dates = "weekly";
   	  options = "--delete-older-than 7d";
   	};
@@ -185,6 +185,14 @@ in
   nixpkgs.config.input-fonts.acceptLicense = true;
 
   programs = {
+    nh = {
+      enable = true;
+      flake = "/etc/nixos";
+      clean = {    
+        enable = true;
+        extraArgs = "--keep-since 7d --keep 10";
+      };
+    };
 	dconf.enable = true;
 	seahorse.enable = true;
 	ssh = {
