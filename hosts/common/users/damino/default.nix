@@ -16,11 +16,10 @@ let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.
   ]);
 in
 {
-  imports =
-    [
-      ../../desktops/sway
-      ./gaming.nix
-    ] ++ (builtins.attrValues outputs.nixosModules);
+  imports = [
+    ../../desktops/sway
+    ./gaming.nix
+  ] ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
     outputs.overlays.stable-packages
@@ -34,20 +33,20 @@ in
     isNormalUser = true;
     description = "damino";
     extraGroups = [ 
-    	"networkmanager"
-    	"wheel"
-    	"video"
-    	"audio"
-    	"render"
-    	"input"
-    	"kvm"
+      "networkmanager"
+      "wheel"
+      "video"
+      "audio"
+      "render"
+      "input"
+      "kvm"
     ] ++ ifTheyExist [
-    	"docker"
-    	"libvirtd"
-    	"plugdev"
-    	"corectrl"
-    	"adbusers"
-    	"i2c"
+      "docker"
+      "libvirtd"
+      "plugdev"
+      "corectrl"
+      "adbusers"
+      "i2c"
     ];
     shell = pkgs.zsh;
     packages = with pkgs; [
