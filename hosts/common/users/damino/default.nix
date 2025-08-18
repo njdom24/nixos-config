@@ -111,7 +111,7 @@ in
       auto-optimise-store = true;
   	};
   	gc = {
-  	  automatic = true;
+  	  automatic = !(config.programs.nh.enable && config.programs.nh.clean.enable);
   	  dates = "weekly";
   	  options = "--delete-older-than 7d";
   	};
@@ -143,6 +143,14 @@ in
   };
 
   programs = {
+    nh = {
+      enable = true;
+      flake = "/etc/nixos";
+      clean = {
+        enable = true;
+        extraArgs = "--keep-since 7d --keep 10";
+      };
+    };
     appimage = {
       enable = true;
       binfmt = true;
