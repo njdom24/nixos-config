@@ -22,8 +22,9 @@ services:
       - ROMM_AUTH_SECRET_KEY=${ROMM_AUTH_SECRET_KEY:-none} # Generate a key with `openssl rand -hex 32`
       - IGDB_CLIENT_ID=${IGDB_CLIENT_ID:-none} # Generate an ID and SECRET in IGDB
       - IGDB_CLIENT_SECRET=${IGDB_CLIENT_SECRET:-none} # https://api-docs.igdb.com/#account-creation
-      - MOBYGAMES_API_KEY=${MOBYGAMES_API_KEY:-none} # https://www.mobygames.com/info/api/
+      #- MOBYGAMES_API_KEY=${MOBYGAMES_API_KEY:-none} # https://www.mobygames.com/info/api/
       - STEAMGRIDDB_API_KEY=${STEAMGRIDDB_API_KEY:-none} # https://github.com/rommapp/romm/wiki/Generate-API-Keys#steamgriddb
+      - HASHEOUS_API_ENABLED=true
     volumes:
       - /srv/docker/romm/data/resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
       - /srv/docker/romm/data/redis_data:/redis-data # Cached data for background tasks
