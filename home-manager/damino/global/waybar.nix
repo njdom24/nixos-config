@@ -22,12 +22,14 @@
      	};
 
      	"bluetooth" = {
-     	  format-on = "󰂯 ";
-     	  format-off = "󰂲 ";
+     	  format-on = "󰂯  ";
+     	  format-off = "󰂲  ";
      	  format-disabled = "";
-     	  format-connected = "󰂱 {num_connections} ";
+     	  format-connected = "󰂱  ";
+     	  #format-connected = "󰂱 {num_connections} ";
      	  tooltip-format-connected = "{device_enumerate}";
-     	  tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+     	  tooltip-format-enumerate-connected = "{device_alias}\t{device_battery_percentage}%";
+     	  #tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
      	  on-click = "kill `pgrep blueberry` || ${pkgs.blueberry}/bin/blueberry";
      	};
 
