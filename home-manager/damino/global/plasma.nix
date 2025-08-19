@@ -341,6 +341,7 @@
     };
 
     packages = with pkgs; [
+      kdePackages.krohnkite
     ];
   };
 
