@@ -342,6 +342,7 @@
 
     packages = with pkgs; [
       kdePackages.krohnkite
+      plasma-toggle-hdr
       kwin-effects-geometry-change
     ];
   };

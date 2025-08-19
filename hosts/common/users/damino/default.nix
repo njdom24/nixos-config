@@ -52,7 +52,6 @@ in
     packages = with pkgs; [
       home-manager
       selectdefaultapplication
-      plasma-toggle-hdr
       mesa-demos
       vulkan-tools
       nvtopPackages.full
