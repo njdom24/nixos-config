@@ -325,15 +325,15 @@
     in {
       ".face.icon".source = ./.face.icon;
       ".config/autostart/sunshine-remote.desktop".text = ''
-          [Desktop Entry]
-          Type=Application
-          Exec=${sunshine-login}
-          Hidden=false
-          NoDisplay=true
-          X-GNOME-Autostart-enabled=true
-          Name=My Script
-          Comment=Checks for remote login and starts sunshine
-        '';
+        [Desktop Entry]
+        Type=Application
+        Exec=${sunshine-login}
+        Hidden=false
+        NoDisplay=true
+        X-GNOME-Autostart-enabled=true
+        Name=My Script
+        Comment=Checks for remote login and starts sunshine
+      '';
     };
     sessionVariables = {
       # https://bugs.kde.org/show_bug.cgi?id=506645
@@ -342,6 +342,7 @@
 
     packages = with pkgs; [
       kdePackages.krohnkite
+      kwin-effects-geometry-change
     ];
   };
 

@@ -1,6 +1,7 @@
 # Custom packages, that can be defined similarly to ones from nixpkgs
 # You can build them using 'nix build .#example'
 { pkgs, ...}: {
+  kwin-effects-geometry-change = pkgs.callPackage ./kwin-effects-geometry-change.nix { };
   plasma-toggle-hdr = pkgs.writeShellScriptBin "plasma-toggle-hdr" ''
     #!/usr/bin/env bash
 
