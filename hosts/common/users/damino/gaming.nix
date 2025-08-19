@@ -584,6 +584,9 @@ in
   	outputs.overlays.modifications
   ];
 
+  # https://gitlab.freedesktop.org/drm/amd/-/issues/2516#note_1874760
+  boot.kernelParams = [ "gpu_sched.sched_policy=0" ];
+
   programs = {
     steam = {
       enable = true;
