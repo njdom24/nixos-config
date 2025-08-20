@@ -186,13 +186,14 @@
               };
               general = {
                 animationDuration = 0;
-                highlightType = 1;
-                spacing = 3;
-                type = 1;
+                highlightOpacityFull = false;
+                spacing = 0;
+                wrapOn = false;
               };
               type1 = {
                 fixedLen = 3;
                 labelSource = 0;
+                t1activeWidth = 10;
               };
             };
           }
