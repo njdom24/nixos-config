@@ -174,15 +174,77 @@
     panels = [
       {
         screen = "all";
-        location = "top";
         height = 32;
+        location = "top";
         widgets = [
           "org.kde.plasma.kickoff"
-          "org.kde.plasma.pager"
+          {
+            name = "org.dhruv8sh.kara";
+            config = {
+              appearance = {
+                showOnlyActive = true;
+              };
+              general = {
+                animationDuration = 0;
+                highlightType = 1;
+                spacing = 3;
+                type = 1;
+              };
+              type1 = {
+                fixedLen = 3;
+                labelSource = 0;
+              };
+            };
+          }
           "org.kde.plasma.icontasks"
           "org.kde.plasma.marginsseparator"
-          "org.kde.plasma.systemtray"
-          "org.kde.plasma.digitalclock"
+          {
+            systemTray = {
+              icons.scaleToFit = true;
+              items = {
+                showAll = false;
+                shown = [
+                  #"org.kde.plasma.keyboardlayout"
+                  "org.kde.plasma.networkmanagement"
+                  "org.kde.plasma.volume"
+                ];
+                hidden = [
+                  "org.kde.plasma.battery"
+                  "org.kde.plasma.brightness"
+                  "org.kde.plasma.clipboard"
+                  "org.kde.plasma.devicenotifier"
+                  "org.kde.plasma.mediacontroller"
+                  "plasmashell_microphone"
+                  "xdg-desktop-portal-kde"
+                  "zoom"
+                ];
+                configs = {
+                  "org.kde.plasma.notifications".config = {
+                    Shortcuts = {
+                      global = "Meta+`";
+                    };
+                  };
+                };
+              };
+            };
+          }
+          {
+            name = "org.kde.plasma.digitalclock";
+            config = {
+              Appearance = {
+                autoFontAndSize = true;
+                #customDateFormat = "ddd, MMM d";
+                #dateDisplayFormat = "BesideTime";
+                #dateFormat = "custom";
+                showDate = false;
+                #fontSize = 11;
+                #fontFamily = "Inter";
+                #fontStyleName = "Medium";
+                #fontWeight = 400;
+                #use24hFormat = 2;
+              };
+            };
+          }
         ];
       }
     ];
@@ -342,6 +404,7 @@
 
     packages = with pkgs; [
       kdePackages.krohnkite
+      plasma-panel-colorizer
       plasma-toggle-hdr
       kwin-effects-geometry-change
     ];
