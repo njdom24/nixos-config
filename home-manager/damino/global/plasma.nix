@@ -174,7 +174,7 @@
     panels = [
       {
         screen = "all";
-        height = 32;
+        height = 22;
         location = "top";
         widgets = [
           "org.kde.plasma.kickoff"
@@ -198,6 +198,25 @@
             };
           }
           "org.kde.plasma.icontasks"
+          "org.kde.plasma.panelspacer"
+          {
+            name = "org.kde.plasma.digitalclock";
+            config = {
+              Appearance = {
+                autoFontAndSize = false;
+                #customDateFormat = "ddd, MMM d";
+                #dateDisplayFormat = "BesideTime";
+                #dateFormat = "custom";
+                showDate = false;
+                fontSize = 10;
+                fontFamily = "Inter Display";
+                fontStyleName = "Medium";
+                #fontWeight = 400;
+                #use24hFormat = 2;
+              };
+            };
+          }
+          "org.kde.plasma.panelspacer"
           "org.kde.plasma.marginsseparator"
           {
             systemTray = {
@@ -226,23 +245,6 @@
                     };
                   };
                 };
-              };
-            };
-          }
-          {
-            name = "org.kde.plasma.digitalclock";
-            config = {
-              Appearance = {
-                autoFontAndSize = true;
-                #customDateFormat = "ddd, MMM d";
-                #dateDisplayFormat = "BesideTime";
-                #dateFormat = "custom";
-                showDate = false;
-                #fontSize = 11;
-                #fontFamily = "Inter";
-                #fontStyleName = "Medium";
-                #fontWeight = 400;
-                #use24hFormat = 2;
               };
             };
           }
