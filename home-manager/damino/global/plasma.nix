@@ -200,7 +200,15 @@
               };
             };
           }
-          "org.kde.plasma.icontasks"
+          {
+          	name = "org.kde.plasma.icontasks";
+          	config = {
+          	  general = {
+          	    showOnlyCurrentActivity = false;
+          	    tooltipControls = false;
+          	  };
+          	};
+          }
           "org.kde.plasma.panelspacer"
           {
             name = "org.kde.plasma.digitalclock";
