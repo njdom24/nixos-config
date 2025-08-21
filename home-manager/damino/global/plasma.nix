@@ -119,6 +119,9 @@
         "Window to Desktop 8" = "Meta+*";
         "Window to Desktop 9" = "Meta+(";
         "Window to Desktop 10" = "Meta+)";
+
+        # Unbind Meta+`
+        "Walk Through Windows of Current Application" = "Alt+`";
         
         #"Window Move Center" = "Ctrl+Alt+C";
       };
@@ -210,8 +213,8 @@
                 showDate = false;
                 fontSize = 10;
                 fontFamily = "Inter Display";
-                fontStyleName = "Medium";
-                #fontWeight = 400;
+                #fontStyleName = "Medium";
+                fontWeight = 400;
                 #use24hFormat = 2;
               };
             };
@@ -274,7 +277,10 @@
           Timeout = 0;
         };
       };
-      kdeglobals.Sounds.Enable = false;
+      kdeglobals = {
+        General.accentColorFromWallpaper = true;
+        Sounds.Enable = false;
+      };
       plasmaparc.General.AudioFeedback = false;
 
       kdeglobals = {
