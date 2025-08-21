@@ -355,6 +355,7 @@
       '';
     };
   };
+  systemd.user.services.swaync = lib.mkForce { };
 
   home = {
   };
