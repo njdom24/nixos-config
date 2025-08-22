@@ -292,18 +292,19 @@
         "xdph": "xdph"
       },
       "locked": {
-        "lastModified": 1755453916,
-        "narHash": "sha256-rnABdXsWamAuMHMuISaeVaMHNGDwdW7RThNNNfpCjxA=",
-        "owner": "UjinT34",
-        "repo": "Hyprland",
-        "rev": "9ba8b99705dabef716e39db955854fded9bede38",
-        "type": "github"
+        "lastModified": 1755883465,
+        "narHash": "sha256-MMcjYXm3+sJaIWluibYvlo8RJhf0ljNB/HHSGLChars=",
+        "ref": "refs/heads/main",
+        "rev": "0d45b277d6c750377b336034b8adc53eae238d91",
+        "revCount": 6389,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/hyprwm/Hyprland"
       },
       "original": {
-        "owner": "UjinT34",
-        "ref": "subsurface-fixes",
-        "repo": "Hyprland",
-        "type": "github"
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/hyprwm/Hyprland"
       }
     },
     "hyprland-protocols": {

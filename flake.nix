@@ -22,9 +22,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-    #hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
+    hyprland.url = "git+https://github.com/hyprwm/Hyprland?submodules=1";
     #hyprland.url = "github:UjinT34/Hyprland/fp16?submodules=1";
-    hyprland.url = "github:UjinT34/Hyprland/subsurface-fixes?submodules=1";
+
     #hy3 = {
     #  url = "github:outfoxxed/hy3";
     #  #url = "github:outfoxxed/hy3?ref=hl{version}"; # where {version} is the hyprland release version
