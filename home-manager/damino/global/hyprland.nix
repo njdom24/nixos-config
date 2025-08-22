@@ -272,7 +272,7 @@
 
       render = {
         direct_scanout = 1;
-        cm_fs_passthrough = 1;
+        cm_fs_passthrough = 0;
         cm_auto_hdr = 1;
       };
 
