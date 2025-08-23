@@ -2,6 +2,7 @@
 # You can build them using 'nix build .#example'
 { pkgs, ...}: {
   kwin-effects-geometry-change = pkgs.callPackage ./kwin-effects-geometry-change.nix { };
+  virtual-desktops-only-on-primary = pkgs.callPackage ./kwin-virtual-desktops-only-on-primary.nix { };
   plasma-toggle-hdr = pkgs.writeShellScriptBin "plasma-toggle-hdr" ''
     #!/usr/bin/env bash
 

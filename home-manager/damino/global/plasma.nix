@@ -272,6 +272,11 @@
         #};
         Plugins = {
           magiclampEnabled = true;
+          "virtual-desktops-only-on-primaryEnabled" = true;
+        };
+        "Script-virtual-desktops-only-on-primary" = {
+          primaryOutputIndex = 0;
+          numberOfScreens = 3;
         };
         Windows = {
           FocusPolicy = "FocusFollowsMouse";
@@ -424,6 +429,7 @@
       plasma-panel-colorizer
       plasma-toggle-hdr
       kwin-effects-geometry-change
+      virtual-desktops-only-on-primary
     ];
   };
 
