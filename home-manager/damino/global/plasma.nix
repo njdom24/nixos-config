@@ -190,6 +190,7 @@
               general = {
                 animationDuration = 0;
                 highlightOpacityFull = false;
+                highlightType = 1; # Line
                 spacing = 0;
                 wrapOn = false;
               };
