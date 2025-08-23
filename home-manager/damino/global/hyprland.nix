@@ -244,6 +244,8 @@
       ];
 
       layerrule = [
+        # Don't clobber slurp's overlay window
+        "noanim, selection"
         # https://github.com/ErikReider/SwayNotificationCenter/issues/424#issuecomment-2694101051
         "blur, swaync-notification-window"
         "ignorealpha 0.5, swaync-notification-window"
@@ -362,6 +364,14 @@
         # Notification daemon
         "CTRL, SPACE, exec, swaync-client --hide-latest"
         "CTRL, grave, exec, swaync-client --toggle-panel"
+
+        # Screenshot active monitor of focused window
+        ", Print, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        "SHIFT, Next, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+
+        # Screenshot selected region
+        "SHIFT, Print, exec, ${pkgs.grim}/bin/grim -g \"$(slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        "SHIFT, Prior, exec, ${pkgs.grim}/bin/grim -g \"$(slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
 
         "CTRL SHIFT, B, exec, ${toggle-hdr}"
       ];
