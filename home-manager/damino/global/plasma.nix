@@ -297,6 +297,7 @@
           NoiseStrength = 8;
           RefractionEdgeSize = 0;
           RefractionRGBFringing = 0;
+          WindowClasses = "steam";
         };
       };
       kscreenlockerrc = {
