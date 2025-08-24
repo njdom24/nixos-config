@@ -454,6 +454,7 @@
 
     packages = with pkgs; [
       kdePackages.plasma-browser-integration
+      colloid-kde
       kdePackages.krohnkite
       plasma-panel-colorizer
       plasma-toggle-hdr
