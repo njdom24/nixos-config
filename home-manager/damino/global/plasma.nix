@@ -306,6 +306,14 @@
           Timeout = 0;
         };
       };
+      spectaclerc = {
+        General = {
+          clipboardGroup = "PostScreenshotCopyImage";
+          launchAction = "TakeFullscreenScreenshot";
+          showCaptureInstructions = false;
+        };
+        GuiConfig.captureMode = 0;
+      };
       kdeglobals = {
         General.accentColorFromWallpaper = true;
         Sounds.Enable = false;
