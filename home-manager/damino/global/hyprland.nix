@@ -269,6 +269,7 @@
         force_default_wallpaper = -1; # Disable anime mascot wallpapers
         disable_hyprland_logo = true; # If true disables the random hyprland logo / anime girl background
         enable_anr_dialog = false; # Disable "not responding" popups
+        exit_window_retains_fullscreen = true; # Steam Big Picture retain fullscreen on game exit
         vrr = 2;
       };
 
