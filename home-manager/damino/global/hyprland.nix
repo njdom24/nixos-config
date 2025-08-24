@@ -456,6 +456,7 @@
       };
     };
   };
+  systemd.user.services.hyprpaper = lib.mkForce { };
 
   home = {
     file = {
