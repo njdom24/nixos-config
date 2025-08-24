@@ -459,10 +459,10 @@ let
     # Currently skipping due to gpu_sched.sched_policy=0 working better with early (default is better with 1)
     # https://gitlab.freedesktop.org/drm/amd/-/issues/3166#note_2277578
     # https://gitlab.freedesktop.org/drm/amd/-/issues/2516#note_2119750
-    if [[ -v mangohud_path ]] && [[ -r /sys/module/gpu_sched/parameters/sched_policy ]]; then
+    if [[ -v mangohud_path ]]; then # && [[ -r /sys/module/gpu_sched/parameters/sched_policy ]]; then
       #${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
       ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangohud_file" # Copy current config
-      policy=$(< /sys/module/gpu_sched/parameters/sched_policy)
+      #policy=$(< /sys/module/gpu_sched/parameters/sched_policy)
 
       # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
       #${pkgs.gnused}/bin/sed -i '/^blacklist=/d' "$mangoapp_file" # Remove blacklist
@@ -471,7 +471,8 @@ let
       #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
       #${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
       # Force FPS limiter that seems to behave better with specific scheduling mode, since gamescope stutters with the wrong one
-      if [[ "$policy" -eq 0 ]]; then # RR: Early
+      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] && false; then
+      #if [[ "$policy" -eq 0 ]]; then # RR: Early
         if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=late' "$mangohud_file"; then
           ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=late/fps_limit_method=early/' "$mangohud_file"
         elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
