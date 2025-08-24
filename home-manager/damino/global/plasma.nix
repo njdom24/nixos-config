@@ -274,6 +274,7 @@
         Plugins = {
           magiclampEnabled = true;
           "virtual-desktops-only-on-primaryEnabled" = true;
+          forceblurEnabled = true; # Better Blur
         };
         "Script-virtual-desktops-only-on-primary" = {
           primaryOutputIndex = 0;
@@ -284,6 +285,19 @@
         };
         EdgeBarrier.EdgeBarrier = 0;
         "Effect-slide"."SlideBackground" = false;
+
+        # Better Blur
+        "Effect-blurplus" = {
+          BlurMatching = false;
+          BlurNonMatching = true;
+          BlurStrength = 5;
+          Brightness = 1.7;
+          Contrast = 1.2;
+          Saturation = 1.2;
+          NoiseStrength = 8;
+          RefractionEdgeSize = 0;
+          RefractionRGBFringing = 0;
+        };
       };
       kscreenlockerrc = {
         Daemon = {
@@ -433,6 +447,7 @@
       kdePackages.krohnkite
       plasma-panel-colorizer
       plasma-toggle-hdr
+      inputs.kwin-effects-forceblur.packages.${pkgs.system}.default
       kwin-effects-geometry-change
       virtual-desktops-only-on-primary
     ];
