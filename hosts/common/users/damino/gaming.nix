@@ -456,7 +456,8 @@ let
     #mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
     mangohud_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)"
 
-    if [[ -v mangohud_path ]]; then
+    # Currently skipping due to gpu_sched.sched_policy=0 working better with early (default is better with 1)
+    if [[ -v mangohud_path ]] && false; then
       #${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
       ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangohud_file" # Copy current config
 
