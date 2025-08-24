@@ -235,6 +235,8 @@
         # Help deal with gamescope input going through to Steam
         #"stayfocused, class:^gamescope$"
         "noinitialfocus, class:^(steam)$"
+        "fullscreen, title:^(Steam Big Picture Mode)$"
+        #"suppressevent fullscreen maximize, title:^(Steam Big Picture Mode)$"
 
         "workspace 2, class:^(vesktop)$"
         "workspace 4, class:^(steam)$"
