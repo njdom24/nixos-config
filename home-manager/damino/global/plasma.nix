@@ -469,6 +469,13 @@
     extraPortals = with pkgs; [ kdePackages.xdg-desktop-portal-kde ];
   };
 
+  # 2) Add a drop-in file:
+  xdg.configFile."systemd/user/plasma-plasmashell.service.d/10-unset-mesa.conf".text = ''
+    [Service]
+    # Remove the variable from plasmashell's environment
+    UnsetEnvironment=vblank_mode
+  '';
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "24.11";
 }
