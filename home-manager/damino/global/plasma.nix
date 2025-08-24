@@ -223,7 +223,7 @@
                 fontSize = 10;
                 fontFamily = "Inter Display";
                 #fontStyleName = "Medium";
-                fontWeight = 400;
+                fontWeight = 600;
                 #use24hFormat = 2;
               };
             };
