@@ -471,13 +471,13 @@ let
       #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
       #${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
       # Force FPS limiter that seems to behave better with specific scheduling mode, since gamescope stutters with the wrong one
-      if [[ "$policy" -eq 0 ]]; then # FIFO: Early
+      if [[ "$policy" -eq 0 ]]; then # RR: Early
         if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=late' "$mangohud_file"; then
           ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=late/fps_limit_method=early/' "$mangohud_file"
         elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
           echo 'fps_limit_method=early' >> "$mangohud_file"
         fi
-      else # RR: Late
+      else # FIFO: Late
         if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
           ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
         elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
