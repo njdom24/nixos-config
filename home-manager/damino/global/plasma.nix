@@ -453,6 +453,7 @@
     };
 
     packages = with pkgs; [
+      kdePackages.plasma-browser-integration
       kdePackages.krohnkite
       plasma-panel-colorizer
       plasma-toggle-hdr
