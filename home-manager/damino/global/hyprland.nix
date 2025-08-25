@@ -408,7 +408,6 @@
         "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
         "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 1048576 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'"
         "nm-applet &"
-        "hyprpaper &"
         # Work around cursor config option unreliability
         "hyprctl setcursor $cursorTheme 24"
         "swaync &"
@@ -418,6 +417,7 @@
         "hyprctl dispatch workspace 1"
       ];
       exec = [
+        "${pkgs.hyprpaper}/bin/hyprpaper &"
         #"timeout 10 kanshi &"
         # Waybar freezes on reload on Hyprland sometimes, so just restart
         "kill `pgrep waybar`; waybar &"
