@@ -60,7 +60,8 @@
 
     workspace = {
       # plasma-apply-desktoptheme --list-themes
-      theme = "breeze-dark";
+      theme = "Colloid-dark";
+      #theme = "breeze-dark";
       # plasma-apply-colorscheme --list-schemes
       colorScheme = "BreezeDark";
       cursor = {
@@ -68,7 +69,8 @@
         size = 24;
       };
       # ~/.config/kdeglobals
-      iconTheme = "breeze-dark";
+      iconTheme = "kora";
+      #iconTheme = "breeze-dark";
       wallpaper = "${./theming/wallpapers/new_gridania.jpg}";
       # plasma-apply-lookandfeel --list
       #lookAndFeel = "org.kde.breezedark.desktop";
@@ -177,10 +179,18 @@
     panels = [
       {
         screen = "all";
-        height = 22;
+        height = 32;
         location = "top";
         widgets = [
-          "org.kde.plasma.kickoff"
+          #"org.kde.plasma.kickoff"
+          {
+          	name = "org.kde.plasma.kickoff";
+          	config = {
+          	  general = {
+          	    icon = "${pkgs.kdePackages.breeze-icons}/share/icons/breeze/places/24@3x/start-here-kde-plasma.svg";
+          	  };
+          	};
+          }
           {
             name = "org.dhruv8sh.kara";
             config = {
