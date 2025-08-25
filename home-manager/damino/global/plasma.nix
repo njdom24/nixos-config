@@ -182,12 +182,15 @@
         height = 32;
         location = "top";
         widgets = [
-          #"org.kde.plasma.kickoff"
           {
           	name = "org.kde.plasma.kickoff";
           	config = {
           	  general = {
           	    icon = "${pkgs.kdePackages.breeze-icons}/share/icons/breeze/places/24@3x/start-here-kde-plasma.svg";
+          	    highlightNewlyInstalledApps = false;
+          	    primaryActions = 1;
+          	    showActionButtonCaptions = true;
+          	    systemFavorites = "lock-screen\\,logout\\,save-session\\,switch-user";
           	  };
           	};
           }
