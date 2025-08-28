@@ -228,10 +228,15 @@ in
 
     displayManager.sddm = {
   	  enable = true;
-  	  theme = "Elegant";
+  	  theme = "catppuccin-mocha";
+  	  extraPackages = lib.mkForce [ ];
   	  settings = {
   	  	Theme.CursorTheme = "XCursor-Pro-Dark";
   	  };
+
+  	  # https://github.com/NixOS/nixpkgs/issues/292761
+  	  # package = pkgs.lib.mkForce pkgs.libsForQt5.sddm;
+  	  package = lib.mkForce pkgs.kdePackages.sddm;
 
   	  wayland = {
   	    enable = true;
@@ -342,10 +347,6 @@ in
           # Vulkan backend breaks with sunshine: https://github.com/swaywm/sway/issues/8765#issuecomment-2975196895
           "/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=gles2 ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
   	  };
-
-  	  # https://github.com/NixOS/nixpkgs/issues/292761
-  	  package = pkgs.lib.mkForce pkgs.libsForQt5.sddm;
-  	  extraPackages = pkgs.lib.mkForce [];
     };
 
     pipewire = {
@@ -482,6 +483,14 @@ in
   	  networkmanagerapplet
   	  gtk3
   	  elegant-sddm
+  	  (pkgs.catppuccin-sddm.override {
+  	    flavor = "mocha";
+  	    font  = "Inter";
+  	    fontSize = "11";
+  	    #background = "${./wallpaper.png}";
+  	    #loginBackground = true;
+  	  })
+  	  inter
   	  xcursor-pro
   	  pciutils
   	  libgcc
