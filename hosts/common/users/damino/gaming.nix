@@ -202,11 +202,12 @@ let
           }
         ' "$conf")
         
+        hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         cm=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*cm[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
      
-        if [[ "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
+        if [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
           echo "1 $sdr_max $max_lum"
         else
           echo "0 0 0"
@@ -418,6 +419,7 @@ let
             echo "Setting FPS limit to $refresh_rate"
             ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $refresh_rate
           fi
+          export DXVK_HDR="$hdr_enabled"
           "$@"
           if [[ -n "$refresh_rate" ]]; then
             echo "Re-setting FPS limit from $refresh_rate to $refresh"
@@ -513,6 +515,12 @@ let
 
     echo "Launching gamescope at $width"x"$height@$refresh"
     ld_preload_pass="''${LD_PRELOAD-}"
+
+    # DXVK_HDR=1 should only be needed for Hyprland too, but doesn't hurt to do that globally
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$hdr_enabled" == "1" ]]; then
+      #extra_flags+=("--hdr-debug-force-output")
+      extra_flags+=("--hdr-debug-force-support")
+    fi
     
     while true; do
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
