@@ -300,9 +300,9 @@
         };
       };
 
-      gestures = {
-        workspace_swipe = false;
-      };
+      gesture = [
+        "3, horizontal, workspace"
+      ];
 
       cursor = {
         no_warps = false;
