@@ -483,13 +483,20 @@ in
   	  networkmanagerapplet
   	  gtk3
   	  elegant-sddm
-  	  (pkgs.catppuccin-sddm.override {
+  	  ((pkgs.catppuccin-sddm.override {
   	    flavor = "mocha";
   	    font  = "Inter";
   	    fontSize = "11";
   	    #background = "${./wallpaper.png}";
-  	    #loginBackground = true;
-  	  })
+  	    loginBackground = true;
+  	  }).overrideAttrs (old: {
+  	    installPhase = old.installPhase + ''
+  	      configFile=$out/share/sddm/themes/${config.services.displayManager.sddm.theme}/theme.conf
+  	        substituteInPlace $configFile \
+  	          --replace-fail 'UserIcon="false"' 'UserIcon="true"' \
+  	          --replace-fail 'AccentColor="#74c7ec"' 'AccentColor="#fab387"'
+  	      '';
+  	  }))
   	  inter
   	  xcursor-pro
   	  pciutils
