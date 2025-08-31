@@ -23,7 +23,6 @@
       patches = (oldAttrs.patches or []) ++ [
         ../patches/gamescope-sway-fix.patch
         ../patches/gamescope-crash-fix.patch
-        ../patches/gamescope-hypr-fix.patch
       ];
     });
 
