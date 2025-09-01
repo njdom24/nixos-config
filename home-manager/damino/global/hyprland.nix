@@ -9,61 +9,6 @@
 
   wayland.windowManager.hyprland =
   let
-    toggle-hdr = pkgs.writeShellScript "toggle-hdr.sh" ''
-      #!/usr/bin/env bash
-
-      conf="$HOME/.config/hypr/displays.conf"
-
-      mon_id=$(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r '.monitor')
-      monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | jq -r ".[] | select(.id == $mon_id) | .name")
-
-      # Find the sysfs path to EDID dynamically under card*
-      edid_path=""
-      for card in /sys/class/drm/card*; do
-        candidate="$card-$monitor/edid"
-        if [ -f "$candidate" ]; then
-          edid_path="$candidate"
-          break
-        fi
-      done
-
-      if [ -z "$edid_path" ]; then
-        echo "EDID file not found for monitor $monitor under any card* directory."
-        exit 1
-      fi
-
-      if ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" | grep -q "HDR Static Metadata Data Block"; then
-        echo "HDR support detected on $monitor, toggling cm..."
-        has_srgb=$(${pkgs.gawk}/bin/awk -v mon="$monitor" '
-          BEGIN { inblock=0; has_output=0; has_srgb=0 }
-          /^[[:space:]]*monitorv2[[:space:]]*\{/ { inblock=1; has_output=0; has_srgb=0; next }
-          /^[[:space:]]*\}/ { 
-            if (inblock && has_output && has_srgb) { print "yes"; exit } 
-            inblock=0 
-          }
-          inblock {
-            if ($0 ~ ("output = " mon)) has_output=1
-            if ($0 ~ /cm = srgb/) has_srgb=1
-          }
-          ' "$conf")
-
-          if [ "$has_srgb" = "yes" ]; then
-            echo "Enabling HDR"
-            ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
-              /output = $monitor/,/}/s/cm = srgb/cm = hdr/
-            }" "$conf"
-          else
-            echo "Disabling HDR"
-            ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
-              /output = $monitor/,/}/s/cm = hdr/cm = srgb/
-            }" "$conf"
-        fi
-
-        #${pkgs.hyprland}/bin/hyprctl reload
-      else
-        echo "HDR not supported on $monitor; no changes made."
-      fi
-    '';
     set-displays = pkgs.writeShellScript "set-displays.sh" ''
       if [ -f /tmp/sunshine_login ]; then
         if ${pkgs.gawk}/bin/awk '
@@ -276,9 +221,9 @@
       };
 
       render = {
-        direct_scanout = 1;
+        direct_scanout = 0;
         cm_fs_passthrough = 0;
-        cm_auto_hdr = 1;
+        cm_auto_hdr = 0;
       };
 
       #debug = {
@@ -306,7 +251,7 @@
 
       cursor = {
         no_warps = false;
-        no_break_fs_vrr = 1;
+        no_break_fs_vrr = 0;
       };
 
       ### KEYBINDINGS ###
@@ -376,7 +321,7 @@
         "SHIFT, Print, exec, ${pkgs.grim}/bin/grim -g \"$(slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
         "SHIFT, Prior, exec, ${pkgs.grim}/bin/grim -g \"$(slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
 
-        "CTRL SHIFT, B, exec, ${toggle-hdr}"
+        "CTRL SHIFT, B, exec, hypr-toggle-hdr"
       ];
 
       bindm = [
@@ -470,6 +415,90 @@
     };
     packages = with pkgs; [
       #hyprlandPlugins.hy3
+    ] ++ [
+      (pkgs.writeShellScriptBin "hypr-toggle-hdr" ''
+        #!/usr/bin/env bash
+      
+        conf="$HOME/.config/hypr/displays.conf"
+      
+        mon_id=$(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r '.monitor')
+        monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | jq -r ".[] | select(.id == $mon_id) | .name")
+      
+        # Find the sysfs path to EDID dynamically under card*
+        edid_path=""
+        for card in /sys/class/drm/card*; do
+          candidate="$card-$monitor/edid"
+          if [ -f "$candidate" ]; then
+            edid_path="$candidate"
+            break
+          fi
+        done
+      
+        if [ -z "$edid_path" ]; then
+          echo "EDID file not found for monitor $monitor under any card* directory."
+          exit 1
+        fi
+      
+        if ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" | grep -q "HDR Static Metadata Data Block"; then
+          echo "HDR support detected on $monitor"
+      
+          current_mode=$(${pkgs.gawk}/bin/awk -v mon="$monitor" '
+            BEGIN { inblock=0; has_output=0; mode="unknown" }
+            /^[[:space:]]*monitorv2[[:space:]]*\{/ { inblock=1; has_output=0; mode="unknown"; next }
+            /^[[:space:]]*\}/ {
+              if (inblock && has_output && mode != "unknown") { print mode; exit }
+              inblock=0
+            }
+            inblock {
+              if ($0 ~ ("output = " mon)) has_output=1
+              if ($0 ~ /cm = (srgb|hdr)/) {
+                split($0, a, "=")
+                mode=a[2]; gsub(/[[:space:]]/, "", mode)
+              }
+            }
+          ' "$conf")
+      
+          case "$1" in
+            on)
+              if [ "$current_mode" = "hdr" ]; then
+                echo "Already in HDR mode; nothing to do."
+                exit 0
+              fi
+              echo "Enabling HDR"
+              ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
+                /output = $monitor/,/}/s/cm = srgb/cm = hdr/
+              }" "$conf"
+              ;;
+            off)
+              if [ "$current_mode" = "srgb" ]; then
+                echo "Already in sRGB mode; nothing to do."
+                exit 0
+              fi
+              echo "Disabling HDR"
+              ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
+                /output = $monitor/,/}/s/cm = hdr/cm = srgb/
+              }" "$conf"
+              ;;
+            *)
+              if [ "$current_mode" = "hdr" ]; then
+                echo "Toggling: disabling HDR"
+                ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
+                  /output = $monitor/,/}/s/cm = hdr/cm = srgb/
+                }" "$conf"
+              else
+                echo "Toggling: enabling HDR"
+                ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
+                  /output = $monitor/,/}/s/cm = srgb/cm = hdr/
+                }" "$conf"
+              fi
+              ;;
+          esac
+      
+          #${pkgs.hyprland}/bin/hyprctl reload
+        else
+          echo "HDR not supported on $monitor; no changes made."
+        fi
+      '')
     ];
 
     activation = {
