@@ -59,7 +59,7 @@ in
       handbrake
       firefox
       vdhcoapp
-      (chromium.override { enableWideVine = true; })
+      (chromium.override { enableWideVine = false; })
       kdePackages.kate
       kitty
       ffmpeg-full

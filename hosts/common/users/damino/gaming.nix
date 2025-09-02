@@ -202,12 +202,12 @@ let
           }
         ' "$conf")
         
-        hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
+        #hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         cm=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*cm[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
      
-        if [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
+        if [[ "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
           echo "1 $sdr_max $max_lum"
         else
           echo "0 0 0"
@@ -255,6 +255,102 @@ let
       WAYLAND_DISPLAY="$wdisplay"
       XDG_SESSION_TYPE="$session"
     }
+
+    if mode="$(${get_display_mode})"; then
+      read width height refresh <<< "$mode"
+    else
+      width=1920 height=1080 refresh=60
+    fi
+    refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
+
+    if [[ -v MANGOHUD_FPS_LIMIT ]]; then
+      fps_limit="$MANGOHUD_FPS_LIMIT"
+    else
+      fps_limit=""
+    fi
+    refresh_rate=""
+    steam_mode=0
+
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+      hypr-toggle-hdr off
+    fi
+
+    # Use a loop to walk through the args
+    extra_flags=()
+    to_run=()
+    i=0
+    while [ $i -lt $# ]; do
+      arg="''${@:$((i+1)):1}"
+      echo "''$()"
+      echo "Looping arg $arg"
+    
+      # Check for MANGOHUD_CONFIG
+      if [[ "$arg" == MANGOHUD_CONFIG=* ]]; then
+        config="''${arg#MANGOHUD_CONFIG=}"
+        config="''${config#\"}"
+        config="''${config%\"}"
+    
+        IFS=',' read -ra settings <<< "$config"
+        for setting in "''${settings[@]}"; do
+          if [[ "$setting" == fps_limit=* ]]; then
+            fps_limit="''${setting#fps_limit=}"
+            break
+          fi
+        done
+
+      elif [[ "$arg" == MANGOHUD_FPS_LIMIT=* ]]; then
+        fps_limit="''${arg#*=}"
+        echo '''
+      # Found to be unnecessary / potentially worse
+      #elif [[ ( "$arg" == "ENABLE_LSFG=1" || "$arg" == "LSFG_LEGACY=1" || "$arg" == "lsfg-min" ) && -v hdr_enabled ]]; then
+      #  export LSFG_HDR="$hdr_enabled"
+      fi
+
+      # Check for gamescope args
+      if [[ -v scope_vars_done ]]; then
+        to_run+=("$arg")
+      else
+        # Check for -r <value>
+        if [[ "$arg" == "-r" ]]; then
+          next="''${@:$((i+2)):1}"
+          if [[ -n "$next" ]]; then
+            refresh_rate="$next"
+          fi
+          i=$((i+2)) # skip the next one too
+          continue
+        fi
+
+        if [[ "$arg" == "--steam" || "$arg" == "-e" ]]; then
+          steam_mode=1
+        fi
+
+        if [[ "$arg" == "--hdr-enabled" ]]; then
+          if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+            hypr-toggle-hdr on
+          fi
+        fi
+
+        if [[ "$arg" == "--" ]]; then
+          scope_vars_done=1
+        else
+          extra_flags+=("$arg")
+        fi
+      fi
+
+      i=$((i+1))
+    done
+    # "''$()"
+
+    if [ -v scope_vars_done ]; then
+      echo "Commands to run: $to_run"
+      for arg in "''${to_run[@]}"; do
+        printf "[%s] " "$arg"
+      done
+      echo "''$()"
+    else
+      echo "gsc requires explicit arg separation with '--'"
+      exit 1
+    fi
 
     read hdr_enabled hdr_paper_white hdr_peak <<< "$(get_hdr)"
 
@@ -320,92 +416,6 @@ let
       fi
     fi
 
-    if mode="$(${get_display_mode})"; then
-      read width height refresh <<< "$mode"
-    else
-      width=1920 height=1080 refresh=60
-    fi
-    refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
-
-    if [[ -v MANGOHUD_FPS_LIMIT ]]; then
-      fps_limit="$MANGOHUD_FPS_LIMIT"
-    else
-      fps_limit=""
-    fi
-    refresh_rate=""
-    steam_mode=0
-
-    # Use a loop to walk through the args
-    extra_flags=()
-    to_run=()
-    i=0
-    while [ $i -lt $# ]; do
-      arg="''${@:$((i+1)):1}"
-      echo "''$()"
-      echo "Looping arg $arg"
-    
-      # Check for MANGOHUD_CONFIG
-      if [[ "$arg" == MANGOHUD_CONFIG=* ]]; then
-        config="''${arg#MANGOHUD_CONFIG=}"
-        config="''${config#\"}"
-        config="''${config%\"}"
-    
-        IFS=',' read -ra settings <<< "$config"
-        for setting in "''${settings[@]}"; do
-          if [[ "$setting" == fps_limit=* ]]; then
-            fps_limit="''${setting#fps_limit=}"
-            break
-          fi
-        done
-
-      elif [[ "$arg" == MANGOHUD_FPS_LIMIT=* ]]; then
-        fps_limit="''${arg#*=}"
-        echo '''
-      # Found to be unnecessary / potentially worse
-      #elif [[ ( "$arg" == "ENABLE_LSFG=1" || "$arg" == "LSFG_LEGACY=1" || "$arg" == "lsfg-min" ) && -v hdr_enabled ]]; then
-      #  export LSFG_HDR="$hdr_enabled"
-      fi
-
-      # Check for gamescope args
-      if [[ -v scope_vars_done ]]; then
-        to_run+=("$arg")
-      else
-        # Check for -r <value>
-        if [[ "$arg" == "-r" ]]; then
-          next="''${@:$((i+2)):1}"
-          if [[ -n "$next" ]]; then
-            refresh_rate="$next"
-          fi
-          i=$((i+2)) # skip the next one too
-          continue
-        fi
-
-        if [[ "$arg" == "--steam" || "$arg" == "-e" ]]; then
-          steam_mode=1
-        fi
-
-        if [[ "$arg" == "--" ]]; then
-          scope_vars_done=1
-        else
-          extra_flags+=("$arg")
-        fi
-      fi
-
-      i=$((i+1))
-    done
-    # "''$()"
-
-    if [ -v scope_vars_done ]; then
-      echo "Commands to run: $to_run"
-      for arg in "''${to_run[@]}"; do
-        printf "[%s] " "$arg"
-      done
-      echo "''$()"
-    else
-      echo "gsc requires explicit arg separation with '--'"
-      exit 1
-    fi
-
     # Skip wrapping if we're already inside Gamescope. Execute everything after '--'
     if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
       while [ "$#" -gt 0 ]; do
@@ -421,6 +431,9 @@ let
           fi
           export DXVK_HDR="$hdr_enabled"
           "$@"
+          if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+            hypr-toggle-hdr off
+          fi
           if [[ -n "$refresh_rate" ]]; then
             echo "Re-setting FPS limit from $refresh_rate to $refresh"
             ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $refresh
@@ -473,7 +486,7 @@ let
       #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
       #${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
       # Force FPS limiter that seems to behave better with specific scheduling mode, since gamescope stutters with the wrong one
-      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] && false; then
+      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
       #if [[ "$policy" -eq 0 ]]; then # RR: Early
         if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=late' "$mangohud_file"; then
           ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=late/fps_limit_method=early/' "$mangohud_file"
@@ -517,9 +530,13 @@ let
     ld_preload_pass="''${LD_PRELOAD-}"
 
     # DXVK_HDR=1 should only be needed for Hyprland too, but doesn't hurt to do that globally
-    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$hdr_enabled" == "1" ]]; then
-      #extra_flags+=("--hdr-debug-force-output")
-      extra_flags+=("--hdr-debug-force-support")
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+      extra_flags+=("--backend")
+      extra_flags+=("sdl")
+      if [[ "$hdr_enabled" == "1" ]]; then
+        extra_flags+=("--hdr-debug-force-output")
+        extra_flags+=("--hdr-debug-force-support")
+      fi
     fi
     
     while true; do
@@ -540,6 +557,10 @@ let
         fi
         echo "gamescope exited with code $code, retrying in 1 second..."
         sleep 1
+      fi
+
+      if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+        hypr-toggle-hdr off
       fi
     done
 
@@ -712,6 +733,7 @@ in
         "--force-grab-cursor" # Breaks games with launchers (Elden Ring)
         #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
+        "--hide-cursor-delay 10"
       ];
     };
   };

@@ -252,6 +252,7 @@
       cursor = {
         no_warps = false;
         no_break_fs_vrr = 0;
+        inactive_timeout = 10;
       };
 
       ### KEYBINDINGS ###
