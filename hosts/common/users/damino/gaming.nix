@@ -202,12 +202,12 @@ let
           }
         ' "$conf")
         
-        #hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
+        hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         cm=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*cm[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
      
-        if [[ "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
+        if [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
           echo "1 $sdr_max $max_lum"
         else
           echo "0 0 0"
@@ -448,6 +448,11 @@ let
     else
       if [[ -n "$refresh_rate" ]]; then
         refresh="$refresh_rate"
+        internal_refresh="$refresh"
+      else
+        # Multiply by 100 to work around Wayland backend VRR issues. Accounted for later by editing MangoHud's limiters
+        internal_refresh="$refresh"
+        refresh=$((refresh * 100))
       fi
     fi
 
@@ -471,35 +476,13 @@ let
     #mangoapp_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)" # tmpdir required only for Steam mode since it has unique /tmp (on NixOS?)
     mangohud_file="$(${pkgs.mktemp}/bin/mktemp --tmpdir=/home/$USER)"
 
-    # Currently skipping due to gpu_sched.sched_policy=0 working better with early (default is better with 1)
-    # https://gitlab.freedesktop.org/drm/amd/-/issues/3166#note_2277578
-    # https://gitlab.freedesktop.org/drm/amd/-/issues/2516#note_2119750
-    if [[ -v mangohud_path ]]; then # && [[ -r /sys/module/gpu_sched/parameters/sched_policy ]]; then
+    if [[ -v mangohud_path ]]; then
       #${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangoapp_file" # Copy current config
       ${pkgs.coreutils}/bin/cat "$mangohud_path" > "$mangohud_file" # Copy current config
-      #policy=$(< /sys/module/gpu_sched/parameters/sched_policy)
 
       # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
-      #${pkgs.gnused}/bin/sed -i '/^blacklist=/d' "$mangoapp_file" # Remove blacklist
-      #${pkgs.gnused}/bin/sed -i '/^vsync=/d' "$mangoapp_file" # Remove Vulkan vsync
-      #${pkgs.gnused}/bin/sed -i '/^gl_vsync=/d' "$mangoapp_file" # Remove OpenGL vsync
-      #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangoapp_file" # Remove fps limiter method
-      #${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangoapp_file" # Remove fps limiter
-      # Force FPS limiter that seems to behave better with specific scheduling mode, since gamescope stutters with the wrong one
-      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      #if [[ "$policy" -eq 0 ]]; then # RR: Early
-        if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=late' "$mangohud_file"; then
-          ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=late/fps_limit_method=early/' "$mangohud_file"
-        elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
-          echo 'fps_limit_method=early' >> "$mangohud_file"
-        fi
-      else # FIFO: Late
-        if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
-          ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
-        elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
-          echo 'fps_limit_method=late' >> "$mangohud_file"
-        fi
-      fi
+      ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangohud_file" # Remove FPS limiter
+      echo "fps_limit=$internal_refresh" >> "$mangohud_file" # Replace with refresh rate, to counteract the higher nested -r
 
       #if [[ "$steam_mode" == "1" ]]; then
       #  # MangoApp's keybinds don't work in Steam mode
@@ -508,33 +491,32 @@ let
       #  mangoapp_flag="--mangoapp"
       #  MANGOHUD=0
       #fi
-        
-      #keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
-      #keybind_disable="Shift_R+F11" # MangoHud cannot unset keybinds, so work around
-      #${pkgs.gnused}/bin/sed -i "s/^toggle_hud=.*/toggle_hud=$keybind_disable/" "$mangohud_file"
-      #${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Fix VRR by removing fps_limit_method(=early)
-      #echo "fps_limit_method=late" >> "$mangohud_file"
-
-      export MANGOHUD_CONFIGFILE="$mangohud_file"
 
       #mangoapp_flag="--mangoapp -- env MANGOHUD_CONFIGFILE=$mangohud_file "
       #echo "$mangoapp_flag $@" > /home/damino/test.log
+    else
+      echo "fps_limit=$internal_refresh" > "$mangohud_file"
+      if [[ ! -v MANGOHUD || "$MANGOHUD" == "0" ]]; then
+        # Hidden MangoHud for when not desired
+        echo "no_display" >> "$mangohud_file"
+        keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
+        echo "toggle_hud=$keybind_disable" >> "$mangohud_file"
+      fi
     fi
 
+    export MANGOHUD_CONFIGFILE="$mangohud_file"
+
     if [[ -v MANGOHUD_CONFIG ]]; then
-      export MANGOHUD_CONFIG="''${MANGOHUD_CONFIG:+$MANGOHUD_CONFIG,}fps_limit_early"
+      export MANGOHUD_CONFIG="fps_limit=$internal_refresh,$MANGOHUD_CONFIG"
       # "''$()"
     fi
 
     echo "Launching gamescope at $width"x"$height@$refresh"
     ld_preload_pass="''${LD_PRELOAD-}"
 
-    # DXVK_HDR=1 should only be needed for Hyprland too, but doesn't hurt to do that globally
+    # DXVK_HDR=1 should only be needed for Hyprland, but doesn't hurt to do that globally
     if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      extra_flags+=("--backend")
-      extra_flags+=("sdl")
       if [[ "$hdr_enabled" == "1" ]]; then
-        extra_flags+=("--hdr-debug-force-output")
         extra_flags+=("--hdr-debug-force-support")
       fi
     fi
@@ -543,7 +525,8 @@ let
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
+      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $internal_refresh "''${to_run[@]}"; then
+      #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
