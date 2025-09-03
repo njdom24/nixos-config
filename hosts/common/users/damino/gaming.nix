@@ -636,7 +636,7 @@ in
         extraProfile = ''
           # https://github.com/NixOS/nixpkgs/issues/279893
           unset TZ
-          if [ -n "$SWAYSOCK" ]; then
+          if [ -n "$SWAYSOCK" ] || [-n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
             if echo "$WAYLAND_DISPLAY" | ${pkgs.gnugrep}/bin/grep "gamescope" >/dev/null 2>&1 || pgrep "gamescope" > /dev/null; then
               # Launched through gamescope. Could enable after https://github.com/Supreeeme/extest/issues/11 or portal issue below
               echo "Disabling Extest"
