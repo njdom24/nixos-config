@@ -448,11 +448,6 @@ let
     else
       if [[ -n "$refresh_rate" ]]; then
         refresh="$refresh_rate"
-        internal_refresh="$refresh"
-      else
-        # Multiply by 100 to work around Wayland backend VRR issues. Accounted for later by editing MangoHud's limiters
-        internal_refresh="$refresh"
-        refresh=$((refresh * 100))
       fi
     fi
 
@@ -482,7 +477,6 @@ let
 
       # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
       ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangohud_file" # Remove FPS limiter
-      echo "fps_limit=$internal_refresh" >> "$mangohud_file" # Replace with refresh rate, to counteract the higher nested -r
 
       #if [[ "$steam_mode" == "1" ]]; then
       #  # MangoApp's keybinds don't work in Steam mode
@@ -494,22 +488,13 @@ let
 
       #mangoapp_flag="--mangoapp -- env MANGOHUD_CONFIGFILE=$mangohud_file "
       #echo "$mangoapp_flag $@" > /home/damino/test.log
-    else
-      echo "fps_limit=$internal_refresh" > "$mangohud_file"
-      if [[ ! -v MANGOHUD || "$MANGOHUD" == "0" ]]; then
-        # Hidden MangoHud for when not desired
-        echo "no_display" >> "$mangohud_file"
-        keybind_disable="Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9" # MangoHud cannot unset keybinds, so work around
-        echo "toggle_hud=$keybind_disable" >> "$mangohud_file"
-      fi
     fi
 
     export MANGOHUD_CONFIGFILE="$mangohud_file"
 
-    if [[ -v MANGOHUD_CONFIG ]]; then
-      export MANGOHUD_CONFIG="fps_limit=$internal_refresh,$MANGOHUD_CONFIG"
-      # "''$()"
-    fi
+    #if [[ -v MANGOHUD_CONFIG ]]; then
+      #export MANGOHUD_CONFIG="fps_limit=$internal_refresh,$MANGOHUD_CONFIG"
+    #fi
 
     echo "Launching gamescope at $width"x"$height@$refresh"
     ld_preload_pass="''${LD_PRELOAD-}"
@@ -525,7 +510,7 @@ let
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $internal_refresh "''${to_run[@]}"; then
+      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
       #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
