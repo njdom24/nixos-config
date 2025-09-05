@@ -1,25 +1,25 @@
-From 4af44b37b2657cd1cd23295a30e3f6251aa2c80e Mon Sep 17 00:00:00 2001
+From 3f69b3e17eb43d3f3fd8d393024f116c6bb0681e Mon Sep 17 00:00:00 2001
 From: Damino <dom32400@aol.com>
-Date: Thu, 4 Sep 2025 01:45:46 -0400
-Subject: [PATCH] hack: Increase vblank interval by 100x
+Date: Thu, 4 Sep 2025 22:35:30 -0400
+Subject: [PATCH] Always consider VRR enabled when passed
 
 ---
- src/vblankmanager.cpp | 2 +-
+ src/Backends/WaylandBackend.cpp | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/src/vblankmanager.cpp b/src/vblankmanager.cpp
-index f036d00..878ce76 100644
---- a/src/vblankmanager.cpp
-+++ b/src/vblankmanager.cpp
-@@ -72,7 +72,7 @@ namespace gamescope
- 
- 	int CVBlankTimer::GetRefresh() const
- 	{
--		return g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
-+		return g_nNestedRefresh ? g_nNestedRefresh * 100 : g_nOutputRefresh * 100;
- 	}
- 
- 	uint64_t CVBlankTimer::GetLastVBlank() const
+diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
+index 664ed0e..93d00d8 100644
+--- a/src/Backends/WaylandBackend.cpp
++++ b/src/Backends/WaylandBackend.cpp
+@@ -1136,7 +1136,7 @@ namespace gamescope
+     }
+     bool CWaylandConnector::IsVRRActive() const
+     {
+-        return cv_adaptive_sync && m_bHostCompositorIsCurrentlyVRR;
++        return cv_adaptive_sync;
+     }
+     std::span<const BackendMode> CWaylandConnector::GetModes() const
+     {
 -- 
 2.50.1
 

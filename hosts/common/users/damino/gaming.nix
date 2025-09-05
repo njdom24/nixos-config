@@ -271,9 +271,9 @@ let
     refresh_rate=""
     steam_mode=0
 
-    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      hypr-toggle-hdr off
-    fi
+    #if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+    #  hypr-toggle-hdr off
+    #fi
 
     # Use a loop to walk through the args
     extra_flags=()
@@ -431,9 +431,9 @@ let
           fi
           export DXVK_HDR="$hdr_enabled"
           "$@"
-          if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-            hypr-toggle-hdr off
-          fi
+          #if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+          #  hypr-toggle-hdr off
+          #fi
           if [[ -n "$refresh_rate" ]]; then
             echo "Re-setting FPS limit from $refresh_rate to $refresh"
             ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $refresh
@@ -477,6 +477,14 @@ let
 
       # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
       ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangohud_file" # Remove FPS limiter
+      ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Remove FPS limiter
+
+      # Force 'late' FPS limiter because 'early' is broken
+      if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
+        ${pkgs.gnused}/bin/sed -i 's/^fps_limit_method=early/fps_limit_method=late/' "$mangohud_file"
+      elif ! ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=' "$mangohud_file"; then
+        echo 'fps_limit_method=late' >> "$mangohud_file"
+      fi
 
       #if [[ "$steam_mode" == "1" ]]; then
       #  # MangoApp's keybinds don't work in Steam mode
@@ -510,8 +518,8 @@ let
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
-      #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
+      #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
+      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
@@ -527,9 +535,9 @@ let
         sleep 1
       fi
 
-      if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-        hypr-toggle-hdr off
-      fi
+      #if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+      #  hypr-toggle-hdr off
+      #fi
     done
 
     #if [[ -v mangoapp_file ]]; then

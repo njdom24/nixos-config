@@ -223,7 +223,7 @@
       render = {
         direct_scanout = 0;
         cm_fs_passthrough = 0;
-        cm_auto_hdr = 0;
+        cm_auto_hdr = 2;
       };
 
       #debug = {
