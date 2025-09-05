@@ -1,25 +1,31 @@
-From 3f69b3e17eb43d3f3fd8d393024f116c6bb0681e Mon Sep 17 00:00:00 2001
-From: Damino <dom32400@aol.com>
-Date: Thu, 4 Sep 2025 22:35:30 -0400
-Subject: [PATCH] Always consider VRR enabled when passed
-
----
- src/Backends/WaylandBackend.cpp | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
 diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
-index 664ed0e..93d00d8 100644
+index 664ed0e..fecd652 100644
 --- a/src/Backends/WaylandBackend.cpp
 +++ b/src/Backends/WaylandBackend.cpp
-@@ -1136,7 +1136,7 @@ namespace gamescope
+@@ -444,6 +444,7 @@ namespace gamescope
+         std::atomic<bool> m_bDesiredFullscreenState = { false };
+ 
+         bool m_bHostCompositorIsCurrentlyVRR = false;
++        bool m_bForceVRR = false;
+     };
+ 
+     class CWaylandFb final : public CBaseBackendFb
+@@ -970,6 +971,9 @@ namespace gamescope
+             UpdateFullscreenState();
+         }
+ 
++        const char *forceVrr = getenv( "GSC_FORCE_VRR" );
++        m_bForceVRR = (forceVrr && *forceVrr && atoi(forceVrr) != 0);
++
+         UpdateEdid();
+         m_pBackend->HackUpdatePatchedEdid();
+ 
+@@ -1136,7 +1140,7 @@ namespace gamescope
      }
      bool CWaylandConnector::IsVRRActive() const
      {
 -        return cv_adaptive_sync && m_bHostCompositorIsCurrentlyVRR;
-+        return cv_adaptive_sync;
++        return cv_adaptive_sync && (m_bHostCompositorIsCurrentlyVRR || m_bForceVRR);
      }
      std::span<const BackendMode> CWaylandConnector::GetModes() const
      {
--- 
-2.50.1
-

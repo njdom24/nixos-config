@@ -509,6 +509,8 @@ let
 
     # DXVK_HDR=1 should only be needed for Hyprland, but doesn't hurt to do that globally
     if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+      # Bespoke var to force-fix VRR
+      export GSC_FORCE_VRR=1
       if [[ "$hdr_enabled" == "1" ]]; then
         extra_flags+=("--hdr-debug-force-support")
       fi
