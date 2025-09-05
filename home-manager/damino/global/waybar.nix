@@ -9,7 +9,7 @@
 	  	height = 22;
 	  	modules-left = [ "sway/workspaces" "sway/mode" "hyprland/workspaces" "hyprland/submap" ];
 	  	modules-center = [ "clock" ];
-	  	modules-right = [ "pulseaudio" "bluetooth" "custom/weather" "tray" "custom/menu" ];
+	  	modules-right = [ "pulseaudio" "bluetooth" "custom/weather" "custom/nightlight" "tray" "custom/menu" ];
 
 	  	"sway/workspaces" = {
           disable-scroll = true;
@@ -149,6 +149,44 @@
             default = [ "" "" "" ];
           };
           on-click = "kill `pgrep pavucontrol` || ${pkgs.pavucontrol}/bin/pavucontrol";
+    	};
+
+    	"custom/nightlight" = let
+    	  nightlight = pkgs.writeShellScript "nightlight" ''
+    	    #!/usr/bin/env bash
+    	    
+    	    if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+    	      BIN="hyprsunset"
+    	      ARGS="-t 4500"
+    	    else
+    	      BIN="gammastep"
+    	      ARGS="-O 4500"
+    	    fi
+    	    
+    	    case "$1" in
+    	      toggle)
+    	        if pgrep -x "$BIN" >/dev/null; then
+    	          pkill -x "$BIN"
+    	        else
+    	          "$BIN" $ARGS &
+    	        fi
+    	        sleep 0.1 && pkill -RTMIN+10 waybar
+    	        ;;
+    	      status|*)
+    	        if pgrep -x "$BIN" >/dev/null; then
+    	          echo "{\"text\":\"\",\"tooltip\":\"$BIN active (4500K)\"}"
+    	        else
+    	          echo "{\"text\":\"\",\"tooltip\":\"$BIN inactive\"}"
+    	        fi
+    	        ;;
+    	    esac
+    	  '';
+    	in {
+    	  exec = "${nightlight} status";
+    	  on-click = "${nightlight} toggle";
+    	  return-type = "json";
+    	  signal = 10;
+    	  format = "  {}  ";
     	};
 	  };
 	};

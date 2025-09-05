@@ -416,6 +416,7 @@
     };
     packages = with pkgs; [
       #hyprlandPlugins.hy3
+      hyprsunset
     ] ++ [
       (pkgs.writeShellScriptBin "hypr-toggle-hdr" ''
         #!/usr/bin/env bash
