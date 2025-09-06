@@ -174,6 +174,13 @@
         "rounding 0, floating:0, onworkspace:f[1]"
         # # Ignore maximize requests from apps
         "suppressevent maximize, class:.*"
+        # XWaylandVideoBridge
+        "opacity 0.0 override, class:^(xwaylandvideobridge)$"
+        "noanim, class:^(xwaylandvideobridge)$"
+        "noinitialfocus, class:^(xwaylandvideobridge)$"
+        "maxsize 1 1, class:^(xwaylandvideobridge)$"
+        "noblur, class:^(xwaylandvideobridge)$"
+        "nofocus, class:^(xwaylandvideobridge)$"
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "content game, class:^gamescope$"
@@ -361,6 +368,7 @@
         "vesktop"
         "steam"
         "hyprctl dispatch workspace 1"
+        "${pkgs.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
       ];
       exec = [
         "${pkgs.hyprpaper}/bin/hyprpaper &"
