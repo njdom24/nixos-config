@@ -60,8 +60,7 @@
 
     workspace = {
       # plasma-apply-desktoptheme --list-themes
-      theme = "Colloid-dark";
-      #theme = "breeze-dark";
+      theme = "breeze-dark";
       # plasma-apply-colorscheme --list-schemes
       colorScheme = "BreezeDark";
       cursor = {
@@ -467,7 +466,6 @@
 
     packages = with pkgs; [
       kdePackages.plasma-browser-integration
-      colloid-kde
       kdePackages.krohnkite
       plasma-panel-colorizer
       plasma-toggle-hdr
