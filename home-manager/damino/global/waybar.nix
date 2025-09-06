@@ -22,10 +22,10 @@
      	};
 
      	"bluetooth" = {
-     	  format-on = "󰂯  ";
-     	  format-off = "󰂲  ";
+     	  format-on = " 󰂯";
+     	  format-off = " 󰂲";
      	  format-disabled = "";
-     	  format-connected = "󰂱  ";
+     	  format-connected = " 󰂱";
      	  #format-connected = "󰂱 {num_connections} ";
      	  tooltip-format-connected = "{device_enumerate}";
      	  tooltip-format-enumerate-connected = "{device_alias}\t{device_battery_percentage}%";
