@@ -55,10 +55,10 @@
     '';
     # Bodge to work around screenshare not working with 10-bit / HDR displays
     screenshare-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
-      hyprctl output create headless HEADLESS-2
+      hyprctl output create headless HEADLESS-MIRROR
       current_workspace="$(hyprctl activeworkspace -j | jq '.id')"
       hyprctl dispatch workspace 999
-      hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-2
+      hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-MIRROR
       sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror DP-1"
       
       hyprctl dispatch workspace "$current_workspace"
@@ -177,7 +177,7 @@
         "w[tv1], gapsout:0, gapsin:0"
         "f[1], gapsout:0, gapsin:0"
 
-        "999, monitor:HEADLESS-2"
+        "999, monitor:HEADLESS-MIRROR"
       ];
 
       windowrule = [
@@ -418,7 +418,7 @@
       # Default for extra displays
       monitor = , preferred, auto, 1, mirror, DP-1
       # For screenshare
-      monitor = HEADLESS-2, 2560x1440@30, 4500x0, 1, bitdepth, 8
+      monitor = HEADLESS-MIRROR, 2560x1440@30, 4500x0, 1, bitdepth, 8
     '';
   };
 
