@@ -414,6 +414,11 @@
           #bind = , escape,submap,reset 
           #bind = , return,submap,reset 
       submap=reset
+
+      # Default for extra displays
+      monitor = , preferred, auto, 1, mirror, DP-1
+      # For screenshare
+      monitor = HEADLESS-2, 2560x1440@30, 4500x0, 1, bitdepth, 8
     '';
   };
 
