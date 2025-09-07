@@ -232,7 +232,7 @@ in
 
     displayManager.sddm = {
   	  enable = true;
-  	  theme = "catppuccin-mocha";
+  	  theme = "catppuccin-mocha-maroon";
   	  extraPackages = lib.mkForce [ ];
   	  settings = {
   	  	Theme.CursorTheme = "XCursor-Pro-Dark";
@@ -487,20 +487,15 @@ in
   	  networkmanagerapplet
   	  gtk3
   	  elegant-sddm
-  	  ((pkgs.catppuccin-sddm.override {
+  	  (pkgs.catppuccin-sddm.override {
   	    flavor = "mocha";
+        accent = "maroon"; # List: https://github.com/catppuccin/sddm/releases/tag/v1.1.2
+        userIcon = true;
   	    font  = "Inter";
   	    fontSize = "11";
   	    #background = "${./wallpaper.png}";
   	    loginBackground = true;
-  	  }).overrideAttrs (old: {
-  	    installPhase = old.installPhase + ''
-  	      configFile=$out/share/sddm/themes/${config.services.displayManager.sddm.theme}/theme.conf
-  	        substituteInPlace $configFile \
-  	          --replace-fail 'UserIcon="false"' 'UserIcon="true"' \
-  	          --replace-fail 'AccentColor="#74c7ec"' 'AccentColor="#fab387"'
-  	      '';
-  	  }))
+  	  })
   	  inter
   	  xcursor-pro
   	  pciutils

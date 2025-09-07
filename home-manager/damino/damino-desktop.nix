@@ -1,7 +1,7 @@
 { inputs, pkgs, lib, ... }: {
 	imports = [ ./global ];
 
-	wayland.windowManager.hyprland.settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card0" ];
+	wayland.windowManager.hyprland.settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
 
 	programs = {
 	  rofi.yoffset = 24;
