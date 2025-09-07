@@ -53,6 +53,17 @@
         fi
       done
     '';
+    # Bodge to work around screenshare not working with 10-bit / HDR displays
+    screenshare-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
+      hyprctl output create headless HEADLESS-2
+      current_workspace="$(hyprctl activeworkspace -j | jq '.id')"
+      hyprctl dispatch workspace 999
+      hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-2
+      sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror DP-1"
+      
+      hyprctl dispatch workspace "$current_workspace"
+      sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
+    '';
   in {
     enable = true;
     systemd.enable = true;
@@ -165,6 +176,8 @@
       workspace = [
         "w[tv1], gapsout:0, gapsin:0"
         "f[1], gapsout:0, gapsin:0"
+
+        "999, monitor:HEADLESS-2"
       ];
 
       windowrule = [
@@ -181,6 +194,9 @@
         "maxsize 1 1, class:^(xwaylandvideobridge)$"
         "noblur, class:^(xwaylandvideobridge)$"
         "nofocus, class:^(xwaylandvideobridge)$"
+
+        # For screenshare bodge. Specifying workspace for some reason breaks
+        "fullscreen, class:^(at.yrlf.wl_mirror)$"
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "content game, class:^gamescope$"
@@ -425,6 +441,7 @@
     packages = with pkgs; [
       #hyprlandPlugins.hy3
       hyprsunset
+      wl-mirror
     ] ++ [
       (pkgs.writeShellScriptBin "hypr-toggle-hdr" ''
         #!/usr/bin/env bash
