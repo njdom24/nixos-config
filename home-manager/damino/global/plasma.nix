@@ -12,7 +12,7 @@
 }: {
   # You can import other home-manager modules here
   imports = [
-    inputs.plasma-manager.homeManagerModules.plasma-manager
+    inputs.plasma-manager.homeModules.plasma-manager
   ];
 
   nixpkgs = {
