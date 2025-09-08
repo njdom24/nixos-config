@@ -195,8 +195,8 @@
         "fullscreen, title:^(Steam Big Picture Mode)$"
         #"suppressevent fullscreen maximize, title:^(Steam Big Picture Mode)$"
 
-        "workspace 2, class:^(vesktop)$"
-        "workspace 4, class:^(steam)$"
+        "workspace 2 silent, class:^(vesktop)$"
+        "workspace 4 silent, class:^(steam)$"
 
         # Temporary(?) blur workspace change glitching workaround
         "noblur,class:^()$,title:^()$"
@@ -355,6 +355,10 @@
         ",XF86MonBrightnessDown, exec, brightnessctl -e4 -n2 set 5%-"
       ];
 
+      xwayland = {
+        force_zero_scaling = true;
+      };
+
       experimental = {
         xx_color_management_v4 = true;
       };
@@ -370,8 +374,8 @@
         "hyprctl setcursor $cursorTheme 24"
         "swaync &"
         "[workspace 1 silent] firefox"
-        "vesktop"
-        "steam"
+        "[workspace 2 silent] vesktop"
+        "[workspace 4 silent] steam"
         "hyprctl dispatch workspace 1"
         "${pkgs.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
       ];
