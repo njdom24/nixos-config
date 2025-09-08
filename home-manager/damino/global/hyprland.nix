@@ -467,6 +467,7 @@
           hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-MIRROR
           hyprctl dispatch workspace "$current_workspace"
           sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
+          sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
         fi
         
         # Run the real command with all args, capture stdout
