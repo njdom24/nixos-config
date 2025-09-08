@@ -53,17 +53,6 @@
         fi
       done
     '';
-    # Bodge to work around screenshare not working with 10-bit / HDR displays
-    screenshare-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
-      hyprctl output create headless HEADLESS-MIRROR
-      current_workspace="$(hyprctl activeworkspace -j | jq '.id')"
-      hyprctl dispatch workspace 999
-      hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-MIRROR
-      sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror DP-1"
-      
-      hyprctl dispatch workspace "$current_workspace"
-      sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
-    '';
   in {
     enable = true;
     systemd.enable = true;
@@ -435,6 +424,81 @@
 
   home = {
     file = {
+      ".config/xdg-desktop-portal/hyprland-portals.conf" = lib.mkDefault {
+        text = ''
+          [preferred]
+          default = hyprland;gtk
+          org.freedesktop.impl.portal.FileChooser = kde
+        '';
+      };
+
+      ".config/hypr/xdph.conf" = let screenshare-fix =
+        let portal-watcher = pkgs.writeShellScript "portal-watcher.sh" ''
+          #! /usr/bin/env bash
+          echo "I live!" > /home/damino/Documents/hypr/portaltest.txt
+          ${pkgs.pipewire}/bin/pw-mon | while read -r line; do
+            if [[ "$line" == *"Stream/Input/Video"* ]]; then
+              streaming_sources=$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.gnugrep}/bin/grep -o Stream/Input/Video | ${pkgs.coreutils}/bin/wc -l)
+              #echo "Test: $streaming_sources"
+              if [[ "$streaming_sources" == "0" ]]; then
+                ${pkgs.procps}/bin/kill $(${pkgs.procps}/bin/pgrep wl-mirror)
+                ${pkgs.hyprland}/bin/hyprctl output remove HEADLESS-MIRROR
+                exit 0
+              fi
+            fi
+          done
+          ''; 
+      in pkgs.writeShellScript "screenshare-fix.sh" ''
+        #! /usr/bin/env bash
+        # Example outputs:
+        # [SELECTION]/screen:DP-2
+        # [SELECTION]/window:447338992
+        # [SELECTION]/region:DP-1@697,422,953,722
+        
+        current_workspace="$(hyprctl activeworkspace -j | jq '.id')"
+        
+        if [[ ! $(hyprctl monitors | grep -q "HEADLESS-MIRROR") ]]; then
+          hyprctl output create headless HEADLESS-MIRROR
+          hyprctl dispatch workspace 999
+          hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-MIRROR
+          hyprctl dispatch workspace "$current_workspace"
+          sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
+        fi
+        
+        # Run the real command with all args, capture stdout
+        output="$("hyprland-share-picker" "$@")"
+        
+        display=""
+        case "$output" in
+          "[SELECTION]/screen:"*)
+            display="''${output#"[SELECTION]/screen:"}"
+            ''$()
+            if [[ "$display" == "HEADLESS-MIRROR" ]]; then
+              focused_display="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
+              sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror $focused_display"
+              echo $output
+            else
+              sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror $display"
+              echo "[SELECTION]/screen:HEADLESS-MIRROR"
+            fi
+
+            ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
+            ${pkgs.systemd}/bin/systemctl --user reset-failed
+            ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
+            exit 0
+            ;;
+        esac
+        
+        echo $output
+      ''; in lib.mkDefault {
+        text = ''
+          screencopy {
+            max_fps = 60
+            custom_picker_binary = ${screenshare-fix}
+          }
+        '';
+      };
+
       ".config/hypr/hm/displays.conf" = lib.mkDefault {
         text = ''
           # Default monitor configuration
