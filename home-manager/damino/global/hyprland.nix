@@ -165,8 +165,6 @@
       workspace = [
         "w[tv1], gapsout:0, gapsin:0"
         "f[1], gapsout:0, gapsin:0"
-
-        "999, monitor:HEADLESS-MIRROR"
       ];
 
       windowrule = [
@@ -184,8 +182,6 @@
         "noblur, class:^(xwaylandvideobridge)$"
         "nofocus, class:^(xwaylandvideobridge)$"
 
-        # For screenshare bodge. Specifying workspace for some reason breaks
-        "fullscreen, class:^(at.yrlf.wl_mirror)$"
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "content game, class:^gamescope$"
@@ -230,6 +226,7 @@
         enable_anr_dialog = false; # Disable "not responding" popups
         exit_window_retains_fullscreen = false; # Steam Big Picture retain fullscreen on game exit
         vrr = 2;
+        screencopy_force_8b = true;
       };
 
       render = {
@@ -410,8 +407,6 @@
 
       # Default for extra displays
       monitor = , preferred, auto, 1, mirror, DP-1
-      # For screenshare
-      monitor = HEADLESS-MIRROR, 2560x1440@30, 4500x0, 1, bitdepth, 8
     '';
   };
 
@@ -436,70 +431,11 @@
         '';
       };
 
-      ".config/hypr/xdph.conf" = let screenshare-fix =
-        let portal-watcher = pkgs.writeShellScript "portal-watcher.sh" ''
-          #! /usr/bin/env bash
-          echo "I live!" > /home/damino/Documents/hypr/portaltest.txt
-          ${pkgs.pipewire}/bin/pw-mon | while read -r line; do
-            if [[ "$line" == *"Stream/Input/Video"* ]]; then
-              streaming_sources=$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.gnugrep}/bin/grep -o Stream/Input/Video | ${pkgs.coreutils}/bin/wc -l)
-              #echo "Test: $streaming_sources"
-              if [[ "$streaming_sources" == "0" ]]; then
-                ${pkgs.procps}/bin/kill $(${pkgs.procps}/bin/pgrep wl-mirror)
-                ${pkgs.hyprland}/bin/hyprctl output remove HEADLESS-MIRROR
-                exit 0
-              fi
-            fi
-          done
-          ''; 
-      in pkgs.writeShellScript "screenshare-fix.sh" ''
-        #! /usr/bin/env bash
-        # Example outputs:
-        # [SELECTION]/screen:DP-2
-        # [SELECTION]/window:447338992
-        # [SELECTION]/region:DP-1@697,422,953,722
-        
-        current_workspace="$(hyprctl activeworkspace -j | jq '.id')"
-        
-        if [[ ! $(hyprctl monitors | grep -q "HEADLESS-MIRROR") ]]; then
-          hyprctl output create headless HEADLESS-MIRROR
-          hyprctl dispatch workspace 999
-          hyprctl dispatch moveworkspacetomonitor 999 HEADLESS-MIRROR
-          hyprctl dispatch workspace "$current_workspace"
-          sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
-          sleep 0.2 && hyprctl dispatch renameworkspace 999 ""
-        fi
-        
-        # Run the real command with all args, capture stdout
-        output="$("hyprland-share-picker" "$@")"
-        
-        display=""
-        case "$output" in
-          "[SELECTION]/screen:"*)
-            display="''${output#"[SELECTION]/screen:"}"
-            ''$()
-            if [[ "$display" == "HEADLESS-MIRROR" ]]; then
-              focused_display="$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')"
-              sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror $focused_display"
-              echo $output
-            else
-              sleep 0.5 && hyprctl dispatch -- exec "[workspace 999 silent] wl-mirror $display"
-              echo "[SELECTION]/screen:HEADLESS-MIRROR"
-            fi
-
-            ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
-            ${pkgs.systemd}/bin/systemctl --user reset-failed
-            ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
-            exit 0
-            ;;
-        esac
-        
-        echo $output
-      ''; in lib.mkDefault {
+      ".config/hypr/xdph.conf" = lib.mkDefault {
         text = ''
           screencopy {
             max_fps = 60
-            custom_picker_binary = ${screenshare-fix}
+            custom_picker_binary = hyprland-share-picker
           }
         '';
       };
