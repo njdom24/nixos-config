@@ -265,7 +265,13 @@
       };
 
       ### KEYBINDINGS ###
-      bind = [
+      bind = let focused-screenshot = pkgs.writeShellScript "focused-screenshot" ''
+        monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
+        sh -c "${pkgs.grim}/bin/grim -o $monitor - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+      '';
+      selector-screenshot = pkgs.writeShellScript "selector-screenshot" ''
+        sh -c "${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+      ''; in [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
         "$mainMod SHIFT, E, exec, wlogout"
@@ -324,12 +330,15 @@
         "CTRL, grave, exec, swaync-client --toggle-panel"
 
         # Screenshot active monitor of focused window
-        ", Print, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
-        "SHIFT, Next, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        ", Print, exec, ${focused-screenshot}"
+        "SHIFT, Next, exec, ${focused-screenshot}"
+        #"SHIFT, Next, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        #"SHIFT, Next, exec, sh -c '${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ''.[] | select(.focused==true).name'')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png'"        
+        
 
         # Screenshot selected region
-        "SHIFT, Print, exec, ${pkgs.grim}/bin/grim -g \"$(slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
-        "SHIFT, Prior, exec, ${pkgs.grim}/bin/grim -g \"$(slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        "SHIFT, Print, exec, ${selector-screenshot}"
+        "SHIFT, Prior, exec, ${selector-screenshot}"
 
         "CTRL SHIFT, B, exec, hypr-toggle-hdr"
       ];
@@ -457,9 +466,8 @@
         #!/usr/bin/env bash
       
         conf="$HOME/.config/hypr/displays.conf"
-      
-        mon_id=$(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r '.monitor')
-        monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | jq -r ".[] | select(.id == $mon_id) | .name")
+
+        monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
       
         # Find the sysfs path to EDID dynamically under card*
         edid_path=""
