@@ -153,7 +153,7 @@
                   ${pkgs.coreutils}/bin/printf "%s\n" \
                     "monitorv2 {" \
                     "	output = HDMI-A-1" \
-                    "	mode = ''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}"  \ "''$()"
+                    "	mode = ''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}" \
                     "	position = 0x0" \
                     "	scale = 1" \
                     "	transform = 0" \
@@ -173,6 +173,8 @@
                     "monitor = DP-2, disable" \
                     "monitor = DP-3, disable" \
                     > "$tmpfile"
+
+                  # "''$()"
 
                   if [[ "$1" == "hdr" ]]; then
                     echo "Enabling HDR"
