@@ -198,7 +198,7 @@
 	        max_luminance = 1300
 	        max_avg_luminance = 1300
 	        bitdepth = 10
-	        cm = hdr
+	        cm = srgb
 	      }
 	      monitor = DP-1, disable
 	      monitor = DP-2, disable
