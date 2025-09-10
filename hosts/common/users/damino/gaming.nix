@@ -612,12 +612,13 @@ in
         extraProfile = ''
           # https://github.com/NixOS/nixpkgs/issues/279893
           unset TZ
-          if [ -n "$SWAYSOCK" ] || [-n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
-            if echo "$WAYLAND_DISPLAY" | ${pkgs.gnugrep}/bin/grep "gamescope" >/dev/null 2>&1 || pgrep "gamescope" > /dev/null; then
+          if [ -n "$SWAYSOCK" ] || [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+            if [ "$XDG_CURRENT_DESKTOP" = "gamescope" ]; then
               # Launched through gamescope. Could enable after https://github.com/Supreeeme/extest/issues/11 or portal issue below
               echo "Disabling Extest"
             else
               # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
+              # and/or https://github.com/hyprwm/Hyprland/pull/7919
               export LD_PRELOAD="$LD_PRELOAD:${pkgs.pkgsi686Linux.extest}/lib/libextest.so"
               echo "Enabling Extest"
             fi
