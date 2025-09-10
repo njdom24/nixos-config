@@ -263,7 +263,7 @@
         inactive_timeout = 10;
         # https://github.com/hyprwm/Hyprland/discussions/7386
         no_break_fs_vrr = 1;
-        no_hardware_cursors = 1;
+        no_hardware_cursors = 0;
         min_refresh_rate = 72;
       };
 
