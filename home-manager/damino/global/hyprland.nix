@@ -270,10 +270,16 @@
       ### KEYBINDINGS ###
       bind = let focused-screenshot = pkgs.writeShellScript "focused-screenshot" ''
         monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
-        sh -c "${pkgs.grim}/bin/grim -o $monitor - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        tmpfile=$(${pkgs.mktemp}/bin/mktemp /tmp/clip.XXXXXX.png)
+        ${pkgs.hyprshot}/bin/hyprshot -m output -m $monitor --clipboard-only -s -- $(${pkgs.wl-clipboard-rs}/bin/wl-paste --type image/png > $tmpfile && ${pkgs.libnotify}/bin/notify-send -i $tmpfile "Screenshot taken")
+        rm $tmpfile
       '';
       selector-screenshot = pkgs.writeShellScript "selector-screenshot" ''
-        sh -c "${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
+        tmpfile=$(${pkgs.mktemp}/bin/mktemp /tmp/clip.XXXXXX.png)
+        ${pkgs.hyprshot}/bin/hyprshot -m region --clipboard-only -s
+        ${pkgs.wl-clipboard-rs}/bin/wl-paste --type image/png > $tmpfile && ${pkgs.libnotify}/bin/notify-send -i $tmpfile "Screenshot taken"
+        rm $tmpfile
+        #sh -c "${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
       ''; in [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
@@ -463,6 +469,7 @@
     packages = with pkgs; [
       #hyprlandPlugins.hy3
       hyprsunset
+      hyprshot
       wl-mirror
     ] ++ [
       (pkgs.writeShellScriptBin "hypr-toggle-hdr" ''
