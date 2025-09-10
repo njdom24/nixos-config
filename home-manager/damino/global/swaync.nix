@@ -83,6 +83,13 @@
           padding: 7px;
           border-radius: 12.6px;
         }
+
+        .notification image {
+          min-width: 64px;
+          min-height: 64px;
+          max-width: 96px;
+          max-height: 96px;
+        }
         
         .notification-background .notification.critical {
           box-shadow: inset 0 0 7px 0 var(--base08);
