@@ -462,6 +462,7 @@
     sessionVariables = {
       # https://bugs.kde.org/show_bug.cgi?id=506645
       KWIN_DISABLE_TONEMAPPING = "1";
+      KWIN_DRM_DELAY_VRR_CURSOR_UPDATES = "1";
     };
 
     packages = with pkgs; [
