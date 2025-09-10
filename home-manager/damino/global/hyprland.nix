@@ -268,18 +268,24 @@
       };
 
       ### KEYBINDINGS ###
-      bind = let focused-screenshot = pkgs.writeShellScript "focused-screenshot" ''
+      bind = let
+      show-screenshot = pkgs.writeShellScript "show-screenshot" ''
+        ${pkgs.libnotify}/bin/notify-send -i $1 "Screenshot taken"
+      '';
+      focused-screenshot = pkgs.writeShellScript "focused-screenshot" ''
         monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
-        tmpfile=$(${pkgs.mktemp}/bin/mktemp /tmp/clip.XXXXXX.png)
-        ${pkgs.hyprshot}/bin/hyprshot -m output -m $monitor --clipboard-only -s -- $(${pkgs.wl-clipboard-rs}/bin/wl-paste --type image/png > $tmpfile && ${pkgs.libnotify}/bin/notify-send -i $tmpfile "Screenshot taken")
+        tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+        dir=$(dirname "$tmpfile")
+        file=$(basename "$tmpfile")
+        ${pkgs.hyprshot}/bin/hyprshot -m output -m $monitor -o $dir -f $file -s -- ${show-screenshot}
         rm $tmpfile
       '';
       selector-screenshot = pkgs.writeShellScript "selector-screenshot" ''
-        tmpfile=$(${pkgs.mktemp}/bin/mktemp /tmp/clip.XXXXXX.png)
-        ${pkgs.hyprshot}/bin/hyprshot -m region --clipboard-only -s
-        ${pkgs.wl-clipboard-rs}/bin/wl-paste --type image/png > $tmpfile && ${pkgs.libnotify}/bin/notify-send -i $tmpfile "Screenshot taken"
+        tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+        dir=$(dirname "$tmpfile")
+        file=$(basename "$tmpfile")
+        ${pkgs.hyprshot}/bin/hyprshot -m region -o $dir -f $file -s -- ${show-screenshot}
         rm $tmpfile
-        #sh -c "${pkgs.grim}/bin/grim -g \"$(${pkgs.slurp}/bin/slurp -d)\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
       ''; in [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
