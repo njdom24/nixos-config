@@ -713,6 +713,8 @@ in
         "--hide-cursor-delay 10000"
       ];
     };
+
+    gpu-screen-recorder.enable = true;
   };
 
   hardware = {
