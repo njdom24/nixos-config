@@ -269,23 +269,28 @@
 
       ### KEYBINDINGS ###
       bind = let
-      show-screenshot = pkgs.writeShellScript "show-screenshot" ''
-        ${pkgs.libnotify}/bin/notify-send -i $1 "Screenshot taken"
-      '';
-      focused-screenshot = pkgs.writeShellScript "focused-screenshot" ''
-        monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
+      screenshot = pkgs.writeShellScript "screenshot" ''
+        mode="$1"
         tmpfile=$(${pkgs.mktemp}/bin/mktemp)
-        dir=$(dirname "$tmpfile")
-        file=$(basename "$tmpfile")
-        ${pkgs.hyprshot}/bin/hyprshot -m output -m $monitor -o $dir -f $file -s -- ${show-screenshot}
-        rm $tmpfile
-      '';
-      selector-screenshot = pkgs.writeShellScript "selector-screenshot" ''
-        tmpfile=$(${pkgs.mktemp}/bin/mktemp)
-        dir=$(dirname "$tmpfile")
-        file=$(basename "$tmpfile")
-        ${pkgs.hyprshot}/bin/hyprshot -m region -o $dir -f $file -s -- ${show-screenshot}
-        rm $tmpfile
+        trap 'rm -f "$tmpfile"' EXIT
+
+        case "$mode" in
+          focused)
+            monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
+            ${pkgs.grim}/bin/grim -o "$monitor" "$tmpfile"
+            ;;
+          select|selector)
+            geom=$(${pkgs.slurp}/bin/slurp)
+            ${pkgs.grim}/bin/grim -g "$geom" "$tmpfile"
+            ;;
+          *)
+            echo "Usage: $0 {focused|select}" >&2
+            exit 1
+            ;;
+        esac
+
+        ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
+        ${pkgs.libnotify}/bin/notify-send -i "$tmpfile" "Screenshot taken"
       ''; in [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
@@ -345,15 +350,15 @@
         "CTRL, grave, exec, swaync-client --toggle-panel"
 
         # Screenshot active monitor of focused window
-        ", Print, exec, ${focused-screenshot}"
-        "SHIFT, Next, exec, ${focused-screenshot}"
+        ", Print, exec, ${screenshot} focused"
+        "SHIFT, Next, exec, ${screenshot} focused"
         #"SHIFT, Next, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
         #"SHIFT, Next, exec, sh -c '${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ''.[] | select(.focused==true).name'')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png'"        
         
 
         # Screenshot selected region
-        "SHIFT, Print, exec, ${selector-screenshot}"
-        "SHIFT, Prior, exec, ${selector-screenshot}"
+        "SHIFT, Print, exec, ${screenshot} selector"
+        "SHIFT, Prior, exec, ${screenshot} selector"
 
         "CTRL SHIFT, B, exec, hypr-toggle-hdr"
       ];
@@ -475,7 +480,6 @@
     packages = with pkgs; [
       #hyprlandPlugins.hy3
       hyprsunset
-      hyprshot
       wl-mirror
     ] ++ [
       (pkgs.writeShellScriptBin "hypr-toggle-hdr" ''
