@@ -5,7 +5,10 @@
 
   services = {
     mako.settings.output = lib.mkForce "HDMI-A-1";
-    swaync.settings.notification-window-preferred-output = lib.mkForce "HDMI-A-1";
+    swaync.settings = {
+      notification-window-preferred-output = lib.mkForce "HDMI-A-1";
+      positionX = lib.mkForce "right";
+    };
   };
 
   home.file = {

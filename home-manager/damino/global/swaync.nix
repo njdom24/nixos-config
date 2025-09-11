@@ -9,6 +9,8 @@
         timeout = 4;
         notification-window-preferred-output = "DP-2";
         notification-window-width = 350;
+        positionX = "left";
+        control-center-positionX = "right";
       };
       # Adapted from https://github.com/catppuccin/swaync
       style = ''

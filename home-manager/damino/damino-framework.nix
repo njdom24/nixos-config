@@ -20,6 +20,7 @@
 	};
 
 	services = {
+	  swaync.settings.positionX = lib.mkForce "right";
 	  kanshi.settings = [
 	  	{
 	  	  profile = {
