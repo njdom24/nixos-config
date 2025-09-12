@@ -716,6 +716,8 @@ in
 
     gpu-screen-recorder.enable = true;
   };
+  # Fixes portal access: https://github.com/NixOS/nixpkgs/pull/369574#issuecomment-3194343946
+  security.wrappers."gpu-screen-recorder".capabilities = lib.mkForce "";
 
   hardware = {
     amdgpu.overdrive.enable = true;
