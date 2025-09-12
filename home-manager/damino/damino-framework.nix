@@ -11,7 +11,12 @@
 	    fi
 	  '';
 
-	  hyprland.settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+	  hyprland = {
+	    settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+	    extraConfig = ''
+	      monitor = , preferred, auto, 1, mirrorr, eDP-1
+	    '';
+	  };
 	};
 
 	programs = {

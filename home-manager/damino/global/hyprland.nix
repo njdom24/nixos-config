@@ -433,9 +433,6 @@
           #bind = , escape,submap,reset 
           #bind = , return,submap,reset 
       submap=reset
-
-      # Default for extra displays
-      monitor = , preferred, auto, 1, mirror, DP-1
     '';
   };
 
