@@ -289,8 +289,10 @@
             ;;
         esac
 
-        ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
-        ${pkgs.libnotify}/bin/notify-send -i "$tmpfile" "Screenshot taken"
+        if [[ -s "$tmpfile" ]]; then
+          ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
+          ${pkgs.libnotify}/bin/notify-send -i "$tmpfile" "Screenshot taken"
+        fi
       ''; in [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
