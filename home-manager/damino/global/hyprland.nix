@@ -457,11 +457,48 @@
         '';
       };
 
-      ".config/hypr/xdph.conf" = lib.mkDefault {
+      ".config/hypr/xdph.conf" = let
+        portal-passthrough = pkgs.writeShellScript "portal-passthrough.sh" ''
+          #!/usr/bin/env bash
+          # Example outputs:
+          # [SELECTION]/screen:DP-2
+          # [SELECTION]/window:447338992
+          # [SELECTION]/region:DP-1@697,422,953,722
+
+          # 1. Check PipeWire first
+          if ${pkgs.pipewire}/bin/pw-dump | ${pkgs.jq}/bin/jq -e 'any(.[]; .info?.props?["node.name"]=="gpu-screen-recorder" and .info.props["stream.is-live"]==true)' >/dev/null; then
+            echo $("hyprland-share-picker" "$@")
+          else
+            # 2. Fallback: check processes
+            # get maximum elapsed time among all matching processes
+            # Note: process living < 1 second outputs none
+            max_elapsed=$(${pkgs.ps}/bin/ps -eo etimes,cmd --no-headers \
+              | ${pkgs.gawk}/bin/awk '$0 ~ /gpu-screen-recorder/ && $0 ~ /-w portal/ { if($1>m)m=$1 } END{ if(NR>0) print m; else print "" }')
+            notify-send "$max_elapsed"
+            if [[ ( -n "$max_elapsed" && "$max_elapsed" -le 1 ) || ( ! -n "$max_elapsed" && $(pgrep -f "gpu-screen-recorder.*-w portal") ) ]]; then
+              # All gpu-screen-recorder processes with '-w portal' started within 10s, might be about to go live
+              monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j)
+              
+              # Prefer DP-1 if active
+              if echo "$monitors" | ${pkgs.jq}/bin/jq -e '.[] | select(.name=="DP-1" and .dpmsStatus==true)' >/dev/null; then
+                monitor="DP-1"
+              else
+                # Otherwise pick the first active monitor
+                monitor=$(echo "$monitors" | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus==true) | .name' | head -n1)
+              fi
+              notify-send "$[SELECTION]/screen:$monitor"
+              echo [SELECTION]/screen:$monitor
+            else
+              echo $("hyprland-share-picker" "$@")
+            fi
+          fi
+        '';
+      in lib.mkDefault {
         text = ''
           screencopy {
             max_fps = 60
-            custom_picker_binary = hyprland-share-picker
+            custom_picker_binary = ${portal-passthrough}
+            #custom_picker_binary = hyprland-share-picker
           }
         '';
       };
