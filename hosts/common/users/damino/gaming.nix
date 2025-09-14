@@ -811,6 +811,7 @@ in
 	  # citra-mk7 TODO: https://github.com/NixOS/nixpkgs/pull/348927
 	  dolphin-emu
 	  unstable.cemu
+	  unstable.rpcs3
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
