@@ -230,7 +230,7 @@
       };
 
       render = {
-        direct_scanout = 0;
+        direct_scanout = 1;
         cm_fs_passthrough = 2;
         cm_auto_hdr = 1;
       };
@@ -433,7 +433,8 @@
 
       experimental = {
         # https://github.com/hyprwm/Hyprland/discussions/11677#discussioncomment-14397277
-        xx_color_management_v4 = false;
+        # Despite above, still needed for auto HDR in gamescope as of 9/14/2025. Maybe since I'm not using VK_hdr_layer
+        xx_color_management_v4 = true;
       };
 
       ### AUTOSTART ###
