@@ -340,6 +340,10 @@ in
               output "*" {
                 bg #000000 solid_color
               }
+              input "type:touchpad" {
+                tap enabled
+                natural_scroll enabled
+              }
               exec ${monitorQuery}
               exec ${highestRefresh}
               exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; ${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`; sleep 10 && rm -f /tmp/wayvnc_login"

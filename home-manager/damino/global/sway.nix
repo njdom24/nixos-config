@@ -172,13 +172,13 @@
 		  	  bg = "${./theming/wallpapers/new_gridania.jpg} fill";
 		  	};
 		  };
-		  input = {
-		  	"type:pointer" = { accel_profile = "flat"; };
-		  	"type:touchpad" = {
-		  		tap = "enabled";
-		  		natural_scroll = "enabled";
-		  	};
-		  };
+          input = {
+            "type:pointer" = { accel_profile = "flat"; };
+            "type:touchpad" = {
+              tap = "enabled";
+              natural_scroll = "enabled";
+            };
+          };
 		  focus.mouseWarping = false;
 		  seat = {
 		  	"*" = {
