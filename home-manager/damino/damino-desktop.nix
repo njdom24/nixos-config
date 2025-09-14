@@ -2,7 +2,10 @@
 	imports = [ ./global ];
 
 	wayland.windowManager.hyprland = {
-      settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+      settings = {
+        env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+        exec = [ "systemctl --user start gpu-screen-recorder" ];
+      };
       extraConfig = ''
         monitor = , preferred, auto, 1, mirror, DP-1
       '';
