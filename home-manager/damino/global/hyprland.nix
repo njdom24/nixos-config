@@ -269,6 +269,27 @@
 
       ### KEYBINDINGS ###
       bind = let
+      screenrec = pkgs.writeShellScript "screenrec" ''
+        # Heuristic to check if recording will be started, since GSR doesn't give feedback
+        dir="/home/$USER/Recordings"
+        
+        latest_file=$(ls -t "$dir" | head -n1)
+        mod_time=$(stat -c %Y "$dir/$latest_file")
+        now=$(date +%s)
+        delta=$(( now - mod_time ))
+
+        if (( delta > 2 )); then
+          ${pkgs.libnotify}/bin/notify-send "Recording started"
+        fi
+
+        ${pkgs.procps}/bin/pgrep -f "gpu-screen-recorder" | while read pid; do
+          cmd=$(${pkgs.ps}/bin/ps -p "$pid" -o args=)
+
+          if [[ "$cmd" == *"-r"* && "$cmd" == *"-ro"* ]]; then
+            kill -SIGRTMIN "$pid"
+          fi
+        done
+      '';
       screenshot = pkgs.writeShellScript "screenshot" ''
         mode="$1"
         tmpfile=$(${pkgs.mktemp}/bin/mktemp)
@@ -354,14 +375,19 @@
 
         # Screenshot active monitor of focused window
         ", Print, exec, ${screenshot} focused"
-        "SHIFT, Next, exec, ${screenshot} focused"
-        #"SHIFT, Next, exec, ${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true).name')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png"
-        #"SHIFT, Next, exec, sh -c '${pkgs.grim}/bin/grim -o \"$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ''.[] | select(.focused==true).name'')\" - | ${pkgs.wl-clipboard-rs}/bin/wl-copy -t image/png'"        
+        "SHIFT, Next, exec, ${screenshot} focused"      
         
-
         # Screenshot selected region
         "SHIFT, Print, exec, ${screenshot} selector"
         "SHIFT, Prior, exec, ${screenshot} selector"
+
+        # Save replay if gpu-screen-recorder -r is running
+        "CTRL, Print, exec, pkill -SIGUSR1 -f gpu-screen-recorder"
+        "CTRL SHIFT, Next, exec, pkill -SIGUSR1 -f gpu-screen-recorder"
+
+        # Start / stop manual recording if gpu-screen-recorder -ro is running
+        "CTRL SHIFT, Print, exec, ${screenrec}"
+        "CTRL SHIFT, Prior&Next, exec, ${screenrec}"
 
         "CTRL SHIFT, B, exec, hypr-toggle-hdr"
       ];
@@ -461,48 +487,12 @@
         '';
       };
 
-      ".config/hypr/xdph.conf" = let
-        portal-passthrough = pkgs.writeShellScript "portal-passthrough.sh" ''
-          #!/usr/bin/env bash
-          # Example outputs:
-          # [SELECTION]/screen:DP-2
-          # [SELECTION]/window:447338992
-          # [SELECTION]/region:DP-1@697,422,953,722
-
-          # Check PipeWire first
-          if ${pkgs.pipewire}/bin/pw-dump | ${pkgs.jq}/bin/jq -e 'any(.[]; .info?.props?["node.name"]=="gpu-screen-recorder" and .info.props["stream.is-live"]==true)' >/dev/null; then
-            echo $("hyprland-share-picker" "$@")
-          else
-            # Check processes for "whitelist"
-            # Get maximum elapsed time among all matching processes
-            # Note: process living < 1 second outputs none
-            max_elapsed=$(${pkgs.ps}/bin/ps -eo etimes,cmd --no-headers \
-              | ${pkgs.gawk}/bin/awk '$0 ~ /gpu-screen-recorder/ && $0 ~ /-w portal/ { if($1>m)m=$1 } END{ if(NR>0) print m; else print "" }')
-            #${pkgs.libnotify}/bin/notify-send "$max_elapsed"
-            if [[ ( -n "$max_elapsed" && "$max_elapsed" -le 1 ) || ( ! -n "$max_elapsed" && $(pgrep -f "gpu-screen-recorder.*-w portal") ) ]]; then
-              # All gpu-screen-recorder processes with '-w portal' started within 10s, might be about to go live
-              monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j)
-              
-              # Prefer DP-1 if active
-              if echo "$monitors" | ${pkgs.jq}/bin/jq -e '.[] | select(.name=="DP-1" and .dpmsStatus==true)' >/dev/null; then
-                monitor="DP-1"
-              else
-                # Otherwise pick the first active monitor
-                monitor=$(echo "$monitors" | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus==true) | .name' | head -n1)
-              fi
-              ${pkgs.libnotify}/bin/notify-send "Sharing $monitor"
-              echo [SELECTION]/screen:$monitor
-            else
-              echo $("hyprland-share-picker" "$@")
-            fi
-          fi
-        '';
-      in lib.mkDefault {
+      ".config/hypr/xdph.conf" = lib.mkDefault {
         text = ''
           screencopy {
             max_fps = 60
-            custom_picker_binary = ${portal-passthrough}
-            #custom_picker_binary = hyprland-share-picker
+            allow_token_by_default = true
+            custom_picker_binary = hyprland-share-picker
           }
         '';
       };

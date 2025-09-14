@@ -11,6 +11,24 @@
 
     Service = {
       ExecStart = let
+        gsr-notify = pkgs.writeShellScript "gsr-notify" ''
+          path=$1
+          type=$2
+
+          if [[ -n "$type" ]]; then
+            case "$type" in
+              "regular")
+                ${pkgs.libnotify}/bin/notify-send "Recording saved" "$1"
+                ;;
+              "replay")
+                ${pkgs.libnotify}/bin/notify-send "Replay saved" "$1"
+                ;;
+              *)
+                echo "Unknown type: $type"
+                ;;
+            esac
+          fi
+        '';
         gsr-watcher = pkgs.writeShellScript "gsr-watcher" ''
           if [[ "$XDG_CURRENT_DESKTOP" != "Hyprland" ]]; then
             echo "Currently only supports Hyprland..."
@@ -27,10 +45,28 @@
           echo "Using token $token_file"
           
           if [[ -s "$token_file" ]]; then
-            ${pkgs.libnotify}/bin/notify-send "Starting GPU Screen Recorder"
+            echo "Starting GPU Screen Recorder"
           else
             ${pkgs.libnotify}/bin/notify-send "Select display for replay capture"
           fi
+
+          PRIORITY=("av1" "hevc" "h264")
+          # Parse available codecs from gpu-screen-recorder --info
+          codecs=$(${pkgs.gpu-screen-recorder}/bin/gpu-screen-recorder --info | ${pkgs.gawk}/bin/awk '
+            $1 == "section=video_codecs" { in_section=1; next }
+            /^section=/ { in_section=0 }
+            in_section { print $1 }
+          ')
+
+          # Pick the best available codec
+          best_codec="h264"
+          for c in "''${PRIORITY[@]}"; do
+            if echo "$codecs" | ${pkgs.gnugrep}/bin/grep -qx "$c"; then
+              best_codec="$c"
+              break
+              "''$()"
+            fi
+          done
 
           cmd_base=(
             ${pkgs.gpu-screen-recorder}/bin/gpu-screen-recorder
@@ -38,58 +74,40 @@
             -restore-portal-session yes
             -portal-session-token-filepath "$token_file"
             -a "default_output"
-            -q "medium"
+            -q "high"
             -r 120
-            -sc "$(which notify-send)"
+            -sc "${gsr-notify}"
             -c mkv
+            -k "$best_codec"
             -o "/home/$USER/Replays"
             -ro "/home/$USER/Recordings"
           )
-          
-          try_codec() {
-            codec="$1"
-            echo "Trying codec: $codec"
-            ${pkgs.libnotify}/bin/notify-send "Trying codec: $codec"
 
-            # Create a named pipe for logs
-            pipe=$(${pkgs.mktemp}/bin/mktemp -u)
-            ${pkgs.coreutils}/bin/mkfifo "$pipe"
+          # Create a named pipe for logs
+          pipe=$(${pkgs.mktemp}/bin/mktemp -u)
+          ${pkgs.coreutils}/bin/mkfifo "$pipe"
 
-            # Start gpu-screen-recorder writing to the pipe
-            "''${cmd_base[@]}" -k "$codec" >"$pipe" 2>&1 &
-            gsr_pid=$!
-            # "''$()"
+          # Start gpu-screen-recorder writing to the pipe
+          "''${cmd_base[@]}" >"$pipe" 2>&1 &
+          gsr_pid=$!
+          # "''$()"
 
-            # Read the output in the main shell
-            while IFS= read -r line; do
-              if [[ "$line" =~ "update fps:" ]]; then
-                continue
-              elif [[ "$line" =~ "not supported" ]]; then
-                echo "Codec $codec failed, killing process..."
-                ${pkgs.libnotify}/bin/notify-send "Codec $codec failed, killing process..."
-                kill "$gsr_pid" 2>/dev/null || true
-                rm -f "$pipe"
-                return 1
-              # Detect PipeWire unconnected state
-              elif [[ "$line" =~ "new state: \"unconnected\"" ]]; then
-                echo "Replay buffer disconnected. Restarting..."
-                ${pkgs.libnotify}/bin/notify-send "Replay buffer disconnected. Restarting..."
-                kill "$gsr_pid" 2>/dev/null || true
-                exit 1
-                break
-              else
-                echo "$line"
-              fi
-            done <"$pipe"
-            rm -f "$pipe"
-          }
-
-          for codec in av1 hevc h264; do
-            if try_codec "$codec"; then
-              # Successfully started with this codec
+          # Read the output in the main shell
+          while IFS= read -r line; do
+            if [[ "$line" =~ "update fps:" ]]; then
+              continue
+            # Detect PipeWire unconnected state
+            elif [[ "$line" =~ "new state: \"unconnected\"" ]]; then
+              echo "Replay buffer disconnected. Restarting..."
+              ${pkgs.libnotify}/bin/notify-send "Replay buffer disconnected. Restarting..."
+              kill "$gsr_pid" 2>/dev/null || true
+              exit 1
               break
+            else
+              echo "$line"
             fi
-          done
+          done <"$pipe"
+          rm -f "$pipe"
         ''; in
         "${gsr-watcher}";
       Restart = "on-failure";
