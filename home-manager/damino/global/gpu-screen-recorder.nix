@@ -18,10 +18,10 @@
           if [[ -n "$type" ]]; then
             case "$type" in
               "regular")
-                ${pkgs.libnotify}/bin/notify-send "Recording saved" "$1"
+                ${pkgs.libnotify}/bin/notify-send "Recording saved" "$path"
                 ;;
               "replay")
-                ${pkgs.libnotify}/bin/notify-send "Replay saved" "$1"
+                ${pkgs.libnotify}/bin/notify-send "Replay saved" "$path"
                 ;;
               *)
                 echo "Unknown type: $type"
