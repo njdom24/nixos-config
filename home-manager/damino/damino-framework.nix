@@ -14,7 +14,7 @@
 	  hyprland = {
 	    settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
 	    extraConfig = ''
-	      monitor = , preferred, auto, 1, mirrorr, eDP-1
+	      monitor = , preferred, auto, 1, mirror, eDP-1
 	    '';
 	  };
 	};
