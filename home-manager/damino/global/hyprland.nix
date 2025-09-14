@@ -432,7 +432,8 @@
       };
 
       experimental = {
-        xx_color_management_v4 = true;
+        # https://github.com/hyprwm/Hyprland/discussions/11677#discussioncomment-14397277
+        xx_color_management_v4 = false;
       };
 
       ### AUTOSTART ###
