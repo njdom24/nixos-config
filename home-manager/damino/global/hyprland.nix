@@ -270,15 +270,11 @@
       ### KEYBINDINGS ###
       bind = let
       screenrec = pkgs.writeShellScript "screenrec" ''
-        # Heuristic to check if recording will be started, since GSR doesn't give feedback
-        dir="/home/$USER/Recordings"
-        
-        latest_file=$(ls -t "$dir" | head -n1)
-        mod_time=$(stat -c %Y "$dir/$latest_file")
-        now=$(date +%s)
-        delta=$(( now - mod_time ))
+        # Check if recording will be started, since GSR doesn't give feedback
+        # Get the latest status line from the gpu-screen-recorder journal
+        last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
 
-        if (( delta > 2 )); then
+        if [[ "$last_line" != *"Started recording"* ]]; then
           ${pkgs.libnotify}/bin/notify-send "Recording started"
         fi
 
