@@ -27,7 +27,7 @@
     ./hyprland.nix
     ./kitty.nix
     ./theming
-    ./gpu-screen-recorder.nix
+    ./gpu-screen-recorder
   ];
 
   colorScheme = inputs.nix-colors.colorSchemes.mocha;
