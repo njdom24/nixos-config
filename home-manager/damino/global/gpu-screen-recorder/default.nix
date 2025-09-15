@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  python = pkgs.python3.withPackages (ps: [ ps.evdev ]);
+  python = pkgs.python3.withPackages (ps: [ ps.evdev ps.psutil ps.pysdl2 ]);
   gamepadWatcher = pkgs.writeShellScript "gamepad-watcher" ''
 ${python.interpreter} <<'EOF'
 ${builtins.readFile ./gamepad-watcher.py}
@@ -21,7 +21,7 @@ in
       ExecStart = "${gamepadWatcher}";
       Restart = "always";
       RestartSec = 5;
-      KillMode = "process";
+      KillMode = "control-group";
     };
 
     Install = {

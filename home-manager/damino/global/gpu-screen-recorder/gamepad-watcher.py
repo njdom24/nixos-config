@@ -1,80 +1,104 @@
-import evdev
-import asyncio
-import signal
-import os
-import subprocess
+#!/usr/bin/env python3
+import ctypes
 import time
+import subprocess
+import sdl2
+import sdl2.ext
+import logging
 
-DEVICES = {}  # path -> device
-PRESS_TASKS = {}
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-async def monitor_gamepad(dev):
-    pressed_state = {
-        evdev.ecodes.BTN_MODE: False,
-        'dpad_up': False  # track separately
-    }
+# Only track Guide + D-Pad Up
+WATCH_BUTTONS = [sdl2.SDL_CONTROLLER_BUTTON_GUIDE, sdl2.SDL_CONTROLLER_BUTTON_DPAD_UP]
+
+controller_state = {}
+
+def open_controllers():
+    sdl2.SDL_Init(sdl2.SDL_INIT_GAMECONTROLLER)
+    controllers = {}
+    for i in range(sdl2.SDL_NumJoysticks()):
+        if sdl2.SDL_IsGameController(i):
+            ctrl = sdl2.SDL_GameControllerOpen(i)
+            instance_id = sdl2.SDL_JoystickInstanceID(sdl2.SDL_GameControllerGetJoystick(ctrl))
+            name = sdl2.SDL_GameControllerName(ctrl)
+            logging.info(f"Controller plugged in: {name.decode()}")
+            controllers[instance_id] = {
+                "controller": ctrl,
+                "pressed": {b: False for b in WATCH_BUTTONS},
+                "hold_start": {b: None for b in WATCH_BUTTONS},
+                "combo_active": False,   # <-- new flag
+            }
+    return controllers
+
+def process_events():
+    event = sdl2.SDL_Event()
+    while sdl2.SDL_PollEvent(ctypes.byref(event)) != 0:
+        if event.type == sdl2.SDL_CONTROLLERBUTTONDOWN:
+            instance_id = event.cbutton.which
+            button = event.cbutton.button
+            if instance_id in controller_state and button in WATCH_BUTTONS:
+                state = controller_state[instance_id]
+                state["pressed"][button] = True
+                if state["hold_start"][button] is None:
+                    state["hold_start"][button] = time.time()
+        elif event.type == sdl2.SDL_CONTROLLERBUTTONUP:
+            instance_id = event.cbutton.which
+            button = event.cbutton.button
+            if instance_id in controller_state and button in WATCH_BUTTONS:
+                state = controller_state[instance_id]
+                state["pressed"][button] = False
+                state["hold_start"][button] = None
+                state["combo_active"] = False
+        elif event.type == sdl2.SDL_CONTROLLERDEVICEADDED:
+            idx = event.cdevice.which
+            if sdl2.SDL_IsGameController(idx):
+                ctrl = sdl2.SDL_GameControllerOpen(idx)
+                instance_id = sdl2.SDL_JoystickInstanceID(sdl2.SDL_GameControllerGetJoystick(ctrl))
+                name_ptr = sdl2.SDL_GameControllerName(ctrl)
+                name = name_ptr.decode() if name_ptr else f"Controller_{idx}"
+                logging.info(f"Controller plugged in: {name}")
+                controller_state[instance_id] = {
+                    "controller": ctrl,
+                    "pressed": {b: False for b in WATCH_BUTTONS},
+                    "hold_start": {b: None for b in WATCH_BUTTONS},
+                    "combo_active": False,
+                }
+        elif event.type == sdl2.SDL_CONTROLLERDEVICEREMOVED:
+            instance_id = event.cdevice.which
+            if instance_id in controller_state:
+                ctrl = controller_state[instance_id]["controller"]
+                sdl2.SDL_GameControllerClose(ctrl)
+                del controller_state[instance_id]
+                logging.info(f"Controller unplugged: {instance_id}")
+
+
+def check_combo():
+    now = time.time()
+    for state in controller_state.values():
+        if all(state["pressed"][b] for b in WATCH_BUTTONS):
+            if not state["combo_active"]:
+                hold_times = [state["hold_start"][b] for b in WATCH_BUTTONS]
+                if all(start and now - start >= 1.0 for start in hold_times):
+                    logging.info("Guide + D-Pad Up held for 1s! Triggering pkill...")
+                    subprocess.run(["pkill", "-SIGUSR1", "-f", "gpu-screen-recorder"])
+                    state["combo_active"] = True
+        else:
+            state["combo_active"] = False  # reset when any button is released
+
+def main_loop():
+    global controller_state
+    controller_state = open_controllers()
     try:
-        combo_active = False
-        combo_start_time = None
-        hold_duration = 1.0  # seconds
-        async for event in dev.async_read_loop():
-            if event.type == evdev.ecodes.EV_KEY and event.code == evdev.ecodes.BTN_MODE:
-                pressed_state[evdev.ecodes.BTN_MODE] = bool(event.value)
-            elif event.type == evdev.ecodes.EV_ABS and event.code == evdev.ecodes.ABS_HAT0Y:
-                pressed_state['dpad_up'] = (event.value == -1)
-            
-            # check if combo is active
-            if pressed_state[evdev.ecodes.BTN_MODE] and pressed_state['dpad_up']:
-                if combo_start_time is None:
-                    combo_start_time = time.monotonic()  # start timer
-                elif not combo_active and (time.monotonic() - combo_start_time) >= hold_duration:
-                    combo_active = True
-                    print("Home + D-Pad Up held for 1s!")
-                    subprocess.run([ "pkill", "-SIGUSR1", "-f", "gpu-screen-recorder" ])
-            else:
-                # Reset timer and combo state when released
-                combo_start_time = None
-                combo_active = False
-    except OSError:
-        print(f"Device disconnected: {dev.name} at {dev.path}")
+        while True:
+            process_events()
+            check_combo()
+            time.sleep(0.01)  # 100 Hz polling
+    except KeyboardInterrupt:
+        logging.info("Exiting...")
+    finally:
+        for state in controller_state.values():
+            sdl2.SDL_GameControllerClose(state["controller"])
+        sdl2.SDL_Quit()
 
-def find_gamepads():
-    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-    gamepads = []
-    for dev in devices:
-        if 'Wireless Controller' in dev.name or 'Gamepad' in dev.name:
-            gamepads.append(dev)
-    return gamepads
-
-async def main_loop():
-    global DEVICES
-    while True:
-        current_paths = {dev.path for dev in find_gamepads()}
-
-        # Handle new devices
-        for path in current_paths - DEVICES.keys():
-            dev = evdev.InputDevice(path)
-            DEVICES[path] = dev
-            print(f"Added {dev.name} at {dev.path}")
-            asyncio.create_task(monitor_gamepad(dev))
-
-        # Handle disconnected devices (don't kill the monitor task)
-        for path in list(DEVICES.keys()):
-            if path not in current_paths:
-                dev = DEVICES.pop(path)
-                print(f"Removed {dev.name} at {dev.path}")
-                try:
-                    dev.close()
-                except Exception:
-                    pass
-
-        await asyncio.sleep(1)  # scan frequency
-
-def exit_now(signum, frame):
-    print("Exiting…")
-    os._exit(0)  # immediate exit, avoids InputDevice.__del__ spam
-
-signal.signal(signal.SIGINT, exit_now)
-signal.signal(signal.SIGTERM, exit_now)
-
-asyncio.run(main_loop())
+if __name__ == "__main__":
+    main_loop()
