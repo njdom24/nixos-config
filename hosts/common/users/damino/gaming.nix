@@ -811,7 +811,12 @@ in
 	  # citra-mk7 TODO: https://github.com/NixOS/nixpkgs/pull/348927
 	  dolphin-emu
 	  unstable.cemu
-	  unstable.rpcs3
+	  # Fixes RPCN UI freeze
+	  (unstable.rpcs3.overrideAttrs (prevAttrs: {
+	    preFixup = (prevAttrs.preFixup) + ''
+	      qtWrapperArgs+=(--set QT_QPA_PLATFORM xcb)
+	    '';
+	  }))
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
