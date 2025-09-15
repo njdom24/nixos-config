@@ -75,7 +75,7 @@
             -portal-session-token-filepath "$token_file"
             -a "default_output"
             -q "high"
-            -r 120
+            -r 300
             -sc "${gsr-notify}"
             -c mkv
             -k "$best_codec"
