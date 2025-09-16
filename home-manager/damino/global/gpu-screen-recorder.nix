@@ -1,33 +1,4 @@
-{ config, pkgs, ... }:
-let
-  python = pkgs.python3.withPackages (ps: [ ps.evdev ps.psutil ps.pysdl2 ]);
-  gamepadWatcher = pkgs.writeShellScript "gamepad-watcher" ''
-${python.interpreter} <<'EOF'
-${builtins.readFile ./gamepad-watcher.py}
-EOF
-'';
-
-in
-{
-  systemd.user.services.gamepad-watcher = {
-    Unit = {
-      Description = "Watch Home + D-Pad Up to save replays";
-      PartOf = [ "gpu-screen-recorder.service" ];  # Stop/start with
-      BindsTo = [ "gpu-screen-recorder.service" ]; # Stops if GPU recorder stops
-      After = [ "gpu-screen-recorder.service" ];   # Start after
-    };
-
-    Service = {
-      ExecStart = "${gamepadWatcher}";
-      Restart = "always";
-      RestartSec = 5;
-      KillMode = "control-group";
-    };
-
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-  };
+{ config, pkgs, ... }: {
   systemd.user.services.gpu-screen-recorder = {
     Unit = {
       Description = "GPU Screen Recorder";
