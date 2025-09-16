@@ -101,6 +101,7 @@ in
 	  betterdiscordctl
 	  vesktop
 	  jellyfin-media-player
+	  kdePackages.kdenlive
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
