@@ -477,7 +477,8 @@ let
 
       # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
       ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangohud_file" # Remove FPS limiter
-      ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Remove FPS limiter
+      ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Remove FPS limit method
+      ${pkgs.gnused}/bin/sed -i "1i fps_limit=$refresh" "$mangohud_file"
 
       # Force 'late' FPS limiter because 'early' is broken
       if ${pkgs.gnugrep}/bin/grep -q '^fps_limit_method=early' "$mangohud_file"; then
@@ -518,8 +519,8 @@ let
       if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
-      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
-      #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
+      #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
+      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
         ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
