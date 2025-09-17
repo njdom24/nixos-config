@@ -159,11 +159,12 @@
 	  dolphin-emu
 	  unstable.cemu
 	  # Fixes RPCN UI freeze
-	  (unstable.rpcs3.overrideAttrs (prevAttrs: {
-	    preFixup = (prevAttrs.preFixup) + ''
-	      qtWrapperArgs+=(--set QT_QPA_PLATFORM xcb)
-	    '';
-	  }))
+	  unstable.rpcs3
+	  #(unstable.rpcs3.overrideAttrs (prevAttrs: {
+	  #  preFixup = (prevAttrs.preFixup) + ''
+	  #    qtWrapperArgs+=(--set QT_QPA_PLATFORM xcb)
+	  #  '';
+	  #}))
 	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
