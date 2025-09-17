@@ -517,6 +517,9 @@ in
   	  seahorse
   	] ++ gst_plugins;
 
+    # TODO: Remove after https://github.com/NixOS/nixpkgs/issues/409986#issuecomment-3217982330
+  	etc."xdg/menus/applications.menu".source = "${pkgs.kdePackages.plasma-workspace}/etc/xdg/menus/plasma-applications.menu";
+
   	variables = {
   	  #"TZ" = "${config.time.timeZone}";
   	  "GST_PLUGIN_SYSTEM_PATH_1_0" = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins;
