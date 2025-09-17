@@ -359,6 +359,10 @@
         "$mainMod SHIFT, 9, movetoworkspacesilent, 9"
         "$mainMod SHIFT, 0, movetoworkspacesilent, 10"
 
+        # Standard Alt+Tab behavior, useful for Steam Input
+        "ALT, Tab, cyclenext"
+        "ALT, Tab, bringactivetotop"
+
         # Notification daemon
         "CTRL, SPACE, exec, swaync-client --hide-latest"
         "CTRL, grave, exec, swaync-client --toggle-panel"
