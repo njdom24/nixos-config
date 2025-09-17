@@ -4,7 +4,7 @@
 	wayland.windowManager.hyprland = {
       settings = {
         env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
-        exec = [ "systemctl --user start gpu-screen-recorder" ];
+        exec-once = [ "sleep 5 && systemctl --user start gpu-screen-recorder" ];
       };
       extraConfig = ''
         monitor = , preferred, auto, 1, mirror, DP-1

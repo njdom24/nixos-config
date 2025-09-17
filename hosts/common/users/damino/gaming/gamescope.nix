@@ -564,6 +564,7 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
+      $(sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
     
     timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
@@ -578,6 +579,7 @@ let
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
+      $(sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
   '';
