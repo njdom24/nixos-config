@@ -35,13 +35,14 @@
           fi
 
           # Collect connector name + model for active monitors
-          monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus == 1) | "\(.name):\(.model)"')
+          monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus == 1) | "\(.name):\(.model)"' | sort)
 
           # Generate a unique hash from monitor configuration
           hash=$(${pkgs.coreutils}/bin/printf "%s\n" "$monitors" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.coreutils}/bin/cut -d' ' -f1)
-
-          token_file="/home/$USER/.config/gpu-screen-recorder/restore_token_$hash"
+ 
+          token_file="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/restore_token_$hash"
           echo "Using token $token_file"
+          mkdir -p "$(dirname "$token_file")"
           
           if [[ -s "$token_file" ]]; then
             echo "Starting GPU Screen Recorder"
