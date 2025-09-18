@@ -172,7 +172,7 @@
             min_luminance = 0.005
             max_luminance = 1156
             max_avg_luminance = 1156
-            bitdepth = 10
+            bitdepth = 8
             cm = srgb
           }
 
@@ -205,7 +205,7 @@
 	        min_luminance = 0.005
 	        max_luminance = 1300
 	        max_avg_luminance = 1300
-	        bitdepth = 10
+	        bitdepth = 8
 	        cm = srgb
 	      }
 	      monitor = DP-1, disable

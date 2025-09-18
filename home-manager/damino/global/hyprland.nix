@@ -535,11 +535,8 @@
     ] ++ [
       (pkgs.writeShellScriptBin "hypr-toggle-hdr" ''
         #!/usr/bin/env bash
-      
-        conf="$HOME/.config/hypr/displays.conf"
 
         monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
-      
         # Find the sysfs path to EDID dynamically under card*
         edid_path=""
         for card in /sys/class/drm/card*; do
@@ -558,59 +555,24 @@
         if ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" | grep -q "HDR Static Metadata Data Block"; then
           echo "HDR support detected on $monitor"
       
-          current_mode=$(${pkgs.gawk}/bin/awk -v mon="$monitor" '
-            BEGIN { inblock=0; has_output=0; mode="unknown" }
-            /^[[:space:]]*monitorv2[[:space:]]*\{/ { inblock=1; has_output=0; mode="unknown"; next }
-            /^[[:space:]]*\}/ {
-              if (inblock && has_output && mode != "unknown") { print mode; exit }
-              inblock=0
-            }
-            inblock {
-              if ($0 ~ ("output = " mon)) has_output=1
-              if ($0 ~ /cm = (srgb|hdr)/) {
-                split($0, a, "=")
-                mode=a[2]; gsub(/[[:space:]]/, "", mode)
-              }
-            }
-          ' "$conf")
-      
-          case "$1" in
-            on)
-              if [ "$current_mode" = "hdr" ]; then
-                echo "Already in HDR mode; nothing to do."
-                exit 0
-              fi
-              echo "Enabling HDR"
-              ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
-                /output = $monitor/,/}/s/cm = srgb/cm = hdr/
-              }" "$conf"
-              ;;
-            off)
-              if [ "$current_mode" = "srgb" ]; then
-                echo "Already in sRGB mode; nothing to do."
-                exit 0
-              fi
-              echo "Disabling HDR"
-              ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
-                /output = $monitor/,/}/s/cm = hdr/cm = srgb/
-              }" "$conf"
-              ;;
-            *)
-              if [ "$current_mode" = "hdr" ]; then
-                echo "Toggling: disabling HDR"
-                ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
-                  /output = $monitor/,/}/s/cm = hdr/cm = srgb/
-                }" "$conf"
-              else
-                echo "Toggling: enabling HDR"
-                ${pkgs.gnused}/bin/sed -i "/monitorv2 {/,/}/{
-                  /output = $monitor/,/}/s/cm = srgb/cm = hdr/
-                }" "$conf"
-              fi
-              ;;
-          esac
-      
-          #${pkgs.hyprland}/bin/hyprctl reload
+          # Query monitor state
+          state=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$monitor\")")
+          
+          format=$(echo "$state" | ${pkgs.jq}/bin/jq -r ".currentFormat")
+          
+          ### HDR / SDR toggle (bitdepth + cm)
+          if [[ "$format" == "XRGB8888" ]]; then
+              echo "Switching $monitor to HDR"
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$monitor]:bitdepth" 10
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$monitor]:cm" hdr
+          elif [[ "$format" == "XRGB2101010" ]]; then
+              echo "Switching $monitor to SDR"
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$monitor]:bitdepth" 8
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$monitor]:cm" srgb
+          else
+              echo "Unknown format: $format"
+          fi
+
         else
           echo "HDR not supported on $monitor; no changes made."
         fi
