@@ -5,7 +5,9 @@
 	settings = {
 	  mainBar = {
 	    ipc = true;
+	    position = "top";
 	  	layer = "top";
+	  	mode = "dock";
 	  	height = 22;
 	  	modules-left = [ "sway/workspaces" "sway/mode" "hyprland/workspaces" "hyprland/submap" ];
 	  	modules-center = [ "clock" ];

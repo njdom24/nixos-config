@@ -208,6 +208,8 @@
         "ignorealpha 0.5, swaync-control-center"
         "blur, rofi"
         "ignorealpha 0.5, rofi"
+        "blur, waybar"
+        "ignorealpha 0.5, waybar"
       ];
 
       dwindle = {
