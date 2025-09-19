@@ -183,7 +183,7 @@
             scale = 1
             transform = 0
             vrr = 0
-            bitdepth = 8
+            bitdepth = 10
             cm = srgb
           }
 
