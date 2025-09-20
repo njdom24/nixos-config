@@ -24,7 +24,7 @@
     #nwg-look # doesn't work system-level
     nwg-menu
     waybar
-    rofi-wayland
+    rofi
     lxappearance
     wdisplays
     kanshi

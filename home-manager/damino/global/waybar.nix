@@ -129,7 +129,7 @@
 	      format-icons = {
             default = "";
           };
-		  on-click = '' ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/pgrep -x rofi && ${pkgs.procps}/bin/pkill -x rofi || ${pkgs.rofi-wayland}/bin/rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun -location 3" '';
+		  on-click = '' ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/pgrep -x rofi && ${pkgs.procps}/bin/pkill -x rofi || ${pkgs.rofi}/bin/rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun -location 3" '';
     	};
 
     	"pulseaudio" = {
