@@ -29,50 +29,96 @@
           fi
         '';
         gsr-watcher = pkgs.writeShellScript "gsr-watcher" ''
+          set -euo pipefail
+        
           if [[ "$XDG_CURRENT_DESKTOP" != "Hyprland" ]]; then
             echo "Currently only supports Hyprland..."
             exit 0
           fi
-
-          # Collect connector name + model for active monitors
+        
+          # Collect active monitors and build hash
           monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus == 1) | "\(.name):\(.model)"' | sort)
-
-          # Generate a unique hash from monitor configuration
           hash=$(${pkgs.coreutils}/bin/printf "%s\n" "$monitors" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.coreutils}/bin/cut -d' ' -f1)
- 
-          token_file="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/restore_token_$hash"
-          echo "Using token $token_file"
-          mkdir -p "$(dirname "$token_file")"
-          
-          if [[ -s "$token_file" ]]; then
-            echo "Starting GPU Screen Recorder"
+        
+          portal_token="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/portal/restore_token_$hash"
+          kms_token="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/kmsgrab/restore_token_$hash"
+          mkdir -p "$(dirname "$portal_token")" "$(dirname "$kms_token")"
+        
+          # --- pick display: cached token or hyprland-share-picker ---
+          mode="portal"
+          output=""
+        
+          if [[ -s "$kms_token" ]]; then
+            output=$(cat "$kms_token")
+            if [[ -n "$output" ]]; then
+              mode="kmsgrab"
+            fi
           else
-            ${pkgs.libnotify}/bin/notify-send "Select display for replay capture"
+            selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
+            if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
+              output="''${BASH_REMATCH[1]}"
+              "''$()"
+              echo "$output" >"$kms_token"
+              mode="kmsgrab"
+            fi
           fi
-
+        
+          # --- helper: detect HDR for an output from ~/.config/hypr/displays.conf ---
+          detect_hdr() {
+            local out="$1"
+            local conf="$HOME/.config/hypr/displays.conf"
+            [[ -f "$conf" ]] || { echo "sdr"; return; }
+        
+            ${pkgs.gawk}/bin/awk -v out="$out" '
+              $1 == "monitorv2" { in_block=1; buf=""; next }
+              in_block && $1 == "}" {
+                in_block=0
+                if (buf ~ "output *= *"out) print buf
+                buf=""
+                next
+              }
+              in_block { buf = buf "\n" $0 }
+            ' "$conf" | ${pkgs.gnugrep}/bin/grep -q "cm *= *hdr" && echo "hdr" || echo "sdr"
+          }
+        
+          # --- collect available codecs ---
           PRIORITY=("av1" "hevc" "h264")
-          # Parse available codecs from gpu-screen-recorder --info
           codecs=$(${pkgs.gpu-screen-recorder}/bin/gpu-screen-recorder --info | ${pkgs.gawk}/bin/awk '
             $1 == "section=video_codecs" { in_section=1; next }
             /^section=/ { in_section=0 }
             in_section { print $1 }
           ')
-
-          # Pick the best available codec
-          best_codec="h264"
-          for c in "''${PRIORITY[@]}"; do
-            if echo "$codecs" | ${pkgs.gnugrep}/bin/grep -qx "$c"; then
-              best_codec="$c"
-              break
-              "''$()"
+        
+          # If kmsgrab+HDR candidate, prefer HDR codec names
+          hdr_status="sdr"
+          if [[ "$mode" == "kmsgrab" ]]; then
+            hdr_status=$(detect_hdr "$output")
+            if [[ "$hdr_status" == "hdr" ]]; then
+              PRIORITY=("av1_hdr" "hevc_hdr" "av1" "hevc" "h264")
             fi
-          done
-
+          fi
+        
+          pick_codec() {
+            for c in "''${PRIORITY[@]}"; do
+              if echo "$codecs" | ${pkgs.gnugrep}/bin/grep -qx "$c"; then
+                "''$()"
+                printf "%s" "$c"
+                return 0
+              fi
+            done
+            printf "h264"
+          }
+        
+          best_codec=$(pick_codec)
+          # Ensure we don't run kmsgrab unless HDR codec is available
+          if [[ "$hdr_status" == "hdr" && "$best_codec" != *hdr* ]]; then
+            echo "HDR codec not available for $output (picked $best_codec). Falling back to portal."
+            mode="portal"
+          fi
+        
+          # --- prepare command base ---
           cmd_base=(
             ${pkgs.gpu-screen-recorder}/bin/gpu-screen-recorder
-            -w portal
-            -restore-portal-session yes
-            -portal-session-token-filepath "$token_file"
             -a "default_output"
             -q "high"
             -r 300
@@ -82,36 +128,84 @@
             -o "/home/$USER/Replays"
             -ro "/home/$USER/Recordings"
           )
-
-          # Create a named pipe for logs
+        
+          if [[ "$mode" == "kmsgrab" && "$hdr_status" == "hdr" ]]; then
+            echo "Using KMS grab (HDR) for output=$output codec=$best_codec"
+            cmd_base+=(-w "$output")
+          else
+            if [[ "$mode" == "kmsgrab" ]]; then
+              echo "Selected display is not HDR (or detection failed); falling back to portal"
+            else
+              echo "Using portal capture (no kmsgrab token)"
+            fi
+            cmd_base+=(
+              -w portal
+              -restore-portal-session yes
+              -portal-session-token-filepath "$portal_token"
+            )
+          fi
+        
+          # --- create named pipe and start recorder ---
           pipe=$(${pkgs.mktemp}/bin/mktemp -u)
           ${pkgs.coreutils}/bin/mkfifo "$pipe"
-
-          # Start gpu-screen-recorder writing to the pipe
+        
           "''${cmd_base[@]}" >"$pipe" 2>&1 &
           gsr_pid=$!
           # "''$()"
-
-          # Read the output in the main shell
+        
+          # cleanup helpers
+          stop_gsr() {
+            if [[ -n "''${gsr_pid:-}" ]]; then
+              "''$()"
+              kill "$gsr_pid" 2>/dev/null || true
+              wait "$gsr_pid" 2>/dev/null || true
+              gsr_pid=""
+            fi
+            [[ -n "${pipe:-}" ]] && rm -f "$pipe"
+          }
+        
+          trap 'stop_gsr; exit 0' TERM INT
+        
+          # On reload: re-evaluate HDR (only relevant if kmsgrab was chosen).
+          # If HDR status changed, restart the whole service so systemd gives it a clean slate.
+          trap '
+            if [[ "$mode" == "kmsgrab" ]]; then
+              new_hdr=$(detect_hdr "$output")
+              if [[ "$new_hdr" != "$hdr_status" ]]; then
+                echo "HDR status changed ($hdr_status -> $new_hdr)"
+                ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr), restarting service..."
+                ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
+              else
+                echo "Reload received: HDR unchanged ($hdr_status)."
+              fi
+            else
+              echo "Reload received in portal mode: nothing to do."
+            fi
+          ' HUP
+        
+          # --- Read recorder output and react to noteworthy lines (restored loop) ---
           while IFS= read -r line; do
             if [[ "$line" =~ "update fps:" ]]; then
+              # spammy status line — ignore
               continue
-            # Detect PipeWire unconnected state
             elif [[ "$line" =~ "new state: \"unconnected\"" ]]; then
               echo "Replay buffer disconnected. Restarting..."
               ${pkgs.libnotify}/bin/notify-send "Replay buffer disconnected. Restarting..."
+              # kill + exit so systemd restarts this watcher (Restart=.. will take care of it)
               kill "$gsr_pid" 2>/dev/null || true
               exit 1
-              break
             else
               echo "$line"
             fi
           done <"$pipe"
+        
           rm -f "$pipe"
-        ''; in
+        '' ;
+         in
         "${gsr-watcher}";
       Restart = "on-failure";
       RestartSec = 10;
+      ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
     };
 
     #Install = {
