@@ -19,10 +19,11 @@
     output="$dir/''${name}_SDR.$ext"
     # "''$()"
 
+    # spline chosen over bt.2446a due to being pale
     # Try GPU Vulkan/libplacebo path
     if ${pkgs.coreutils}/bin/nice -n 10 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
       -i "$input" \
-      -vf "hwupload,libplacebo=tonemapping=bt.2446a:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
+      -vf "hwupload,libplacebo=tonemapping=spline:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
       -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
     then
       echo "GPU tonemapping succeeded."
