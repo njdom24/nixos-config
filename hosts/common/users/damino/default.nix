@@ -102,6 +102,7 @@ in
 	  vesktop
 	  jellyfin-media-player
 	  kdePackages.kdenlive
+	  shotcut
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
