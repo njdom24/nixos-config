@@ -1,4 +1,43 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }: let
+  hdr-to-sdr = pkgs.writeShellScriptBin "hdr-to-sdr" ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    if [ $# -ne 1 ]; then
+      echo "Usage: $(basename $0) <input_file>"
+      exit 1
+    fi
+
+    # Handle CTRL+C to exit immediately
+    trap 'echo "Interrupted! Exiting..."; exit 1' SIGINT SIGTERM
+
+    input="$1"
+    dir=$(dirname "$input")
+    filename=$(basename "$input")
+    name="''${filename%.*}"
+    ext="''${filename##*.}"
+    output="$dir/''${name}_SDR.$ext"
+    # "''$()"
+
+    # Try GPU Vulkan/libplacebo path
+    if ${pkgs.coreutils}/bin/nice -n 10 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
+      -i "$input" \
+      -vf "hwupload,libplacebo=tonemapping=bt.2446a:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
+      -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
+    then
+      echo "GPU tonemapping succeeded."
+    else
+      echo "GPU tonemapping failed, falling back to CPU..."
+      ${pkgs.coreutils}/bin/nice -n 10 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
+        -vf "
+        zscale=t=linear:npl=100:p=bt2020:m=bt2020nc,format=gbrpf32le, \
+        tonemap=tonemap=reinhard:desat=0, \
+        zscale=t=bt709:m=bt709:r=tv,format=yuv420p
+        " -c:v libx265 -crf 22 -preset medium \
+        "$output"
+    fi
+  '';
+in {
   systemd.user.services.gpu-screen-recorder = {
     Unit = {
       Description = "GPU Screen Recorder";
@@ -212,4 +251,8 @@
       #WantedBy = [ "graphical-session.target" ];
     #};
   };
+
+  home.packages = with pkgs; [
+    hdr-to-sdr
+  ];
 }
