@@ -79,13 +79,18 @@ in {
         gsr-watcher = pkgs.writeShellScript "gsr-watcher" ''
           set -euo pipefail
         
-          if [[ "$XDG_CURRENT_DESKTOP" != "Hyprland" ]]; then
-            echo "Currently only supports Hyprland..."
-            exit 0
-          fi
-        
           # Collect active monitors and build hash
-          monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus == true) | "\(.name):\(.model)"' | sort)
+          monitors=""
+          case "$XDG_CURRENT_DESKTOP" in
+            Hyprland)
+              monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus == true) | "\(.name):\(.model)"' | sort)
+              ;;
+            *)
+              # Fallback to xrandr for other desktops or if other tools are missing
+              monitors=$(${pkgs.xorg.xrandr}/bin/xrandr --query | ${pkgs.gawk}/bin/awk '/ connected/ {print $1 ":unknown"}' | sort)
+              ;;
+          esac
+
           hash=$(${pkgs.coreutils}/bin/printf "%s\n" "$monitors" | ${pkgs.coreutils}/bin/sha256sum | ${pkgs.coreutils}/bin/cut -d' ' -f1)
 
           portal_token="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/portal/restore_token_$hash"
@@ -99,20 +104,30 @@ in {
 
           # Detect HDR from ~/.config/hypr/displays.conf
           detect_hdr() {
-            local out="$1"
-            local conf="$HOME/.config/hypr/displays.conf"
-            [[ -f "$conf" ]] || { echo "sdr"; return; }
+            case "$XDG_CURRENT_DESKTOP" in
+              Hyprland)
+                local out="$1"
+                local conf="$HOME/.config/hypr/displays.conf"
+                [[ -f "$conf" ]] || { echo "sdr"; return; }
 
-            ${pkgs.gawk}/bin/awk -v out="$out" '
-              $1 == "monitorv2" { in_block=1; buf=""; next }
-              in_block && $1 == "}" {
-                in_block=0
-                if (buf ~ "output *= *"out) print buf
-                buf=""
-                next
-              }
-              in_block { buf = buf "\n" $0 }
-            ' "$conf" | ${pkgs.gnugrep}/bin/grep -q "cm *= *hdr" && echo "hdr" || echo "sdr"
+                ${pkgs.gawk}/bin/awk -v out="$out" '
+                  $1 == "monitorv2" { in_block=1; buf=""; next }
+                  in_block && $1 == "}" {
+                    in_block=0
+                    if (buf ~ "output *= *"out) print buf
+                    buf=""
+                    next
+                  }
+                  in_block { buf = buf "\n" $0 }
+                ' "$conf" | ${pkgs.gnugrep}/bin/grep -q "cm *= *hdr" && echo "hdr" || echo "sdr"
+                ;;
+              KDE)
+                echo "sdr" # TODO
+                ;;
+              *)
+                echo "sdr"
+                ;;
+            esac
           }
 
           hdr_status=$(detect_hdr "$output")
