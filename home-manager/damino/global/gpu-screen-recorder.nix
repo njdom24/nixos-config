@@ -84,31 +84,17 @@ in {
           kms_token="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/kmsgrab/restore_token_$hash"
           mkdir -p "$(dirname "$portal_token")" "$(dirname "$kms_token")"
         
-          # --- pick display: cached token or hyprland-share-picker ---
+          # Pick display
           mode="portal"
+          PRIORITY=("av1" "hevc" "h264")
           output=""
-        
-          if [[ -s "$kms_token" ]]; then
-            output=$(cat "$kms_token")
-            if [[ -n "$output" ]]; then
-              mode="kmsgrab"
-            fi
-          else
-            selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
-            if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
-              output="''${BASH_REMATCH[1]}"
-              "''$()"
-              echo "$output" >"$kms_token"
-              mode="kmsgrab"
-            fi
-          fi
-        
-          # --- helper: detect HDR for an output from ~/.config/hypr/displays.conf ---
+
+          # Detect HDR from ~/.config/hypr/displays.conf
           detect_hdr() {
             local out="$1"
             local conf="$HOME/.config/hypr/displays.conf"
             [[ -f "$conf" ]] || { echo "sdr"; return; }
-        
+
             ${pkgs.gawk}/bin/awk -v out="$out" '
               $1 == "monitorv2" { in_block=1; buf=""; next }
               in_block && $1 == "}" {
@@ -120,23 +106,35 @@ in {
               in_block { buf = buf "\n" $0 }
             ' "$conf" | ${pkgs.gnugrep}/bin/grep -q "cm *= *hdr" && echo "hdr" || echo "sdr"
           }
+
+          hdr_status=$(detect_hdr "$output")
+
+          if [[ "$hdr_status" == "hdr" ]]; then
+            if [[ -s "$kms_token" ]]; then
+              output=$(cat "$kms_token")
+              if [[ -n "$output" ]]; then
+                mode="kmsgrab"
+              fi
+            else
+              selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
+              if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
+                output="''${BASH_REMATCH[1]}"
+                "''$()"
+                echo "$output" >"$kms_token"
+                mode="kmsgrab"
+              fi
+            fi
+            if [[ "$mode" == "kmsgrab" ]]; then
+              PRIORITY=("av1_hdr" "hevc_hdr" "av1" "hevc" "h264")
+            fi
+          fi
         
-          # --- collect available codecs ---
-          PRIORITY=("av1" "hevc" "h264")
+          # Collect available codecs
           codecs=$(${pkgs.gpu-screen-recorder}/bin/gpu-screen-recorder --info | ${pkgs.gawk}/bin/awk '
             $1 == "section=video_codecs" { in_section=1; next }
             /^section=/ { in_section=0 }
             in_section { print $1 }
           ')
-        
-          # If kmsgrab+HDR candidate, prefer HDR codec names
-          hdr_status="sdr"
-          if [[ "$mode" == "kmsgrab" ]]; then
-            hdr_status=$(detect_hdr "$output")
-            if [[ "$hdr_status" == "hdr" ]]; then
-              PRIORITY=("av1_hdr" "hevc_hdr" "av1" "hevc" "h264")
-            fi
-          fi
         
           pick_codec() {
             for c in "''${PRIORITY[@]}"; do
@@ -156,7 +154,7 @@ in {
             mode="portal"
           fi
         
-          # --- prepare command base ---
+          # Common args
           cmd_base=(
             ${pkgs.gpu-screen-recorder}/bin/gpu-screen-recorder
             -a "default_output"
@@ -174,9 +172,9 @@ in {
             cmd_base+=(-w "$output")
           else
             if [[ "$mode" == "kmsgrab" ]]; then
-              echo "Selected display is not HDR (or detection failed); falling back to portal"
+              echo "Selected display is not HDR; Using to portal"
             else
-              echo "Using portal capture (no kmsgrab token)"
+              echo "Using portal capture"
             fi
             cmd_base+=(
               -w portal
@@ -185,7 +183,7 @@ in {
             )
           fi
         
-          # --- create named pipe and start recorder ---
+          # Create named pipe for communication
           pipe=$(${pkgs.mktemp}/bin/mktemp -u)
           ${pkgs.coreutils}/bin/mkfifo "$pipe"
         
@@ -209,21 +207,17 @@ in {
           # On reload: re-evaluate HDR (only relevant if kmsgrab was chosen).
           # If HDR status changed, restart the whole service so systemd gives it a clean slate.
           trap '
-            if [[ "$mode" == "kmsgrab" ]]; then
-              new_hdr=$(detect_hdr "$output")
-              if [[ "$new_hdr" != "$hdr_status" ]]; then
-                echo "HDR status changed ($hdr_status -> $new_hdr)"
-                ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr), restarting service..."
-                ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
-              else
-                echo "Reload received: HDR unchanged ($hdr_status)."
-              fi
+            new_hdr=$(detect_hdr "$output")
+            if [[ "$new_hdr" != "$hdr_status" ]]; then
+              echo "HDR status changed ($hdr_status -> $new_hdr)"
+              ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr), restarting service..."
+              ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
             else
-              echo "Reload received in portal mode: nothing to do."
+              echo "Reload received: HDR unchanged ($hdr_status)."
             fi
           ' HUP
         
-          # --- Read recorder output and react to noteworthy lines (restored loop) ---
+          # Read output and handle noteworthy output
           while IFS= read -r line; do
             if [[ "$line" =~ "update fps:" ]]; then
               # spammy status line — ignore
