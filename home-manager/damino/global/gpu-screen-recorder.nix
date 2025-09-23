@@ -21,7 +21,7 @@
 
     # spline chosen over bt.2446a due to being pale
     # Try GPU Vulkan/libplacebo path
-    if ${pkgs.coreutils}/bin/nice -n 10 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
+    if ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
       -i "$input" \
       -vf "hwupload,libplacebo=tonemapping=spline:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
       -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
@@ -29,7 +29,7 @@
       echo "GPU tonemapping succeeded."
     else
       echo "GPU tonemapping failed, falling back to CPU..."
-      ${pkgs.coreutils}/bin/nice -n 10 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
+      ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
         -vf "
         zscale=t=linear:npl=100:p=bt2020:m=bt2020nc,format=gbrpf32le, \
         tonemap=tonemap=reinhard:desat=0, \
@@ -60,7 +60,15 @@ in {
                 ${pkgs.libnotify}/bin/notify-send "Recording saved" "$path"
                 ;;
               "replay")
-                ${pkgs.libnotify}/bin/notify-send "Replay saved" "$path"
+                transfer=$(${pkgs.ffmpeg-full}/bin/ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
+                    -of default=noprint_wrappers=1:nokey=1 "$path")
+                if [[ "$transfer" =~ smpte2084|arib-std-b67 ]]; then
+                  ${pkgs.libnotify}/bin/notify-send "Replay saved (HDR)" "$path"
+                  echo "HDR detected in $file (transfer=$transfer), converting to SDR..."
+                  $(${hdr-to-sdr}/bin/hdr-to-sdr "$path" && ${pkgs.libnotify}/bin/notify-send "Tonemapping complete" "$path") &
+                else
+                  ${pkgs.libnotify}/bin/notify-send "Replay saved" "$path"
+                fi
                 ;;
               *)
                 echo "Unknown type: $type"
@@ -109,7 +117,8 @@ in {
 
           hdr_status=$(detect_hdr "$output")
 
-          if [[ "$hdr_status" == "hdr" ]]; then
+          if [[ "$hdr_status" == "hdr" && "''${FORCE_PORTAL:-0}" != "1" ]]; then
+            # "''$()"
             if [[ -s "$kms_token" ]]; then
               output=$(cat "$kms_token")
               if [[ -n "$output" ]]; then
@@ -119,7 +128,7 @@ in {
               selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
               if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
                 output="''${BASH_REMATCH[1]}"
-                "''$()"
+                # "''$()"
                 echo "$output" >"$kms_token"
                 mode="kmsgrab"
               fi
@@ -139,7 +148,7 @@ in {
           pick_codec() {
             for c in "''${PRIORITY[@]}"; do
               if echo "$codecs" | ${pkgs.gnugrep}/bin/grep -qx "$c"; then
-                "''$()"
+                # "''$()"
                 printf "%s" "$c"
                 return 0
               fi
@@ -194,7 +203,7 @@ in {
           # cleanup helpers
           stop_gsr() {
             if [[ -n "''${gsr_pid:-}" ]]; then
-              "''$()"
+              # "''$()"
               kill "$gsr_pid" 2>/dev/null || true
               wait "$gsr_pid" 2>/dev/null || true
               gsr_pid=""
@@ -207,13 +216,16 @@ in {
           # On reload: re-evaluate HDR (only relevant if kmsgrab was chosen).
           # If HDR status changed, restart the whole service so systemd gives it a clean slate.
           trap '
-            new_hdr=$(detect_hdr "$output")
-            if [[ "$new_hdr" != "$hdr_status" ]]; then
-              echo "HDR status changed ($hdr_status -> $new_hdr)"
-              ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr), restarting service..."
-              ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
-            else
-              echo "Reload received: HDR unchanged ($hdr_status)."
+            if [[ "''${FORCE_PORTAL:-0}" != "1" ]]; then
+              # "''$()"
+              new_hdr=$(detect_hdr "$output")
+              if [[ "$new_hdr" != "$hdr_status" ]]; then
+                echo "HDR status changed ($hdr_status -> $new_hdr)"
+                ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr), restarting service..."
+                ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
+              else
+                echo "Reload received: HDR unchanged ($hdr_status)."
+              fi
             fi
           ' HUP
         
@@ -228,6 +240,10 @@ in {
               # kill + exit so systemd restarts this watcher (Restart=.. will take care of it)
               kill "$gsr_pid" 2>/dev/null || true
               exit 1
+            elif [[ "$line" =~ "gsr error: gsr_capture_kms_capture: failed to get kms" ]]; then
+              # Saving HDR replays causes a crash...
+              kill "$gsr_pid" 2>/dev/null || true
+              exit 1
             else
               echo "$line"
             fi
@@ -240,6 +256,7 @@ in {
       Restart = "on-failure";
       RestartSec = 10;
       ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
+      Environment = "FORCE_PORTAL=1"; # TODO: Remove if saving HDR replays stops crashing
     };
 
     #Install = {
