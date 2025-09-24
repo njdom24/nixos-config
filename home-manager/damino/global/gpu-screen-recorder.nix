@@ -93,6 +93,9 @@ in {
             Hyprland)
               monitors=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[] | select(.dpmsStatus == true) | "\(.name):\(.model)"' | sort)
               ;;
+            KDE)
+              monitors=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected == true and .priority > 0) | "\(.name):\(.pos.x)x\(.pos.y)"' | sort)
+              ;;
             *)
               # Fallback to xrandr for other desktops or if other tools are missing
               monitors=$(${pkgs.xorg.xrandr}/bin/xrandr --query | ${pkgs.gawk}/bin/awk '/ connected/ {print $1 ":unknown"}' | sort)
