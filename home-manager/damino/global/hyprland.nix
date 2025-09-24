@@ -408,8 +408,8 @@
         '';
       in  [
         # Save replay if gpu-screen-recorder -r is running
-        "CTRL, Print, exec, pkill -SIGUSR1 -f gpu-screen-recorder"
-        "CTRL SHIFT, Next, exec, pkill -SIGUSR1 -f gpu-screen-recorder" # Page Down
+        "CTRL, Print, exec, killall -SIGUSR1 gpu-screen-recorder"
+        "CTRL SHIFT, Next, exec, killall -SIGUSR1 gpu-screen-recorder" # Page Down
         # Start / stop manual recording if gpu-screen-recorder -ro is running
         "CTRL SHIFT, Print, exec, ${screenrec}"
         "CTRL SHIFT, Prior, exec, ${screenrec}" # Page Up

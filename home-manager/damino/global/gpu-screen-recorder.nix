@@ -26,9 +26,9 @@
       -vf "hwupload,libplacebo=tonemapping=spline:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
       -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
     then
-      echo "GPU tonemapping succeeded."
+      echo "GPU tonemapping succeeded." >&2
     else
-      echo "GPU tonemapping failed, falling back to CPU..."
+      echo "GPU tonemapping failed, falling back to CPU..." >&2
       ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
         -vf "
         zscale=t=linear:npl=100:p=bt2020:m=bt2020nc,format=gbrpf32le, \
@@ -271,7 +271,7 @@ in {
       Restart = "on-failure";
       RestartSec = 10;
       ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
-      Environment = "FORCE_PORTAL=1"; # TODO: Remove if saving HDR replays stops crashing
+      #Environment = "FORCE_PORTAL=1"; # TODO: Remove if saving HDR replays stops crashing
     };
 
     #Install = {
