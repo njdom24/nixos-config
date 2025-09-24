@@ -4,6 +4,12 @@
 
 { inputs, outputs, config, lib, pkgs, ... }:
 let
+  # Patched for improved VRR
+  gamescope_immediate = pkgs.gamescope.overrideAttrs (oldAttrs: {
+    patches = (oldAttrs.patches) ++ [
+      ../../../../../patches/gamescope-vblank-hack.patch
+    ];
+  });
   # Work around HDR needing an extra "push" with VMM7100 Firmware v124 (VRR, HDR, 4k144Hz)
   vmm7100_hdr_fix = pkgs.writeShellScript "vmm7100-hdr-fix" ''
     #!/usr/bin/env bash
@@ -516,7 +522,7 @@ let
     fi
     
     while true; do
-      if env -u LD_PRELOAD ${pkgs.gamescope}/bin/gamescope ${
+      if env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope ${
         lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args
       #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
