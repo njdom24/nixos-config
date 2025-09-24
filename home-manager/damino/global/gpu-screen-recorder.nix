@@ -202,43 +202,6 @@ in {
           if [[ "$mode" == "kmsgrab" && "$hdr_status" == "hdr" ]]; then
             echo "Using kmsgrab for output=$output codec=$best_codec"
             cmd_base+=(-w "$output")
-
-            # Background HDR tonemapping
-            (
-              CONFIG_DIR="$HOME/.config/gpu-screen-recorder"
-              QUEUE="$CONFIG_DIR/hdr-to-sdr.queue"
-              mkdir -p "$CONFIG_DIR"
-              touch "$QUEUE"
-            
-              while true; do
-                if [[ -s "$QUEUE" ]]; then
-                  filepath=$(head -n1 "$QUEUE")
-                  [[ -z "$filepath" ]] && {
-                    # Drop empty line safely
-                    tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
-                    continue
-                  }
-            
-                  echo "Tonemapping $filepath"
-                  #${pkgs.libnotify}/bin/notify-send "Tonemapping $filepath"
-            
-                  ${hdr-to-sdr}/bin/hdr-to-sdr "$filepath"
-                  status=$?
-            
-                  if [[ $status -eq 0 ]]; then
-                    ${pkgs.libnotify}/bin/notify-send "Tonemapping finished" "$(basename "$filepath")"
-                  else
-                    ${pkgs.libnotify}/bin/notify-send "Tonemapping failed" "$(basename "$filepath")"
-                  fi
-            
-                  # Remove job from the queue
-                  tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
-                else
-                  # Sleep until something in the directory changes
-                  ${pkgs.inotify-tools}/bin/inotifywait -q -e modify "$CONFIG_DIR" >/dev/null 2>&1
-                fi
-              done
-            ) &
           else
             if [[ "$mode" == "kmsgrab" ]]; then
               echo "Selected display is not HDR; Using portal"
@@ -271,6 +234,43 @@ in {
             fi
             [[ -n "${pipe:-}" ]] && rm -f "$pipe"
           }
+
+          # Background HDR tonemapping
+          (
+            CONFIG_DIR="$HOME/.config/gpu-screen-recorder"
+            QUEUE="$CONFIG_DIR/hdr-to-sdr.queue"
+            mkdir -p "$CONFIG_DIR"
+            touch "$QUEUE"
+          
+            while true; do
+              if [[ -s "$QUEUE" ]]; then
+                filepath=$(head -n1 "$QUEUE")
+                [[ -z "$filepath" ]] && {
+                  # Drop empty line safely
+                  tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
+                  continue
+                }
+          
+                echo "Tonemapping $filepath"
+                #${pkgs.libnotify}/bin/notify-send "Tonemapping $filepath"
+          
+                ${hdr-to-sdr}/bin/hdr-to-sdr "$filepath"
+                status=$?
+          
+                if [[ $status -eq 0 ]]; then
+                  ${pkgs.libnotify}/bin/notify-send "Tonemapping finished" "$(basename "$filepath")"
+                else
+                  ${pkgs.libnotify}/bin/notify-send "Tonemapping failed" "$(basename "$filepath")"
+                fi
+          
+                # Remove job from the queue
+                tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
+              else
+                # Sleep until something in the directory changes
+                ${pkgs.inotify-tools}/bin/inotifywait -q -e modify "$CONFIG_DIR" >/dev/null 2>&1
+              fi
+            done
+          ) &
         
           trap 'stop_gsr; exit 0' TERM INT
         
