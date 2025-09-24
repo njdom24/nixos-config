@@ -204,6 +204,7 @@ in {
               -w portal
               -restore-portal-session yes
               -portal-session-token-filepath "$portal_token"
+              -fm content
             )
           fi
         
