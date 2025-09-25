@@ -39,13 +39,57 @@
     fi
   '';
 in {
+  systemd.user.services.gsr-tonemapper = {
+    Unit = {
+      Description = "Sequentially tonemaps a batch of HDR recordings";
+      After = [ "graphical-session.target" ];
+      # Stop this service when sunshine starts
+      Conflicts = [ "sunshine.service" ];
+    };
+
+    Service = {
+      ExecStart = let gsr-tonemapper = pkgs.writeShellScript "gsr-tonemapper" ''
+        CONFIG_DIR="$HOME/.config/gpu-screen-recorder"
+        QUEUE="$CONFIG_DIR/hdr-to-sdr.queue"
+        mkdir -p "$CONFIG_DIR"
+        touch "$QUEUE"
+
+        while [[ -s "$QUEUE" ]]; do
+          filepath=$(head -n1 "$QUEUE")
+          [[ -z "$filepath" ]] && {
+            # Drop empty line safely
+            tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
+            continue
+          }
+        
+          echo "Tonemapping $filepath"
+          #${pkgs.libnotify}/bin/notify-send "Tonemapping $filepath"
+        
+          ${hdr-to-sdr}/bin/hdr-to-sdr "$filepath"
+          status=$?
+        
+          if [[ $status -eq 0 ]]; then
+            ${pkgs.libnotify}/bin/notify-send "Tonemapping finished" "$(basename "$filepath")"
+          else
+            ${pkgs.libnotify}/bin/notify-send "Tonemapping failed" "$(basename "$filepath")"
+          fi
+        
+          # Remove job from the queue
+          tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
+        done
+      ''; in "${gsr-tonemapper}";
+      Restart = "on-failure";
+      RestartSec = 10;
+    };
+  };
+
   systemd.user.services.gpu-screen-recorder = {
     Unit = {
       Description = "GPU Screen Recorder";
       After = [ "graphical-session.target" ];
+      Wants = [ "gsr-tonemapper.service" ];
       # Stop this service when sunshine starts
       Conflicts = [ "sunshine.service" ];
-      Wants = [ "gamepad-watcher.service" ];
     };
 
     Service = {
@@ -63,6 +107,7 @@ in {
                   ${pkgs.libnotify}/bin/notify-send "Recording saved (HDR)" "$path"
                   echo "HDR detected in $file (transfer=$transfer), converting to SDR..."
                   echo "$path" >> /home/$USER/.config/gpu-screen-recorder/hdr-to-sdr.queue
+                  ${pkgs.systemd}/bin/systemctl --user start gsr-tonemapper.service
                 else
                   ${pkgs.libnotify}/bin/notify-send "Recording saved" "$path"
                 fi
@@ -74,6 +119,7 @@ in {
                   ${pkgs.libnotify}/bin/notify-send "Replay saved (HDR)" "$path"
                   echo "HDR detected in $file (transfer=$transfer), converting to SDR..."
                   echo "$path" >> /home/$USER/.config/gpu-screen-recorder/hdr-to-sdr.queue
+                  ${pkgs.systemd}/bin/systemctl --user start gsr-tonemapper.service
                 else
                   ${pkgs.libnotify}/bin/notify-send "Replay saved" "$path"
                 fi
@@ -206,7 +252,7 @@ in {
             echo "Using kmsgrab for output=$output codec=$best_codec"
             cmd_base+=(-w "$output")
           else
-            if [[ "$mode" == "kmsgrab" ]]; then
+            if [[ "$hdr_status" != "hdr" ]]; then
               echo "Selected display is not HDR; Using portal"
             else
               echo "Using portal capture"
@@ -237,43 +283,6 @@ in {
             fi
             [[ -n "${pipe:-}" ]] && rm -f "$pipe"
           }
-
-          # Background HDR tonemapping
-          (
-            CONFIG_DIR="$HOME/.config/gpu-screen-recorder"
-            QUEUE="$CONFIG_DIR/hdr-to-sdr.queue"
-            mkdir -p "$CONFIG_DIR"
-            touch "$QUEUE"
-          
-            while true; do
-              if [[ -s "$QUEUE" ]]; then
-                filepath=$(head -n1 "$QUEUE")
-                [[ -z "$filepath" ]] && {
-                  # Drop empty line safely
-                  tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
-                  continue
-                }
-          
-                echo "Tonemapping $filepath"
-                #${pkgs.libnotify}/bin/notify-send "Tonemapping $filepath"
-          
-                ${hdr-to-sdr}/bin/hdr-to-sdr "$filepath"
-                status=$?
-          
-                if [[ $status -eq 0 ]]; then
-                  ${pkgs.libnotify}/bin/notify-send "Tonemapping finished" "$(basename "$filepath")"
-                else
-                  ${pkgs.libnotify}/bin/notify-send "Tonemapping failed" "$(basename "$filepath")"
-                fi
-          
-                # Remove job from the queue
-                tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
-              else
-                # Sleep until something in the directory changes
-                ${pkgs.inotify-tools}/bin/inotifywait -q -e modify "$CONFIG_DIR" >/dev/null 2>&1
-              fi
-            done
-          ) &
         
           trap 'stop_gsr; exit 0' TERM INT
         
