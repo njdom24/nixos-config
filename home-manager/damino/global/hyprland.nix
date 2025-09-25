@@ -192,6 +192,8 @@
         #"suppressevent fullscreen maximize, title:^(Steam Big Picture Mode)$"
 
         "workspace 2 silent, class:^(vesktop)$"
+        "workspace 2 silent, class:^(discord)$"
+
         "workspace 4 silent, class:^(steam)$"
 
         # Temporary(?) blur workspace change glitching workaround
@@ -455,7 +457,7 @@
         "hyprctl setcursor $cursorTheme 24"
         "swaync &"
         "[workspace 1 silent] firefox"
-        "[workspace 2 silent] vesktop"
+        "[workspace 2 silent] discord"
         "[workspace 4 silent] steam"
         "hyprctl dispatch workspace 1"
         "${pkgs.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
