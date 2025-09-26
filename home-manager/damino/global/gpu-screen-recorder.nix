@@ -294,7 +294,7 @@ in {
               new_hdr=$(detect_hdr "$output")
               if [[ "$new_hdr" != "$hdr_status" ]]; then
                 echo "HDR status changed ($hdr_status -> $new_hdr)"
-                ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr), restarting service..."
+                ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr)" "Restarting service..."
                 ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
               else
                 echo "Reload received: HDR unchanged ($hdr_status)."
