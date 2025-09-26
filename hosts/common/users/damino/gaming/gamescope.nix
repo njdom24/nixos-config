@@ -89,6 +89,7 @@ let
   lsfg-min = pkgs.writeShellScriptBin "lsfg-min" ''
     #!/usr/bin/env bash
     set -eo pipefail
+    TEST="$2"
     
     # Early exit if explicitly disabled
     if [[ "$ENABLE_LSFG" = "0" || "$LSFG_LEGACY" = "0" ]]; then
@@ -109,28 +110,27 @@ let
       width=1920 height=1080 refresh=60
     fi
 
-    flow_scale=$(echo "scale=2; 1080 / $height" | ${pkgs.bc}/bin/bc)
-    export LSFG_FLOW_SCALE=$(echo "$flow_scale" | ${pkgs.gnused}/bin/sed -E 's/^(-?)\./\10./')
-    echo "Using LSFG flow scale: $LSFG_FLOW_SCALE"
-
     refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
     
     if [ "$refresh" -ge "$min" ]; then
-      export ENABLE_LSFG=1 # Removed in later versions
       export LSFG_LEGACY=1
+      export LSFG_MULTIPLIER=2
 
-      # Default to performancemode
-      export LSFG_PERF_MODE="''${LSFG_PERF_MODE:-1}"
-      export LSFG_PERFORMANCE_MODE="$LSFG_PERF_MODE" # Seems to be renamed as of https://github.com/PancakeTAS/lsfg-vk/commit/5f033eca0d2d16ea519ef74f0fdc422a71eff56e
+      flow_scale=$(echo "scale=2; 1080 / $height" | ${pkgs.bc}/bin/bc)
+      export LSFG_FLOW_SCALE=$(echo "$flow_scale" | ${pkgs.gnused}/bin/sed -E 's/^(-?)\./\10./')
+      echo "Using LSFG flow scale: $LSFG_FLOW_SCALE"
+
+      # Default to performance mode
+      export LSFG_PERFORMANCE_MODE="''${LSFG_PERFORMANCE_MODE:-1}"
       # "''$()
-    
+
       # --- MANGOHUD_FPS_LIMIT ---
       if [ -n "$MANGOHUD_FPS_LIMIT" ]; then
         new_limit=$((MANGOHUD_FPS_LIMIT * 2))
         export MANGOHUD_FPS_LIMIT="$new_limit"
         echo "New MANGOHUD_FPS_LIMIT: $MANGOHUD_FPS_LIMIT"
       fi
-    
+
       # --- MANGOHUD_CONFIG ---
       if [ -n "$MANGOHUD_CONFIG" ]; then
         if [[ "$MANGOHUD_CONFIG" =~ fps_limit=([0-9]+) ]]; then
@@ -141,13 +141,17 @@ let
               last_fps_limit="''${BASH_REMATCH[1]}"
             fi
           done
-          
+
           new_limit=$((last_fps_limit * 2))
     
           # Remove existing fps_limit, normalize commas
           cleaned=$(echo "$MANGOHUD_CONFIG" | ${pkgs.gnused}/bin/sed -E 's/(^|,)fps_limit=[0-9]+//g' | ${pkgs.gnused}/bin/sed -E 's/^,+|,+$//g' | ${pkgs.gnused}/bin/sed -E 's/,+/,/g')
-    
-          export MANGOHUD_CONFIG="$cleaned,fps_limit=$new_limit"
+          if [ -z "$cleaned" ]; then
+            export MANGOHUD_CONFIG="fps_limit=$new_limit"
+          else
+            export MANGOHUD_CONFIG="$cleaned,fps_limit=$new_limit"
+          fi
+
           echo "New MANGOHUD_CONFIG: $MANGOHUD_CONFIG"
           #echo "LSFG_HDR: $LSFG_HDR"
           #echo "LSFG_HDR: $LSFG_HDR_MODE" # Also renamed to this
@@ -156,7 +160,7 @@ let
     else
       echo "Refresh rate $refresh below minimum. Not enabling LSFG"
     fi
-    
+
     exec "$@"
   '';
 
@@ -676,6 +680,7 @@ in
   	  gsc
   	  gsc-vmm7100
   	  lsfg-min
+  	  lsfg-vk
 
   	  # https://github.com/ValveSoftware/steam-for-linux/issues/11479
   	  # cd to /tmp to somehow avoid stutters with VRR
