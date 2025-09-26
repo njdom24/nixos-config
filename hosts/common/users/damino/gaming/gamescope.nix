@@ -124,15 +124,17 @@ let
       export LSFG_PERFORMANCE_MODE="''${LSFG_PERFORMANCE_MODE:-1}"
       # "''$()
 
+      # FPS limiter multipliers disabled -- Current releases seem to be applied after limiters now
+
       # --- MANGOHUD_FPS_LIMIT ---
-      if [ -n "$MANGOHUD_FPS_LIMIT" ]; then
+      if [ -n "$MANGOHUD_FPS_LIMIT" && false ]; then
         new_limit=$((MANGOHUD_FPS_LIMIT * 2))
         export MANGOHUD_FPS_LIMIT="$new_limit"
         echo "New MANGOHUD_FPS_LIMIT: $MANGOHUD_FPS_LIMIT"
       fi
 
       # --- MANGOHUD_CONFIG ---
-      if [ -n "$MANGOHUD_CONFIG" ]; then
+      if [ -n "$MANGOHUD_CONFIG" && false ]; then
         if [[ "$MANGOHUD_CONFIG" =~ fps_limit=([0-9]+) ]]; then
           last_fps_limit=""
           IFS=',' read -ra cfg_parts <<< "$MANGOHUD_CONFIG"
