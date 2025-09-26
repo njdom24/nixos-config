@@ -1,4 +1,5 @@
 { inputs, config, pkgs, ... }: {
+  home.packages = with pkgs; [ font-awesome noto-fonts-emoji twemoji-color-font ];
   programs.waybar = {
 	enable = true;
 
@@ -24,10 +25,10 @@
      	};
 
      	"bluetooth" = {
-     	  format-on = " 󰂯";
+     	  format-on = " 󰂯 ";
      	  format-off = " 󰂲";
      	  format-disabled = "";
-     	  format-connected = " 󰂱";
+     	  format-connected = " 󰂱 ";
      	  #format-connected = "󰂱 {num_connections} ";
      	  tooltip-format-connected = "{device_enumerate}";
      	  tooltip-format-enumerate-connected = "{device_alias}\t{device_battery_percentage}%";
@@ -95,29 +96,75 @@
     	"custom/weather" = {
           exec = pkgs.writeShellScript "get_weather" ''
             #!/usr/bin/env bash
-            # get_weather.sh
-            for i in {1..5}
-            do
-                #text=$(curl -s "https://wttr.in/$1?format=1")
-                text=$(curl -s "https://wttr.in/$1?format=%c+%t")
-                if [[ $? == 0 ]]
-                then
-                	text=$(echo "$text" | tr -d +)
-                    text=$(echo "$text" | sed -E "s/\s+/ /g")
-                    tooltip=$(curl -s "https://wttr.in/$1?format=4")
-                    if [[ $? == 0 ]]
-                    then
-                        tooltip=$(echo "$tooltip" | sed -E "s/\s+/ /g")
-                        echo "{\"text\":\"$text\", \"tooltip\":\"$tooltip\"}"
-                        exit
-                    fi
+            
+            CACHE_DIR="/home/$USER/.config/waybar"
+            CACHE_FILE="$CACHE_DIR/weather.json"
+            LOCK_FILE="$CACHE_DIR/weather.lock"
+            MAX_AGE=$((30 * 60)) # 30 minutes
+            
+            mkdir -p "$CACHE_DIR"
+            
+            # Check if cache exists and is fresh enough
+            if [[ -f "$CACHE_FILE" ]]; then
+              now=$(date +%s)
+              mtime=$(stat -c %Y "$CACHE_FILE")
+              age=$((now - mtime))
+
+              if [[ $age -lt $MAX_AGE ]]; then
+                cat "$CACHE_FILE"
+                exit 0
+              fi
+            fi
+
+            # Use flock to ensure only one curl runs at a time
+            exec 9>"$LOCK_FILE"
+            flock -x 9
+
+            # Double-check cache again after obtaining lock
+            if [[ -f "$CACHE_FILE" ]]; then
+              now=$(date +%s)
+              mtime=$(stat -c %Y "$CACHE_FILE")
+              age=$((now - mtime))
+
+              if [[ $age -lt $MAX_AGE ]]; then
+                cat "$CACHE_FILE"
+                exit 0
+              fi
+            fi
+
+            # Perform the fetch, retrying up to 5 times
+            for i in {1..5}; do
+              text=$(curl -s 'https://wttr.in/$1?format=%c+%t')
+              if [[ $? -eq 0 && -n "$text" ]]; then
+                # Detect "busy" response
+                if [[ "$text" == *"This query is already being processed"* ]]; then
+                  sleep 60
+                  continue
                 fi
-                sleep 2
+            
+                text=$(echo "$text" | tr -d + | sed -E "s/\s+/ /g")
+            
+                tooltip=$(${pkgs.curl}/bin/curl -s 'https://wttr.in/$1?format=4')
+                if [[ $? -eq 0 && -n "$tooltip" ]]; then
+                  if [[ "$tooltip" == *"This query is already being processed"* ]]; then
+                    sleep 60
+                    continue
+                  fi
+
+                  tooltip=$(echo "$tooltip" | sed -E "s/\s+/ /g")
+                  result="{\"text\":\"$text\", \"tooltip\":\"$tooltip\"}"
+                  echo "$result" | tee "$CACHE_FILE"
+                  exit 0
+                fi
+              fi
+              sleep 2
             done
-            echo "{\"text\":\"error\", \"tooltip\":\"error\"}"
+            
+            # Fallback
+            echo "{\"text\":\"\", \"tooltip\":\"error\"}"
           '';
           return-type = "json";
-          format = "{}";
+          format = " {} ";
           tooltip = true;
           interval = 3600;
     	};

@@ -225,7 +225,8 @@ in
   	fontconfig = {
   	  antialias = true;
   	  hinting.enable = true;
-  	  hinting.autohint = true;	
+  	  hinting.autohint = true;
+  	  useEmbeddedBitmaps = true; # Fixes Firefox emoji
   	};
   };
 
