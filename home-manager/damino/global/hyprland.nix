@@ -271,6 +271,13 @@
         min_refresh_rate = 72;
       };
 
+      device = [
+        {
+          name = "dualsense-wireless-controller-touchpad";
+          enabled = false;
+        }
+      ];
+
       ### KEYBINDINGS ###
       bind = let
       checkrec = pkgs.writeShellScript "checkrec" ''
