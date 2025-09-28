@@ -27,6 +27,10 @@
           sleep 5 && systemctl --user start sunshine
 
           exit 0
+        else
+          ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
+          ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
+          ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 4 silent] steam"
         fi
       fi
 
@@ -463,9 +467,9 @@
         # Work around cursor config option unreliability
         "hyprctl setcursor $cursorTheme 24"
         "swaync &"
-        "[workspace 1 silent] firefox"
-        "[workspace 2 silent] discord"
-        "[workspace 4 silent] steam"
+        #"[workspace 1 silent] firefox"
+        #"[workspace 2 silent] discord"
+        #"[workspace 4 silent] steam"
         "hyprctl dispatch workspace 1"
         "${pkgs.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
       ];
