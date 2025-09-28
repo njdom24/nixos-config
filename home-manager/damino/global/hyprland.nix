@@ -189,6 +189,7 @@
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "content game, class:^gamescope$"
+        "content game, class:^(steam_app_\d+)$" # All Steam apps are considered games
         # Help deal with gamescope input going through to Steam
         #"stayfocused, class:^gamescope$"
         "noinitialfocus, class:^(steam)$"
@@ -270,7 +271,7 @@
         no_warps = false;
         inactive_timeout = 10;
         # https://github.com/hyprwm/Hyprland/discussions/7386
-        no_break_fs_vrr = 1;
+        no_break_fs_vrr = 2;
         no_hardware_cursors = 0;
         min_refresh_rate = 72;
       };
