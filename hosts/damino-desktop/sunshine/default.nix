@@ -45,6 +45,8 @@
           ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
 
           echo "Using display: $WAYLAND_DISPLAY"
+          session_class="$(loginctl show-session "$XDG_SESSION_ID" -p Class --value 2>/dev/null)"
+          echo "Session class: $session_class"
           declare -a known_compositors=("kwin_wayland" "Hyprland" "sway")
 
           # Detect running compositor by process name
@@ -68,7 +70,9 @@
                     ${pkgs.sway}/bin/swaymsg create_output
                   fi
                   # Disable all non-HEADLESS outputs
-                  ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+                  if [ "$session_class" != "greeter" ]; then
+                    ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+                  fi
 
                   # Configure display to match client
                   if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
@@ -282,26 +286,26 @@
           ];
         }
 
-        {
-          name = "Legacy";
-          image-path = "desktop.png";
-          prep-cmd = [
-            {
-              do = pkgs.writeShellScript "set-client-res" ''
-                if [ -z "$SWAYSOCK" && -z "$WAYLAND_DISPLAY" ]; then
-                  SWAYSOCK=/run/user/$(id -u)/sway-ipc.$(id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
-                fi
-                
-                if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
-                  mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
-                  ${pkgs.sway}/bin/swaymsg output HEADLESS-1 mode $mode
-                else
-                  echo "Not headless"
-                fi
-              '';
-            }
-          ];
-        }
+        #{
+        #  name = "Legacy";
+        #  image-path = "desktop.png";
+        #  prep-cmd = [
+        #    {
+        #      do = pkgs.writeShellScript "set-client-res" ''
+        #        if [ -z "$SWAYSOCK" && -z "$WAYLAND_DISPLAY" ]; then
+        #          SWAYSOCK=/run/user/$(id -u)/sway-ipc.$(id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
+        #        fi
+        #        
+        #        if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
+        #          mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
+        #          ${pkgs.sway}/bin/swaymsg output HEADLESS-1 mode $mode
+        #        else
+        #          echo "Not headless"
+        #        fi
+        #      '';
+        #    }
+        #  ];
+        #}
       ];
     };
   };
