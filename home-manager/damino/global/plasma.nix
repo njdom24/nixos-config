@@ -339,6 +339,10 @@
 
       dolphinrc = {
         DetailsMode.PreviewSize = 16; # Small icons in detail view
+        Search.SearchTool = "Baloo"; # Non-indexed search doesn't work
+      };
+      baloofilerc = {
+        General."index hidden folders" = true;
       };
 
       kcminputrc = {
