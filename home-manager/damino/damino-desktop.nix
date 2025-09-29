@@ -172,7 +172,7 @@
             min_luminance = 0.005
             max_luminance = 1156
             max_avg_luminance = 1156
-            bitdepth = 8
+            bitdepth = 10
             cm = srgb
           }
 

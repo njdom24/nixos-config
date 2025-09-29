@@ -26,19 +26,18 @@
 
           sleep 5 && systemctl --user start sunshine
 
-          exit 0
-        else
-          ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
-          ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
-          ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 4 silent] steam"
+          exit 0          
         fi
       fi
 
       # Restore desktop config if not remote
-      displays="~/.config/hypr/displays.conf.gsc"
-      if [ -f "$displays" ]; then
-        mv "$displays" "~/.config/hypr/displays.conf"
+      display_cfg="/home/$USER/.config/hypr/displays.conf"
+      if [[ -f "$display_cfg".sunshine ]]; then
+        mv "$display_cfg".sunshine "$displays"
       fi
+      ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
+      ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
+      ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 4 silent] steam"
     '';
     # Bodge to work around gamescope cursor grab not working on games with launchers
     gamescope-cursor-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''

@@ -145,7 +145,12 @@
                 Hyprland)
                   echo "→ Running Hyprland-specific logic"
                   export XDG_CURRENT_DESKTOP="Hyprland"
-                  cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
+
+                  display_cfg="/home/$USER/.config/hypr/displays.conf"
+                  if [[ ! -f "$display_cfg".sunshine ]]; then
+                    # Make backup
+                    cp "$display_cfg" "$display_cfg".sunshine
+                  fi
 
                   # Configure display to match client
                   if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
