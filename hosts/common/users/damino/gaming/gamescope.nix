@@ -673,6 +673,7 @@ in
         #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
         "-F fsr"
+        "--fsr-sharpness 8"
         "--hide-cursor-delay 10000"
       ];
     };
