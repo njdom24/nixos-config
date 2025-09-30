@@ -9,20 +9,13 @@
 	};
 	initContent = ''
 	  upgrade() {
-	    TMP_BUILD_DIR="/var/tmp/nix-build"
-	    mkdir -p "$TMP_BUILD_DIR"
-	    chmod 1777 "$TMP_BUILD_DIR"
 	    TMPDIR="$TMP_BUILD_DIR" ${pkgs.nh}/bin/nh os switch /etc/nixos -- --impure "$@"
-	    #sudo nixos-rebuild switch --impure --flake /etc/nixos/.# "$@"
-	    rm -rf "$TMP_BUILD_DIR"
+	    #sudo nixos-rebuild switch --flake /etc/nixos/.# --impure "$@"
 	  }
 	  hm-upgrade() {
-	    TMP_BUILD_DIR="/var/tmp/nix-build"
-	    mkdir -p "$TMP_BUILD_DIR"
-	    chmod 1777 "$TMP_BUILD_DIR"
-	    ${pkgs.nh}/bin/nh home switch /etc/nixos -- "$@"
+	    # https://github.com/nix-community/home-manager/issues/6564
+	    TMPDIR=/var/tmp/ ${pkgs.nh}/bin/nh home switch /etc/nixos -- "$@"
 	    #home-manager switch --flake /etc/nixos/. "$@"
-	    rm -rf "$TMP_BUILD_DIR"
 	  }
 	'';
 	oh-my-zsh = {

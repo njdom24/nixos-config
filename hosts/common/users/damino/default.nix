@@ -115,6 +115,7 @@ in
   nix = {
     settings = {
       auto-optimise-store = true;
+      build-dir = "/var/tmp";
   	};
   	gc = {
   	  automatic = !(config.programs.nh.enable && config.programs.nh.clean.enable);
