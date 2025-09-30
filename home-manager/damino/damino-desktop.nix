@@ -19,7 +19,80 @@
 	  kanshi.settings = [
 	    {
 	      profile = {
+	        name = "desktop-headless";
+	        outputs = [
+	          {
+	            criteria = "Beihai Century Joint Innovation Technology Co.,Ltd P275MV PLUS 0000000000000";
+	      	    status = "enable";
+	      	    mode = "3840x2160@160Hz";
+	      	    position = "0,0";
+	      	    scale = 1.5;
+	      	    #adaptiveSync = true;
+	      	  }
+	          {
+	      	    criteria = "AOC 24G1WG4 0x00042EBB";
+	      	    status = "enable";
+	      	    mode = "1920x1080@144.001";
+	      	    position = "2560,250";
+	      	    scale = 1.0;
+	      	    adaptiveSync = false;
+	      	  }
+	      	  {
+	      	    criteria = "Technical Concepts Ltd Beyond TV 0x00010000";
+	      	    status = "disable";
+	      	    adaptiveSync = false;
+	      	  }
+	      	  {
+	      	    criteria = "Samsung Electric Company SAMSUNG 0x01000E00"; # Dummy display
+	      	    status = "disable";
+	      	    adaptiveSync = false;
+	      	  }
+	        ];
+	        exec = [
+	          #"sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'" # Breaks xdg-desktop-portal-wlr/pipewire capture
+	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
+	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
+	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
+	        ];
+	      };
+	    }
+	    {
+	      profile = {
 	        name = "desktop";
+	        outputs = [
+	          {
+	            criteria = "Beihai Century Joint Innovation Technology Co.,Ltd P275MV PLUS 0000000000000";
+	      	    status = "enable";
+	      	    mode = "3840x2160@160Hz";
+	      	    position = "0,0";
+	      	    scale = 1.5;
+	      	    #adaptiveSync = true;
+	      	  }
+	          {
+	      	    criteria = "AOC 24G1WG4 0x00042EBB";
+	      	    status = "enable";
+	      	    mode = "1920x1080@144.001";
+	      	    position = "2560,250";
+	      	    scale = 1.0;
+	      	    adaptiveSync = false;
+	      	  }
+	      	  {
+	      	    criteria = "Technical Concepts Ltd Beyond TV 0x00010000";
+	      	    status = "disable";
+	      	    adaptiveSync = false;
+	      	  }
+	        ];
+	        exec = [
+	          #"sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'" # Breaks xdg-desktop-portal-wlr/pipewire capture
+	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
+	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
+	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
+	        ];
+	      };
+	    }
+	    {
+	      profile = {
+	        name = "desktop-bck";
 	        outputs = [
 	          {
 	            criteria = "AOC Q27G40XMN 0x00000081";
@@ -52,7 +125,7 @@
 	    }
 	    {
 	      profile = {
-	        name = "desktop-headless";
+	        name = "desktop-headless-bck";
 	        outputs = [
 	          {
 	            criteria = "AOC Q27G40XMN 0x00000081";
@@ -162,9 +235,9 @@
 	    text = ''
 	      monitorv2 {
 	        output = DP-1
-            mode = 2560x1440@180
+            mode = 3840x2160@160
             position = 0x0
-            scale = 1
+            scale = 1.5
             transform = 0
             vrr = 2
             sdr_min_luminance = 0.005
