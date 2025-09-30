@@ -672,6 +672,7 @@ in
         "--force-grab-cursor" # Breaks games with launchers (Elden Ring)
         #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
+        "-F fsr"
         "--hide-cursor-delay 10000"
       ];
     };
