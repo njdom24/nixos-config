@@ -176,6 +176,7 @@
   	  wineWowPackages.waylandFull
   	  winetricks
   	  latencyflex-vulkan
+  	  libstrangle # Better for some games with launchers, where MangoHud can crash
   	];
 
   	variables = {
