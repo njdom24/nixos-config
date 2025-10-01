@@ -436,8 +436,8 @@
           
           len=''${#outputs[@]}
           first=''${outputs[0]:-}
-          
-          if [[ $len -eq 1 && ("$first" == "$DUMMY" || "$first" == "$DP-3") ]]; then
+
+          if [[ $len -eq 0 || ( $len -eq 1 && ( "$first" == "$DUMMY" || "$first" == "$DP-3" ) ) ]]; then
             echo "Only dummy is enabled and connected. Restoring..."
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
             ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
