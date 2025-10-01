@@ -526,6 +526,11 @@ let
         extra_flags+=("--hdr-debug-force-support")
       fi
     fi
+
+    if [[ "$height" -gt 1440 ]]; then
+      extra_flags+=("--cursor-scale-height")
+      extra_flags+=("1440")
+    fi
     
     while true; do
       if env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope ${
