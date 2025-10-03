@@ -134,6 +134,7 @@ in
   	noto-fonts
   	noto-fonts-cjk-sans
   	noto-fonts-emoji
+  	noto-fonts-monochrome-emoji
   ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
 
   qt = {
