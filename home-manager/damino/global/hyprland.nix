@@ -32,8 +32,8 @@
 
       # Restore desktop config if not remote
       display_cfg="/home/$USER/.config/hypr/displays.conf"
-      if [[ -f "$display_cfg".sunshine ]]; then
-        mv "$display_cfg".sunshine "$displays"
+      if [[ -f "$display_cfg".gsc ]]; then
+        mv "$display_cfg".gsc "$displays"
       fi
       ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
       ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"

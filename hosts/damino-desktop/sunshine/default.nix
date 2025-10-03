@@ -147,9 +147,9 @@
                   export XDG_CURRENT_DESKTOP="Hyprland"
 
                   display_cfg="/home/$USER/.config/hypr/displays.conf"
-                  if [[ ! -f "$display_cfg".sunshine ]]; then
+                  if [[ ! -f "$display_cfg".gsc ]]; then
                     # Make backup
-                    cp "$display_cfg" "$display_cfg".sunshine
+                    cp "$display_cfg" "$display_cfg".gsc
                   fi
 
                   # Configure display to match client
