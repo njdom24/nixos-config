@@ -104,6 +104,7 @@ in
 	  jellyfin-media-player
 	  kdePackages.kdenlive
 	  shotcut
+	  video-trimmer
 	  xorg.xeyes
 	  corefonts
 	  vistafonts
