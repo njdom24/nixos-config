@@ -294,7 +294,7 @@ in
               ${pkgs.sway}/bin/swaymsg output "HEADLESS-1" pos 0 0
 
               # Define your list of preferred device names (or partial names) in order of priority
-              PREFERRED_DEVICES=("Beihai Century Joint Innovation Technology Co.,Ltd" "AOC Q27G40XMN" "Xiaomi Corporation Mi Monitor" "Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
+              PREFERRED_DEVICES=("Beihai Century Joint Innovation Technology Co.,Ltd" "AOC Q27G40XMN" "Acer Technologies VG271U" "Samsung Electric Company LC27T55") # Replace with actual display names or partial names
 
               # Function to get all connected displays with their descriptions
               get_connected_displays() {
@@ -322,10 +322,21 @@ in
                   fi
               done
               
-              # If no preferred device is connected, default to the first connected display
+              # If no preferred device is connected, pick the first connected display by priority:
+              # DP* > HDMI* > eDP* > others
               if [[ -z "$PRIMARY_DISPLAY" && -n "$CONNECTED_DISPLAYS" ]]; then
-                  PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" | head -n 1 | ${pkgs.gawk}/bin/awk '{print $1}')
-                  echo "No preferred monitor found; defaulting to first connected display: $PRIMARY_DISPLAY"
+                  PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" \
+                      | ${pkgs.gawk}/bin/awk '
+                          # Assign priorities
+                          /^DP/   { pri=1 }
+                          /^HDMI/ { pri=2 }
+                          /^eDP/  { pri=3 }
+                          !/^DP/ && !/^HDMI/ && !/^eDP/ { pri=4 }
+                          { print pri, $0 }
+                      ' \
+                      | ${pkgs.coreutils}/bin/sort -k1,1n \
+                      | ${pkgs.gawk}/bin/awk "{print \$2; exit}")
+                  echo "No preferred monitor found; defaulting to prioritized display: $PRIMARY_DISPLAY"
               fi
 
               # Export the primary display as an environment variable if a display was found
