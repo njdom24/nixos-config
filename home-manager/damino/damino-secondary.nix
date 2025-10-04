@@ -4,9 +4,9 @@
   # wayland.windowManager.hyprland.settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card0" ];
 
   services = {
-    mako.settings.output = lib.mkForce "HDMI-A-1";
+    mako.settings.output = lib.mkForce "DP-2";
     swaync.settings = {
-      notification-window-preferred-output = lib.mkForce "HDMI-A-1";
+      notification-window-preferred-output = lib.mkForce "DP-2";
       positionX = lib.mkForce "right";
     };
   };
@@ -15,8 +15,33 @@
     # Force back to default
     ".config/hypr/hm/displays.conf" = lib.mkForce {
       text = ''
-        monitor=,preferred,auto,auto
-        exec = timeout 10 kanshi &
+        monitorv2 {
+          output = DP-1
+          mode = 2560x1440@180
+           position = 2560x0
+           scale = 1
+           transform = 0
+           supports_hdr = 0
+           vrr = 2
+           sdr_min_luminance = 0.005
+           sdr_max_luminance = 203
+           min_luminance = 0.005
+           max_luminance = 400
+           max_avg_luminance = 203
+           bitdepth = 10
+           cm = srgb
+        }
+        
+        monitorv2 {
+          output = DP-2
+          mode = 2560x1440@144
+          position = 0x0
+          scale = 1
+          transform = 0
+          vrr = 0
+          bitdepth = 10
+          cm = srgb
+        }
       '';
     };
   };
