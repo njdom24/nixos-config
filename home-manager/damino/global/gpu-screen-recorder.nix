@@ -39,55 +39,10 @@
     fi
   '';
 in {
-  systemd.user.services.gsr-tonemapper = {
-    Unit = {
-      Description = "Sequentially tonemaps a batch of HDR recordings";
-      After = [ "graphical-session.target" ];
-      # Stop this service when sunshine starts
-      Conflicts = [ "sunshine.service" ];
-    };
-
-    Service = {
-      ExecStart = let gsr-tonemapper = pkgs.writeShellScript "gsr-tonemapper" ''
-        CONFIG_DIR="$HOME/.config/gpu-screen-recorder"
-        QUEUE="$CONFIG_DIR/hdr-to-sdr.queue"
-        mkdir -p "$CONFIG_DIR"
-        touch "$QUEUE"
-
-        while [[ -s "$QUEUE" ]]; do
-          filepath=$(head -n1 "$QUEUE")
-          [[ -z "$filepath" ]] && {
-            # Drop empty line safely
-            tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
-            continue
-          }
-        
-          echo "Tonemapping $filepath"
-          #${pkgs.libnotify}/bin/notify-send "Tonemapping $filepath"
-        
-          ${hdr-to-sdr}/bin/hdr-to-sdr "$filepath"
-          status=$?
-        
-          if [[ $status -eq 0 ]]; then
-            ${pkgs.libnotify}/bin/notify-send "Tonemapping finished" "$(basename "$filepath")"
-          else
-            ${pkgs.libnotify}/bin/notify-send "Tonemapping failed" "$(basename "$filepath")"
-          fi
-        
-          # Remove job from the queue
-          tail -n +2 "$QUEUE" > "$QUEUE.tmp" && mv "$QUEUE.tmp" "$QUEUE"
-        done
-      ''; in "${gsr-tonemapper}";
-      Restart = "on-failure";
-      RestartSec = 10;
-    };
-  };
-
   systemd.user.services.gpu-screen-recorder = {
     Unit = {
       Description = "GPU Screen Recorder";
       After = [ "graphical-session.target" ];
-      Wants = [ "gsr-tonemapper.service" ];
       # Stop this service when sunshine starts
       Conflicts = [ "sunshine.service" ];
     };
@@ -105,9 +60,6 @@ in {
                     -of default=noprint_wrappers=1:nokey=1 "$path")
                 if [[ "$transfer" =~ smpte2084|arib-std-b67 ]]; then
                   ${pkgs.libnotify}/bin/notify-send "Recording saved (HDR)" "$path"
-                  echo "HDR detected in $file (transfer=$transfer), converting to SDR..."
-                  echo "$path" >> /home/$USER/.config/gpu-screen-recorder/hdr-to-sdr.queue
-                  ${pkgs.systemd}/bin/systemctl --user start gsr-tonemapper.service
                 else
                   ${pkgs.libnotify}/bin/notify-send "Recording saved" "$path"
                 fi
@@ -117,9 +69,6 @@ in {
                     -of default=noprint_wrappers=1:nokey=1 "$path")
                 if [[ "$transfer" =~ smpte2084|arib-std-b67 ]]; then
                   ${pkgs.libnotify}/bin/notify-send "Replay saved (HDR)" "$path"
-                  echo "HDR detected in $file (transfer=$transfer), converting to SDR..."
-                  echo "$path" >> /home/$USER/.config/gpu-screen-recorder/hdr-to-sdr.queue
-                  ${pkgs.systemd}/bin/systemctl --user start gsr-tonemapper.service
                 else
                   ${pkgs.libnotify}/bin/notify-send "Replay saved" "$path"
                 fi
