@@ -135,6 +135,23 @@
 	  	blacklist = ".gamescope-wrapped,gamescope,gamescope-wl";
 	  };
 	};
+
+	mpv = {
+	  enable = true;
+	  config = {
+	    profile = "fast";
+	    hwdec = "auto-safe";
+	  };
+	  profiles = {
+	    HDR = {
+	      profile-cond = "p[\"video-params/gamma\"] == \"pq\"";
+	      vo = "dmabuf-wayland";
+	      tone-mapping = "spline";
+	      gamut-mapping-mode = "auto";
+	      hdr-compute-peak = "yes";
+	    };
+	  };
+	};
   };
 
   services = {
