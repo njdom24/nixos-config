@@ -29,11 +29,15 @@
 	        for pid in $(${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)"); do
 	          envfile="/proc/$pid/environ"
 	          [ -r "$envfile" ] || continue
-	          
-	          wayland_display=$(${pkgs.coreutils}/bin/tr '\0' '\n' < "$envfile" 2>/dev/null | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | ${pkgs.coreutils}/bin/cut -d= -f2-)
-	          if [ -n "$wayland_display" ]; then
-	            echo "$wayland_display"
-	            exit 0
+
+	          if wayland_display=$(${pkgs.coreutils}/bin/tr '\0' '\n' < "$envfile" 2>/dev/null \
+	            | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' \
+	            | ${pkgs.coreutils}/bin/cut -d= -f2-); then
+
+	            if [ -n "$wayland_display" ]; then
+	              echo "$wayland_display"
+	              exit 0
+	            fi
 	          fi
 	        done
           fi
@@ -42,7 +46,10 @@
         # Core script
         displayConfig = pkgs.writeShellScript "displayConfig" ''
           # Disable RGB
-          ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
+          $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
+          ${pkgs.systemd}/bin/systemctl --user stop gpu-screen-recorder || true
+
+          sleep 1
 
           echo "Using display: $WAYLAND_DISPLAY"
           session_class="$(loginctl show-session "$XDG_SESSION_ID" -p Class --value 2>/dev/null)"
@@ -193,7 +200,9 @@
                     ${pkgs.gnused}/bin/sed -i 's/supports_hdr = 0/supports_hdr = 1/' "$tmpfile"
                   fi
 
-                  mv "$tmpfile" ~/.config/hypr/displays.conf
+                  mv -f "$tmpfile" ~/.config/hypr/displays.conf
+
+                  ${pkgs.procps}/bin/kill $($pkgs.procps}/bin/pgrep hyprland-share) || true
                   ;;
                 "")
                   echo "→ No known compositor found"
@@ -244,7 +253,7 @@
             {
               do = pkgs.writeShellScript "desktop-hdr" ''
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
-                ${displayConfig} hdr > /tmp/sunshine_log.txt 2>&1
+                ${displayConfig} hdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
             }
           ];
@@ -257,7 +266,7 @@
             {
               do = pkgs.writeShellScript "desktop-sdr" ''
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
-                ${displayConfig} sdr > /tmp/sunshine_log.txt 2>&1
+                ${displayConfig} sdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
             }
           ];
@@ -270,8 +279,8 @@
             {
               do = pkgs.writeShellScript "steam-hdr" ''
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
-                ${displayConfig} hdr > /tmp/sunshine_log.txt 2>&1
-                ${gamescopeConfig} hdr > /tmp/sunshine_log.txt 2>&1
+                ${displayConfig} hdr > /tmp/sunshine_log_$UID.txt 2>&1
+                ${gamescopeConfig} hdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
             }
           ];
@@ -284,8 +293,8 @@
             {
               do = pkgs.writeShellScript "steam-sdr" ''
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
-                ${displayConfig} sdr > /tmp/sunshine_log.txt 2>&1
-                ${gamescopeConfig} sdr > /tmp/sunshine_log.txt 2>&1
+                ${displayConfig} sdr > /tmp/sunshine_log_$UID.txt 2>&1
+                ${gamescopeConfig} sdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
             }
           ];
