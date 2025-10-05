@@ -20,22 +20,46 @@
     # "''$()"
 
     # spline chosen over bt.2446a due to being pale
-    # Try GPU Vulkan/libplacebo path
-    if ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
-      -i "$input" \
-      -vf "hwupload,libplacebo=tonemapping=spline:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
-      -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
-    then
-      echo "GPU tonemapping succeeded." >&2
-    else
-      echo "GPU tonemapping failed, falling back to CPU..." >&2
-      ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
-        -vf "
-        zscale=t=linear:npl=100:p=bt2020:m=bt2020nc,format=gbrpf32le, \
-        tonemap=tonemap=reinhard:desat=0, \
-        zscale=t=bt709:m=bt709:r=tv,format=yuv420p
-        " -c:v libx265 -crf 22 -preset medium \
+    max_retries=5
+    attempt=1
+    success=false
+
+    # Retries due to occasional spurious failures with Vulkan encode
+    # Try full GPU Vulkan/libplacebo path
+    while (( attempt <= max_retries )); do
+      echo "Attempt $attempt/$max_retries: GPU tonemapping / GPU encode..." >&2
+      if ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -y \
+        -init_hw_device vulkan=vkdev:0 -filter_hw_device vkdev \
+        -i "$input" \
+        -vf "libplacebo=tonemapping=spline:gamma=1.05:contrast=1.2:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,format=p010,hwupload" \
+        -c:v hevc_vulkan -b:v 20M -preset p5 -c:a copy "$output"
+      then
+        echo "GPU tonemapping / GPU encode succeeded." >&2
+        success=true
+        break
+      else
+        echo "Attempt $attempt failed, retrying..." >&2
+        ((attempt++))
+        sleep 3 # small delay before retry
+      fi
+    done
+    
+    if ! $success; then
+      echo "GPU tonemapping / GPU encode failed after $max_retries attempts." >&2
+
+      if ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
+        -i "$input" \
+        -vf "hwupload,libplacebo=tonemapping=spline:gamma=1.05:contrast=1.2:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=limited,hwdownload,format=yuv420p10" \
+        -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
+      then
+        echo "GPU tonemapping / CPU encode succeeded." >&2
+      else
+        echo "GPU acceleration failed, falling back to CPU..." >&2
+        ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
+        -vf "zscale=t=linear:npl=100:p=bt2020:m=bt2020nc,format=gbrpf32le,tonemap=tonemap=reinhard:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p" \
+        -c:v libx265 -crf 22 -preset medium \
         "$output"
+      fi
     fi
   '';
 in {
