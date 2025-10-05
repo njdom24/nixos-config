@@ -144,9 +144,9 @@
 	  };
 	  profiles = {
 	    HDR = {
-	      profile-cond = "p[\"video-params/gamma\"] == \"pq\"";
+	      profile-cond = "(p[\"video-params/primaries\"] == \"bt.2020\") and (p[\"video-params/gamma\"] == \"pq\")";
 	      vo = "dmabuf-wayland";
-	      tone-mapping = "spline";
+	      #tone-mapping = "spline";
 	      gamut-mapping-mode = "auto";
 	      hdr-compute-peak = "yes";
 	    };
