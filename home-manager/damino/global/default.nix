@@ -174,6 +174,62 @@
     startServices = "sd-switch";
     services = {
       gammastep.Install.WantedBy = lib.mkForce [ ];
+      stable-render-nodes = let
+        stable-render-nodes = pkgs.writeShellScript "stable-render-nodes.sh" ''
+          #!/usr/bin/env bash
+          outdir="$XDG_RUNTIME_DIR/dri"
+          ${pkgs.coreutils}/bin/mkdir -p "$outdir"
+          
+          declare -A cards renders
+          
+          # Collect card devices
+          for path in /dev/dri/by-path/*-card; do
+            pci=$(${pkgs.coreutils}/bin/basename "$path")
+            pci="''${pci%-card}"       # remove trailing '-card'
+            cards[$pci]="$path"
+          done
+          
+          # Collect render devices
+          for path in /dev/dri/by-path/*-render; do
+            pci=$(${pkgs.coreutils}/bin/basename "$path")
+            pci="''${pci%-render}"     # remove trailing '-render'
+            renders[$pci]="$path"
+          done
+          
+          # iGPU first (bus 0000:00:*)
+          for pci in $(printf "%s\n" "''${!cards[@]}" | ${pkgs.coreutils}/bin/sort); do
+            if [[ "$pci" =~ ^pci-0000:00: ]]; then
+              ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/igpu"
+              [[ -n "''${renders[$pci]:-}" ]] && ln -sf "''${renders[$pci]}" "$outdir/igpu-render"
+              unset cards[$pci]  # remove iGPU from further loops
+            fi
+          done
+          
+          # remaining cards = dGPUs
+          i=0
+          for pci in $(printf "%s\n" "''${!cards[@]}" | ${pkgs.coreutils}/bin/sort); do
+            ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/dgpu$i"
+            [[ -n "''${renders[$pci]:-}" ]] && ln -sf "''${renders[$pci]}" "$outdir/dgpu$i-render"
+            ((i++))
+          done
+
+          exit 0
+        ''; in {
+        Unit = {
+          Description = "Create stable GPU symlinks for Wayland compositors";
+          After = [ "default.target" ];
+          Before = [ "graphical-session-pre.target" "graphical-session.target" ];
+          PartOf = [ "graphical-session.target" ];
+        };
+        Service = {
+          Type = "oneshot";
+          ExecStart = "${stable-render-nodes}";
+          RemainAfterExit = "yes";
+        };
+        Install = {
+          WantedBy = [ "default.target" ];
+        };
+      };
     };
   };
 
