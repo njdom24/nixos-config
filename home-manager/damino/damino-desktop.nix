@@ -95,7 +95,7 @@
 	  	    name = "desktop-secondary";
 	  	    outputs = [
 	  	      {
-	  	        criteria = "AOC Q27G40XMN 2QTR1JA000129";
+	  	        criteria = "AOC Q27G40XMN 0x00000081";
 	      	    status = "enable";
 	      	    mode = "2560x1440@180Hz";
 	      	    position = "2560,0";
@@ -108,6 +108,38 @@
 	  	  	    position = "0,0";
 	  	  	    #position = "2560,0";
 	  	  	    #adaptiveSync = true;
+	  	  	  }
+	  	    ];
+	  	    exec = [
+	  	      "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
+	  	      #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
+	  	      #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-9"
+	  	    ];
+	  	  };
+	  	}
+	  	{
+	  	  profile = {
+	  	    name = "desktop-secondary-headless";
+	  	    outputs = [
+	  	      {
+	  	        criteria = "AOC Q27G40XMN 0x00000081";
+	      	    status = "enable";
+	      	    mode = "2560x1440@180Hz";
+	      	    position = "2560,0";
+	      	    #adaptiveSync = true;
+	      	  }
+	  	      {
+	  	        criteria = "Acer Technologies VG271U 0x0302811A";
+	  	  	    status = "enable";
+	  	  	    mode = "2560x1440@143.999Hz";
+	  	  	    position = "0,0";
+	  	  	    #position = "2560,0";
+	  	  	    #adaptiveSync = true;
+	  	  	  }
+	  	  	  {
+	  	  	    criteria = "Samsung Electric Company SAMSUNG 0x01000E00"; # Dummy display
+	  	  	    status = "disable";
+	  	  	    adaptiveSync = false;
 	  	  	  }
 	  	    ];
 	  	    exec = [

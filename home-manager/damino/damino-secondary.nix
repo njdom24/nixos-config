@@ -40,6 +40,9 @@
           bitdepth = 10
           cm = srgb
         }
+
+        monitor = DP-3, disable
+        monitor = HDMI-A-1, disable
       '';
     };
   };
