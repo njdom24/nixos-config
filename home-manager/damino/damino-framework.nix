@@ -12,7 +12,7 @@
 	  '';
 
 	  hyprland = {
-	    settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+	    settings.env = [ "AQ_DRM_DEVICES,$XDG_RUNTIME_DIR/dri/dgpu0:$XDG_RUNTIME_DIR/dri/igpu" ];
 	    extraConfig = ''
 	      monitor = , preferred, auto, 1, mirror, eDP-1
 	    '';

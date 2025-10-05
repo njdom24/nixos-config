@@ -1,8 +1,6 @@
 { inputs, pkgs, lib, ... }: {
   imports = [ ./damino-desktop.nix ];
 
-  # wayland.windowManager.hyprland.settings.env = [ "AQ_DRM_DEVICES,/dev/dri/card0" ];
-
   services = {
     mako.settings.output = lib.mkForce "DP-2";
     swaync.settings = {

@@ -3,7 +3,7 @@
 
 	wayland.windowManager.hyprland = {
       settings = {
-        env = [ "AQ_DRM_DEVICES,/dev/dri/card1" ];
+        env = [ "AQ_DRM_DEVICES,$XDG_RUNTIME_DIR/dri/dgpu0" ];
         exec-once = [ "sleep 5 && systemctl --user start gpu-screen-recorder" ];
       };
       extraConfig = ''
