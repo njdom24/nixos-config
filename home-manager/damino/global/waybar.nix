@@ -184,8 +184,8 @@
           #"format": "{volume}% {icon} {format_source}",
           #"format-bluetooth": "{volume}% {icon} {format_source}",
           format-bluetooth = "{volume}% {icon}";
-          format-bluetooth-muted = "  {icon} {format_source}";
-          format-muted = "  {format_source}";
+          format-bluetooth-muted = "󰝟  {icon}";
+          format-muted = "󰝟 ";
           #"format-source": "{volume}% ",
           #"format-source-muted": "",
           format-icons = {
@@ -346,12 +346,6 @@ window#waybar.chromium {
 
 label:focus {
     background-color: #000000;
-}
-
-
-#pulseaudio.muted {
-    background-color: #90b1b1;
-    color: #2a5c45;
 }
 
 #custom-media {
