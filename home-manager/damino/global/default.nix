@@ -205,23 +205,37 @@
           
           i=0
           igpu_assigned=false
-          
+          known_dgpus=("Radeon RX" "NVIDIA")
+
           for pci in "''${sorted[@]}"; do
+            pci_id="''${pci#pci-}"
+            name="$(${pkgs.pciutils}/bin/lspci -s "$pci_id" | ${pkgs.gnused}/bin/sed -E 's/.*\[(.*)\].*/\1/')"
             depth=''${depths[$pci]}
+
+            could_be_igpu=false
             if [[ $igpu_assigned == false && "$depth" -le 3 ]]; then
-              echo "Assigning iGPU: $pci (depth=$depth)"
+              could_be_igpu=true
+              for substr in "''${known_dgpus[@]}"; do
+                if [[ "$name" == *"$substr"* ]]; then
+                  could_be_igpu=false
+                  break
+                fi
+              done
+            fi
+            
+            if [[ "$could_be_igpu" == true ]]; then
+              echo "Assigning iGPU: $name (depth=$depth)"
               ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/igpu"
               [[ -n "''${renders[$pci]:-}" ]] && ${pkgs.coreutils}/bin/ln -sf "''${renders[$pci]}" "$outdir/igpu-render"
               igpu_assigned=true
             else
-              echo "Assigning dGPU$i: $pci (depth=$depth)"
+              echo "Assigning dGPU$i: $name (depth=$depth)"
               ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/dgpu$i"
               [[ -n "''${renders[$pci]:-}" ]] && ${pkgs.coreutils}/bin/ln -sf "''${renders[$pci]}" "$outdir/dgpu$i-render"
               ((i++))
             fi
           done
-          # "''${}"
-
+          echo ''$()
           exit 0
         ''; in {
         Unit = {
