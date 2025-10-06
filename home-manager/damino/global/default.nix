@@ -207,13 +207,14 @@
           igpu_assigned=false
           
           for pci in "''${sorted[@]}"; do
-            if [[ $igpu_assigned == false ]]; then
-              echo "Assigning iGPU: $pci (depth=''${depths[$pci]})"
+            depth=''${depths[$pci]}
+            if [[ $igpu_assigned == false && "$depth" -le 3 ]]; then
+              echo "Assigning iGPU: $pci (depth=$depth)"
               ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/igpu"
               [[ -n "''${renders[$pci]:-}" ]] && ${pkgs.coreutils}/bin/ln -sf "''${renders[$pci]}" "$outdir/igpu-render"
               igpu_assigned=true
             else
-              echo "Assigning dGPU$i: $pci (depth=''${depths[$pci]})"
+              echo "Assigning dGPU$i: $pci (depth=$depth)"
               ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/dgpu$i"
               [[ -n "''${renders[$pci]:-}" ]] && ${pkgs.coreutils}/bin/ln -sf "''${renders[$pci]}" "$outdir/dgpu$i-render"
               ((i++))
