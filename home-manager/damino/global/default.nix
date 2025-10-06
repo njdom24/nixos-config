@@ -176,42 +176,50 @@
       gammastep.Install.WantedBy = lib.mkForce [ ];
       stable-render-nodes = let
         stable-render-nodes = pkgs.writeShellScript "stable-render-nodes.sh" ''
-          #!/usr/bin/env bash
+          #!/usr/bin/env bash          
           outdir="$XDG_RUNTIME_DIR/dri"
           ${pkgs.coreutils}/bin/mkdir -p "$outdir"
           
-          declare -A cards renders
+          declare -A cards renders depths
           
-          # Collect card devices
+          # Collect cards and record PCI path depth
           for path in /dev/dri/by-path/*-card; do
-            pci=$(${pkgs.coreutils}/bin/basename "$path")
-            pci="''${pci%-card}"       # remove trailing '-card'
-            cards[$pci]="$path"
+            pci="''${path##*/}"
+            pci="''${pci%-card}"
+            cards["$pci"]="$path"
+            sysfs=$(${pkgs.systemd}/bin/udevadm info -q path "$path")
+            # Count PCI segments (number of '/0000:' occurrences)
+            depth=$(${pkgs.gnugrep}/bin/grep -o "0000:" <<<"$sysfs" | ${pkgs.coreutils}/bin/wc -l)
+            depths["$pci"]="$depth"
           done
           
-          # Collect render devices
+          # Collect render nodes
           for path in /dev/dri/by-path/*-render; do
-            pci=$(${pkgs.coreutils}/bin/basename "$path")
-            pci="''${pci%-render}"     # remove trailing '-render'
-            renders[$pci]="$path"
+            pci="''${path##*/}"
+            pci="''${pci%-render}"
+            renders["$pci"]="$path"
           done
           
-          # iGPU first (bus 0000:00:*)
-          for pci in $(printf "%s\n" "''${!cards[@]}" | ${pkgs.coreutils}/bin/sort); do
-            if [[ "$pci" =~ ^pci-0000:00: ]]; then
+          # Sort by PCI path depth (ascending)
+          sorted=($(for k in "''${!depths[@]}"; do echo "''${depths[$k]} $k"; done | ${pkgs.coreutils}/bin/sort -n | ${pkgs.gawk}/bin/awk '{print $2}'))
+          
+          i=0
+          igpu_assigned=false
+          
+          for pci in "''${sorted[@]}"; do
+            if [[ $igpu_assigned == false ]]; then
+              echo "Assigning iGPU: $pci (depth=''${depths[$pci]})"
               ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/igpu"
-              [[ -n "''${renders[$pci]:-}" ]] && ln -sf "''${renders[$pci]}" "$outdir/igpu-render"
-              unset cards[$pci]  # remove iGPU from further loops
+              [[ -n "''${renders[$pci]:-}" ]] && ${pkgs.coreutils}/bin/ln -sf "''${renders[$pci]}" "$outdir/igpu-render"
+              igpu_assigned=true
+            else
+              echo "Assigning dGPU$i: $pci (depth=''${depths[$pci]})"
+              ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/dgpu$i"
+              [[ -n "''${renders[$pci]:-}" ]] && ${pkgs.coreutils}/bin/ln -sf "''${renders[$pci]}" "$outdir/dgpu$i-render"
+              ((i++))
             fi
           done
-          
-          # remaining cards = dGPUs
-          i=0
-          for pci in $(printf "%s\n" "''${!cards[@]}" | ${pkgs.coreutils}/bin/sort); do
-            ${pkgs.coreutils}/bin/ln -sf "''${cards[$pci]}" "$outdir/dgpu$i"
-            [[ -n "''${renders[$pci]:-}" ]] && ln -sf "''${renders[$pci]}" "$outdir/dgpu$i-render"
-            ((i++))
-          done
+          # "''${}"
 
           exit 0
         ''; in {
