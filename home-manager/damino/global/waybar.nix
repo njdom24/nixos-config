@@ -206,10 +206,10 @@
     	    
     	    if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
     	      BIN="hyprsunset"
-    	      ARGS="-t 4500"
+    	      ARGS="-t 5500"
     	    else
     	      BIN="gammastep"
-    	      ARGS="-O 4500"
+    	      ARGS="-O 5500"
     	    fi
     	    
     	    case "$1" in
