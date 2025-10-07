@@ -62,6 +62,63 @@
       fi
     fi
   '';
+  discord-compress = pkgs.writeShellScriptBin "discord-compress" ''
+    # Discord-style HEVC compression (~10 MB target)
+    input="$1"
+    output="$input"_compressed.mkv
+    target_size_mb="''${2:-10}" # Optional arg, default 10 MB
+    
+    if [[ -z "$input" ]]; then
+      echo "Usage: $0 <input-file> [target_MB]"
+      exit 1
+    fi
+
+    # --- Clean exit on Ctrl-C
+    cleanup() {
+        echo "Exiting..."
+        # Kill any running ffmpeg child processes
+        ${pkgs.procps}/bin/pkill -P $$ 2>/dev/null || true
+        exit 1
+    }
+    trap cleanup SIGINT
+
+    # --- Get video duration in seconds
+    duration=$(${pkgs.ffmpeg-full}/bin/ffprobe -v error -show_entries format=duration -of csv=p=0 "$input")
+    duration=''${duration%.*}
+    duration=$((duration + 1))
+    
+    # --- Audio bitrate in kbps
+    audio_bitrate=128
+    
+    # --- Calculate target video bitrate in kbps
+    target_bitrate=$(( (target_size_mb * 8192 - audio_bitrate * duration) / duration ))
+    echo "Target video bitrate: ''${target_bitrate} kbps (~''${target_size_mb} MB total)"
+    
+    # --- Get resolution
+    read -r width height <<< "$(ffprobe -v error -select_streams v:0 \
+        -show_entries stream=width,height -of csv=p=0 "$input")"
+    
+    # --- Max Discord resolution
+    max_width=1920
+    max_height=1080
+    
+    # --- First pass (no output)
+    ${pkgs.ffmpeg-full}/bin/ffmpeg -y -i "$input" \
+        -vf "scale='min(1920\,iw)':'min(1080\,ih)':force_original_aspect_ratio=decrease" \
+        -c:v libx265 -b:v ''${target_bitrate}k -preset medium -x265-params pass=1 \
+        -an -f null /dev/null
+    
+    # --- Second pass
+    ${pkgs.ffmpeg-full}/bin/ffmpeg -y -i "$input" \
+        -vf "scale='min(1920\,iw)':'min(1080\,ih)':force_original_aspect_ratio=decrease" \
+        -c:v libx265 -b:v ''${target_bitrate}k -preset medium -x265-params pass=2 \
+        -c:a aac -b:a 128k \
+        -movflags +faststart \
+        "$output"
+
+    # "''$()
+    echo "Done: $output"
+  '';
 in {
   systemd.user.services.gpu-screen-recorder = {
     Unit = {
@@ -312,5 +369,6 @@ in {
 
   home.packages = with pkgs; [
     hdr-to-sdr
+    discord-compress
   ];
 }
