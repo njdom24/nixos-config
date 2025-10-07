@@ -9,7 +9,43 @@
   pkgs,
   hostName,
   ...
-}: {
+}: let
+  playYoutubeHdr = pkgs.writeShellScriptBin "play-youtube-hdr" ''
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    URL="$1"
+
+    YTDL_FORMAT=$(${pkgs.yt-dlp}/bin/yt-dlp -F "$URL" | ${pkgs.gawk}/bin/awk '
+    NR>6 {
+      if ($6 == "10" || $6 == "HDR") {
+        vid[$1]=$3*1000+$4
+        id[$1]=$1
+      }
+    }
+    END {
+      max_val=0
+      best_id=""
+      for (i in vid) {
+        if (vid[i] > max_val) {
+          max_val=vid[i]
+          best_id=id[i]
+        }
+      }
+      if (best_id) print best_id
+    }')
+
+    if [[ -z "$YTDL_FORMAT" ]]; then
+      YTDL_FORMAT="bestvideo+bestaudio/best"
+    else
+      YTDL_FORMAT="''${YTDL_FORMAT}+bestaudio"
+      # "''$()
+    fi
+
+    echo "Playing with format: $YTDL_FORMAT"
+    ${pkgs.mpv}/bin/mpv --ytdl-format="$YTDL_FORMAT" "$URL"
+  '';
+in {
   # You can import other home-manager modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
@@ -92,6 +128,7 @@
       stable.kora-icon-theme
       flavours
       adw-gtk3
+      playYoutubeHdr
     ];
   };
 
