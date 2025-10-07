@@ -144,10 +144,11 @@
 	  profiles = {
 	    HDR = {
 	      profile-cond = "(p[\"video-params/primaries\"] == \"bt.2020\") and (p[\"video-params/gamma\"] == \"pq\")";
-	      vo = "dmabuf-wayland";
+	      vo = "gpu-next";
+	      target-colorspace-hint = "yes";
 	      #tone-mapping = "spline";
 	      gamut-mapping-mode = "auto";
-	      hdr-compute-peak = "yes";
+	      #hdr-compute-peak = "yes";
 	    };
 	  };
 	};
