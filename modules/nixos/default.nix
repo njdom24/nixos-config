@@ -3,5 +3,4 @@
 {
   # List your module files here
   # my-module = import ./my-module.nix;
-  sddm-avatar = import ./sddm-avatar.nix;
 }

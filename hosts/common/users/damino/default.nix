@@ -347,9 +347,11 @@ in
                   echo "SWAYSOCK: $SWAYSOCK"
                   echo "Primary display set to: $PRIMARY_DISPLAY"
 
+                  # Disable all non-primary outputs
+                  ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+
                   # Enable the primary display if it's disabled
-                  ${pkgs.sway}/bin/swaymsg output "*" disable
-                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" enable pos 0 0
+                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" pos 0 0
               else
                   echo "No connected displays found."
               fi
@@ -362,11 +364,11 @@ in
                 tap enabled
                 natural_scroll enabled
               }
-              exec ${monitorQuery}
-              exec ${highestRefresh}
-              exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; ${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`; sleep 10 && rm -f /tmp/wayvnc_login"
-              exec ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`"
-              exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.sunshine}/bin/sunshine ${sunshineCfg} > /tmp/sunshine_login"
+              exec ${pkgs.bash}/bin/bash -c 'echo "$( ${monitorQuery} )" > /tmp/swaylog.txt'
+              #exec ${highestRefresh}
+              #exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; ${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`; sleep 10 && rm -f /tmp/wayvnc_login"
+              #exec ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`"
+              #exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.sunshine}/bin/sunshine ${sunshineCfg} > /tmp/sunshine_login"
             '';
           in
           #"/usr/bin/env WLR_BACKENDS=drm,headless,libinput WLR_RENDERER=vulkan ${pkgs.sway}/bin/sway -c ${swayCfg} --unsupported-gpu";
@@ -465,6 +467,25 @@ in
       "systemd-journald".serviceConfig = {
         TimeoutStartSec = "10s";
         TimeoutStopSec = "10s";
+      };
+
+      sddm-avatar = let get-sddm-avatars = pkgs.writeShellScript "get-sddm-avatars" ''
+        for user in /home/*; do
+          username=$(basename $user)
+          if [ -f "$user/.face.icon" ]; then
+            cp -f "$user/.face.icon" "/var/lib/AccountsService/icons/$username"
+          fi
+        done
+        ''; in {
+        description = "Script to copy or update users Avatars at startup.";
+        wantedBy = [ "multi-user.target" ];
+        before = [ "display-manager.service" ];
+        serviceConfig = {
+          Type = "simple";
+          ExecStart = "${get-sddm-avatars}";
+          StandardOutput = "journal+console";
+          StandardError = "journal+console";
+        };
       };
 
       "ddcci@" = {
