@@ -140,18 +140,18 @@ in {
                 transfer=$(${pkgs.ffmpeg-full}/bin/ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
                     -of default=noprint_wrappers=1:nokey=1 "$path")
                 if [[ "$transfer" =~ smpte2084|arib-std-b67 ]]; then
-                  ${pkgs.libnotify}/bin/notify-send "Recording saved (HDR)" "$path"
+                  ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording saved (HDR)" "$path"
                 else
-                  ${pkgs.libnotify}/bin/notify-send "Recording saved" "$path"
+                  ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording saved" "$path"
                 fi
                 ;;
               "replay")
                 transfer=$(${pkgs.ffmpeg-full}/bin/ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
                     -of default=noprint_wrappers=1:nokey=1 "$path")
                 if [[ "$transfer" =~ smpte2084|arib-std-b67 ]]; then
-                  ${pkgs.libnotify}/bin/notify-send "Replay saved (HDR)" "$path"
+                  ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Replay saved (HDR)" "$path"
                 else
-                  ${pkgs.libnotify}/bin/notify-send "Replay saved" "$path"
+                  ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Replay saved" "$path"
                 fi
                 ;;
               *)
@@ -324,7 +324,7 @@ in {
               new_hdr=$(detect_hdr "$output")
               if [[ "$new_hdr" != "$hdr_status" ]]; then
                 echo "HDR status changed ($hdr_status -> $new_hdr)"
-                ${pkgs.libnotify}/bin/notify-send "HDR status changed ($hdr_status -> $new_hdr)" "Restarting service..."
+                ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "HDR status changed ($hdr_status -> $new_hdr)" "Restarting service..."
                 ${pkgs.systemd}/bin/systemctl --user restart gpu-screen-recorder
               else
                 echo "Reload received: HDR unchanged ($hdr_status)."
@@ -339,7 +339,7 @@ in {
               continue
             elif [[ "$line" =~ "new state: \"unconnected\"" ]]; then
               echo "Replay buffer disconnected. Restarting..."
-              ${pkgs.libnotify}/bin/notify-send "Replay buffer disconnected. Restarting..."
+              ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Replay buffer disconnected. Restarting..."
               # kill + exit so systemd restarts this watcher (Restart=.. will take care of it)
               kill "$gsr_pid" 2>/dev/null || true
               exit 1

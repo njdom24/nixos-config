@@ -325,9 +325,9 @@
         last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
 
         if [[ "$last_line" != *"Started recording"* ]]; then
-          ${pkgs.libnotify}/bin/notify-send "Starting recording..."
+          ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Starting recording..."
         else
-          ${pkgs.libnotify}/bin/notify-send "Stopping recording..."
+          ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Stopping recording..."
         fi
       '';
       screenshot = pkgs.writeShellScript "screenshot" ''
@@ -353,7 +353,7 @@
         if [[ -s "$tmpfile" ]]; then
           ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
           # cat "$tmpfile" | ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png
-          ${pkgs.libnotify}/bin/notify-send -i "$tmpfile" "Screenshot taken"
+          ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
         fi
       ''; in [
         "$mainMod, Return, exec, $terminal"
@@ -426,8 +426,8 @@
         "SHIFT, Prior, exec, ${screenshot} selector"
 
         # Save replay if gpu-screen-recorder -r is running
-        "CTRL, Print, exec, ${pkgs.libnotify}/bin/notify-send 'Saving replay...'"
-        "CTRL SHIFT, Next, exec, ${pkgs.libnotify}/bin/notify-send 'Saving replay...'" # Page Down
+        "CTRL, Print, exec, ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'"
+        "CTRL SHIFT, Next, exec, ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'" # Page Down
 
         # Start / stop manual recording if gpu-screen-recorder -ro is running
         "CTRL SHIFT, Print, exec, ${checkrec}"
@@ -443,7 +443,7 @@
           last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
 
           if [[ "$last_line" != *"Started recording"* ]]; then
-            ${pkgs.libnotify}/bin/notify-send "Recording started"
+            ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording started"
           fi
 
           ${pkgs.procps}/bin/pgrep -f "gpu-screen-recorder" | while read pid; do
