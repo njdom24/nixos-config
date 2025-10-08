@@ -92,6 +92,8 @@
   in {
     enable = true;
     systemd.enable = true;
+    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
     #importantPrefixes = [ "output" ];
     #plugins = [ pkgs.hyprlandPlugins.hy3 ];
     #plugins = [ inputs.hy3.packages.x86_64-linux.hy3 ];
