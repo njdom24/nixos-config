@@ -9,43 +9,7 @@
   pkgs,
   hostName,
   ...
-}: let
-  playYoutubeHdr = pkgs.writeShellScriptBin "play-youtube-hdr" ''
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    URL="$1"
-
-    YTDL_FORMAT=$(${pkgs.yt-dlp}/bin/yt-dlp -F "$URL" | ${pkgs.gawk}/bin/awk '
-    NR>6 {
-      if ($6 == "10" || $6 == "HDR") {
-        vid[$1]=$3*1000+$4
-        id[$1]=$1
-      }
-    }
-    END {
-      max_val=0
-      best_id=""
-      for (i in vid) {
-        if (vid[i] > max_val) {
-          max_val=vid[i]
-          best_id=id[i]
-        }
-      }
-      if (best_id) print best_id
-    }')
-
-    if [[ -z "$YTDL_FORMAT" ]]; then
-      YTDL_FORMAT="bestvideo+bestaudio/best"
-    else
-      YTDL_FORMAT="''${YTDL_FORMAT}+bestaudio"
-      # "''$()
-    fi
-
-    echo "Playing with format: $YTDL_FORMAT"
-    ${pkgs.mpv}/bin/mpv --ytdl-format="$YTDL_FORMAT" "$URL"
-  '';
-in {
+}: {
   # You can import other home-manager modules here
   imports = [
     # If you want to use modules your own flake exports (from modules/home-manager):
@@ -120,7 +84,24 @@ in {
       LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.xorg.libX11}/lib"; # Fixed MangoHud for Wayland apps: https://github.com/ValveSoftware/gamescope/pull/1666 https://github.com/flightlessmango/MangoHud/issues/1497
     };
 
-    packages = with pkgs; [
+    packages = let
+      playYoutubeHdr = pkgs.writeShellScriptBin "youtube-hdr" ''
+      #!/usr/bin/env bash
+      url="$1"
+
+      hdr_format=$(${pkgs.yt-dlp}/bin/yt-dlp -F "$url" | ${pkgs.gnugrep}/bin/grep "HDR" | ${pkgs.coreutils}/bin/tail -n 1 | ${pkgs.gawk}/bin/awk '{print $1}')
+
+      if [[ -z "$hdr_format" ]]; then
+        echo "Video has no HDR option." >&2
+        exit 1
+      fi
+
+      format="''${hdr_format}+bestaudio"
+      # "''$()
+
+      echo "Playing HDR: $format"
+      ${pkgs.mpv}/bin/mpv --ytdl-format="bestvideo+bestaudio/best" "$url"
+    ''; in with pkgs; [
       nwg-look
       nwg-displays
       fluent-gtk-theme
