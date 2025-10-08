@@ -289,6 +289,63 @@ in
   	            fi
   	          done
   	        '';
+  	        monitorScale = pkgs.writeShellScript "monitor-scale" ''
+  	          #!/usr/bin/env bash
+
+  	          if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+  	            echo "Usage: $0 <output_name> [target_dpi]" >&2
+  	            exit 1
+  	          fi
+
+  	          output="$1"
+  	          # Default target DPI matches 27" 1440p
+  	          target_dpi="''${2:-110}"
+
+  	          # --- Find DRM connector ---
+  	          edid_path=""
+  	          for dir in /sys/class/drm/*; do
+  	            if [ -d "$dir" ] && [[ "$(basename "$dir")" == *-"$output" ]]; then
+  	              edid_path="$dir"
+  	              break
+  	            fi
+  	          done
+
+  	          if [ -z "$edid_path" ]; then
+  	            echo "Error: no DRM connector found for $output" >&2
+  	            exit 1
+  	          fi
+
+  	          edid_file="$edid_path/edid"
+  	          if [ ! -f "$edid_file" ]; then
+  	            echo "Error: no EDID data found for $output" >&2
+  	            exit 1
+  	          fi
+
+  	          # --- Extract physical size from EDID (in cm) ---
+  	          read mw mh <<<$(${pkgs.edid-decode}/bin/edid-decode "$edid_file" 2>/dev/null | ${pkgs.gawk}/bin/awk '/Maximum image size:/ {print $4, $7; exit}')
+  	          if [ -z "''${mw:-}" ] || [ -z "''${mh:-}" ]; then
+  	              echo "Error: could not parse physical size from EDID for $output" >&2
+  	              exit 1
+  	          fi
+
+  	          # --- Get current resolution from Sway ---
+  	          width=$(${pkgs.sway}/bin/swaymsg -t get_outputs -r | ${pkgs.jq}/bin/jq -r --arg name "$output" '.[] | select(.name==$name) | .current_mode.width')
+  	          height=$(${pkgs.sway}/bin/swaymsg -t get_outputs -r | ${pkgs.jq}/bin/jq -r --arg name "$output" '.[] | select(.name==$name) | .current_mode.height')
+
+  	          if [ -z "''${width:-}" ] || [ -z "''${height:-}" ]; then
+  	            echo "Error: could not query resolution for $output" >&2
+  	            exit 1
+  	          fi
+
+  	          # --- Compute DPI ---
+  	          dpi=$(${pkgs.gawk}/bin/awk -v w=$width -v h=$height -v mw=$mw -v mh=$mh \
+  	            'BEGIN { print sqrt((w*w + h*h)) / sqrt((mw/2.54)^2 + (mh/2.54)^2) }')
+
+  	          # --- Compute recommended Sway scale ---
+  	          scale=$(${pkgs.gawk}/bin/awk -v dpi=$dpi -v target=$target_dpi 'BEGIN { printf "%.2f", dpi/target }')
+              # "''$()
+  	          echo "$scale"
+  	        '';
   	        monitorQuery = pkgs.writeShellScript "monitor-query" ''
               #!/usr/bin/env bash
 
@@ -350,8 +407,9 @@ in
                   # Disable all non-primary outputs
                   ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
 
-                  # Enable the primary display if it's disabled
-                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" pos 0 0
+                  # Enable, the primary display if it's disabled, scale
+                  scale="$(${monitorScale} $PRIMARY_DISPLAY)" || scale="1"
+                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" pos 0 0 scale $scale
               else
                   echo "No connected displays found."
               fi
