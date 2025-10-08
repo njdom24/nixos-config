@@ -322,6 +322,7 @@
       checkrec = pkgs.writeShellScript "checkrec" ''
         # Check if recording will be started, since GSR doesn't give feedback
         # Get the latest status line from the gpu-screen-recorder journal
+        ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
         last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
 
         if [[ "$last_line" != *"Started recording"* ]]; then
@@ -426,8 +427,8 @@
         "SHIFT, Prior, exec, ${screenshot} selector"
 
         # Save replay if gpu-screen-recorder -r is running
-        "CTRL, Print, exec, ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'"
-        "CTRL SHIFT, Next, exec, ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'" # Page Down
+        "CTRL, Print, exec, ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'"
+        "CTRL SHIFT, Next, exec, ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'" # Page Down
 
         # Start / stop manual recording if gpu-screen-recorder -ro is running
         "CTRL SHIFT, Print, exec, ${checkrec}"
@@ -439,6 +440,8 @@
       bindo = let
         screenrec = pkgs.writeShellScript "screenrec" ''
           # Check if recording will be started, since GSR doesn't give feedback
+          ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
+
           # Get the latest status line from the gpu-screen-recorder journal
           last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
 
