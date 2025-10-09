@@ -433,7 +433,7 @@ in
                 natural_scroll enabled
               }
               exec ${pkgs.bash}/bin/bash -c 'echo "$( ${monitorQuery} )" > /tmp/swaylog.txt'
-              #exec ${highestRefresh}
+              exec ${highestRefresh}
               #exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.wayvnc}/bin/wayvnc 127.0.0.1 --log-level=info > /tmp/wayvnc_login; ${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`; sleep 10 && rm -f /tmp/wayvnc_login"
               #exec ${pkgs.bash}/bin/bash -c "${pkgs.procps}/bin/kill `${pkgs.procps}/bin/pgrep sunshine`"
               #exec ${pkgs.bash}/bin/bash -c "sleep 5 && ${pkgs.sunshine}/bin/sunshine ${sunshineCfg} > /tmp/sunshine_login"
