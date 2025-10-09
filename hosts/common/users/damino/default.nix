@@ -367,7 +367,7 @@ in
 
               # Function to get all connected displays with their descriptions
               get_connected_displays() {
-                  ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | .name + " " + (.make // "") + " " + (.model // "")'
+                ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | .name + " " + (.make // "") + " " + (.model // "")'
               }
 
               # Retrieve the list of connected displays with their descriptions
@@ -383,45 +383,45 @@ in
               # Iterate through the preferred devices list and select the first connected display matching a device name
               echo "Pref: ''\${PREFERRED_DEVICES[@]}"
               for device_name in "''\${PREFERRED_DEVICES[@]}"; do
-				  echo "DEVICE: $device_name"
-                  if echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep -q "$device_name"; then
-                      PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep "$device_name" | ${pkgs.gawk}/bin/awk '{print $1}')
-                      echo "Preferred monitor '$device_name' found: $PRIMARY_DISPLAY"
-                      break  # Exit the loop once a match is found
-                  fi
+				echo "DEVICE: $device_name"
+                if echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep -q "$device_name"; then
+                  PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" | ${pkgs.gnugrep}/bin/grep "$device_name" | ${pkgs.gawk}/bin/awk '{print $1}')
+                  echo "Preferred monitor '$device_name' found: $PRIMARY_DISPLAY"
+                  break  # Exit the loop once a match is found
+                fi
               done
               
               # If no preferred device is connected, pick the first connected display by priority:
               # DP* > HDMI* > eDP* > others
               if [[ -z "$PRIMARY_DISPLAY" && -n "$CONNECTED_DISPLAYS" ]]; then
-                  PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" \
-                      | ${pkgs.gawk}/bin/awk '
-                          # Assign priorities
-                          /^DP/   { pri=1 }
-                          /^HDMI/ { pri=2 }
-                          /^eDP/  { pri=3 }
-                          !/^DP/ && !/^HDMI/ && !/^eDP/ { pri=4 }
-                          { print pri, $0 }
-                      ' \
-                      | ${pkgs.coreutils}/bin/sort -k1,1n \
-                      | ${pkgs.gawk}/bin/awk "{print \$2; exit}")
-                  echo "No preferred monitor found; defaulting to prioritized display: $PRIMARY_DISPLAY"
+                PRIMARY_DISPLAY=$(echo "$CONNECTED_DISPLAYS" \
+                  | ${pkgs.gawk}/bin/awk '
+                    # Assign priorities
+                    /^DP/   { pri=1 }
+                    /^HDMI/ { pri=2 }
+                    /^eDP/  { pri=3 }
+                    !/^DP/ && !/^HDMI/ && !/^eDP/ { pri=4 }
+                    { print pri, $0 }
+                  ' \
+                  | ${pkgs.coreutils}/bin/sort -k1,1n \
+                  | ${pkgs.gawk}/bin/awk "{print \$2; exit}")
+                echo "No preferred monitor found; defaulting to prioritized display: $PRIMARY_DISPLAY"
               fi
 
               # Export the primary display as an environment variable if a display was found
               if [[ -n "$PRIMARY_DISPLAY" ]]; then
-                  export PRIMARY_DISPLAY
-                  echo "SWAYSOCK: $SWAYSOCK"
-                  echo "Primary display set to: $PRIMARY_DISPLAY"
+                export PRIMARY_DISPLAY
+                echo "SWAYSOCK: $SWAYSOCK"
+                echo "Primary display set to: $PRIMARY_DISPLAY"
 
-                  # Disable all non-primary outputs
-                  ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+                # Disable all non-primary outputs
+                ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
 
-                  # Enable, the primary display if it's disabled, scale
-                  scale="$(${monitorScale} $PRIMARY_DISPLAY)" || scale="1"
-                  ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" pos 0 0 scale $scale
+                # Enable, the primary display if it's disabled, scale
+                scale="$(${monitorScale} $PRIMARY_DISPLAY)" || scale="1"
+                ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" pos 0 0 scale $scale
               else
-                  echo "No connected displays found."
+                echo "No connected displays found."
               fi
   	        '';
             swayCfg = pkgs.writeText "sway.conf" ''
