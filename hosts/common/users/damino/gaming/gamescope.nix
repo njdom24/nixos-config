@@ -393,9 +393,15 @@ let
             fi
           fi
         elif [[ "$hdr_enabled" == "1" ]]; then
-          # Scale peak brightness by luminance multiplier from base of 203 nits
-          scale=$(echo "scale=4; $hdr_paper_white / 203" | ${pkgs.bc}/bin/bc)
-          adjusted_peak=$(echo "$hdr_peak / $scale" | ${pkgs.bc}/bin/bc)
+          if [[ "$XDG_CURRENT_DESKTOP" == "KDE" || "$_GSC_PARENT_DESKTOP" == "KDE" ]]; then
+            # Scale peak brightness by luminance multiplier from base of 203 nits
+            scale=$(echo "scale=4; $hdr_paper_white / 203" | ${pkgs.bc}/bin/bc)
+            adjusted_peak=$(echo "$hdr_peak / $scale" | ${pkgs.bc}/bin/bc)
+          else
+            # Not KDE: don't scale
+            adjusted_peak=$hdr_peak
+          fi
+          
           # Set peak brightness
           ${pkgs.gnused}/bin/sed -i "s/^ToneMapPeakNits=.*/ToneMapPeakNits=$adjusted_peak/" "$reshade_file"
         
