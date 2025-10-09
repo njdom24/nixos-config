@@ -298,13 +298,23 @@ in
   	          fi
 
   	          output="$1"
-  	          # Default target DPI matches 27" 1440p
-  	          target_dpi="''${2:-110}"
+
+  	          # $2 = optional user target DPI
+  	          if [ -n "''${2:-}" ]; then
+  	            target_dpi="$2"
+  	            # "''$()
+  	          else
+  	            if [[ "$output" == eDP-* ]]; then
+  	              target_dpi=155  # Laptop target DPI
+  	            else
+  	              target_dpi=110  # Desktop monitor target DPI (Matches 27" 1440p)
+  	            fi
+  	          fi
 
   	          # --- Find DRM connector ---
   	          edid_path=""
   	          for dir in /sys/class/drm/*; do
-  	            if [ -d "$dir" ] && [[ "$(basename "$dir")" == *-"$output" ]]; then
+  	            if [ -d "$dir" ] && [[ "$(${pkgs.coreutils}/bin/basename "$dir")" == *-"$output" ]]; then
   	              edid_path="$dir"
   	              break
   	            fi
@@ -324,8 +334,8 @@ in
   	          # --- Extract physical size from EDID (in cm) ---
   	          read mw mh <<<$(${pkgs.edid-decode}/bin/edid-decode "$edid_file" 2>/dev/null | ${pkgs.gawk}/bin/awk '/Maximum image size:/ {print $4, $7; exit}')
   	          if [ -z "''${mw:-}" ] || [ -z "''${mh:-}" ]; then
-  	              echo "Error: could not parse physical size from EDID for $output" >&2
-  	              exit 1
+  	            echo "Error: could not parse physical size from EDID for $output" >&2
+  	            exit 1
   	          fi
 
   	          # --- Get current resolution from Sway ---
@@ -343,7 +353,7 @@ in
 
   	          # --- Compute recommended Sway scale ---
   	          scale=$(${pkgs.gawk}/bin/awk -v dpi=$dpi -v target=$target_dpi 'BEGIN { printf "%.2f", dpi/target }')
-              # "''$()
+
   	          echo "$scale"
   	        '';
   	        monitorQuery = pkgs.writeShellScript "monitor-query" ''
@@ -529,7 +539,7 @@ in
 
       sddm-avatar = let get-sddm-avatars = pkgs.writeShellScript "get-sddm-avatars" ''
         for user in /home/*; do
-          username=$(basename $user)
+          username=$(${pkgs.coreutils}/bin/basename $user)
           if [ -f "$user/.face.icon" ]; then
             cp -f "$user/.face.icon" "/var/lib/AccountsService/icons/$username"
           fi
