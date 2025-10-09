@@ -219,7 +219,6 @@
         "maxsize 1 1, class:^(xwaylandvideobridge)$"
         "noblur, class:^(xwaylandvideobridge)$"
         "nofocus, class:^(xwaylandvideobridge)$"
-        "novrr, class:^(vlc)$" # Goes to 0 fps for some reason
 
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
@@ -274,7 +273,7 @@
       };
 
       render = {
-        direct_scanout = 1;
+        direct_scanout = 2;
         cm_fs_passthrough = 2;
         cm_auto_hdr = 1;
       };
