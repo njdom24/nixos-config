@@ -31,7 +31,7 @@
       if ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -y \
         -init_hw_device vulkan=vkdev:0 -filter_hw_device vkdev \
         -i "$input" \
-        -vf "libplacebo=tonemapping=spline:gamma=1.00:contrast=1.1:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=full,format=p010,hwupload" \
+        -vf "libplacebo=tonemapping=spline:gamma=1.05:contrast=1.05:gamut_mode=relative:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=full,format=p010,hwupload" \
         -c:v hevc_vulkan -b:v 20M -preset p5 -c:a copy "$output"
       then
         echo "GPU tonemapping / GPU encode succeeded." >&2
@@ -49,7 +49,7 @@
 
       if ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -y -init_hw_device vulkan \
         -i "$input" \
-        -vf "hwupload,libplacebo=tonemapping=spline:gamma=1.00:contrast=1.1:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=full,hwdownload,format=yuv420p10" \
+        -vf "hwupload,libplacebo=tonemapping=spline:gamma=1.05:contrast=1.05:colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=full,hwdownload,format=yuv420p10" \
         -c:v libx265 -crf 22 -preset medium -c:a copy "$output"
       then
         echo "GPU tonemapping / CPU encode succeeded." >&2
