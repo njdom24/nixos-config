@@ -353,8 +353,10 @@ in
 
   	          # --- Compute recommended Sway scale ---
   	          scale=$(${pkgs.gawk}/bin/awk -v dpi=$dpi -v target=$target_dpi 'BEGIN { printf "%.2f", dpi/target }')
+  	          # --- Round scale *up* to the next 0.05 step to avoid blurry fractional scaling ---
+  	          rounded_scale=$(${pkgs.gawk}/bin/awk -v s="$scale" 'BEGIN { printf "%.2f", (int((s*20)+0.9999))/20 }')
 
-  	          echo "$scale"
+  	          echo "$rounded_scale"
   	        '';
   	        monitorQuery = pkgs.writeShellScript "monitor-query" ''
               #!/usr/bin/env bash
