@@ -169,7 +169,6 @@ let
   # Gamescope helper to auto-fill mode, HDR, update settings
   gsc = pkgs.writeShellScriptBin "gsc" ''
     #!/usr/bin/env bash
-    set -eo pipefail
 
     export _GSC_PARENT_DESKTOP="''${_GSC_PARENT_DESKTOP:-$XDG_CURRENT_DESKTOP}"
     export _GSC_PARENT_DISPLAY="''${_GSC_PARENT_DISPLAY:-$DISPLAY}"
@@ -366,7 +365,7 @@ let
 
     read hdr_enabled hdr_paper_white hdr_peak <<< "$(get_hdr)"
 
-    # Try to enable/disable RenoDX HDR ReShade automatically
+    # Try to configure RenoDX HDR ReShade automatically
     if [[ -v RENODX_HDR && "$RENODX_HDR" == "1" ]]; then
       reshade_file="$(${pkgs.coreutils}/bin/timeout 5 ${pkgs.findutils}/bin/find "$PWD" -type f -name 'ReShade.ini' | ${pkgs.coreutils}/bin/head -n 1)"
 
@@ -375,24 +374,71 @@ let
         # Find matching .addon64 file containing 'renodx'
         addon_file="$(${pkgs.findutils}/bin/find "$reshade_dir" -maxdepth 1 -type f -name '*.addon64' -printf '%f\n' | ${pkgs.gnugrep}/bin/grep renodx | head -n1)"
         addon_id="RenoDX@$addon_file"
-        
-        # Read current DisabledAddons value from [ADDON] section
-        current=$(${pkgs.gawk}/bin/awk -F= '/^\[ADDON\]/{f=1} f && /^DisabledAddons=/{print substr($0, index($0,$2)) ; exit}' "$reshade_file" | ${pkgs.coreutils}/bin/tr -d '\r\n' | ${pkgs.gnused}/bin/sed 's/^,*//; s/,*$//; s/ //g')
-        # Helper function
-        contains() {
-          [[ ",$1," == *",$2,"* ]]
-        }
-        
-        if [[ "$hdr_enabled" == "0" ]]; then
-          # Append addon_id if missing
-          if ! contains "$current" "$addon_id"; then
-            if [[ -z "$current" ]]; then
-              new_disabled_addons="$addon_id"
-            else
-              new_disabled_addons="$current,$addon_id"
+
+        if [[ "$hdr_enabled" == "1" ]]; then
+          addon_file_bak="$(${pkgs.findutils}/bin/find "$reshade_dir" -maxdepth 1 -type f -name '*.addon64.bak' -printf '%f\n' | ${pkgs.gnugrep}/bin/grep renodx | head -n1)"
+          # Enable: move .bak back to .addon64 if needed
+          if [[ -n "$addon_file_bak" ]]; then
+            mv -f "$addon_file_bak" "''${addon_file_bak%.bak}"
+            # "''$()"
+          fi
+        fi
+
+        # Try to enable/disable automatically
+        if ${pkgs.gnugrep}/bin/grep -q '^\[ADDON\]' "$reshade_file"; then
+          # Read current DisabledAddons value from [ADDON] section
+          current=$(${pkgs.gawk}/bin/awk -F= '/^\[ADDON\]/{f=1} f && /^DisabledAddons=/{print substr($0, index($0,$2)) ; exit}' "$reshade_file" | ${pkgs.coreutils}/bin/tr -d '\r\n' | ${pkgs.gnused}/bin/sed 's/^,*//; s/,*$//; s/ //g')
+          # Helper function
+          contains() {
+            [[ ",$1," == *",$2,"* ]]
+          }
+
+          if [[ "$hdr_enabled" == "0" ]]; then
+            # Append addon_id if missing
+            if ! contains "$current" "$addon_id"; then
+              if [[ -z "$current" ]]; then
+                new_disabled_addons="$addon_id"
+              else
+                new_disabled_addons="$current,$addon_id"
+              fi
+            fi
+          elif [[ "$hdr_enabled" == "1" ]]; then
+            # Remove addon_id if present
+            if contains "$current" "$addon_id"; then
+              # Filter the addon_id from the list
+              IFS=',' read -ra arr <<< "$current"
+              new_arr=()
+              for addon in "''${arr[@]}"; do
+                if [[ "$addon" != "$addon_id" && -n "$addon" ]]; then
+                  new_arr+=("$addon")
+                fi
+              done
+              new_disabled_addons=$(IFS=, ; echo "''${new_arr[*]}")
             fi
           fi
-        elif [[ "$hdr_enabled" == "1" ]]; then
+
+          if [[ -v new_disabled_addons ]]; then
+            temp_file="$(${pkgs.mktemp}/bin/mktemp)"
+
+            # Update the INI file DisabledAddons= line inside [ADDON]
+            ${pkgs.gawk}/bin/awk -v new="$new_disabled_addons" '
+            BEGIN{in_addon=0}
+             /^\[ADDON\]/ {in_addon=1; print; next}
+             /^\[/ && !/^\[ADDON\]/ {in_addon=0}
+             in_addon && /^DisabledAddons=/ {print "DisabledAddons=" new; next}
+             {print}
+            ' "$reshade_file" > "$temp_file" && mv "$temp_file" "$reshade_file"
+          fi
+        else
+          if [[ "$hdr_enabled" == "0" ]]; then
+            # Disable: move .addon64 to .addon64.bak if exists
+            if [[ -n "$addon_file" ]]; then
+              mv -f "$addon_file" "$addon_file.bak"
+            fi
+          fi
+        fi
+
+        if [[ "$hdr_enabled" == "1" ]]; then
           if [[ "$XDG_CURRENT_DESKTOP" == "KDE" || "$_GSC_PARENT_DESKTOP" == "KDE" ]]; then
             # Scale peak brightness by luminance multiplier from base of 203 nits
             scale=$(echo "scale=4; $hdr_paper_white / 203" | ${pkgs.bc}/bin/bc)
@@ -401,36 +447,11 @@ let
             # Not KDE: don't scale
             adjusted_peak=$hdr_peak
           fi
-          
+
           # Set peak brightness
           ${pkgs.gnused}/bin/sed -i "s/^ToneMapPeakNits=.*/ToneMapPeakNits=$adjusted_peak/" "$reshade_file"
-        
-          # Remove addon_id if present
-          if contains "$current" "$addon_id"; then
-            # Filter the addon_id from the list
-            IFS=',' read -ra arr <<< "$current"
-            new_arr=()
-            for addon in "''${arr[@]}"; do
-              if [[ "$addon" != "$addon_id" && -n "$addon" ]]; then
-                new_arr+=("$addon")
-              fi
-            done
-            new_disabled_addons=$(IFS=, ; echo "''${new_arr[*]}")
-          fi
         fi
 
-        if [[ -v new_disabled_addons ]]; then
-          temp_file="$(${pkgs.mktemp}/bin/mktemp)"
-
-          # Update the INI file DisabledAddons= line inside [ADDON]
-          ${pkgs.gawk}/bin/awk -v new="$new_disabled_addons" '
-          BEGIN{in_addon=0}
-           /^\[ADDON\]/ {in_addon=1; print; next}
-           /^\[/ && !/^\[ADDON\]/ {in_addon=0}
-           in_addon && /^DisabledAddons=/ {print "DisabledAddons=" new; next}
-           {print}
-          ' "$reshade_file" > "$temp_file" && mv "$temp_file" "$reshade_file"
-        fi
       fi
     fi
 

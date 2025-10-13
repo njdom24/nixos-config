@@ -24,7 +24,7 @@
            sdr_min_luminance = 0.005
            sdr_max_luminance = 203
            min_luminance = 0.005
-           max_luminance = 400
+           max_luminance = 1156
            max_avg_luminance = 203
            bitdepth = 10
            cm = srgb
