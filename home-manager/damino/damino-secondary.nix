@@ -19,7 +19,7 @@
            position = 2560x0
            scale = 1
            transform = 0
-           supports_hdr = 0
+           supports_hdr = 1
            vrr = 2
            sdr_min_luminance = 0.005
            sdr_max_luminance = 203

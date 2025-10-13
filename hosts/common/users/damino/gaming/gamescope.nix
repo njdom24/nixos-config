@@ -218,7 +218,7 @@ let
         sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
      
-        if [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" ]]; then
+        if [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" || "$max_lum" -gt 400 ]]; then
           echo "1 $sdr_max $max_lum"
         else
           echo "0 0 0"

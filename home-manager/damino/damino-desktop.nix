@@ -168,6 +168,7 @@
             scale = 1.5
             transform = 0
             vrr = 2
+            supports_hdr = 1
             sdr_min_luminance = 0.005
             sdr_max_luminance = 203
             min_luminance = 0.005
@@ -201,6 +202,7 @@
 	        scale = 1
 	        transform = 0
 	        vrr = 2
+	        supports_hdr = 1
 	        sdr_min_luminance = 0.005
 	        sdr_max_luminance = 203
 	        min_luminance = 0.005
