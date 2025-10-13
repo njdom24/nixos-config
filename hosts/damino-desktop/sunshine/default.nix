@@ -177,8 +177,8 @@
                     "	sdr_min_luminance = 0.005" \
                     "	sdr_max_luminance = 203" \
                     "	min_luminance = 0" \
-                    "	max_luminance = 1000" \
-                    "	max_avg_luminance = 400" \
+                    "	max_luminance = 203" \
+                    "	max_avg_luminance = 203" \
                     "	cm = srgb" \
                     "	supports_wide_color = 0" \
                     "	supports_hdr = 0" \
@@ -194,8 +194,10 @@
 
                   if [[ "$1" == "hdr" ]]; then
                     echo "Enabling HDR"
-                    ${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
+                    #${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
                     ${pkgs.gnused}/bin/sed -i 's/bitdepth = 8/bitdepth = 10/' "$tmpfile"
+                    ${pkgs.gnused}/bin/sed -i 's/max_luminance = 203/max_luminance = 1000/' "$tmpfile"
+                    ${pkgs.gnused}/bin/sed -i 's/max_avg_luminance = 203/max_avg_luminance = 1000/' "$tmpfile"
                     ${pkgs.gnused}/bin/sed -i 's/supports_wide_color = 0/supports_wide_color = 1/' "$tmpfile"
                     ${pkgs.gnused}/bin/sed -i 's/supports_hdr = 0/supports_hdr = 1/' "$tmpfile"
                   fi
