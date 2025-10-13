@@ -52,7 +52,7 @@
           sleep 1
 
           echo "Using display: $WAYLAND_DISPLAY"
-          session_class="$(loginctl show-session "$XDG_SESSION_ID" -p Class --value 2>/dev/null)"
+          session_class="$(${pkgs.systemd}/bin/loginctl show-session "$XDG_SESSION_ID" -p Class --value 2>/dev/null)"
           echo "Session class: $session_class"
           declare -a known_compositors=("kwin_wayland" "Hyprland" "sway")
 
@@ -219,6 +219,93 @@
           echo "Compositor: Unknown"
         '';
 
+      undoConfig = pkgs.writeShellScript "undoConfig" ''
+        session_class="$(${pkgs.systemd}/bin/loginctl show-session "$XDG_SESSION_ID" -p Class --value 2>/dev/null)"
+        if [ "$session_class" = "greeter" ]; then
+          echo "Running in greeter. Nothing to undo"
+          exit 0
+        fi
+
+        if [ -z "$REMOTE_ENABLED" ]; then
+          REMOTE_ENABLED=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^REMOTE_ENABLED=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+        fi
+        
+        if [ "$REMOTE_ENABLED" = "1" ]; then
+          echo "Fully-remote session. Keeping physical displays disabled"
+          exit 0
+        fi
+
+        export WAYLAND_DISPLAY=$(${getWaylandDisplay})
+        echo "Using display: $WAYLAND_DISPLAY"
+        declare -a known_compositors=("kwin_wayland" "Hyprland" "sway")
+
+        # Detect running compositor by process name
+        for comp in ''\${known_compositors[@]}''\; do
+          if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)" -f "$comp" > /dev/null; then
+            echo "Compositor: $comp"
+            
+            case "$comp" in
+              sway)
+                echo "→ Running sway-specific logic"
+                export XDG_CURRENT_DESKTOP="sway"
+                if [ -z "$SWAYSOCK" ]; then
+                  export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
+                fi
+
+                $(${pkgs.coreutils}/bin/timeout 5 ${pkgs.kanshi}/bin/kanshi) &
+                ;;
+              kwin_wayland)
+                echo "→ Running KDE/KWin-specific logic"
+                export XDG_CURRENT_DESKTOP="KDE"
+                
+                # Assume dummy display used for headless
+                DUMMY="HDMI-A-1"
+
+                # Get all connected and enabled outputs
+                outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+                  .outputs[]
+                  | select(.connected == true and .enabled == true)
+                  | .name
+                '))
+                
+                len=''${#outputs[@]}
+                first=''${outputs[0]:-}
+
+                if [[ $len -eq 0 || ( $len -eq 1 && ( "$first" == "$DUMMY" || "$first" == "$DP-3" ) ) ]]; then
+                  echo "Only dummy is enabled and connected. Restoring..."
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".disable
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.primary
+                else
+                  echo "Dummy is not the only enabled connected output"
+                fi
+                ;;
+              Hyprland)
+                echo "→ Running Hyprland-specific logic"
+                export XDG_CURRENT_DESKTOP="Hyprland"
+
+                display_cfg="/home/$USER/.config/hypr/displays.conf"
+                if [[ -f "$display_cfg".gsc ]]; then
+                  mv -f "$display_cfg".gsc "$display_cfg"
+                fi
+                ;;
+              "")
+                echo "→ No known compositor found"
+                ;;
+              *)
+                echo "→ Unknown compositor: $compositor"
+                ;;
+            esac
+            
+            exit 0
+          fi
+        done
+        
+        echo "Compositor: Unknown"
+      '';
+
       gamescopeConfig = pkgs.writeShellScript "gamescopeConfig" ''
         if ${pkgs.procps}/bin/pgrep -f ".gamescope-wrapped" > /dev/null || \
            ${pkgs.procps}/bin/pgrep -x "gamescope" > /dev/null || \
@@ -255,6 +342,7 @@
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} hdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
+              undo = undoConfig;
             }
           ];
         }
@@ -268,6 +356,7 @@
                 export WAYLAND_DISPLAY=$(${getWaylandDisplay})
                 ${displayConfig} sdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
+              undo = undoConfig;
             }
           ];
         }
@@ -282,6 +371,7 @@
                 ${displayConfig} hdr > /tmp/sunshine_log_$UID.txt 2>&1
                 ${gamescopeConfig} hdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
+              undo = undoConfig;
             }
           ];
         }
@@ -296,6 +386,7 @@
                 ${displayConfig} sdr > /tmp/sunshine_log_$UID.txt 2>&1
                 ${gamescopeConfig} sdr > /tmp/sunshine_log_$UID.txt 2>&1
               '';
+              undo = undoConfig;
             }
           ];
         }

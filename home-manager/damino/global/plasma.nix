@@ -398,7 +398,8 @@
         END { if (e && !cancel) exit 0; else exit 1 }
         ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
           # Disable RGB
-          ${pkgs.openrgb}/bin/openrgb --mode static --color 000000
+          $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
+          ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
 
           # Assume dummy display used for headless
           DUMMY="HDMI-A-1"
@@ -427,6 +428,7 @@
 
           systemctl --user start sunshine
         else
+          ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
           # Get all connected and enabled outputs
           outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
             .outputs[]

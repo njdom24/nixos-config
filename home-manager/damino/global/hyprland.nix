@@ -20,6 +20,8 @@
         ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
           $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
 
+          ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
+
           sleep 1
           # Enable headless display if remote
           # Hyprctl is unreliable and extremely buggy for disabling
@@ -63,6 +65,8 @@
           exit 0          
         fi
       fi
+
+      ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
 
       # Restore desktop config if not remote
       if [[ -f "$display_cfg".gsc ]]; then
@@ -123,7 +127,6 @@
         "MOZ_ENABLE_WAYLAND,1"
         "MOZ_DBUS_REMOTE,1"
         "NIXOS_OZONE_WL,1"
-        "REMOTE_ENABLED,0"
       ];
 
       #plugin = {
