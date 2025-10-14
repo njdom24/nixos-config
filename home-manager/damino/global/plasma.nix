@@ -393,12 +393,13 @@
     let sunshine-login = pkgs.writeShellScript "sunshine-login" ''
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP WAYLAND_DISPLAY DISPLAY
 
-      if [ -f /tmp/sunshine_login ] && [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]]; then
-        if ${pkgs.gawk}/bin/awk '
-        /CLIENT CONNECTED/ {e=1}
-        e && /CLIENT DISCONNECTED/ {cancel=1}
-        END { if (e && !cancel) exit 0; else exit 1 }
-        ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
+      if [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]]; then
+        if [[ "$(${pkgs.systemd}/bin/systemctl --user is-active sunshine.service 2>/dev/null)" == "active" ]] || \
+          ( [ -f /tmp/sunshine_login ] && ${pkgs.gawk}/bin/awk '
+          /CLIENT CONNECTED/ {e=1}
+          e && /CLIENT DISCONNECTED/ {cancel=1}
+          END { if (e && !cancel) exit 0; else exit 1 }
+          ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login) ); then
           # Disable RGB
           $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
           ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
@@ -428,7 +429,7 @@
             fi
           done <<< "$displays"
 
-          systemctl --user restart sunshine
+          ${pkgs.systemd}/bin/systemctl --user restart sunshine
         else
           ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
           # Get all connected and enabled outputs
