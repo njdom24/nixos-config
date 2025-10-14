@@ -18,6 +18,15 @@
 	      TMPDIR=/var/tmp/ ${pkgs.nh}/bin/nh home switch /etc/nixos -b old -- "$@"
 	      #home-manager switch --flake /etc/nixos/. "$@" -b old
 	    }
+	    nix-find-insecure() {
+          if [ -z "$1" ]; then
+            echo "Usage: nix-find-insecure <package-name-ver>"
+            return 1
+          fi
+
+          pkg="$1"
+          nix-store -q --referrers /nix/store/*$pkg
+	    }
 	  '';
 	  oh-my-zsh = {
 	    enable = true;
