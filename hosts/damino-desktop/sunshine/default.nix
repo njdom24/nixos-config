@@ -99,33 +99,53 @@
                 export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
               fi
 
-              # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
-              existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+              DUMMY="HDMI-A-1"
+              existing_dummy=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$DUMMY\")) | .name")
 
-              if [ -z "$existing_headless" ]; then
-                # If no HEADLESS output exists, create one
-                ${pkgs.sway}/bin/swaymsg create_output
+              if [ -z "$existing_dummy" ]; then
+                # TODO: Won't work with kmsgrab forced. Need to find a way to force wlroots...
+                # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
+                existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+
+                if [ -z "$existing_headless" ]; then
+                  # If no HEADLESS output exists, create one
+                  ${pkgs.sway}/bin/swaymsg create_output
+                fi
+                existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+                STREAMING_OUTPUT="$existing_headless"
+              else
+                STREAMING_OUTPUT="$DUMMY"
+                ${pkgs.sway}/bin/swaymsg output $DUMMY enable
+                #${pkgs.sway}/bin/swaymsg output HEADLESS-1 disable
+                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 unplug 2> /dev/null || true
               fi
+
               # Disable all non-HEADLESS outputs
               if [ "$session_class" != "greeter" ]; then
-                ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+                ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$STREAMING_OUTPUT\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
               fi
 
               # Configure display to match client
-              if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
+              if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e --arg out "$STREAMING_OUTPUT" '.[] | select(.name == $out)' > /dev/null; then
+                if [[ "$STREAMING_OUTPUT" == "$DUMMY" ]]; then
+                  if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
+                    SUNSHINE_CLIENT_FPS=120
+                  fi
+                fi
                 mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
-                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 mode $mode
+                ${pkgs.sway}/bin/swaymsg output "$STREAMING_OUTPUT" mode "$mode"
               else
                 echo "Error: Not headless"
-                exit 1
+                # Don't return failure, allow the stream to go through
+                exit 0
               fi
 
               if [[ "$1" == "hdr" ]]; then
                 echo "Enabling HDR"
-                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 10
+                ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 10
               else
                 echo "Disabling HDR"
-                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 8
+                ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 8
               fi
               ;;
             KDE)
