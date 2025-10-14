@@ -140,7 +140,7 @@
 		  exec sh -c 'if [ "$REMOTE_ENABLED" -ne 1 ]; then gtk-launch discord.desktop; fi'
 		  exec sh -c 'if [ "$REMOTE_ENABLED" -ne 1 ]; then gtk-launch steam.desktop; fi'
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
-		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then sleep 5 && ${pkgs.systemd}/bin/systemctl --user start sunshine; fi'
+		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then sleep 5 && ${pkgs.systemd}/bin/systemctl --user restart sunshine; fi'
 		'';
 
 		config = {

@@ -391,6 +391,8 @@
   home = {
     file =
     let sunshine-login = pkgs.writeShellScript "sunshine-login" ''
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP WAYLAND_DISPLAY DISPLAY
+
       if [ -f /tmp/sunshine_login ] && [[ "$XDG_CURRENT_DESKTOP" == "KDE" ]]; then
         if ${pkgs.gawk}/bin/awk '
         /CLIENT CONNECTED/ {e=1}
@@ -426,7 +428,7 @@
             fi
           done <<< "$displays"
 
-          systemctl --user start sunshine
+          systemctl --user restart sunshine
         else
           ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
           # Get all connected and enabled outputs

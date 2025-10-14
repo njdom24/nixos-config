@@ -24,6 +24,12 @@
       };
       applications.apps = let
         getWaylandDisplay = pkgs.writeShellScript "getWaylandDisplay" ''
+          if [[ -z "$WAYLAND_DISPLAY" ]]; then
+            session_class="$(${pkgs.systemd}/bin/loginctl show-session "$XDG_SESSION_ID" -p Class --value 2>/dev/null)"
+            if [ "$session_class" != "greeter" ]; then
+              WAYLAND_DISPLAY=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+            fi
+          fi
           if [ -z "$WAYLAND_DISPLAY" ]; then
 	        # Get WAYLAND_DISPLAY from a running process
 	        for pid in $(${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)"); do
@@ -56,170 +62,185 @@
           echo "Session class: $session_class"
           declare -a known_compositors=("kwin_wayland" "Hyprland" "sway")
 
-          # Detect running compositor by process name
-          for comp in ''\${known_compositors[@]}''\; do
-            if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)" -f "$comp" > /dev/null; then
-              echo "Compositor: $comp"
-              
-              case "$comp" in
-                sway)
-                  echo "→ Running sway-specific logic"
-                  export XDG_CURRENT_DESKTOP="sway"
-                  if [ -z "$SWAYSOCK" ]; then
-                    export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
-                  fi
+          if [[ -z "$XDG_CURRENT_DESKTOP" && "$session_class" != "greeter" ]]; then
+            XDG_CURRENT_DESKTOP=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^XDG_CURRENT_DESKTOP=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+          fi
 
-                  # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
-                  existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+          if [[ -z "$XDG_CURRENT_DESKTOP" ]]; then
+            # Detect running compositor by process name
+            for comp in ''\${known_compositors[@]}''\; do
+              if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)" -f "$comp" > /dev/null; then
+                echo "Compositor: $comp"
+                case "$comp" in
+                  sway)
+                    export XDG_CURRENT_DESKTOP="sway"
+                    ;;
+                  kwin_wayland)
+                    export XDG_CURRENT_DESKTOP="KDE"
+                    ;;
+                  Hyprland)
+                    export XDG_CURRENT_DESKTOP="Hyprland"
+                    ;;
+                  *)
+                    echo "→ Unknown compositor: $compositor"
+                    ;;
+                esac
+              fi
+            done
+          fi
+
+          case "$XDG_CURRENT_DESKTOP" in
+            sway)
+              echo "→ Running sway-specific logic"
+              if [ -z "$SWAYSOCK" ]; then
+                export SWAYSOCK=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^SWAYSOCK=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+              fi
+              if [ -z "$SWAYSOCK" ]; then
+                export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
+              fi
+
+              # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
+              existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+
+              if [ -z "$existing_headless" ]; then
+                # If no HEADLESS output exists, create one
+                ${pkgs.sway}/bin/swaymsg create_output
+              fi
+              # Disable all non-HEADLESS outputs
+              if [ "$session_class" != "greeter" ]; then
+                ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+              fi
+
+              # Configure display to match client
+              if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
+                mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
+                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 mode $mode
+              else
+                echo "Error: Not headless"
+                exit 1
+              fi
+
+              if [[ "$1" == "hdr" ]]; then
+                echo "Enabling HDR"
+                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 10
+              else
+                echo "Disabling HDR"
+                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 8
+              fi
+              ;;
+            KDE)
+              echo "→ Running KDE/KWin-specific logic"
+
+              # Assume dummy display used for headless
+              DUMMY="HDMI-A-1"
+
+              # Configure display to match client
+              if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
+                SUNSHINE_CLIENT_FPS=120
+              fi
+
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
+
+              output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o)
                   
-                  if [ -z "$existing_headless" ]; then
-                    # If no HEADLESS output exists, create one
-                    ${pkgs.sway}/bin/swaymsg create_output
-                  fi
-                  # Disable all non-HEADLESS outputs
-                  if [ "$session_class" != "greeter" ]; then
-                    ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
-                  fi
+              # Extract the names of the connected displays
+              displays=$(echo "$output" | ${pkgs.gawk}/bin/awk '/Output:/ { print $3 }')
+              echo "Displays found: $displays"
 
-                  # Configure display to match client
-                  if ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -e '.[] | select(.name == "HEADLESS-1")' > /dev/null; then
-                    mode="$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"Hz
-                    ${pkgs.sway}/bin/swaymsg output HEADLESS-1 mode $mode
-                  else
-                    echo "Error: Not headless"
-                    exit 1
-                  fi
+              # Check if the dummy display is present
+              echo "$displays" | grep -qx "$DUMMY"
+              if [ $? -ne 0 ]; then
+                echo "$DUMMY is not connected. Exiting."
+                exit 1
+              fi
                   
-                  if [[ "$1" == "hdr" ]]; then
-                    echo "Enabling HDR"
-                    ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 10
-                  else
-                    echo "Disabling HDR"
-                    ${pkgs.sway}/bin/swaymsg output HEADLESS-1 render_bit_depth 8
-                  fi
-                  
-                  ;;
-                kwin_wayland)
-                  echo "→ Running KDE/KWin-specific logic"
-                  export XDG_CURRENT_DESKTOP="KDE"
-                  
-                  # Assume dummy display used for headless
-                  DUMMY="HDMI-A-1"
+              # Loop through each display and disable all except DUMMY
+              while read -r display; do
+                if [[ "$display" != "$DUMMY" ]]; then
+                  echo "Disabling display: $display"
+                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$display".disable
+                fi
+              done <<< "$displays"
 
-                  # Configure display to match client
-                  if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
-                    SUNSHINE_CLIENT_FPS=120
-                  fi
+              if [[ "$1" == "hdr" ]]; then
+                echo "Enabling HDR"
+                ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".wcg.enable output."$DUMMY".hdr.enable
+                # https://github.com/LizardByte/Sunshine/issues/3298#issuecomment-2670218658
+                ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferAccuracy
+                #${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".sdr-brightness.203 # Standard reference luminance
+                ${pkgs.kdePackages.full}/bin/qdbus org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/Actions/BrightnessControl org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness 10000 # Max 100.00% brightness
+                ${pkgs.kdePackages.kscreen}/bin/hdrcalibrator "$DUMMY" & # Present calibration GUI
+              else
+                echo "Disabling HDR"
+                ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable output."$DUMMY".wcg.disable
+                ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferEfficiency
+              fi
+              ;;
+            Hyprland)
+              echo "→ Running Hyprland-specific logic"
 
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".mode."$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
-                  
-                  output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o)
-                  
-                  # Extract the names of the connected displays
-                  displays=$(echo "$output" | ${pkgs.gawk}/bin/awk '/Output:/ { print $3 }')
-                  echo "Displays found: $displays"
+              display_cfg="/home/$USER/.config/hypr/displays.conf"
+              if [[ ! -f "$display_cfg".gsc ]]; then
+                # Make backup
+                cp -f "$display_cfg" "$display_cfg".gsc
+              fi
 
-                  # Check if the dummy display is present
-                  echo "$displays" | grep -qx "$DUMMY"
-                  if [ $? -ne 0 ]; then
-                      echo "$DUMMY is not connected. Exiting."
-                      exit 1
-                  fi
-                  
-                  # Loop through each display and disable all except DUMMY
-                  while read -r display; do
-                    if [[ "$display" != "$DUMMY" ]]; then
-                      echo "Disabling display: $display"
-                      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$display".disable
-                    fi
-                  done <<< "$displays"
-                  
-                  if [[ "$1" == "hdr" ]]; then
-                    echo "Enabling HDR"
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".wcg.enable output."$DUMMY".hdr.enable
-                    # https://github.com/LizardByte/Sunshine/issues/3298#issuecomment-2670218658
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferAccuracy
-                    #${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".sdr-brightness.203 # Standard reference luminance
-                    ${pkgs.kdePackages.full}/bin/qdbus org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/Actions/BrightnessControl org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness 10000 # Max 100.00% brightness
-                    ${pkgs.kdePackages.kscreen}/bin/hdrcalibrator "$DUMMY" & # Present calibration GUI
-                  else
-                    echo "Disabling HDR"
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".hdr.disable output."$DUMMY".wcg.disable
-                    ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferEfficiency
-                  fi
-                  ;;
-                Hyprland)
-                  echo "→ Running Hyprland-specific logic"
-                  export XDG_CURRENT_DESKTOP="Hyprland"
+              # Configure display to match client
+              if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
+                SUNSHINE_CLIENT_FPS=120
+              fi
 
-                  display_cfg="/home/$USER/.config/hypr/displays.conf"
-                  if [[ ! -f "$display_cfg".gsc ]]; then
-                    # Make backup
-                    cp "$display_cfg" "$display_cfg".gsc
-                  fi
+              tmpfile=$(${pkgs.mktemp}/bin/mktemp)
 
-                  # Configure display to match client
-                  if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
-                    SUNSHINE_CLIENT_FPS=120
-                  fi
+              ${pkgs.coreutils}/bin/printf "%s\n" \
+                "monitorv2 {" \
+                "	output = HDMI-A-1" \
+                "	mode = ''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}" \
+                "	position = 0x0" \
+                "	scale = 1" \
+                "	transform = 0" \
+                "	vrr = 0" \
+                "	sdr_min_luminance = 0.005" \
+                "	sdr_max_luminance = 203" \
+                "	min_luminance = 0" \
+                "	max_luminance = 203" \
+                "	max_avg_luminance = 203" \
+                "	cm = srgb" \
+                "	supports_wide_color = 0" \
+                "	supports_hdr = 0" \
+                "	bitdepth = 8" \
+                "}" \
+                "" \
+                "monitor = DP-1, disable" \
+                "monitor = DP-2, disable" \
+                "monitor = DP-3, disable" \
+                > "$tmpfile"
 
-                  tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+              # "''$()"
 
-                  ${pkgs.coreutils}/bin/printf "%s\n" \
-                    "monitorv2 {" \
-                    "	output = HDMI-A-1" \
-                    "	mode = ''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}" \
-                    "	position = 0x0" \
-                    "	scale = 1" \
-                    "	transform = 0" \
-                    "	vrr = 0" \
-                    "	sdr_min_luminance = 0.005" \
-                    "	sdr_max_luminance = 203" \
-                    "	min_luminance = 0" \
-                    "	max_luminance = 203" \
-                    "	max_avg_luminance = 203" \
-                    "	cm = srgb" \
-                    "	supports_wide_color = 0" \
-                    "	supports_hdr = 0" \
-                    "	bitdepth = 8" \
-                    "}" \
-                    "" \
-                    "monitor = DP-1, disable" \
-                    "monitor = DP-2, disable" \
-                    "monitor = DP-3, disable" \
-                    > "$tmpfile"
+              if [[ "$1" == "hdr" ]]; then
+                echo "Enabling HDR"
+                ${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
+                ${pkgs.gnused}/bin/sed -i 's/bitdepth = 8/bitdepth = 10/' "$tmpfile"
+                ${pkgs.gnused}/bin/sed -i 's/max_luminance = 203/max_luminance = 1000/' "$tmpfile"
+                ${pkgs.gnused}/bin/sed -i 's/max_avg_luminance = 203/max_avg_luminance = 1000/' "$tmpfile"
+                ${pkgs.gnused}/bin/sed -i 's/sdr_max_luminance = 1000/sdr_max_luminance = 203/' "$tmpfile"
+                ${pkgs.gnused}/bin/sed -i 's/supports_wide_color = 0/supports_wide_color = 1/' "$tmpfile"
+                ${pkgs.gnused}/bin/sed -i 's/supports_hdr = 0/supports_hdr = 1/' "$tmpfile"
+              fi
 
-                  # "''$()"
+              mv -f "$tmpfile" ~/.config/hypr/displays.conf
 
-                  if [[ "$1" == "hdr" ]]; then
-                    echo "Enabling HDR"
-                    ${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
-                    ${pkgs.gnused}/bin/sed -i 's/bitdepth = 8/bitdepth = 10/' "$tmpfile"
-                    ${pkgs.gnused}/bin/sed -i 's/max_luminance = 203/max_luminance = 1000/' "$tmpfile"
-                    ${pkgs.gnused}/bin/sed -i 's/max_avg_luminance = 203/max_avg_luminance = 1000/' "$tmpfile"
-                    ${pkgs.gnused}/bin/sed -i 's/sdr_max_luminance = 1000/sdr_max_luminance = 203/' "$tmpfile"
-                    ${pkgs.gnused}/bin/sed -i 's/supports_wide_color = 0/supports_wide_color = 1/' "$tmpfile"
-                    ${pkgs.gnused}/bin/sed -i 's/supports_hdr = 0/supports_hdr = 1/' "$tmpfile"
-                  fi
-
-                  mv -f "$tmpfile" ~/.config/hypr/displays.conf
-
-                  ${pkgs.procps}/bin/kill $($pkgs.procps}/bin/pgrep hyprland-share) || true
-                  ;;
-                "")
-                  echo "→ No known compositor found"
-                  ;;
-                *)
-                  echo "→ Unknown compositor: $compositor"
-                  ;;
-              esac
-              
-              exit 0
-            fi
-          done
-          
-          echo "Compositor: Unknown"
+              ${pkgs.procps}/bin/kill $($pkgs.procps}/bin/pgrep hyprland-share) || true
+              ;;
+            "")
+              echo "→ No known compositor found"
+              ;;
+            *)
+              echo "→ Unknown compositor: $compositor"
+              ;;
+          esac
         '';
 
       undoConfig = pkgs.writeShellScript "undoConfig" ''
@@ -242,80 +263,94 @@
         echo "Using display: $WAYLAND_DISPLAY"
         declare -a known_compositors=("kwin_wayland" "Hyprland" "sway")
 
-        # Detect running compositor by process name
-        for comp in ''\${known_compositors[@]}''\; do
-          if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)" -f "$comp" > /dev/null; then
-            echo "Compositor: $comp"
+        if [[ -z "$XDG_CURRENT_DESKTOP" && "$session_class" != "greeter" ]]; then
+          XDG_CURRENT_DESKTOP=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^XDG_CURRENT_DESKTOP=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+        fi
+
+        if [[ -z "$XDG_CURRENT_DESKTOP" ]]; then
+          # Detect running compositor by process name
+          for comp in ''\${known_compositors[@]}''\; do
+            if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/whoami)" -f "$comp" > /dev/null; then
+              echo "Compositor: $comp"
+              case "$comp" in
+                sway)
+                  export XDG_CURRENT_DESKTOP="sway"
+                  ;;
+                kwin_wayland)
+                  export XDG_CURRENT_DESKTOP="KDE"
+                  ;;
+                Hyprland)
+                  export XDG_CURRENT_DESKTOP="Hyprland"
+                  ;;
+                *)
+                  echo "→ Unknown compositor: $compositor"
+                  ;;
+              esac
+            fi
+          done
+        fi
             
-            case "$comp" in
-              sway)
-                echo "→ Running sway-specific logic"
-                export XDG_CURRENT_DESKTOP="sway"
-                if [ -z "$SWAYSOCK" ]; then
-                  export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
-                fi
+        case "$XDG_CURRENT_DESKTOP" in
+          sway)
+            echo "→ Running sway-specific logic"
 
-                $(${pkgs.coreutils}/bin/timeout 5 ${pkgs.kanshi}/bin/kanshi) &
-                ;;
-              kwin_wayland)
-                echo "→ Running KDE/KWin-specific logic"
-                export XDG_CURRENT_DESKTOP="KDE"
-                
-                # Assume dummy display used for headless
-                DUMMY="HDMI-A-1"
+            if [ -z "$SWAYSOCK" ]; then
+              export SWAYSOCK=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^SWAYSOCK=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+            fi
+            if [ -z "$SWAYSOCK" ]; then
+              export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
+            fi
 
-                # Get all connected and enabled outputs
-                outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
-                  .outputs[]
-                  | select(.connected == true and .enabled == true)
-                  | .name
-                '))
-                
-                len=''${#outputs[@]}
-                first=''${outputs[0]:-}
+            $(${pkgs.coreutils}/bin/timeout 5 ${pkgs.kanshi}/bin/kanshi) &
+            ;;
+          KDE)
+            echo "→ Running KDE/KWin-specific logic"
 
-                if [[ $len -eq 0 || ( $len -eq 1 && ( "$first" == "$DUMMY" || "$first" == "$DP-3" ) ) ]]; then
-                  echo "Only dummy is enabled and connected. Restoring..."
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".disable
-                  ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.primary
-                else
-                  echo "Dummy is not the only enabled connected output"
-                fi
-                ;;
-              Hyprland)
-                echo "→ Running Hyprland-specific logic"
-                export XDG_CURRENT_DESKTOP="Hyprland"
+            # Assume dummy display used for headless
+            DUMMY="HDMI-A-1"
 
-                display_cfg="/home/$USER/.config/hypr/displays.conf"
-                if [[ -f "$display_cfg".gsc ]]; then
-                  mv -f "$display_cfg".gsc "$display_cfg"
-                fi
-                ;;
-              "")
-                echo "→ No known compositor found"
-                ;;
-              *)
-                echo "→ Unknown compositor: $compositor"
-                ;;
-            esac
-            
-            exit 0
-          fi
-        done
-        
-        echo "Compositor: Unknown"
+            # Get all connected and enabled outputs
+            outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+              .outputs[]
+              | select(.connected == true and .enabled == true)
+              | .name
+            '))
+
+            len=''${#outputs[@]}
+            first=''${outputs[0]:-}
+
+            if [[ $len -eq 0 || ( $len -eq 1 && ( "$first" == "$DUMMY" || "$first" == "$DP-3" ) ) ]]; then
+              echo "Only dummy is enabled and connected. Restoring..."
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-2.enable
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.disable
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".disable
+              ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.primary
+            else
+              echo "Dummy is not the only enabled connected output"
+            fi
+            ;;
+          Hyprland)
+            echo "→ Running Hyprland-specific logic"
+
+            display_cfg="/home/$USER/.config/hypr/displays.conf"
+            if [[ -f "$display_cfg".gsc ]]; then
+              mv -f "$display_cfg".gsc "$display_cfg"
+            fi
+            ;;
+          *)
+            echo "→ Unknown compositor: $compositor"
+            ;;
+        esac
       '';
 
       gamescopeConfig = pkgs.writeShellScript "gamescopeConfig" ''
         if ${pkgs.procps}/bin/pgrep -f ".gamescope-wrapped" > /dev/null || \
-           ${pkgs.procps}/bin/pgrep -x "gamescope" > /dev/null || \
-           ${pkgs.procps}/bin/pgrep -x "gamescope-wl" > /dev/null; then
+          ${pkgs.procps}/bin/pgrep -x "gamescope" > /dev/null || \
+          ${pkgs.procps}/bin/pgrep -x "gamescope-wl" > /dev/null; then
 
           echo "Gamescope is running. Adjusting"
-          
+
           if [[ "$1" == "hdr" ]]; then
             echo "Enabling HDR"
             ${pkgs.gamescope}/bin/gamescopectl hdr_enabled 1
@@ -323,7 +358,8 @@
             echo "Disabling HDR"
             ${pkgs.gamescope}/bin/gamescopectl hdr_enabled 0
           fi
-          ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS
+          # Gamescope FPS limiter is buggy
+          # ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS
         else
           echo "gamescope is not running. Starting"
           ${pkgs.systemd}/bin/systemctl --user reset-failed

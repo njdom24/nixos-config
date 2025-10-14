@@ -60,7 +60,7 @@
           mv -f "$tmpfile" ~/.config/hypr/displays.conf
 
           sleep 1 && ${pkgs.hyprland}/bin/hyprctl reload
-          sleep 3 && ${pkgs.systemd}/bin/systemctl --user start sunshine
+          sleep 3 && ${pkgs.systemd}/bin/systemctl --user restart sunshine
 
           exit 0          
         fi
