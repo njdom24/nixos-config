@@ -327,24 +327,21 @@
 		    export REMOTE_ENABLED=0
 		  fi
 
-		  ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=$REMOTE_ENABLED
-
-		  if [ -f /tmp/sunshine_login ]; then
-		    if ${pkgs.gawk}/bin/awk '
-		    /CLIENT CONNECTED/ {e=1}
-		    e && /CLIENT DISCONNECTED/ {cancel=1}
-		    END { if (e && !cancel) exit 0; else exit 1 }
-		    ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
-		      export REMOTE_ENABLED=1
-		      export WLR_DRM_DEVICES=/dev/dri/card1
-		      #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
-		      ${pkgs.openrgb}/bin/openrgb --mode static --color 000000 2> /dev/null || true
-		    else
-		      export REMOTE_ENABLED=0
-		    fi
+		  if [[ "$(${pkgs.systemd}/bin/systemctl --user is-active sunshine.service 2>/dev/null)" == "active" ]] || \
+		     ( [ -f /tmp/sunshine_login ] && ${pkgs.gawk}/bin/awk '
+		        /CLIENT CONNECTED/ {e=1}
+		        e && /CLIENT DISCONNECTED/ {cancel=1}
+		        END { if (e && !cancel) exit 0; else exit 1 }
+		      ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login) ); then
+		    export REMOTE_ENABLED=1
+		    export WLR_DRM_DEVICES=/dev/dri/card1
+		    #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
+		    ${pkgs.openrgb}/bin/openrgb --mode static --color 000000 2> /dev/null || true
 		  else
 		    export REMOTE_ENABLED=0
 		  fi
+
+		  ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=$REMOTE_ENABLED
 
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
 		  #export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")

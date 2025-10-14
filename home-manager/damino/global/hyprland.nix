@@ -12,58 +12,57 @@
     set-displays = pkgs.writeShellScript "set-displays.sh" ''
       display_cfg="/home/$USER/.config/hypr/displays.conf"
 
-      if [ -f /tmp/sunshine_login ]; then
-        if ${pkgs.gawk}/bin/awk '
-        /CLIENT CONNECTED/ {e=1}
-        e && /CLIENT DISCONNECTED/ {cancel=1}
-        END { if (e && !cancel) exit 0; else exit 1 }
-        ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login); then
-          $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
+      if [[ "$(${pkgs.systemd}/bin/systemctl --user is-active sunshine.service 2>/dev/null)" == "active" ]] || \
+       ( [ -f /tmp/sunshine_login ] && ${pkgs.gawk}/bin/awk '
+          /CLIENT CONNECTED/ {e=1}
+          e && /CLIENT DISCONNECTED/ {cancel=1}
+          END { if (e && !cancel) exit 0; else exit 1 }
+        ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login) ); then
+        $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
 
-          ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
+        ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
 
-          sleep 1
-          # Enable headless display if remote
-          # Hyprctl is unreliable and extremely buggy for disabling
-          #${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1, 1920x1080@60,0x0,1
-          #sleep 1
-          #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-1, disable
-          #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-2, disable
-          #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3, disable
+        sleep 1
+        # Enable headless display if remote
+        # Hyprctl is unreliable and extremely buggy for disabling
+        #${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1, 1920x1080@60,0x0,1
+        #sleep 1
+        #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-1, disable
+        #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-2, disable
+        #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3, disable
 
-          if [[ ! -f "$display_cfg".gsc ]]; then
-            # Make backup
-            cp "$display_cfg" "$display_cfg".gsc
-          fi
-
-          tmpfile=$(${pkgs.mktemp}/bin/mktemp)
-
-          ${pkgs.coreutils}/bin/printf "%s\n" \
-            "monitorv2 {" \
-            "	output = HDMI-A-1" \
-            "	mode = 1920x1080@60" \
-            "	position = 0x0" \
-            "	scale = 1" \
-            "	transform = 0" \
-            "	vrr = 0" \
-            "	cm = srgb" \
-            "	supports_wide_color = 0" \
-            "	supports_hdr = 0" \
-            "	bitdepth = 8" \
-            "}" \
-            "" \
-            "monitor = DP-1, disable" \
-            "monitor = DP-2, disable" \
-            "monitor = DP-3, disable" \
-            > "$tmpfile"
-
-          mv -f "$tmpfile" ~/.config/hypr/displays.conf
-
-          sleep 1 && ${pkgs.hyprland}/bin/hyprctl reload
-          sleep 3 && ${pkgs.systemd}/bin/systemctl --user restart sunshine
-
-          exit 0          
+        if [[ ! -f "$display_cfg".gsc ]]; then
+          # Make backup
+          cp -f "$display_cfg" "$display_cfg".gsc
         fi
+
+        tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+
+        ${pkgs.coreutils}/bin/printf "%s\n" \
+          "monitorv2 {" \
+          "	output = HDMI-A-1" \
+          "	mode = 1920x1080@60" \
+          "	position = 0x0" \
+          "	scale = 1" \
+          "	transform = 0" \
+          "	vrr = 0" \
+          "	cm = srgb" \
+          "	supports_wide_color = 0" \
+          "	supports_hdr = 0" \
+          "	bitdepth = 8" \
+          "}" \
+          "" \
+          "monitor = DP-1, disable" \
+          "monitor = DP-2, disable" \
+          "monitor = DP-3, disable" \
+          > "$tmpfile"
+
+        mv -f "$tmpfile" ~/.config/hypr/displays.conf
+
+        sleep 1 && ${pkgs.hyprland}/bin/hyprctl reload
+        sleep 3 && ${pkgs.systemd}/bin/systemctl --user restart sunshine
+
+        exit 0          
       fi
 
       ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
