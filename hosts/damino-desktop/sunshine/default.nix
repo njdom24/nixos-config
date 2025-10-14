@@ -18,7 +18,7 @@
       settings = {
         key_rightalt_to_key_win = "enabled";
         back_button_timeout = 2000;
-        #capture = "kms"; # Sway 1.11 has broken wlr capture over Vulkan
+        capture = "kms"; # Sway 1.11 has broken wlr capture over Vulkan
         # vaapi_strict_rc_buffer = "enabled"; https://github.com/LizardByte/Sunshine/issues/3817#issuecomment-3092532936
         min_fps_factor = 3;
       };
@@ -221,7 +221,7 @@
 
               if [[ "$1" == "hdr" ]]; then
                 echo "Enabling HDR"
-                ${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
+                #${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
                 ${pkgs.gnused}/bin/sed -i 's/bitdepth = 8/bitdepth = 10/' "$tmpfile"
                 ${pkgs.gnused}/bin/sed -i 's/max_luminance = 203/max_luminance = 1000/' "$tmpfile"
                 ${pkgs.gnused}/bin/sed -i 's/max_avg_luminance = 203/max_avg_luminance = 1000/' "$tmpfile"
