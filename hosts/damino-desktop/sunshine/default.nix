@@ -92,7 +92,7 @@
           case "$XDG_CURRENT_DESKTOP" in
             sway)
               echo "→ Running sway-specific logic"
-              if [ -z "$SWAYSOCK" ]; then
+              if [ -z "$SWAYSOCK" ] && [ "$session_class" != "greeter" ]; then
                 export SWAYSOCK=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^SWAYSOCK=' | ${pkgs.coreutils}/bin/cut -d= -f2)
               fi
               if [ -z "$SWAYSOCK" ]; then
