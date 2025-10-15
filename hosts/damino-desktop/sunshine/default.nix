@@ -101,12 +101,11 @@
 
               DUMMY="HDMI-A-1"
               existing_dummy=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$DUMMY\")) | .name")
+              # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
+              existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
 
               if [ -z "$existing_dummy" ]; then
-                # TODO: Won't work with kmsgrab forced. Need to find a way to force wlroots...
-                # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
-                existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
-
+                # TODO: Won't work with kmsgrab forced. Need to find a way to force wlroots capture method...
                 if [ -z "$existing_headless" ]; then
                   # If no HEADLESS output exists, create one
                   ${pkgs.sway}/bin/swaymsg create_output
@@ -116,8 +115,8 @@
               else
                 STREAMING_OUTPUT="$DUMMY"
                 ${pkgs.sway}/bin/swaymsg output $DUMMY enable
-                #${pkgs.sway}/bin/swaymsg output HEADLESS-1 disable
-                ${pkgs.sway}/bin/swaymsg output HEADLESS-1 unplug 2> /dev/null || true
+                #${pkgs.sway}/bin/swaymsg output $existing_headless disable
+                ${pkgs.sway}/bin/swaymsg output $existing_headless unplug 2> /dev/null || true
               fi
 
               # Disable all non-HEADLESS outputs
