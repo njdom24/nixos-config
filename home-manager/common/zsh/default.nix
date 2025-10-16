@@ -15,7 +15,9 @@
 	    }
 	    hm-upgrade() {
 	      # https://github.com/nix-community/home-manager/issues/6564
-	      TMPDIR=/var/tmp/ ${pkgs.nh}/bin/nh home switch /etc/nixos -b old -- "$@"
+	      # https://discourse.nixos.org/t/nixos-rebuild-using-nix-var-nix-builds-instead-of-tmp-for-intermediate-build-outputs/70607
+	      #TMPDIR=/var/tmp/ ${pkgs.nh}/bin/nh home switch /etc/nixos -b old -- "$@"
+	      ${pkgs.nh}/bin/nh home switch /etc/nixos -b old -- "$@"
 	      #home-manager switch --flake /etc/nixos/. "$@" -b old
 	    }
 	    nix-find-insecure() {

@@ -116,7 +116,9 @@ in
   nix = {
     settings = {
       auto-optimise-store = true;
-      build-dir = "/var/tmp";
+      # https://discourse.nixos.org/t/nixos-rebuild-using-nix-var-nix-builds-instead-of-tmp-for-intermediate-build-outputs/70607
+      # Defaults to /nix/var/nix/builds (not a tmpfs) by default. No longer need to specify to build on disk with a /tmp on tmpfs
+      # build-dir = "/var/tmp";
   	};
   	gc = {
   	  automatic = !(config.programs.nh.enable && config.programs.nh.clean.enable);

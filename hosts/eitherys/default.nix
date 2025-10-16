@@ -174,7 +174,7 @@ in
     settings = {
       auto-optimise-store = true;
       experimental-features = [ "nix-command" "flakes" ];
-      build-dir = "/var/tmp";
+      #build-dir = "/var/tmp";
   	};
   	gc = {
   	  automatic = !(config.programs.nh.enable && config.programs.nh.clean.enable);

@@ -9,12 +9,14 @@
 	};
 	initContent = ''
 	  upgrade() {
-	    TMPDIR="$TMP_BUILD_DIR" ${pkgs.nh}/bin/nh os switch /etc/nixos -- --impure "$@"
+	    ${pkgs.nh}/bin/nh os switch /etc/nixos -- --impure "$@"
 	    #sudo nixos-rebuild switch --flake /etc/nixos/.# --impure "$@"
 	  }
 	  hm-upgrade() {
 	    # https://github.com/nix-community/home-manager/issues/6564
-	    TMPDIR=/var/tmp/ ${pkgs.nh}/bin/nh home switch /etc/nixos -- "$@"
+	    # https://discourse.nixos.org/t/nixos-rebuild-using-nix-var-nix-builds-instead-of-tmp-for-intermediate-build-outputs/70607
+	    #TMPDIR=/var/tmp/ ${pkgs.nh}/bin/nh home switch /etc/nixos -- "$@"
+	    ${pkgs.nh}/bin/nh home switch /etc/nixos -- "$@"
 	    #home-manager switch --flake /etc/nixos/. "$@"
 	  }
 	  nix-find-insecure() {
