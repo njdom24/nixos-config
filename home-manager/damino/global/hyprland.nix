@@ -280,9 +280,10 @@
         cm_auto_hdr = 1;
       };
 
-      #debug = {
-      #  full_cm_proto = true;
-      #};
+      debug = {
+        # Required for FFXVI to not crash
+        full_cm_proto = true;
+      };
 
       ### INPUT ###
 
