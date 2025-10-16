@@ -19,9 +19,9 @@ in
   boot.initrd.kernelModules = [ "i915" "vfio_pci" "vfio" "vfio_iommu_type1" ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
-  boot.kernelParams = [ "usb-storage.quirks=2109:0715:u" "btusb.enable_autosuspend=0" "i915.enable_guc=3" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
   # HF7-SU31C quirk: https://www.digitalpeer.com/blog/ubuntu-16-and-a-mediasonic-probox-hdl-su3
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [ "usb-storage.quirks=2109:0715:u" "btusb.enable_autosuspend=0" "i915.enable_guc=3" "hid_apple.fnmode=2" ] ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
+  #boot.kernelPackages = pkgs.linuxPackages_latest;
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/0713c829-2d10-4f77-b6d1-1ac368a4e143";
