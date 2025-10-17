@@ -6,7 +6,7 @@ services:
       - NET_ADMIN
     ports:
       - "4568:4567" # suwayomi
-      - "8191:8191" # flaresolverr
+      - "8191:8191" # byparr
       - "43000:43000" # qbittorrent
     environment:
       - VPN_SERVICE_PROVIDER=airvpn

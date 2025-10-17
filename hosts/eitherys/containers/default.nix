@@ -45,7 +45,7 @@ let
     { file = ./romm.yaml; }
     { file = ./kavita.yaml; }
     { file = ./lazylibrarian.yaml; }
-    { file = ./flaresolverr.yaml; }
+    { file = ./byparr.yaml; }
     { file = ./qbittorrent.yaml; }
     { file = ./suwayomi.yaml; }
   ];
