@@ -10,6 +10,7 @@ let
       ../../../../../patches/gamescope-vblank-hack.patch
     ];
   });
+  # TODO: Consider removing. Hasn't been a problem in a while (in Hyprland?)
   # Work around HDR needing an extra "push" with VMM7100 Firmware v124 (VRR, HDR, 4k144Hz)
   vmm7100_hdr_fix = pkgs.writeShellScript "vmm7100-hdr-fix" ''
     #!/usr/bin/env bash
@@ -194,7 +195,7 @@ let
 
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
         echo "0 0 0"
-      elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
+      elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
         conf="$HOME/.config/hypr/displays.conf"
         
         focused_monitor=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
@@ -223,7 +224,7 @@ let
         else
           echo "0 0 0"
         fi
-      elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
+      elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
         json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
         enabled=$(${pkgs.jq}/bin/jq -r '
           .outputs
@@ -259,6 +260,61 @@ let
         fi
       else
         echo "0 0 0"
+      fi
+
+      XDG_CURRENT_DESKTOP="$desktop"
+      DISPLAY="$display"
+      WAYLAND_DISPLAY="$wdisplay"
+      XDG_SESSION_TYPE="$session"
+    }
+
+    get_vrr() {
+      # Account for nested case
+      desktop="$XDG_CURRENT_DESKTOP"
+      display="$DISPLAY"
+      wdisplay="$WAYLAND_DISPLAY"
+      session="$XDG_SESSION_TYPE"
+
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+
+      if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+        # TODO
+        echo "0"
+      elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+        # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
+        vfr_status=$(${pkgs.hyprland}/bin/hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
+        echo "$vfr_status"
+      elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+        # TODO
+        echo "0"
+      else
+        echo "0"
+      fi
+
+      XDG_CURRENT_DESKTOP="$desktop"
+      DISPLAY="$display"
+      WAYLAND_DISPLAY="$wdisplay"
+      XDG_SESSION_TYPE="$session"
+    }
+
+    set_vrr() {
+      local vrr_mode="$1"
+      # Account for nested case
+      desktop="$XDG_CURRENT_DESKTOP"
+      display="$DISPLAY"
+      wdisplay="$WAYLAND_DISPLAY"
+      session="$XDG_SESSION_TYPE"
+
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+
+      if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+        ${pkgs.hyprland}/bin/hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
       fi
 
       XDG_CURRENT_DESKTOP="$desktop"
@@ -558,14 +614,50 @@ let
       extra_flags+=("--cursor-scale-height")
       extra_flags+=("1440")
     fi
-    
+
+    # React to gamescope's errors within the nesting
+    set -o pipefail
+    last_vrr_switch=0
     while true; do
-      if env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope ${
-        lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
-        config.programs.gamescope.args
-      #} -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" ${pkgs.libstrangle}/bin/strangle $refresh "''${to_run[@]}"; then
-      } -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" $mangoapp_flag "''${extra_flags[@]}" -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"; then
-        ## } -r "$refresh" -W "$width" -H "$height" $mangoapp_flag "$@"; then
+      if ${pkgs.coreutils}/bin/stdbuf -oL -eL env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope \
+        ${lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
+          config.programs.gamescope.args} \
+        -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
+        $mangoapp_flag "''${extra_flags[@]}" \
+        -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}" \
+        2>&1 | while IFS= read -r line; do
+          echo "$line"
+      
+          if [[ "$line" == *"[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
+            if [[ "$line" == *"VK_COLOR_SPACE_HDR10_ST2084_EXT"* \
+               || "$line" == *"VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT"* ]]; then
+              if [[ "''${last_colorspace:-}" != "HDR" ]]; then
+                echo "gsc: Detected HDR swapchain: $line" >&2
+                curr_colorspace="HDR"
+              fi
+            elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
+              if [[ "''${last_colorspace:-}" != "SDR" ]]; then
+                echo "gsc: Detected SDR swapchain: $line" >&2
+                curr_colorspace="SDR"
+              fi
+            fi
+            if [[ "$curr_colorspace" != "last_colorspace" ]]; then
+              # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
+              if [[ "$GSC_VRR_MODESET" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+                now=$(${pkgs.coreutils}/bin/date +%s)
+                if (( now - last_vrr_switch >= 10 || last_colorspace != curr_colorspace )); then
+                  last_vrr_switch="$now"
+                  vrr_mode="$(get_vrr)"
+                  echo "gsc: VRR mode: | $vrr_mode |"
+
+                  $(sleep 1 && set_vrr 0 && sleep 5 && set_vrr "$vrr_mode") &
+                fi
+              fi
+              last_colorspace="$curr_colorspace"
+            fi
+          fi
+        done
+      then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
       elif [[ "$steam_mode" == "0" ]]; then
@@ -594,7 +686,7 @@ let
   '';
 
   # Convenience script. Hacky, but seems to get VRR going stable too
-  gsc-vmm7100 = pkgs.writeShellScriptBin "gsc-vmm7100" ''
+  gsc-tv = pkgs.writeShellScriptBin "gsc-tv" ''
     pushd ~
     
     if pgrep -x steam >/dev/null; then
@@ -611,13 +703,13 @@ let
       $(sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
     
-    timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
+    # timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
 
     # TODO: Make extra confs for Hyprland if VRR is still an issue
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       $(sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
     fi
-    sleep 3 && ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
+    sleep 3 && env GSC_VRR_MODESET=1 ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
@@ -714,7 +806,7 @@ in
   environment = {
   	systemPackages = with pkgs; [
   	  gsc
-  	  gsc-vmm7100
+  	  gsc-tv
   	  lsfg-min
   	  lsfg-vk
 
