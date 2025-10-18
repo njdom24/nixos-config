@@ -617,7 +617,7 @@ let
 
     # React to gamescope's errors within the nesting
     set -o pipefail
-    last_vrr_switch=0
+    vrr_mode="$(get_vrr)"
     while true; do
       if ${pkgs.coreutils}/bin/stdbuf -oL -eL env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope \
         ${lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
@@ -643,15 +643,17 @@ let
             fi
             if [[ "$curr_colorspace" != "last_colorspace" ]]; then
               # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
-              if [[ "$GSC_VRR_MODESET" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-                now=$(${pkgs.coreutils}/bin/date +%s)
-                if (( now - last_vrr_switch >= 10 || last_colorspace != curr_colorspace )); then
-                  last_vrr_switch="$now"
-                  vrr_mode="$(get_vrr)"
-                  echo "gsc: VRR mode: | $vrr_mode |"
-
-                  $(sleep 1 && set_vrr 0 && sleep 5 && set_vrr "$vrr_mode") &
+              if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+                if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
+                  ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
+                  wait "$vrr_pid" 2>/dev/null
+                  vrr_pid=
                 fi
+
+                echo "gsc: VRR mode: $vrr_mode"
+
+                (sleep 1 && set_vrr 0 && sleep 10 && set_vrr "$vrr_mode") &
+                vrr_pid=$!
               fi
               last_colorspace="$curr_colorspace"
             fi
@@ -709,7 +711,7 @@ let
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       $(sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
     fi
-    sleep 3 && env GSC_VRR_MODESET=1 ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
+    sleep 3 && env GSC_HDR_MODESET_WORKAROUND=1 ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
