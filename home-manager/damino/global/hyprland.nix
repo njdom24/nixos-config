@@ -281,7 +281,8 @@
       };
 
       debug = {
-        # Required for FFXVI to not crash
+        # Required for FFXVI to not crash with xx_color_management_v4 = true
+        # Required for Auto HDR to work with gamescope with xx_color_management_v4 = false
         full_cm_proto = true;
       };
 
