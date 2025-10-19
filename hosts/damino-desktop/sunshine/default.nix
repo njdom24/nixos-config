@@ -139,12 +139,17 @@
                 exit 0
               fi
 
-              if [[ "$1" == "hdr" ]]; then
+              supports_hdr="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$STREAMING_OUTPUT\") | .features.hdr")"
+              if [[ "$1" == "hdr" && "$supports_hdr" == "true" ]]; then
                 echo "Enabling HDR"
-                ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 10
+                ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 10 hdr on
               else
-                echo "Disabling HDR"
-                ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 8
+                if [[ "$supports_hdr" == "true" ]]; then
+                  echo "Disabling HDR"
+                  ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 10 hdr off
+                else
+                  ${pkgs.sway}/bin/swaymsg output $STREAMING_OUTPUT render_bit_depth 10
+                fi
               fi
               ;;
             KDE)
