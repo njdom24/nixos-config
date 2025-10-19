@@ -39,6 +39,17 @@
               # Launched through gamescope. Could enable after https://github.com/Supreeeme/extest/issues/11 or portal issue below
               echo "Disabling Extest"
             else
+              # Work around Sway's refusal to unscale XWayland: https://github.com/swaywm/sway/issues/2966
+              if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+                if ! ${pkgs.procps}/bin/pgrep -f xwayland-satellite >/dev/null; then
+                  echo "xwayland-satellite is not running. Starting"
+                  ${pkgs.xwayland-satellite}/bin/xwayland-satellite &
+                  sleep 1
+                fi
+                echo "Attempting to start Steam on XWayland-Satellite"
+                export DISPLAY=:1
+                ${pkgs.xorg.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"
+              fi
               # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
               # and/or https://github.com/hyprwm/Hyprland/pull/7919
               export LD_PRELOAD="$LD_PRELOAD:${pkgs.pkgsi686Linux.extest}/lib/libextest.so"

@@ -292,7 +292,10 @@
 		  };
 
 		  assigns = {
-		  	"4" = [{ instance="steamwebhelper"; }];
+		  	"4" = [
+		  	  { instance="steamwebhelper"; }
+		  	  { app_id="steam"; }
+		  	];
 		  };
 		};
 
@@ -399,6 +402,7 @@
 
   home = {
     packages = with pkgs; [
+      xwayland-satellite
       wl-gammarelay-rs
       libsForQt5.qt5ct
       qt6Packages.qt6ct
