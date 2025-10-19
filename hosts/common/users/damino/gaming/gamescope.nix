@@ -193,14 +193,63 @@ let
       WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
       XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
 
+      get_edid_luminance() {
+        local monitor="$1"
+        local edid_path=""
+
+        # Find EDID dynamically under card*
+        for card in /sys/class/drm/card*; do
+          candidate="$card-$monitor/edid"
+          if [ -f "$candidate" ]; then
+            edid_path="$candidate"
+            break
+          fi
+        done
+
+        if [ -z "$edid_path" ]; then
+          echo "EDID file not found for monitor $monitor" >&2
+          echo "0 1 0"
+          return 1
+        fi
+
+        # Function to extract a luminance value given the line label
+        extract_lum() {
+          local label="$1"
+          ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" \
+            | ${pkgs.gnugrep}/bin/grep -A10 "HDR Static Metadata Data Block" \
+            | ${pkgs.gnugrep}/bin/grep "$label" \
+            | ${pkgs.gnused}/bin/sed -E 's/.*\(([0-9.]+) cd\/m\^2\).*/\1/' \
+            | ${pkgs.gnused}/bin/sed -E 's/\..*//'
+        }
+
+        local max_lum avg_lum min_lum
+        max_lum=$(extract_lum "Desired content max luminance")
+        avg_lum=$(extract_lum "Desired content max frame-average luminance")
+        min_lum=$(extract_lum "Desired content min luminance")
+
+        echo "$max_lum $avg_lum $min_lum"
+      }
+
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-        echo "0 0 0"
+        # Use local swaymsg in case of using a different Sway package
+        focused_display="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')"
+        # hdr_support="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$focused_display\") | .features.hdr")"
+        hdr_enabled="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$focused_display\") | .hdr")"
+        if [[ "$hdr_enabled" == "true" ]]; then
+          read edid_max edid_avg edid_min <<< "$(get_edid_luminance "$focused_display")"
+          if [[ "$edid_max" != "0" ]]; then
+            echo "1 203 $edid_max"
+          else
+            echo "0 0 0"
+          fi
+        else
+          echo "0 0 0"
+        fi
       elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+        focused_display=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
         conf="$HOME/.config/hypr/displays.conf"
-        
-        focused_monitor=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-        
-        block=$(${pkgs.gawk}/bin/awk -v mon="$focused_monitor" '
+
+        block=$(${pkgs.gawk}/bin/awk -v mon="$focused_display" '
           /^[[:space:]]*monitorv2[[:space:]]*{/ { inblock=1; block="" }
           inblock {
             block = block $0 "\n"
@@ -213,7 +262,7 @@ let
             }
           }
         ' "$conf")
-        
+
         hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         cm=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*cm[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
         sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
@@ -608,6 +657,8 @@ let
       if [[ "$hdr_enabled" == "1" ]]; then
         extra_flags+=("--hdr-debug-force-support")
       fi
+    elif [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+      extra_flags+=("--hdr-debug-force-support")
     fi
 
     if [[ "$height" -gt 1440 ]]; then
@@ -702,14 +753,17 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
-      $(sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+    elif [["$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+      swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on
+      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
     fi
     
     # timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
 
     # TODO: Make extra confs for Hyprland if VRR is still an issue
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-      $(sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
+      (sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
     fi
     sleep 3 && env GSC_HDR_MODESET_WORKAROUND=1 ${gsc}/bin/gsc -e -F fsr -- ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
 
@@ -717,7 +771,10 @@ let
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
-      $(sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+    elif [["$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+      (${pkgs.coreutils}/bin/timeout 5 kanshi) &
+      swaymsg reload # Contains exec_always kanshi
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
   '';

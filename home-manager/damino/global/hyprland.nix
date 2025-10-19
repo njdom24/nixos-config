@@ -616,7 +616,7 @@
           exit 1
         fi
       
-        if ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" | grep -q "HDR Static Metadata Data Block"; then
+        if ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" | ${pkgs.gnugrep}/bin/grep -q "HDR Static Metadata Data Block"; then
           echo "HDR support detected on $monitor"
 
           conf="$HOME/.config/hypr/displays.conf"

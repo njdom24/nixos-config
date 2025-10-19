@@ -1,12 +1,16 @@
 { inputs, lib, config, pkgs, ... }: {
 	imports = [
-		./wlogout.nix
-		./waybar.nix
-		./rofi.nix
+      #inputs.chaotic.homeManagerModules.default
+      ./wlogout.nix
+      ./waybar.nix
+      ./rofi.nix
 	];
+
+	#nix.package = pkgs.nix;
 
 	wayland.windowManager.sway = {
 		enable = true;
+		#package = pkgs.sway_git;
 		systemd.enable = true;
 		checkConfig = false;
 		wrapperFeatures.gtk = true;
@@ -59,7 +63,6 @@
 		      ${pkgs.sway}/bin/swaymsg output "*" render_bit_depth 10
 		    else
 		      # If not remote, run kanshi
-		      echo Test
 		      ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
 		    fi
 		  '';
@@ -135,12 +138,13 @@
 		  exec ${vrrFullscreen}
 
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
-		  exec sh -c 'if [ "$REMOTE_ENABLED" -ne 1 ]; then gtk-launch firefox.desktop; fi'
-		  #exec sh -c 'if [ "$REMOTE_ENABLED" -ne 1 ]; then gtk-launch vesktop.desktop; fi'
-		  exec sh -c 'if [ "$REMOTE_ENABLED" -ne 1 ]; then gtk-launch discord.desktop; fi'
-		  exec sh -c 'if [ "$REMOTE_ENABLED" -ne 1 ]; then gtk-launch steam.desktop; fi'
+		  # "''$()"
+		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0} -ne 1 ]; then gtk-launch firefox.desktop; fi'
+		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch vesktop.desktop; fi'
+		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch discord.desktop; fi'
+		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch steam.desktop; fi'
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
-		  exec sh -c 'if [ "$REMOTE_ENABLED" -eq 1 ]; then sleep 5 && ${pkgs.systemd}/bin/systemctl --user restart sunshine; fi'
+		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -eq 1 ]; then sleep 5 && ${pkgs.systemd}/bin/systemctl --user restart sunshine; fi'
 		'';
 
 		config = {
@@ -208,6 +212,7 @@
 		  	"Control+space" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --hide-latest";
 		  	#"Control+grave" = "exec makoctl restore";
 		  	#"Control+space" = "exec makoctl dismiss";
+		  	"Control+Shift+b" = "exec sway-toggle-hdr";
 		  	"$mod+Return" = "exec kitty";
 		  	"$mod+Shift+q" = "kill";
 		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
@@ -397,6 +402,16 @@
       wl-gammarelay-rs
       libsForQt5.qt5ct
       qt6Packages.qt6ct
+    ] ++ [
+      (pkgs.writeShellScriptBin "sway-toggle-hdr" ''
+        focused_display="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')"
+        supports_hdr="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$focused_display\") | .features.hdr")"
+        if [[ "$supports_hdr" != "true" ]]; then
+          echo "Display $focused_display does not support HDR: $supports_hdr"
+          exit 1
+        fi
+        swaymsg output "$focused_display" hdr toggle
+      '')
     ];
   };
 }
