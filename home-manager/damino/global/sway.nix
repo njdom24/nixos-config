@@ -185,7 +185,7 @@
               natural_scroll = "enabled";
             };
           };
-		  focus.mouseWarping = false;
+		  focus.mouseWarping = true;
 		  seat = {
 		  	"*" = {
 		  	  hide_cursor = "20000";
