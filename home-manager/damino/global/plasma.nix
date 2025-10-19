@@ -75,27 +75,27 @@
       #lookAndFeel = "org.kde.breezedark.desktop";
     };
 
-    # May need to delete ~/.config/kglobalshortcutsrc first to avoid weird shortcut clobbering
+    # May need to delete ~/.config/kglobalshortcutsrc first to avoid shortcut clobbering if missing a manual disable
     shortcuts = {
-	    # Disable to make way for Desktop shortcuts
-	    #"plasmashell"."activate task manager entry 1" = "none,Meta+1,Activate Task Manager Entry 1";
-	    #"plasmashell"."activate task manager entry 2" = "none,Meta+2,Activate Task Manager Entry 2";
-	    #"plasmashell"."activate task manager entry 3" = "none,Meta+3,Activate Task Manager Entry 3";
-	    #"plasmashell"."activate task manager entry 4" = "none,Meta+4,Activate Task Manager Entry 4";
-	    #"plasmashell"."activate task manager entry 5" = "none,Meta+5,Activate Task Manager Entry 5";
-	    #"plasmashell"."activate task manager entry 6" = "none,Meta+6,Activate Task Manager Entry 6";
-	    #"plasmashell"."activate task manager entry 7" = "none,Meta+7,Activate Task Manager Entry 7";
-	    #"plasmashell"."activate task manager entry 8" = "none,Meta+8,Activate Task Manager Entry 8";
-	    #"plasmashell"."activate task manager entry 9" = "none,Meta+9,Activate Task Manager Entry 9";
-	    #"plasmashell"."activate task manager entry 10" = "none,,Activate Task Manager Entry 10";
-      #"kwin"."Show Desktop" = "none,Meta+D,Peek at Desktop";
+      plasmashell = {
+        # Disable to avoid conflicts with custom shortcuts: https://github.com/nix-community/plasma-manager/issues/109#issuecomment-3418822732
+        "activate task manager entry 1" = "None";
+        "activate task manager entry 2" = "None";
+        "activate task manager entry 3" = "None";
+        "activate task manager entry 4" = "None";
+        "activate task manager entry 5" = "None";
+        "activate task manager entry 6" = "None";
+        "activate task manager entry 7" = "None";
+        "activate task manager entry 8" = "None";
+        "activate task manager entry 9" = "None";
+        "activate task manager entry 10" = "None";
+      };
+      kwin."Show Desktop" = "None";
 
       ksmserver = {
         "Lock Session" = "";
       };
 
-      # TODO: https://github.com/nix-community/plasma-manager/issues/109#issuecomment-3418822732
-      # TL;DR set defaults to "None" if pre-existing keybinds clobber these
       kwin = {
         "Window Close" = "Meta+Shift+Q";
         "Window Fullscreen" = "Meta+F";
