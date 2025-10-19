@@ -458,6 +458,10 @@
           else
             echo "Dummy is not the only enabled connected output"
           fi
+
+          ${pkgs.systemd}/bin/systemctl --user stop xdg-desktop-portal-hyprland
+          ${pkgs.systemd}/bin/systemctl --user start plasma-xdg-desktop-portal-kde
+          ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal
         fi
       fi
     '';

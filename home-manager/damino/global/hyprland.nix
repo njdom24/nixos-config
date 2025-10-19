@@ -500,6 +500,7 @@
 
       ### AUTOSTART ###
       exec-once = [
+        "${pkgs.systemd}/bin/systemctl --user stop plasma-xdg-desktop-portal-kde"
         "${set-displays}"
         "${gamescope-cursor-fix}"
         "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
