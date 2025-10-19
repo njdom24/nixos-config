@@ -207,15 +207,22 @@ let
         done
 
         if [ -z "$edid_path" ]; then
-          echo "EDID file not found for monitor $monitor" >&2
-          echo "0 1 0"
-          return 1
+          echo "0 0 0"
+          return 0
+        fi
+
+        local edid_output
+        edid_decoded=$(${pkgs.edid-decode}/bin/edid-decode < "$edid_path")
+
+        if ! echo "$edid_decoded" | ${pkgs.gnugrep}/bin/grep -q "HDR Static Metadata Data Block"; then
+          echo "0 0 0"
+          return 0
         fi
 
         # Function to extract a luminance value given the line label
         extract_lum() {
           local label="$1"
-          ${pkgs.edid-decode}/bin/edid-decode < "$edid_path" \
+          echo "$edid_decoded" \
             | ${pkgs.gnugrep}/bin/grep -A10 "HDR Static Metadata Data Block" \
             | ${pkgs.gnugrep}/bin/grep "$label" \
             | ${pkgs.gnused}/bin/sed -E 's/.*\(([0-9.]+) cd\/m\^2\).*/\1/' \
@@ -247,7 +254,17 @@ let
         fi
       elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
         focused_display=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-        conf="$HOME/.config/hypr/displays.conf"
+        conf="$HOME/.config/hypr/displaysz.conf"
+
+        # TODO: Replace with more reliable check after https://github.com/hyprwm/Hyprland/pull/12019
+        if [[ ! -f "$conf" ]]; then
+          read edid_max edid_avg edid_min <<< "$(get_edid_luminance "$focused_display")"
+          if [[ "$edid_max" != "0" ]]; then
+            echo "1 203 $edid_max"
+          else
+            echo "0 0 0"
+          fi
+        fi
 
         block=$(${pkgs.gawk}/bin/awk -v mon="$focused_display" '
           /^[[:space:]]*monitorv2[[:space:]]*{/ { inblock=1; block="" }
