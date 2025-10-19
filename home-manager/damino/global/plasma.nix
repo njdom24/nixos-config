@@ -431,6 +431,10 @@
             fi
           done <<< "$displays"
 
+          # Streaming setup sometimes screws with display config on subsequent logins
+          # This allows restoring the previous config: https://discuss.kde.org/t/solved-is-there-any-way-to-reset-monitor-configuration/25998/2
+          rm -f "/home/$USER/.config/kwinoutputconfig.json"
+
           ${pkgs.systemd}/bin/systemctl --user restart sunshine
         else
           ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0

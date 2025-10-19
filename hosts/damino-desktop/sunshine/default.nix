@@ -182,6 +182,10 @@
                 fi
               done <<< "$displays"
 
+              # Streaming setup sometimes screws with display config on subsequent logins
+              # This allows restoring the previous config: https://discuss.kde.org/t/solved-is-there-any-way-to-reset-monitor-configuration/25998/2
+              rm -f "/home/$USER/.config/kwinoutputconfig.json"
+
               if [[ "$1" == "hdr" ]]; then
                 echo "Enabling HDR"
                 ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".wcg.enable output."$DUMMY".hdr.enable
