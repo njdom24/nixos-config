@@ -254,7 +254,7 @@ let
         fi
       elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
         focused_display=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-        conf="$HOME/.config/hypr/displaysz.conf"
+        conf="$HOME/.config/hypr/displays.conf"
 
         # TODO: Replace with more reliable check after https://github.com/hyprwm/Hyprland/pull/12019
         if [[ ! -f "$conf" ]]; then
@@ -264,6 +264,7 @@ let
           else
             echo "0 0 0"
           fi
+          return 0
         fi
 
         block=$(${pkgs.gawk}/bin/awk -v mon="$focused_display" '
@@ -686,6 +687,21 @@ let
     # React to gamescope's errors within the nesting
     set -o pipefail
     vrr_mode="$(get_vrr)"
+
+    # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
+    toggle_vrr() {
+      if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+        if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
+          ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
+          wait "$vrr_pid" 2>/dev/null
+          vrr_pid=
+        fi
+
+        echo "gsc: VRR mode: $vrr_mode"
+        (set_vrr 0 && sleep 10 && set_vrr "$vrr_mode") &
+        vrr_pid=$!
+      fi
+    }
     while true; do
       if ${pkgs.coreutils}/bin/stdbuf -oL -eL env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope \
         ${lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
@@ -695,36 +711,34 @@ let
         -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}" \
         2>&1 | while IFS= read -r line; do
           echo "$line"
-      
-          if [[ "$line" == *"[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
-            if [[ "$line" == *"VK_COLOR_SPACE_HDR10_ST2084_EXT"* \
-               || "$line" == *"VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT"* ]]; then
-              if [[ "''${last_colorspace:-}" != "HDR" ]]; then
-                echo "gsc: Detected HDR swapchain: $line" >&2
-                curr_colorspace="HDR"
-              fi
-            elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
-              if [[ "''${last_colorspace:-}" != "SDR" ]]; then
-                echo "gsc: Detected SDR swapchain: $line" >&2
-                curr_colorspace="SDR"
-              fi
-            fi
-            if [[ "$curr_colorspace" != "last_colorspace" ]]; then
-              # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
-              if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-                if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
-                  ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
-                  wait "$vrr_pid" 2>/dev/null
-                  vrr_pid=
+
+          if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+            # Strip ANSI escape codes
+            line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
+
+            # Colorspace lines don't appear in Steam (-e) mode, so this is the best we can do
+            if [[ "$steam_mode" == "1" && "$line" == *"wlserver: Updating mode"* ]]; then
+              echo "GSC: Modeset detected"
+              toggle_vrr
+            elif [[ "$line" == *"[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
+              if [[ "$line" == *"VK_COLOR_SPACE_HDR10_ST2084_EXT"* \
+                 || "$line" == *"VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT"* ]]; then
+                if [[ "''${last_colorspace:-}" != "HDR" ]]; then
+                  echo "gsc: Detected HDR swapchain: $line" >&2
+                  curr_colorspace="HDR"
                 fi
-
-                echo "gsc: VRR mode: $vrr_mode"
-
-                (sleep 1 && set_vrr 0 && sleep 10 && set_vrr "$vrr_mode") &
-                vrr_pid=$!
+              elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
+                if [[ "''${last_colorspace:-}" != "SDR" ]]; then
+                  echo "gsc: Detected SDR swapchain: $line" >&2
+                  curr_colorspace="SDR"
+                fi
               fi
-              last_colorspace="$curr_colorspace"
+              if [[ "$curr_colorspace" != "last_colorspace" ]]; then
+                toggle_vrr
+                last_colorspace="$curr_colorspace"
+              fi
             fi
+
           fi
         done
       then
@@ -742,9 +756,14 @@ let
         sleep 1
       fi
 
-      #if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      #  hypr-toggle-hdr off
-      #fi
+      # Restore VRR if gamescope closes while toggle job is running
+      if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+        if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
+          ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
+          wait "$vrr_pid" 2>/dev/null
+          set_vrr "$vrr_mode"
+        fi
+      fi
     done
 
     #if [[ -v mangoapp_file ]]; then
