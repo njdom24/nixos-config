@@ -703,7 +703,7 @@ let
       fi
     }
     while true; do
-      if ${pkgs.coreutils}/bin/stdbuf -oL -eL env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope \
+      if ${pkgs.expect}/bin/unbuffer env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope \
         ${lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
           config.programs.gamescope.args} \
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
@@ -716,11 +716,7 @@ let
             # Strip ANSI escape codes
             line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
-            # Colorspace lines don't appear in Steam (-e) mode, so this is the best we can do
-            if [[ "$steam_mode" == "1" && "$line" == *"wlserver: Updating mode"* ]]; then
-              echo "GSC: Modeset detected"
-              toggle_vrr
-            elif [[ "$line" == *"[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
+            if [[ "$line" == "[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
               if [[ "$line" == *"VK_COLOR_SPACE_HDR10_ST2084_EXT"* \
                  || "$line" == *"VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT"* ]]; then
                 if [[ "''${last_colorspace:-}" != "HDR" ]]; then
