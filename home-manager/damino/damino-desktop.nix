@@ -191,6 +191,9 @@
 
           monitor = DP-3, disable
           monitor = HDMI-A-1, disable
+
+          # Bodge to fix refresh rate being 144 on first login
+          exec-once=sleep 1 && hyprctl keyword "monitorv2[DP-1]:mode" 3840x2160@160
 	    '';
 	  };
 	  ".config/hypr/hm/displays/tv.conf" = {
