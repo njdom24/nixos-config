@@ -234,6 +234,13 @@ let
         avg_lum=$(extract_lum "Desired content max frame-average luminance")
         min_lum=$(extract_lum "Desired content min luminance")
 
+        # "''$()" 
+        # Fallback if luminance fields are missing (Common with TVs)
+        max_lum=''${max_lum:-1000}
+        avg_lum=''${avg_lum:-1000}
+        min_lum=''${min_lum:-0}
+        # "''$()"
+
         echo "$max_lum $avg_lum $min_lum"
       }
 
