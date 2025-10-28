@@ -136,8 +136,6 @@
 		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
 		  exec ${vrrFullscreen}
 
-		  # exec QT_QPA_PLATFORMTHEME= corectrl
-		  # "''$()"
 		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec gtk-launch steam.desktop; workspace 1"; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch vesktop.desktop; fi'
