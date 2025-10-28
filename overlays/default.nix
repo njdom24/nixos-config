@@ -26,6 +26,28 @@
     });
 
     mangohud = inputs.chaotic.packages.${prev.system}.mangohud_git;
+
+    # sway pinned to PR #8922 state
+    sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
+      src = prev.fetchFromGitHub {
+        owner = "poisotf";
+        repo  = "sway";
+        rev   = "4b2643e0a8e9ed67c62572e6cfb6c9b97e8d7568";  # use the branch name from the fork
+        sha256 = "sha256-ss0ctrinia/QNgwvwnz7MBvZdIuG27SEWdgEwm4wrMw=";
+      };
+
+      buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.system}.wlroots_git ];
+    });
+
+    xdg-desktop-portal-wlr = prev.xdg-desktop-portal-wlr.overrideAttrs (old: {
+      version = "0.8.0";
+      src = prev.fetchFromGitHub {
+        owner = "emersion";
+        repo  = "xdg-desktop-portal-wlr";
+        rev   = "v0.8.0";
+        sha256 = "sha256-TAWrDH6kud4eXFJvfihImuEFm2uTOaqAOatG+7JmaEM=";
+      };
+    });
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
