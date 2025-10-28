@@ -853,6 +853,7 @@ in
           ENABLE_HDR_WSI = "0";
           STEAM_MULTIPLE_XWAYLANDS = "1";
           PROTON_ENABLE_AMD_AGS = "1";
+          WLR_XWAYLAND = "${pkgs.xwayland}/bin/Xwayland";
         };
         args = [
           "-f"
@@ -884,6 +885,7 @@ in
         ENABLE_GAMESCOPE_WSI = "1";
         ENABLE_HDR_WSI = "0";
         STEAM_MULTIPLE_XWAYLANDS = "1";
+        WLR_XWAYLAND = "${pkgs.xwayland}/bin/Xwayland";
       };
       args = [
         "-f"

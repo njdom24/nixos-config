@@ -365,6 +365,7 @@
 		  fi
 		  export SSH_AUTH_SOCK
 		  export SSH_ASKPASS=${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass
+		  export WLR_XWAYLAND=${pkgs.xwayland-satellite}/bin/xwayland-satellite
 	    '';
 	};
 
