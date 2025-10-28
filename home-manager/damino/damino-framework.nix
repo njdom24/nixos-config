@@ -4,11 +4,7 @@
 	wayland.windowManager = {
 	  # eGPU setup
 	  sway.extraSessionCommands = ''
-	    if [ -e /dev/dri/card0 ]; then
-	      export WLR_DRM_DEVICES=/dev/dri/card0
-	    else
-	      export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1
-	    fi
+	    export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0:$XDG_RUNTIME_DIR/dri/igpu
 	  '';
 
 	  hyprland = {

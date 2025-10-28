@@ -1,14 +1,20 @@
 { inputs, pkgs, lib, ... }: {
 	imports = [ ./global ];
 
-	wayland.windowManager.hyprland = {
-      settings = {
-        env = [ "AQ_DRM_DEVICES,$XDG_RUNTIME_DIR/dri/dgpu0" ];
-        exec-once = [ "sleep 5 && systemctl --user start gpu-screen-recorder" ];
-      };
-      extraConfig = ''
-        monitor = , preferred, auto, 1, mirror, DP-1
-      '';
+	wayland.windowManager = {
+	  sway.extraSessionCommands = ''
+	    export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0
+	  '';
+
+	  hyprland = {
+        settings = {
+          env = [ "AQ_DRM_DEVICES,$XDG_RUNTIME_DIR/dri/dgpu0" ];
+          exec-once = [ "sleep 5 && systemctl --user start gpu-screen-recorder" ];
+        };
+        extraConfig = ''
+          monitor = , preferred, auto, 1, mirror, DP-1
+        '';
+	  };
 	};
 
 	programs = {

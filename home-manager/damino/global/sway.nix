@@ -101,7 +101,6 @@
 		in
 		''
 		  exec systemctl --user restart xdg-desktop-portal
-		  exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 		  
 		  set $base00 #${config.colorScheme.palette.base00}
 		  set $base01 #${config.colorScheme.palette.base01}
@@ -139,10 +138,11 @@
 
 		  # exec QT_QPA_PLATFORMTHEME= corectrl
 		  # "''$()"
-		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0} -ne 1 ]; then gtk-launch firefox.desktop; fi'
+		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec gtk-launch steam.desktop; workspace 1"; fi'
+		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch vesktop.desktop; fi'
-		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch discord.desktop; fi'
-		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch steam.desktop; fi'
+		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch discord.desktop; fi'
+		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch steam.desktop; fi'
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
 		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -eq 1 ]; then sleep 5 && ${pkgs.systemd}/bin/systemctl --user restart sunshine; fi'
 		'';
@@ -156,7 +156,7 @@
 		    	criteria = { instance = "scratchpad"; };
 		      }
 		      {
-		      	command = "border pixel 1";
+		      	command = "border pixel 2";
 		      	criteria = { class = "^.*"; };
 		      }
 		      {
@@ -189,7 +189,7 @@
 		  seat = {
 		  	"*" = {
 		  	  hide_cursor = "20000";
-		  	  xcursor_theme = "${config.gtk.cursorTheme.name}";
+		  	  xcursor_theme = "${config.gtk.cursorTheme.name} 25";
 		  	};
 		  	
 		  };
@@ -220,9 +220,9 @@
 			"$mod+h" = "split h";
 			"$mod+v" = "split v";
 			"$mod+f" = "fullscreen toggle";
-			"$mod+s" = "layout stacking";
-			"$mod+w" = "layout tabbed";
-			"$mod+e" = "layout toggle split";
+			#"$mod+s" = "layout stacking";
+			#"$mod+w" = "layout tabbed";
+			#"$mod+e" = "layout toggle split";
 			"$mod+Shift+space" = "floating toggle";
 			"$mod+space" = "focus mode_toggle";
 			"$mod+a" = "focus parent";
@@ -286,12 +286,14 @@
 		  	  Escape = "mode \"default\"";
 		  	  "$mod+r" = "mode \"default\"";
 
-		  	  "$mod+w" = "output '*' disable; output HDMI-A-1 enable mode 2560x1440@120Hz pos 0 0 adaptive_sync on; exec pactl set-default-sinkalsa_output.pci-0000_0f_00.1.pro-output-3";
 			  "$mod+o" = "exec timeout 10 kanshi";
 		  	};
 		  };
 
 		  assigns = {
+		    "2" = [
+		      { app_id="discord"; }
+		    ];
 		  	"4" = [
 		  	  { instance="steamwebhelper"; }
 		  	  { app_id="steam"; }
@@ -325,7 +327,8 @@
 		    e && !/Closing client connection/ {exit 1}
 		    ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/wayvnc_login); then
 		      export REMOTE_ENABLED=1
-		      export WLR_DRM_DEVICES=/dev/dri/card1
+		      #export WLR_DRM_DEVICES=/dev/dri/card1
+		      export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0
 		      #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
 		      ${pkgs.openrgb}/bin/openrgb --mode static --color 000000 2> /dev/null || true
 		    else
@@ -342,7 +345,8 @@
 		        END { if (e && !cancel) exit 0; else exit 1 }
 		      ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login) ); then
 		    export REMOTE_ENABLED=1
-		    export WLR_DRM_DEVICES=/dev/dri/card1
+		    #export WLR_DRM_DEVICES=/dev/dri/card1
+		    export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0
 		    #export WLR_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1 # Render sway on iGPU to use it for dGPU-maxed encoding
 		    ${pkgs.openrgb}/bin/openrgb --mode static --color 000000 2> /dev/null || true
 		  else
