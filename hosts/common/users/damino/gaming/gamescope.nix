@@ -355,8 +355,8 @@ let
       XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
 
       if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-        # TODO
-        echo "0"
+        vrr_status=$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true) | .features.adaptive_sync')
+        echo "$vrr_status"
       elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
         # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
         vfr_status=$(${pkgs.hyprland}/bin/hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
@@ -389,6 +389,9 @@ let
 
       if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
         ${pkgs.hyprland}/bin/hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
+      elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+        focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+        swaymsg output $focused_display adaptive_sync "$vrr_mode"
       fi
 
       XDG_CURRENT_DESKTOP="$desktop"
@@ -697,7 +700,7 @@ let
 
     # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
     toggle_vrr() {
-      if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+      if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]]; then
         if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
           ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
           wait "$vrr_pid" 2>/dev/null
@@ -705,12 +708,14 @@ let
         fi
 
         echo "gsc: VRR mode: $vrr_mode"
-        (set_vrr 0 && sleep 10 && set_vrr "$vrr_mode") &
-        vrr_pid=$!
+        if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+          (set_vrr 0 && sleep 10 && set_vrr "$vrr_mode") &
+          vrr_pid=$!
+        fi
       fi
     }
     while true; do
-      if ${pkgs.expect}/bin/unbuffer env -u LD_PRELOAD ${gamescope_immediate}/bin/gamescope \
+      if ${pkgs.expect}/bin/unbuffer env -u LD_PRELOAD env -u WLR_XWAYLAND ${gamescope_immediate}/bin/gamescope \
         ${lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
           config.programs.gamescope.args} \
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
@@ -719,7 +724,7 @@ let
         2>&1 | while IFS= read -r line; do
           echo "$line"
 
-          if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+          if [[ "$GSC_HDR_MODESET_WORKAROUND" = "1" ]] && [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
             # Strip ANSI escape codes
             line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
@@ -729,11 +734,19 @@ let
                 if [[ "''${last_colorspace:-}" != "HDR" ]]; then
                   echo "gsc: Detected HDR swapchain: $line" >&2
                   curr_colorspace="HDR"
+                  if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+                    focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+                    swaymsg output $focused_display hdr on
+                  fi
                 fi
               elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
                 if [[ "''${last_colorspace:-}" != "SDR" ]]; then
                   echo "gsc: Detected SDR swapchain: $line" >&2
                   curr_colorspace="SDR"
+                  if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+                    focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+                    swaymsg output $focused_display hdr off
+                  fi
                 fi
               fi
               if [[ "$curr_colorspace" != "last_colorspace" ]]; then

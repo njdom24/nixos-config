@@ -136,7 +136,7 @@
 		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
 		  exec ${vrrFullscreen}
 
-		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec gtk-launch steam.desktop; workspace 1"; fi'
+		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; exec kitty; workspace 1; exec gtk-launch steam.desktop; workspace 1"; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch vesktop.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch discord.desktop; fi'
@@ -299,7 +299,15 @@
 		  };
 		};
 
-	    extraSessionCommands = ''
+	    extraSessionCommands = let satellite-wrapper = pkgs.writeShellScriptBin "satellite-wrapper" ''
+	      # Subsequent calls probably belong to gamescope
+	      if [ "$1" != ":0" ]; then
+	        exec ${pkgs.xwayland}/bin/Xwayland "$@"
+	      else
+	        swaymsg exec ${pkgs.xwayland-satellite}/bin/xwayland-satellite
+	      fi
+	    '';
+	    in ''
 		  #export SDL_VIDEODRIVER=wayland
 		  export QT_QPA_PLATFORM="wayland;xcb"
 		  export GDK_BACKEND=wayland,x11
@@ -365,7 +373,7 @@
 		  fi
 		  export SSH_AUTH_SOCK
 		  export SSH_ASKPASS=${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass
-		  export WLR_XWAYLAND=${pkgs.xwayland-satellite}/bin/xwayland-satellite
+		  export WLR_XWAYLAND=${satellite-wrapper}/bin/satellite-wrapper
 	    '';
 	};
 
