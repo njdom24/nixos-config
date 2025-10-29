@@ -906,7 +906,7 @@ in
         #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
         "--hdr-enabled"
         "--adaptive-sync"
-        "--force-grab-cursor" # Breaks games with launchers (Elden Ring)
+        "--force-grab-cursor"
         #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
         "-F fsr"
