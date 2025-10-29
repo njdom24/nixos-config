@@ -21,6 +21,7 @@
         capture = "kms"; # Sway 1.11 has broken wlr capture over Vulkan
         # vaapi_strict_rc_buffer = "enabled"; https://github.com/LizardByte/Sunshine/issues/3817#issuecomment-3092532936
         min_fps_factor = 3;
+        ds5_inputtino_randomize_mac = "disabled";
       };
       applications.apps = let
         getWaylandDisplay = pkgs.writeShellScript "getWaylandDisplay" ''
@@ -395,7 +396,7 @@
           ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service 2> /dev/null || true
           ${pkgs.systemd}/bin/systemctl --user reset-failed
 
-          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'gsc -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
+          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET_WORKAROUND=1 gsc -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
         fi
       '';
       in
