@@ -163,6 +163,10 @@
 		      }
 		      {
 		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
+		        criteria = { app_id = "gamescope"; };
+		      }
+		      {
+		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
 		        criteria = { app_id = ".gamescope-wrapped"; };
 		      }
 		    ];
@@ -187,7 +191,7 @@
 		  seat = {
 		  	"*" = {
 		  	  hide_cursor = "20000";
-		  	  xcursor_theme = "${config.gtk.cursorTheme.name} 25";
+		  	  xcursor_theme = "${config.gtk.cursorTheme.name} 24";
 		  	};
 		  	
 		  };
