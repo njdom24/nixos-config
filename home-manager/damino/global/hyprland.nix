@@ -83,12 +83,8 @@
         if [[ "$line" =~ ^openwindow.*gamescope ]]; then
           # wait a moment to ensure window is mapped
           sleep 0.1
-          # move to temp workspace 11, then back to current
-          current_ws=$(${pkgs.hyprland}/bin/hyprctl activeworkspace -j | ${pkgs.jq}/bin/jq -r '.id')
-          ${pkgs.hyprland}/bin/hyprctl dispatch movetoworkspacesilent 11,class:gamescope
-          sleep 0.05
-          ${pkgs.hyprland}/bin/hyprctl dispatch movetoworkspacesilent "$current_ws",class:gamescope
-          ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow class:gamescope
+          # Toggle focus
+          hyprctl dispatch focuscurrentorlast; hyprctl dispatch focuscurrentorlast 
         fi
       done
     '';
