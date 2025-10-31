@@ -198,7 +198,7 @@
                 # https://github.com/LizardByte/Sunshine/issues/3298#issuecomment-2670218658
                 ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".colorPowerTradeoff.preferAccuracy
                 #${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".sdr-brightness.203 # Standard reference luminance
-                ${pkgs.kdePackages.full}/bin/qdbus org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/Actions/BrightnessControl org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness 10000 # Max 100.00% brightness
+                ${pkgs.qt6.qttools}/bin/qdbus org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement/Actions/BrightnessControl org.kde.Solid.PowerManagement.Actions.BrightnessControl.setBrightness 10000 # Max 100.00% brightness
                 #${pkgs.kdePackages.kscreen}/bin/hdrcalibrator "$DUMMY" & # Present calibration GUI
               else
                 echo "Disabling HDR"

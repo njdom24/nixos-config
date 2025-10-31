@@ -1,5 +1,5 @@
 { inputs, config, pkgs, ... }: {
-  home.packages = with pkgs; [ font-awesome noto-fonts-emoji noto-fonts-monochrome-emoji twemoji-color-font ];
+  home.packages = with pkgs; [ font-awesome noto-fonts-color-emoji noto-fonts-monochrome-emoji twemoji-color-font ];
   programs.waybar = {
 	enable = true;
 

@@ -121,12 +121,14 @@
   	git = {
   	  enable = true;
   	  package = pkgs.gitFull;
-  	  extraConfig = {
+  	  settings = {
   	    safe.directory = "/etc/nixos";
   	  	credential.helper = "libsecret";
+  	  	user = {
+  	  	  name = "Damino";
+  	  	  email = "dom32400@aol.com";
+  	  	};
   	  };
-  	  userName = "Damino";
-  	  userEmail = "dom32400@aol.com";
   	};
 
   	micro = {

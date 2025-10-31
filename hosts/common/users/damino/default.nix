@@ -58,7 +58,7 @@ in
       selectdefaultapplication
       mesa-demos
       vulkan-tools
-      nvtopPackages.full
+      stable.nvtopPackages.full
       rclone
       handbrake
       firefox
@@ -93,7 +93,7 @@ in
 	  gnome-disk-utility
 	  gnome-system-monitor
 	  libnotify
-	  kdePackages.xwaylandvideobridge
+	  stable.kdePackages.xwaylandvideobridge
 	  (discord.override {
 	  	withOpenASAR = true; # If this breaks, set to false and re-run Discord. https://github.com/NixOS/nixpkgs/issues/208749
 	  	withVencord = true;
@@ -107,7 +107,7 @@ in
 	  video-trimmer
 	  xorg.xeyes
 	  corefonts
-	  vistafonts
+	  vista-fonts
 	  vscode
 	  linux-wifi-hotspot
     ];
@@ -135,7 +135,7 @@ in
   	input-fonts
   	noto-fonts
   	noto-fonts-cjk-sans
-  	noto-fonts-emoji
+  	noto-fonts-color-emoji
   	noto-fonts-monochrome-emoji
   ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
 
@@ -216,7 +216,7 @@ in
       };
     };
   	graphics = {
-  	  extraPackages = with pkgs; [ vaapiVdpau libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
+  	  extraPackages = with pkgs; [ libva-vdpau-driver libvdpau-va-gl libva libva-utils vulkan-loader vulkan-validation-layers vulkan-extension-layer ];
   	  extraPackages32 = with pkgs; [ ];
   	};
   	#nvidia = {

@@ -512,7 +512,7 @@
         #"[workspace 2 silent] discord"
         #"[workspace 4 silent] steam"
         "hyprctl dispatch workspace 1"
-        "${pkgs.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
+        "${pkgs.stable.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
       ];
       exec = [
         "${pkgs.hyprpaper}/bin/hyprpaper &"
