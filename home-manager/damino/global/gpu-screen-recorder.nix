@@ -162,19 +162,23 @@ in {
         '';
         gsr-watcher = pkgs.writeShellScript "gsr-watcher" ''
           set -euo pipefail
-        
+
           # Collect active monitors and build hash
           monitors=""
           case "$XDG_CURRENT_DESKTOP" in
             Hyprland)
               monitors=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.disabled == false) | "\(.name):\(.model)"' | ${pkgs.coreutils}/bin/sort)
               ;;
+            sway)
+              monitors=$(${pkgs.sway}/bin/swaymsg -t get_outputs -r | ${pkgs.jq}/bin/jq -r '
+                  .[] | "\(.name):\(.make // "unknown") \(.model // "")" | select(. != ":")' | ${pkgs.coreutils}/bin/sort)
+              ;;
             KDE)
               monitors=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected == true and .priority > 0) | "\(.name):\(.pos.x)x\(.pos.y)"' | ${pkgs.coreutils}/bin/sort)
               ;;
             *)
               # Fallback to xrandr for other desktops or if other tools are missing
-              monitors=$(${pkgs.xorg.xrandr}/bin/xrandr --query | ${pkgs.gawk}/bin/awk '/ connected/ {print $1 ":unknown"}' | ${pkgs.coreutils}/bin/sort)
+              monitors=$(${pkgs.xorg.xrandr}/bin/xrandr --query 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/ {print $1 ":unknown"}' | ${pkgs.coreutils}/bin/sort)
               ;;
           esac
 
@@ -182,18 +186,19 @@ in {
 
           portal_token="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/portal/restore_token_$hash"
           kms_token="/home/$USER/.config/gpu-screen-recorder/$XDG_CURRENT_DESKTOP/kmsgrab/restore_token_$hash"
-          mkdir -p "$(dirname "$portal_token")" "$(dirname "$kms_token")"
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$portal_token")" "$(${pkgs.coreutils}/bin/dirname "$kms_token")"
         
           # Pick display
           mode="portal"
+          hdr_status="sdr"
           PRIORITY=("av1" "hevc" "h264")
           output=""
-
-          # Detect HDR from ~/.config/hypr/displays.conf
+          
           detect_hdr() {
+            local out="$1"
             case "$XDG_CURRENT_DESKTOP" in
+              # Detect HDR from ~/.config/hypr/displays.conf
               Hyprland)
-                local out="$1"
                 local conf="$HOME/.config/hypr/displays.conf"
                 [[ -f "$conf" ]] || { echo "sdr"; return; }
 
@@ -208,6 +213,10 @@ in {
                   in_block { buf = buf "\n" $0 }
                 ' "$conf" | ${pkgs.gnugrep}/bin/grep -q "cm *= *hdr" && echo "hdr" || echo "sdr"
                 ;;
+              sway)
+                is_hdr="$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$out\") | .hdr")"
+                [[ "$is_hdr" == "true" ]] && echo "hdr" || echo "sdr"
+                ;;
               KDE)
                 echo "sdr" # TODO
                 ;;
@@ -217,10 +226,15 @@ in {
             esac
           }
 
-          hdr_status=$(detect_hdr "$output")
-
-          if [[ "$hdr_status" == "hdr" && "''${FORCE_PORTAL:-0}" != "1" ]]; then
+          if [[ "''${FORCE_PORTAL:-0}" == "1" ]]; then
             # "''$()"
+            mode="portal"
+          else
+            # Default to kmsgrab to not block direct scanout
+            mode="kmsgrab"
+          fi
+
+          if [[ "$mode" == "kmsgrab" ]]; then
             if [[ -s "$kms_token" ]]; then
               output=$(cat "$kms_token")
               if [[ -n "$output" ]]; then
@@ -231,13 +245,15 @@ in {
               if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
                 output="''${BASH_REMATCH[1]}"
                 # "''$()"
-                echo "$output" >"$kms_token"
-                mode="kmsgrab"
+                echo "$output" > "$kms_token"
               fi
             fi
-            if [[ "$mode" == "kmsgrab" ]]; then
-              PRIORITY=("av1_hdr" "hevc_hdr" "av1" "hevc" "h264")
-            fi
+
+            hdr_status=$(detect_hdr "$output")
+          fi
+
+          if [[ "$mode" == "kmsgrab" && "$hdr_status" == "hdr" ]]; then
+            PRIORITY=("av1_hdr" "hevc_hdr" "av1" "hevc" "h264")
           fi
         
           # Collect available codecs
@@ -278,15 +294,11 @@ in {
             -ro "/home/$USER/Recordings"
           )
         
-          if [[ "$mode" == "kmsgrab" && "$hdr_status" == "hdr" ]]; then
+          if [[ "$mode" == "kmsgrab" ]]; then
             echo "Using kmsgrab for output=$output codec=$best_codec"
             cmd_base+=(-w "$output")
           else
-            if [[ "$hdr_status" != "hdr" ]]; then
-              echo "Selected display is not HDR; Using portal"
-            else
-              echo "Using portal capture"
-            fi
+            echo "Using portal capture codec=$best_codec"
             cmd_base+=(
               -w portal
               -restore-portal-session yes
