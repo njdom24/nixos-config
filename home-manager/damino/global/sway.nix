@@ -190,7 +190,7 @@
 		  focus.mouseWarping = "container";
 		  seat = {
 		  	"*" = {
-		  	  hide_cursor = "20000";
+		  	  hide_cursor = "10000";
 		  	  xcursor_theme = "${config.gtk.cursorTheme.name} 24";
 		  	};
 		  	
