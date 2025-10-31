@@ -158,6 +158,11 @@
 	  config = {
 	    profile = "fast";
 	    hwdec = "auto-safe";
+
+	    # https://github.com/mpv-player/mpv/issues/16933#issuecomment-3470496554
+	    target-colorspace-hint = "auto";
+	    target-colorspace-hint-mode = "target";
+	    treat-srgb-as-power22 = "both";
 	  };
 	  profiles = {
 	    HDR = {
