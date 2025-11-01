@@ -499,6 +499,7 @@
       ### AUTOSTART ###
       exec-once = [
         "${pkgs.systemd}/bin/systemctl --user stop plasma-xdg-desktop-portal-kde"
+        "${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal"
         "${set-displays}"
         "${gamescope-cursor-fix}"
         "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
@@ -562,16 +563,21 @@
   };
   systemd.user.services.hyprpaper = lib.mkForce { };
 
+  xdg.portal.extraPortals = [ config.wayland.windowManager.hyprland.portalPackage ];
+  xdg.portal.config = {
+    hyprland = {
+      #preferred = {
+      default = [
+        "hyprland"
+        "gtk"
+      ];
+      "org.freedesktop.impl.portal.FileChooser" = [ "kde" ];
+      #};
+    };
+  };
+
   home = {
     file = {
-      ".config/xdg-desktop-portal/hyprland-portals.conf" = lib.mkDefault {
-        text = ''
-          [preferred]
-          default = hyprland;gtk
-          org.freedesktop.impl.portal.FileChooser = kde
-        '';
-      };
-
       ".config/hypr/xdph.conf" = lib.mkDefault {
         text = ''
           screencopy {

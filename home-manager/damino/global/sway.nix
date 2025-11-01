@@ -426,6 +426,15 @@
 
 	# """ # Workaround to fix highlighting
 
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr ];
+	xdg.portal.config = {
+	  sway = {
+	    default = [ "hyprland;gtk" ];
+	    #"org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+	    #"org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+	  };
+	};
+
 	services = {
 	  kanshi = {
 	    enable = true;
@@ -459,6 +468,15 @@
 	};
 
   home = {
+    file = {
+      ".config/xdg-desktop-portal-wlr/config" = lib.mkDefault {
+        text = ''
+          [screencast]
+          chooser_cmd=${pkgs.slurp}/bin/slurp -f "Monitor: %o" -or
+          chooser_type=simple
+        '';
+      };
+    };
     packages = with pkgs; [
       xwayland-satellite
       wl-gammarelay-rs
