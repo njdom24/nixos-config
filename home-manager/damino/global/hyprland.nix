@@ -310,9 +310,9 @@
         no_warps = false;
         inactive_timeout = 10;
         # https://github.com/hyprwm/Hyprland/discussions/7386
-        no_break_fs_vrr = 0; # Ironically works better for mouselook games, but requires HW cursor (no NVIDIA) not to spike FPS
+        no_break_fs_vrr = 2; # 0 ironically works better for mouselook games, but requires HW cursor (no NVIDIA) not to spike FPS
         no_hardware_cursors = 0;
-        min_refresh_rate = 48;
+        min_refresh_rate = 120; # 48 is technically OK, but causes stutters (even when set to 72)
       };
 
       device = [
