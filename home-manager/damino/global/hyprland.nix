@@ -201,6 +201,9 @@
       workspace = [
         "w[tv1], gapsout:0, gapsin:0"
         "f[1], gapsout:0, gapsin:0"
+        "1,monitor:DP-1"
+        "2,monitor:DP-2"
+        "4,monitor:DP-1"
       ];
 
       windowrule = [
