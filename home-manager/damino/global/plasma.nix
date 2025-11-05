@@ -340,6 +340,7 @@
       };
 
       dolphinrc = {
+        UiSettings.ColorScheme = config.programs.plasma.workspace.colorScheme;
         DetailsMode.PreviewSize = 16; # Small icons in detail view
         Search.SearchTool = "Baloo"; # Non-indexed search doesn't work
       };
