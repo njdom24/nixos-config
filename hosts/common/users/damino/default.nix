@@ -58,7 +58,7 @@ in
       selectdefaultapplication
       mesa-demos
       vulkan-tools
-      stable.nvtopPackages.full
+      nvtopPackages.full
       rclone
       handbrake
       firefox

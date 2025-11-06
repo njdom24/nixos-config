@@ -39,16 +39,6 @@
 
       buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.system}.wlroots_git ];
     });
-
-    xdg-desktop-portal-wlr = prev.xdg-desktop-portal-wlr.overrideAttrs (old: {
-      version = "0.8.0";
-      src = prev.fetchFromGitHub {
-        owner = "emersion";
-        repo  = "xdg-desktop-portal-wlr";
-        rev   = "v0.8.0";
-        sha256 = "sha256-TAWrDH6kud4eXFJvfihImuEFm2uTOaqAOatG+7JmaEM=";
-      };
-    });
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
