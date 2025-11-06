@@ -203,29 +203,52 @@
     	"custom/nightlight" = let
     	  nightlight = pkgs.writeShellScript "nightlight" ''
     	    #!/usr/bin/env bash
+
+            # Gammastep causes stutters when gaming. Kill it to take over
+    	    kill -9 $(pgrep gammastep) 2> /dev/null
     	    
     	    if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
     	      BIN="hyprsunset"
-    	      ARGS="-t 5500"
+    	      ARGS="-t 6000"
     	    else
-    	      BIN="gammastep"
-    	      ARGS="-O 5500"
+    	      if ! ${pkgs.procps}/bin/pgrep -f wl-gammarelay-rs >/dev/null; then
+    	        ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs &
+    	        sleep 0.5
+    	      fi
+    	      BIN="busctl"
+    	      ARGS="--user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6000"
     	    fi
     	    
     	    case "$1" in
     	      toggle)
-    	        if pgrep -x "$BIN" >/dev/null; then
-    	          pkill -x "$BIN"
+    	        if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+    	          if ${pkgs.procps}/bin/pgrep -x "$BIN" >/dev/null; then
+    	            pkill -x "$BIN"
+    	          else
+    	            "$BIN" $ARGS &
+    	          fi
     	        else
-    	          "$BIN" $ARGS &
+    	          if ! busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
+    	            busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6500
+    	          else
+    	            "$BIN" $ARGS &
+    	          fi
     	        fi
     	        sleep 0.1 && pkill -RTMIN+10 waybar
     	        ;;
     	      status|*)
-    	        if pgrep -x "$BIN" >/dev/null; then
-    	          echo "{\"text\":\"\",\"tooltip\":\"$BIN active (4500K)\"}"
+    	        if [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+    	          if pgrep -x "$BIN" >/dev/null; then
+    	            echo "{\"text\":\"\",\"tooltip\":\"$BIN active\"}"
+    	          else
+    	            echo "{\"text\":\"\",\"tooltip\":\"$BIN inactive\"}"
+    	          fi
     	        else
-    	          echo "{\"text\":\"\",\"tooltip\":\"$BIN inactive\"}"
+    	          if ! busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
+    	            echo "{\"text\":\"\",\"tooltip\":\"wl-gammarelay-rs active\"}"
+    	          else
+    	            echo "{\"text\":\"\",\"tooltip\":\"wl-gammarelay-rs inactive\"}"
+    	          fi
     	        fi
     	        ;;
     	    esac
