@@ -1,0 +1,14 @@
+diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
+index ab6d30c..412bf45 100644
+--- a/src/Backends/WaylandBackend.cpp
++++ b/src/Backends/WaylandBackend.cpp
+@@ -2384,7 +2384,8 @@ namespace gamescope
+ 
+     bool CWaylandBackend::SupportsColorManagement() const
+     {
+-        return m_pFrogColorMgmtFactory != nullptr || ( m_pWPColorManager != nullptr && m_WPColorManagerFeatures.bSupportsGamescopeColorManagement );
++        
++        return m_pFrogColorMgmtFactory != nullptr || ( m_pWPColorManager != nullptr && m_WPColorManagerFeatures.bSupportsGamescopeColorManagement ) || g_bForceHDRSupportDebug;
+     }
+ 
+     void CWaylandBackend::SetCursorImage( std::shared_ptr<INestedHints::CursorInfo> info )

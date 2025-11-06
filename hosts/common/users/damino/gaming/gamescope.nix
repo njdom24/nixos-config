@@ -36,7 +36,7 @@ let
   get_display_mode = pkgs.writeShellScript "get-display-mode.sh" ''
     # Sway 1.11 sets this OOTB now
     if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-      ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
+      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
         .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
       '
     elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
@@ -808,7 +808,7 @@ let
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     elif [["$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on
-      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
     fi
     
     # timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears

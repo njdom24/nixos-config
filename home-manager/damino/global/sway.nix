@@ -198,7 +198,7 @@
 		  gaps = {
 		  	smartGaps = true;
 		  	smartBorders = "on";
-		  	inner = 6;
+		  	inner = 4;
 		  	outer = 0;
 		  };
 		  keybindings = let bind-hold = pkgs.writeShellScript "bind-hold" ''

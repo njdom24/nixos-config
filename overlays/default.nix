@@ -22,6 +22,7 @@
       # https://github.com/ValveSoftware/gamescope/issues/1604#issuecomment-2603198783
       patches = (oldAttrs.patches or []) ++ [
         ../patches/gamescope-crash-fix.patch
+        ../patches/gamescope-hdr-sway-fix.patch
       ];
     });
 
