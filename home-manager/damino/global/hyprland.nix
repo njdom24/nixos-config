@@ -101,7 +101,7 @@
       # Kanshi handles non-HDR stuff
       source = "~/.config/hypr/displays.conf";
 
-      "$terminal" = "kitty";
+      "$terminal" = "alacritty";
       "$fileManager" = "dolphin";
       "$menu" = "rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun";
       "$cursorTheme" = "XCursor-Pro-Dark";

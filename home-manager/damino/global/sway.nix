@@ -52,15 +52,15 @@
 		
 		    if [ "$REMOTE_ENABLED" = "1" ]; then
 		      # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
-		      existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+		      existing_headless=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
 		      
 		      if [ -z "$existing_headless" ]; then
 		        # If no HEADLESS output exists, create one
-		        ${pkgs.sway}/bin/swaymsg create_output
+		        swaymsg create_output
 		      fi
 		      # Disable all non-HEADLESS outputs
-		      ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
-		      ${pkgs.sway}/bin/swaymsg output "*" render_bit_depth 10
+		      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+		      swaymsg output "*" render_bit_depth 10
 		    else
 		      # If not remote, run kanshi
 		      ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
@@ -258,7 +258,7 @@
 		  	#"Control+grave" = "exec makoctl restore";
 		  	#"Control+space" = "exec makoctl dismiss";
 		  	"Control+Shift+b" = "exec sway-toggle-hdr";
-		  	"$mod+Return" = "exec kitty";
+		  	"$mod+Return" = "exec alacritty";
 		  	"$mod+Shift+q" = "kill";
 		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
 		  	"$mod+Shift+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun -drun-show-actions\"";

@@ -1,4 +1,79 @@
 { inputs, config, pkgs, ... }: {
+  programs.alacritty = {
+    enable = true;
+  
+    settings = {
+      window.opacity = 0.98;
+  
+      font = {
+        normal.family = "Input Mono";
+        normal.style = "Regular";
+        size = 10.0;
+        offset = { x = 0; y = -1; };
+      };
+  
+      cursor = {
+        style = { shape = "Block"; blinking = "Off"; };
+        thickness = 0.6;
+      };
+
+      mouse.bindings = [
+        { mouse = "Right"; mods = "None"; action = "None"; }
+      ];
+  
+      scrolling.multiplier = 7;
+  
+      colors = {
+        draw_bold_text_with_bright_colors = true;
+        primary = {
+          background = "#3B3228";
+          foreground = "#d0c8c6";
+        };
+  
+        cursor = {
+          text = "#3B3228";
+          cursor = "#d0c8c6";
+        };
+  
+        selection = {
+          text = "#3B3228";
+          background = "#d0c8c6";
+        };
+  
+        normal = {
+          black = "#3B3228";
+          red = "#cb6077";
+          green = "#beb55b";
+          yellow = "#f4bc87";
+          blue = "#8ab3b5";
+          magenta = "#a89bb9";
+          cyan = "#7bbda4";
+          white = "#d0c8c6";
+        };
+  
+        bright = {
+          black = "#7e705a";
+          red = "#cb6077";
+          green = "#beb55b";
+          yellow = "#f4bc87";
+          blue = "#8ab3b5";
+          magenta = "#a89bb9";
+          cyan = "#7bbda4";
+          white = "#f5eeeb";
+        };
+  
+        indexed_colors = [
+          { index = 16; color = "#d28b71"; }
+          { index = 17; color = "#bb9584"; }
+          { index = 18; color = "#534636"; }
+          { index = 19; color = "#645240"; }
+          { index = 20; color = "#b8afad"; }
+          { index = 21; color = "#e9e1dd"; }
+        ];
+      };
+    };
+  };
+  
   programs.kitty = {
 	enable = true;
 	font = {

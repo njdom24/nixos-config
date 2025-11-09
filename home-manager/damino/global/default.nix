@@ -25,7 +25,7 @@
     ./plasma.nix
     ./sway.nix
     ./hyprland.nix
-    ./kitty.nix
+    ./terminals.nix
     ./theming
     ./gpu-screen-recorder.nix
   ];
