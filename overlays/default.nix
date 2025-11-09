@@ -38,6 +38,13 @@
       };
 
       buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.system}.wlroots_git ];
+      
+      patches = let
+        existing = old.patches or [];
+        myPatch = ../patches/sway-hdr-crashfix.patch;
+        alreadyExists = builtins.any (p: p == myPatch) existing;
+      in
+        if alreadyExists then existing else existing ++ [ myPatch ];
     });
   };
 
