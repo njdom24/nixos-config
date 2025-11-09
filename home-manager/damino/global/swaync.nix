@@ -76,7 +76,7 @@
           box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--base02); /* Border color */
           border-radius: 6.6px;
           margin: 18px;
-          background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.8); /* base00 with 80% opacity */
+          background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.9); /* base00 with 90% opacity */
           color: var(--base05);
           padding: 0;
         }
@@ -175,7 +175,7 @@
         .control-center {
           box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--base01);
           border-radius: 12.6px;
-          background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.9); /* base00 with 90% opacity */
+          background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.95); /* base00 with 95% opacity */
           color: var(--base05);
           padding: 14px;
         }
@@ -260,7 +260,7 @@
         
         .mpris-overlay {
           background-color: var(--base01);
-          opacity: 0.9;
+          opacity: 0.95;
           padding: 15px 10px;
         }
         

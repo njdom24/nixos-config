@@ -294,7 +294,7 @@
 }
 
 window#waybar {
-    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.9);
+    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.95);
     color: @base07;
     transition-property: background-color;
     transition-duration: .5s;
@@ -328,15 +328,15 @@ window#waybar.chromium {
 }
 
 #workspaces button.focused {
-    background-color: @base00;
+    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.6);
 }
 
 #workspaces button.urgent {
-    background-color: @base00;
+    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 0.8);
 }
 
 #mode {
-    background-color: #64727D;
+    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 0.6);
 }
 
 #clock,

@@ -18,7 +18,7 @@
 		lightfg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base06}, 100 % )";
 		lightbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 100 % )";
 		foreground = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base05}, 100 % )";
-		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 50 % )";
+		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 80 % )";
 		transparent = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 00 % )";
 		background-color = mkLiteral "@background";
 
