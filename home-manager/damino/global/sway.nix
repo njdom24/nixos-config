@@ -351,7 +351,8 @@
 	      if [ "$1" != ":0" ]; then
 	        exec ${pkgs.xwayland}/bin/Xwayland "$@"
 	      else
-	        swaymsg exec ${pkgs.xwayland-satellite}/bin/xwayland-satellite
+	        # Try to force 1x scaling
+	        swaymsg exec '${pkgs.xwayland-satellite}/bin/xwayland-satellite; sleep 1; ${pkgs.xorg.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"'
 	      fi
 	    '';
 	    in ''
