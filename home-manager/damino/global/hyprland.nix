@@ -80,7 +80,7 @@
       SOCK="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
       
       ${pkgs.socat}/bin/socat -U - UNIX-CONNECT:"$SOCK" | while read -r line; do
-        if [[ "$line" =~ ^openwindow.*gamescope ]]; then
+        if [[ "$line" =~ ^openwindow.*gamescope ]] || [[ "$line" =~ ^openwindow.*gamescope-wrapped ]]; then
           # wait a moment to ensure window is mapped
           sleep 0.1
           # Toggle focus
@@ -225,6 +225,7 @@
         # Fix some dragging issues with XWayland
         "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
         "content game, class:^gamescope$"
+        "content game, class:^.gamescope-wrapped$"
         "content game, class:^(steam_app_\d+)$" # All Steam apps are considered games
         # Help deal with gamescope input going through to Steam
         #"stayfocused, class:^gamescope$"
