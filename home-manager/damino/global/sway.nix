@@ -430,9 +430,9 @@
     xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr ];
 	xdg.portal.config = {
 	  sway = {
-	    default = [ "hyprland;gtk" ];
-	    #"org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
-	    #"org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+	    default = [ "gtk" ];
+	    "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+	    "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
 	  };
 	};
 
@@ -470,10 +470,69 @@
 
   home = {
     file = {
-      ".config/xdg-desktop-portal-wlr/config" = lib.mkDefault {
+      ".config/xdg-desktop-portal-wlr/config" = let headless-share = pkgs.writeShellScript "headless-share.sh" ''
+        display=$(${pkgs.slurp}/bin/slurp -f "%o" -or)
+        echo "Display: $display" >&2
+
+        is_hdr="$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$display\") | .hdr")"
+        if [[ "$is_hdr" != "true" ]]; then
+          echo "Monitor: $display"
+          exit 0
+        fi
+
+        # Find existing headless output (match by name prefix)
+        HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+        
+        if [[ -z "$HEADLESS" ]]; then
+          echo "No headless output found, creating one..." >&2
+          ${pkgs.sway}/bin/swaymsg create_output > /dev/null 2>&1 &
+          HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+        fi
+        
+        if [[ -z "$HEADLESS" ]]; then
+          echo "Failed to create or find a headless output." >&2
+          exit 1
+        fi
+
+        DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
+
+        if [[ -z "$DISPLAY_INFO" ]]; then
+          echo "Could not find output $display." >&2
+          exit 1
+        fi
+
+        echo "Display: $display" >&2
+        echo "Headless: $HEADLESS" >&2
+        
+        # Get resolution, scale, and refresh rate
+        WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
+        HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
+        REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
+        SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
+        XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
+        YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
+        REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
+        
+        # Apply settings to headless output
+        ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+
+        echo "Monitor: $HEADLESS"
+      '';
+      headless-unplug = pkgs.writeShellScript "headless-unplug.sh" ''
+        # Find existing headless output (match by name prefix)
+        HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+        if [[ -z "$HEADLESS" ]]; then
+          echo "Failed to create or find a headless output."
+          exit 0
+        fi
+        ${pkgs.sway}/bin/swaymsg output "$HEADLESS" unplug > /dev/null 2>&1 &
+      ''; in lib.mkDefault {
         text = ''
           [screencast]
-          chooser_cmd=${pkgs.slurp}/bin/slurp -f "Monitor: %o" -or
+          max_fps=60
+          chooser_cmd=${headless-share}
+          exec_after=${headless-unplug}
+          #chooser_cmd=${pkgs.slurp}/bin/slurp -f "Monitor: %o" -or
           chooser_type=simple
         '';
       };
