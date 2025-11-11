@@ -242,6 +242,98 @@
 		        rm -f "$statefile"
 		        ;;
 		    esac
+		  '';
+		  hdr-screenshot = pkgs.writeShellScript "hdr-screenshot" ''
+		    mode="$1"
+		    tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+		    HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+		    trap 'rm -f "$tmpfile && swaymsg output $HEADLESS unplug 2> /dev/null"' EXIT
+		    
+            if [[ -z "$HEADLESS" ]]; then
+              echo "No headless output found, creating one..." >&2
+              swaymsg create_output > /dev/null 2>&1 &
+              HEADLESS=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+            fi
+
+            set_headless_mode() {
+              local display="$1"
+              DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
+              # Get resolution, scale, and refresh rate
+              WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
+              HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
+              REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
+              SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
+              XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
+              YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
+              REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
+
+              swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+            }
+            
+            # Prefer overlapping HEADLESS outputs for HDR tonemapping
+		    case "$mode" in
+		      focused)
+		        output=$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')
+                set_headless_mode $output
+
+		        ${pkgs.grim}/bin/grim -o "$HEADLESS" "$tmpfile"
+		        ;;
+		      select|selector)
+		        REGION=$(${pkgs.slurp}/bin/slurp) || exit 1
+		        read XY WH <<<"$REGION"
+		        X=''${XY%,*}      # before comma
+		        Y=''${XY#*,}      # after comma
+		        W=''${WH%x*}      # before x
+		        H=''${WH#*x}      # after x
+
+		        # Get all outputs that intersect the region
+		        OUTPUTS=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --argjson x "$X" --argjson y "$Y" --argjson w "$W" --argjson h "$H" '
+		          .[] | select(.active) |
+		          select(
+		            # Check if rectangles intersect
+		            (.rect.x + .rect.width  > $x) and
+		            ($x + $w > .rect.x) and
+		            (.rect.y + .rect.height > $y) and
+		            ($y + $h > .rect.y)
+		          ) | .name
+		        ')
+
+                # "''$()"
+                # If exactly one output intersects, store in a variable
+                ${pkgs.libnotify}/bin/notify-send "$OUTPUTS"
+                if [[ ''${#OUTPUTS[@]} -eq 2 ]]; then
+                  TARGET_OUTPUT="''${OUTPUTS[0]}"
+                  if [[ "''${OUTPUTS[0]}" == "HEADLESS*" ]]; then
+                    set_headless_mode "''${OUTPUTS[1]}"
+                    ${pkgs.grim}/bin/grim -o "''${OUTPUTS[0]}" -g "$REGION" "$tmpfile"
+                  elif [[ "''${OUTPUTS[1]}" == "HEADLESS*" ]]; then
+                    set_headless_mode "''${OUTPUTS[0]}"
+                    ${pkgs.grim}/bin/grim -o "''${OUTPUTS[1]}" -g "$REGION" "$tmpfile"
+                  else
+                    ${pkgs.grim}/bin/grim -g "$REGION" "$tmpfile"
+                  fi
+                elif [[ ''${#OUTPUTS[@]} -eq 1 ]]; then
+                  set_headless_mode "''${OUTPUTS[0]}"
+                  # grim doesn't take -o and -g, but seems to just prioritize HEADLESS
+                  ${pkgs.grim}/bin/grim -g "$REGION" "$tmpfile"
+                else
+                  ${pkgs.libnotify}/bin/notify-send "BRANCH5"
+                  ${pkgs.grim}/bin/grim -g "$REGION" "$tmpfile"
+                fi
+		        ;;
+		      *)
+		        echo "Usage: $0 {focused|select}" >&2
+		        swaymsg output $HEADLESS unplug 2> /dev/null
+		        exit 1
+		        ;;
+		    esac
+
+		    if [[ -s "$tmpfile" ]]; then
+		      ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
+		      # cat "$tmpfile" | ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png
+		      ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
+		    fi
+		    swaymsg output $HEADLESS unplug 2> /dev/null
 		  ''; in {
 		    #"$mod+t" = "exec ${bind-hold} start t";
 		    #"--release $mod+t" = "exec ${bind-hold} stop t";
@@ -309,10 +401,10 @@
 			"$mod+Shift+e" = "exec wlogout -p layer-shell";
 			"$mod+r" = "mode \"resize\"";
 
-			"Shift+Print" = "exec 'grim -g \"$(slurp -d)\" - | wl-copy -t image/png'";
-			"Shift+Prior" = "exec 'grim -g \"$(slurp -d)\" - | wl-copy -t image/png'";
-			"Print" = "exec grim -o \"$(swaymsg -t get_tree | jq -r '.nodes[] | select([recurse(.nodes[]?, .floating_nodes[]?) | .focused] | any) | .name')\" - | wl-copy -t image/png";
-			"Shift+Next" = "exec grim -o \"$(swaymsg -t get_tree | jq -r '.nodes[] | select([recurse(.nodes[]?, .floating_nodes[]?) | .focused] | any) | .name')\" - | wl-copy -t image/png";
+			"Shift+Print" = "exec ${hdr-screenshot} select";
+			"Shift+Prior" = "exec ${hdr-screenshot} select";
+			"Print" = "exec ${hdr-screenshot} focused";
+			"Shift+Next" = "exec ${hdr-screenshot} focused";
 		  };
 		  left = "$mod+Left";
 		  right = "$mod+Right";
