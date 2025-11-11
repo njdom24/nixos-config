@@ -806,14 +806,14 @@ let
       cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
-    elif [["$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+    elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
     fi
     
     # timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
 
-    # TODO: Make extra confs for Hyprland if VRR is still an issue
+    # TODO: Make extra confs for Hyprland,sway if VRR is still an issue
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       (sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
     fi
@@ -824,7 +824,7 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
-    elif [["$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+    elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &
       swaymsg reload # Contains exec_always kanshi
     fi
