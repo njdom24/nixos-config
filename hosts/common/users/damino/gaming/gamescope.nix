@@ -753,6 +753,15 @@ let
                 toggle_vrr
                 last_colorspace="$curr_colorspace"
               fi
+            elif [[ "line" == "Game Recording - game stopped"* ]]; then
+              # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
+              if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+                curr_colorspace="HDR"
+                focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+                swaymsg output $focused_display hdr on
+                toggle_vrr
+                last_colorspace="HDR"
+              fi
             fi
 
           fi
