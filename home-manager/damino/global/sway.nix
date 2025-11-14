@@ -162,11 +162,11 @@
 		      	criteria = { title = "Steam Big Picture Mode"; };
 		      }
 		      {
-		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
+		        command = "exec 'sleep 1 && swaymsg move output current && swaymsg workspace back_and_forth && swaymsg workspace back_and_forth'";
 		        criteria = { app_id = "gamescope"; };
 		      }
 		      {
-		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
+		        command = "exec 'sleep 1 && swaymsg move output current && swaymsg workspace back_and_forth && swaymsg workspace back_and_forth'";
 		        criteria = { app_id = ".gamescope-wrapped"; };
 		      }
 		    ];
