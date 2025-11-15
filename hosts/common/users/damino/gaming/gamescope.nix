@@ -749,7 +749,7 @@ let
             toggle_vrr
             last_colorspace="$curr_colorspace"
           fi
-        elif [[ "line" == "Game Recording - game stopped"* ]]; then
+        elif [[ "''${last_colorspace:-}" != "HDR" ]] && [[ "line" == "Game Recording - game stopped"* || "line" == "Removing process"*"for gameID"* ]]; then
           # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
           if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
             curr_colorspace="HDR"
