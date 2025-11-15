@@ -298,7 +298,6 @@
 		          ) | .name
 		        ')
 
-                # "''$()"
                 # If exactly one output intersects, store in a variable
                 ${pkgs.libnotify}/bin/notify-send "$OUTPUTS"
                 if [[ ''${#OUTPUTS[@]} -eq 2 ]]; then
@@ -334,6 +333,7 @@
 		      ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
 		    fi
 		    swaymsg output $HEADLESS unplug 2> /dev/null
+		    # "''$()"
 		  ''; in {
 		    #"$mod+t" = "exec ${bind-hold} start t";
 		    #"--release $mod+t" = "exec ${bind-hold} stop t";
