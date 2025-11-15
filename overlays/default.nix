@@ -29,22 +29,22 @@
     mangohud = inputs.chaotic.packages.${prev.system}.mangohud_git;
 
     # sway pinned to PR #8922 state
-    sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
-      src = prev.fetchFromGitHub {
-        owner = "poisotf";
-        repo  = "sway";
-        rev   = "4b2643e0a8e9ed67c62572e6cfb6c9b97e8d7568";  # use the branch name from the fork
-        sha256 = "sha256-ss0ctrinia/QNgwvwnz7MBvZdIuG27SEWdgEwm4wrMw=";
-      };
+    sway-unwrapped = prev.sway-unwrapped_git.overrideAttrs (old: {
+      #src = prev.fetchFromGitHub {
+      #  owner = "poisotf";
+      #  repo  = "sway";
+      #  rev   = "4b2643e0a8e9ed67c62572e6cfb6c9b97e8d7568";  # use the branch name from the fork
+      #  sha256 = "sha256-ss0ctrinia/QNgwvwnz7MBvZdIuG27SEWdgEwm4wrMw=";
+      #};
 
       buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.system}.wlroots_git ];
       
-      #patches = let
-      #  existing = old.patches or [];
-      #  myPatch = ../patches/sway-hdr-crashfix.patch;
-      #  alreadyExists = builtins.any (p: p == myPatch) existing;
-      #in
-      #  if alreadyExists then existing else existing ++ [ myPatch ];
+      patches = let
+        existing = old.patches or [];
+        myPatch = ../patches/sway-no-srgb-eotf.patch;
+        alreadyExists = builtins.any (p: p == myPatch) existing;
+      in
+        if alreadyExists then existing else existing ++ [ myPatch ];
     });
   };
 
