@@ -10,7 +10,7 @@ let
       ../../../../../patches/gamescope-vblank-hack.patch
     ];
   });
-  # TODO: Consider removing. Hasn't been a problem in a while (in Hyprland?)
+  # TODO: Consider removing. Hasn't been a problem in a while (only KDE?)
   # Work around HDR needing an extra "push" with VMM7100 Firmware v124 (VRR, HDR, 4k144Hz)
   vmm7100_hdr_fix = pkgs.writeShellScript "vmm7100-hdr-fix" ''
     #!/usr/bin/env bash
@@ -30,6 +30,94 @@ let
       ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3,3840x2160@60,auto,1,cm,hdr
       ${pkgs.hyprland}/bin/hyprctl reload
     fi
+  '';
+
+  get_vrr = pkgs.writeShellScript "get_vrr.sh" ''
+    # Account for nested case
+    desktop="$XDG_CURRENT_DESKTOP"
+    display="$DISPLAY"
+    wdisplay="$WAYLAND_DISPLAY"
+    session="$XDG_SESSION_TYPE"
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+    fi
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+      vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .features.adaptive_sync')
+      echo "$vrr_status"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+      # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
+      vfr_status=$(${pkgs.hyprland}/bin/hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
+      echo "$vfr_status"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+      # TODO
+      echo "0"
+    else
+      echo "0"
+    fi
+
+    XDG_CURRENT_DESKTOP="$desktop"
+    DISPLAY="$display"
+    WAYLAND_DISPLAY="$wdisplay"
+    XDG_SESSION_TYPE="$session"
+  '';
+
+  set_vrr = pkgs.writeShellScript "get_vrr.sh" ''
+    local vrr_mode="$1"
+
+    # Account for nested case
+    desktop="$XDG_CURRENT_DESKTOP"
+    display="$DISPLAY"
+    wdisplay="$WAYLAND_DISPLAY"
+    session="$XDG_SESSION_TYPE"
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+    fi
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+      ${pkgs.hyprland}/bin/hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
+    elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+      focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+      swaymsg output $focused_display adaptive_sync "$vrr_mode"
+    fi
+
+    XDG_CURRENT_DESKTOP="$desktop"
+    DISPLAY="$display"
+    WAYLAND_DISPLAY="$wdisplay"
+    XDG_SESSION_TYPE="$session"
+  '';
+
+  novrr = pkgs.writeShellScriptBin "novrr" ''
+    set -euo pipefail
+
+    # Communicate with sway VRR fullscreen script to prevent it from overriding
+    if [[ -v SWAYSOCK ]]; then
+      touch "$XDG_RUNTIME_DIR"/sway_vrr_lock
+    fi
+
+    vrr_start="$(${get_vrr})"
+    ${set_vrr} 0
+
+    cleanup() {
+      local ec=$?
+      ${set_vrr} $vrr_start
+      if [[ -v SWAYSOCK ]]; then
+        rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
+      fi
+      exit "$ec"
+    }
+
+    trap cleanup EXIT INT TERM HUP QUIT
+
+    "$@"
   '';
 
   # Resolution & refresh detection
@@ -164,7 +252,7 @@ let
       echo "Refresh rate $refresh below minimum. Not enabling LSFG"
     fi
 
-    exec "$@"
+    exec ${novrr}/bin/novrr "$@"
   '';
 
   # Gamescope helper to auto-fill mode, HDR, update settings
@@ -673,34 +761,7 @@ let
   '';
 
   gsc-watcher = pkgs.writeShellScriptBin "gsc-watcher" ''
-    get_vrr() {
-      if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-        vrr_status=$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true) | .features.adaptive_sync')
-        echo "$vrr_status"
-      elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-        # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
-        vfr_status=$(${pkgs.hyprland}/bin/hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
-        echo "$vfr_status"
-      elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-        # TODO
-        echo "0"
-      else
-        echo "0"
-      fi
-    }
-
-    set_vrr() {
-      local vrr_mode="$1"
-
-      if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-        ${pkgs.hyprland}/bin/hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
-      elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-        focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-        swaymsg output $focused_display adaptive_sync "$vrr_mode"
-      fi
-    }
-
-    vrr_mode="$(get_vrr)"
+    vrr_mode="$(${get_vrr})"
 
     # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
     toggle_vrr() {
@@ -711,8 +772,8 @@ let
       fi
 
       echo "gsc: VRR mode: $vrr_mode"
-      if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-        (set_vrr 0 && sleep 10 && set_vrr "$vrr_mode") &
+      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+        (${set_vrr} 0 && sleep 10 && ${set_vrr} "$vrr_mode") &
         vrr_pid=$!
       fi
     }
@@ -720,7 +781,7 @@ let
     ${pkgs.expect}/bin/unbuffer ${gsc}/bin/gsc "$@" 2>&1 | while IFS= read -r line; do
       echo "$line"
 
-      if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
         # Strip ANSI escape codes
         line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
@@ -730,7 +791,7 @@ let
             if [[ "''${last_colorspace:-}" != "HDR" ]]; then
               echo "gsc: Detected HDR swapchain: $line" >&2
               curr_colorspace="HDR"
-              if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+              if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
                 focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
                 swaymsg output $focused_display hdr on
               fi
@@ -739,7 +800,7 @@ let
             if [[ "''${last_colorspace:-}" != "SDR" ]]; then
               echo "gsc: Detected SDR swapchain: $line" >&2
               curr_colorspace="SDR"
-              if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+              if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
                 focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
                 swaymsg output $focused_display hdr off
               fi
@@ -751,7 +812,7 @@ let
           fi
         elif [[ "''${last_colorspace:-}" != "HDR" ]] && [[ "line" == "Game Recording - game stopped"* || "line" == "Removing process"*"for gameID"* ]]; then
           # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
-          if [[ "$_GSC_PARENT_DESKTOP" == "sway" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+          if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
             curr_colorspace="HDR"
             focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
             swaymsg output $focused_display hdr on
@@ -764,11 +825,11 @@ let
     done
 
     # Restore VRR if gamescope closes while toggle job is running
-    if [[ "$_GSC_PARENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
       if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
         ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
         wait "$vrr_pid" 2>/dev/null
-        set_vrr "$vrr_mode"
+        ${set_vrr} "$vrr_mode"
       fi
     fi
   '';
@@ -812,6 +873,7 @@ let
       swaymsg reload # Contains exec_always kanshi
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
+    # "''$()"
   '';
 in 
 {
@@ -906,6 +968,7 @@ in
   	  gsc-watcher
   	  lsfg-min
   	  lsfg-vk
+  	  novrr
 
   	  # https://github.com/ValveSoftware/steam-for-linux/issues/11479
   	  # cd to /tmp to somehow avoid stutters with VRR
