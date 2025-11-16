@@ -161,11 +161,11 @@
 		      	criteria = { title = "Steam Big Picture Mode"; };
 		      }
 		      {
-		        command = "exec 'sleep 2 && swaymsg move output current && swaymsg workspace back_and_forth && swaymsg workspace back_and_forth'";
+		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
 		        criteria = { app_id = "gamescope"; };
 		      }
 		      {
-		        command = "exec 'sleep 2 && swaymsg move output current && swaymsg workspace back_and_forth && swaymsg workspace back_and_forth'";
+		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
 		        criteria = { app_id = ".gamescope-wrapped"; };
 		      }
 		    ];
