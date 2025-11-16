@@ -56,7 +56,7 @@
       else
         echo "GPU acceleration failed, falling back to CPU..." >&2
         ${pkgs.coreutils}/bin/nice -n 18 ${pkgs.ffmpeg-full}/bin/ffmpeg -i "$input" \
-        -vf "zscale=t=linear:npl=100:p=bt2020:m=bt2020nc,format=gbrpf32le,tonemap=tonemap=reinhard:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p" \
+        -vf "zscale=transfer=smpte2084:primaries=bt2020:matrix=bt2020nc:t=linear:npl=100,tonemap=hable:desat=0,zscale=transfer=bt709:primaries=bt709:matrix=bt709,format=yuv420p" \
         -c:v libx265 -crf 22 -preset medium \
         "$output"
       fi
