@@ -527,6 +527,7 @@
         # Waybar freezes on reload on Hyprland sometimes, so just restart
         "kill `pgrep waybar`; waybar &"
 
+        "echo \"$AQ_DRM_DEVICES\" | ${pkgs.gnugrep}/bin/grep -q dgpu && systemctl --user start gpu-screen-recorder"
         "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
       ];
     };
