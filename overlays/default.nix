@@ -46,6 +46,8 @@
       in
         if alreadyExists then existing else existing ++ [ myPatch ];
     });
+
+    xwayland-satellite = inputs.xwayland-satellite.packages.${prev.system}.xwayland-satellite;
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will

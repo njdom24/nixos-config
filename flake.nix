@@ -27,6 +27,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    xwayland-satellite = {
+      url = "github:Supreeeme/xwayland-satellite";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hyprland.url = "github:hyprwm/Hyprland";
     #hyprland.url = "github:UjinT34/Hyprland/fp16?submodules=1";
 
@@ -58,6 +63,7 @@
     home-manager,
     home-manager-stable,
     plasma-manager,
+    xwayland-satellite,
     hyprland,
     #hy3,
     hardware,
