@@ -172,6 +172,7 @@
 	      vo = "gpu-next";
 	      target-colorspace-hint = "yes";
 	      #tone-mapping = "spline";
+	      #target-trc =gamma2.2
 	      gamut-mapping-mode = "auto";
 	      #hdr-compute-peak = "yes";
 	    };
