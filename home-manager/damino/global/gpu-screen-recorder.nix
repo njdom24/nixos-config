@@ -236,10 +236,7 @@ in {
 
           if [[ "$mode" == "kmsgrab" ]]; then
             if [[ -s "$kms_token" ]]; then
-              output=$(cat "$kms_token")
-              if [[ -n "$output" ]]; then
-                mode="kmsgrab"
-              fi
+              output=$(${pkgs.coreutils}/bin/cat "$kms_token")
             else
               selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
               if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
