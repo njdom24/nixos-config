@@ -3,16 +3,9 @@ let
   # https://github.com/NixOS/nixpkgs/issues/360592#issuecomment-2513490613
   # Workaround for Sonarr breakage in 24.05. Remove ASAP 
   insecure-unstable = import inputs.nixpkgs {
-    system = pkgs.system;
+    system = pkgs.stdenv.hostPlatform.system;
     config = {
       allowUnfree = true;
-      permittedInsecurePackages = [
-        "dotnet-runtime-wrapped-6.0.36"
-        "aspnetcore-runtime-6.0.36"
-        "aspnetcore-runtime-wrapped-6.0.36"
-        "dotnet-sdk-6.0.428"
-        "dotnet-sdk-wrapped-6.0.428"
-      ];
     };
   };
 in

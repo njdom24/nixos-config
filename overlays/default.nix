@@ -15,7 +15,7 @@
     #    #./my-mesa-fix.patch
     #  ];
     #});
-    gamescope = inputs.chaotic.packages.${prev.system}.gamescope_git.overrideAttrs (oldAttrs: {
+    gamescope = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.gamescope_git.overrideAttrs (oldAttrs: {
       # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530
       NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
 
@@ -26,7 +26,7 @@
       ];
     });
 
-    mangohud = inputs.chaotic.packages.${prev.system}.mangohud_git;
+    mangohud = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.mangohud_git;
 
     # sway pinned to PR #8922 state
     sway-unwrapped = prev.sway-unwrapped_git.overrideAttrs (old: {
@@ -37,7 +37,7 @@
       #  sha256 = "sha256-ss0ctrinia/QNgwvwnz7MBvZdIuG27SEWdgEwm4wrMw=";
       #};
 
-      buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.system}.wlroots_git ];
+      buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.wlroots_git ];
       
       patches = let
         existing = old.patches or [];
@@ -47,28 +47,28 @@
         if alreadyExists then existing else existing ++ [ myPatch ];
     });
 
-    xwayland-satellite = inputs.xwayland-satellite.packages.${prev.system}.xwayland-satellite;
+    xwayland-satellite = inputs.xwayland-satellite.packages.${prev.stdenv.hostPlatform.system}.xwayland-satellite;
   };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
   # be accessible through 'pkgs.unstable'
   unstable-packages = final: _prev: {
     unstable = import inputs.nixpkgs {
-      system = final.system;
+      system = final.stdenv.hostPlatform.system;
       config.allowUnfree = true;
     };
   };
 
   stable-packages = final: _prev: {
     stable = import inputs.nixpkgs-stable {
-      system = final.system;
+      system = final.stdenv.hostPlatform.system;
       config.allowUnfree = true;
     };
   };
 
   legacy-packages = final: _prev: {
     legacy = import inputs.nixpkgs-legacy {
-      system = final.system;
+      system = final.stdenv.hostPlatform.system;
       config.allowUnfree = true;
     };
   };

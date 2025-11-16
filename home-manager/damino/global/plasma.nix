@@ -490,7 +490,7 @@
       kdePackages.krohnkite
       plasma-panel-colorizer
       plasma-toggle-hdr
-      inputs.kwin-effects-forceblur.packages.${pkgs.system}.default
+      inputs.kwin-effects-forceblur.packages.${pkgs.stdenv.hostPlatform.system}.default
       kwin-effects-geometry-change
       virtual-desktops-only-on-primary
     ];
