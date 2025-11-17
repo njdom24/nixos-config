@@ -47,7 +47,7 @@ let
     fi
 
     if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-      vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .features.adaptive_sync')
+      vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .adaptive_sync_status')
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
@@ -66,8 +66,8 @@ let
     XDG_SESSION_TYPE="$session"
   '';
 
-  set_vrr = pkgs.writeShellScript "get_vrr.sh" ''
-    local vrr_mode="$1"
+  set_vrr = pkgs.writeShellScript "set_vrr.sh" ''
+    vrr_mode="$1"
 
     # Account for nested case
     desktop="$XDG_CURRENT_DESKTOP"
@@ -806,11 +806,11 @@ let
               fi
             fi
           fi
-          if [[ "$curr_colorspace" != "last_colorspace" ]]; then
+          if [[ "$curr_colorspace" != "$last_colorspace" ]]; then
             toggle_vrr
             last_colorspace="$curr_colorspace"
           fi
-        elif [[ "''${last_colorspace:-}" != "HDR" ]] && [[ "line" == "Game Recording - game stopped"* || "line" == "Removing process"*"for gameID"* ]]; then
+        elif [[ "''${last_colorspace:-}" != "HDR" ]] && [[ "$line" == "Game Recording - game stopped"* || "$line" == "Removing process"*"for gameID"* ]]; then
           # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
           if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
             curr_colorspace="HDR"
@@ -851,7 +851,7 @@ let
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-      swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on
+      swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
     fi
     
