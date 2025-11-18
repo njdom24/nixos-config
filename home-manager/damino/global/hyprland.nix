@@ -208,52 +208,34 @@
       ];
 
       windowrule = [
-        "bordersize 0, floating:0, onworkspace:w[tv1]"
-        "rounding 0, floating:0, onworkspace:w[tv1]"
-        "bordersize 0, floating:0, onworkspace:f[1]"
-        "rounding 0, floating:0, onworkspace:f[1]"
-        # # Ignore maximize requests from apps
-        "suppressevent maximize, class:.*"
-        # XWaylandVideoBridge
-        "opacity 0.0 override, class:^(xwaylandvideobridge)$"
-        "noanim, class:^(xwaylandvideobridge)$"
-        "noinitialfocus, class:^(xwaylandvideobridge)$"
-        "maxsize 1 1, class:^(xwaylandvideobridge)$"
-        "noblur, class:^(xwaylandvideobridge)$"
-        "nofocus, class:^(xwaylandvideobridge)$"
-
+        "match:workspace w[tv1], match:float 0, border_size 0, rounding 0"
+        "match:workspace f[1], match:float 0, border_size 0, rounding 0"
+        "match:class .*, suppress_event maximize"
+        "match:class ^(xwaylandvideobridge)$, opacity 0.0 override, no_anim 1, no_initial_focus 1, max_size 1 1, no_blur 1, no_focus 1"
         # Fix some dragging issues with XWayland
-        "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
-        "content game, class:^gamescope$"
-        "content game, class:^.gamescope-wrapped$"
-        "content game, class:^(steam_app_\d+)$" # All Steam apps are considered games
+        "match:xwayland 1, match:float 1, match:fullscreen 0, match:pin 0, no_focus 1"
+        "match:class ^gamescope$, content game"
+        "match:class ^.gamescope-wrapped$, content game"
+        "match:class ^(steam_app_\\d+)$, content game" # All Steam apps are considered games
         # Help deal with gamescope input going through to Steam
-        #"stayfocused, class:^gamescope$"
-        "noinitialfocus, class:^(steam)$"
-        "fullscreen, title:^(Steam Big Picture Mode)$"
-        #"suppressevent fullscreen maximize, title:^(Steam Big Picture Mode)$"
+        "match:class ^(steam)$, no_initial_focus 1"
+        "match:title ^(Steam Big Picture Mode)$, fullscreen 1"
 
-        "workspace 2 silent, class:^(vesktop)$"
-        "workspace 2 silent, class:^(discord)$"
+        "match:class ^(vesktop)$, workspace 2 silent"
+        "match:class ^(discord)$, workspace 2 silent"
+        "match:class ^(steam)$, workspace 4 silent"
 
-        "workspace 4 silent, class:^(steam)$"
-
-        # Temporary(?) blur workspace change glitching workaround
-        "noblur,class:^()$,title:^()$"
+        "match:class ^()$ match:title ^()$ no_blur"
       ];
 
       layerrule = [
         # Don't clobber slurp's overlay window
-        "noanim, selection"
+        "match:namespace selection, no_anim 1"
         # https://github.com/ErikReider/SwayNotificationCenter/issues/424#issuecomment-2694101051
-        "blur, swaync-notification-window"
-        "ignorealpha 0.5, swaync-notification-window"
-        "blur, swaync-control-center"
-        "ignorealpha 0.5, swaync-control-center"
-        "blur, rofi"
-        "ignorealpha 0.5, rofi"
-        "blur, waybar"
-        "ignorealpha 0.5, waybar"
+        "match:namespace swaync-notification-window, blur 1, ignore_alpha 0.5"
+        "match:namespace swaync-control-center, blur 1, ignore_alpha 0.5"
+        "match:namespace rofi, blur 1, ignore_alpha 0.5"
+        "match:namespace waybar, blur 1, ignore_alpha 0.5"
       ];
 
       dwindle = {
