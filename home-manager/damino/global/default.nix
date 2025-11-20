@@ -164,7 +164,8 @@
 	    # https://github.com/mpv-player/mpv/issues/16933#issuecomment-3470496554
 	    target-colorspace-hint = "auto";
 	    target-colorspace-hint-mode = "target";
-	    treat-srgb-as-power22 = "both";
+	    treat-srgb-as-power22 = "auto";
+	    #sdr-adjust-gamma = "auto";
 	  };
 	  profiles = {
 	    HDR = {
@@ -183,6 +184,9 @@
 	      target-peak = 1300;
 	    };
 	  };
+	  scripts = [
+	    pkgs.mpvScripts.modernz
+	  ];
 	};
   };
 
