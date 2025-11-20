@@ -176,6 +176,12 @@
 	      gamut-mapping-mode = "auto";
 	      #hdr-compute-peak = "yes";
 	    };
+	    DoVi = {
+	      profile-cond ="(p[\"video-params/colormatrix\"] == \"dolbyvision\")";
+	      target-trc = "pq";
+	      target-prim = "bt.2020";
+	      target-peak = 1300;
+	    };
 	  };
 	};
   };
