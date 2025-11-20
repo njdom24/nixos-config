@@ -150,7 +150,37 @@
 		config = {
 		  #modifier = "Mod4";
 		  window = {
-		    commands  = [
+		    commands = let proton-borderless-fs-fix = pkgs.writeShellScript "proton-borderless-fs-fix.sh" ''
+		      #!/usr/bin/env bash
+		      # Fix for Proton Wayland games positioning weirdly in borderless mode
+
+              sleep 1
+		      # Identify the focused monitor's resolution
+		      read OUT_W OUT_H < <(
+		        swaymsg -t get_outputs |
+		          ${pkgs.jq}/bin/jq -r '
+		            map(select(.focused == true))[0]
+		            | "\(.current_mode.width) \(.current_mode.height)"
+		          '
+		      )
+		      [ -z "$OUT_W" ] || [ -z "$OUT_H" ] && exit 0
+
+		      # Identify the focused window
+		      # (for_window rules guarantee the new window is focused)
+		      read WIN_W WIN_H FLOATING < <(
+		        swaymsg -t get_tree |
+		          ${pkgs.jq}/bin/jq -r '.. | objects | select(.focused? == true) | "\(.geometry.width) \(.geometry.height) \(.floating)"' |
+		          head -n1
+		      )
+		      [ -z "$WIN_W" ] || [ -z "$WIN_H" ] && exit 0
+
+		      # Compare dimensions: Floating window matches output == "borderless fullscreen" -> Force fullscreen
+		      if [[ "$FLOATING" == "user_on" ]] && [ "$WIN_W" -eq "$OUT_W" ] && [ "$WIN_H" -eq "$OUT_H" ]; then
+		        swaymsg [con_id="__focused__"] floating disable
+		        sleep 1
+		        swaymsg [con_id="__focused__"] fullscreen enable
+		      fi
+		    ''; in [
 		  	  {
 		        command = "move scratchpad";
 		    	criteria = { instance = "scratchpad"; };
@@ -170,6 +200,11 @@
 		      {
 		        command = "inhibit_idle fullscreen";
 		        criteria = { app_id = "^.*"; };
+		      }
+		      # TODO: See if matching on content_type works in the future (to match "game")
+		      {
+		        command = "exec ${proton-borderless-fs-fix}";
+		        criteria = { tag = ".*game.*"; };
 		      }
 		      {
 		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
