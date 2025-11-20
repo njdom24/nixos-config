@@ -5,6 +5,9 @@
 	extraConfig = {
 	  show-icons = true;
 	  sidebar-mode = true;
+
+	  # Close on clicking outside 
+	  kb-cancel = "Escape,MousePrimary";
 	};
 
 	font = "${config.gtk.font.name} Bold 11.5";
