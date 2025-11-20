@@ -164,6 +164,14 @@
 		      	criteria = { title = "Steam Big Picture Mode"; };
 		      }
 		      {
+		        command = "inhibit_idle fullscreen";
+		        criteria = { class = "^.*"; };
+		      }
+		      {
+		        command = "inhibit_idle fullscreen";
+		        criteria = { app_id = "^.*"; };
+		      }
+		      {
 		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
 		        criteria = { app_id = "gamescope"; };
 		      }
