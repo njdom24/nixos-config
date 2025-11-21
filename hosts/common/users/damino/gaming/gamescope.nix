@@ -853,6 +853,7 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
+      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
     
     # timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
@@ -871,6 +872,7 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &
       swaymsg reload # Contains exec_always kanshi
+      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
     # "''$()"
