@@ -128,7 +128,7 @@
           #exec_always timeout 10 kanshi
           exec_always ${displaySetup}
           # Start recording only on desktops (dGPU heuristic)
-          exec sh -c "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && systemctl --user start gpu-screen-recorder"
+          exec sh -c "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && systemctl --user restart gpu-screen-recorder"
           exec_always sh -c "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
 
 		  #exec mako
