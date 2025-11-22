@@ -97,6 +97,52 @@
 		      fi
 		    done
 		  '';
+		satellite-steam-unfloat-fix = pkgs.writeShellScript "satellite-steam-unfloat-fix.sh" ''
+          declare -A last_floating
+          debounce_ms=200
+          ignore_until=0
+
+          swaymsg -t subscribe -m '["window"]' |
+          while read -r event; do
+            now=$(date +%s%3N)
+            if [ "$now" -lt "$ignore_until" ]; then
+              continue
+            fi
+
+            id=$(${pkgs.jq}/bin/jq -r '.container.id // empty' <<<"$event")
+            app_id=$(${pkgs.jq}/bin/jq -r '.container.app_id // empty' <<<"$event")
+            tag=$(${pkgs.jq}/bin/jq -r '.container.tag // empty' <<<"$event")
+            floating=$(${pkgs.jq}/bin/jq -r '.container.floating // empty' <<<"$event")
+            visible=$(${pkgs.jq}/bin/jq -r '.container.visible // false' <<<"$event")
+            fullscreen=$(${pkgs.jq}/bin/jq -r '.container.fullscreen_mode // 0' <<<"$event")
+
+            # Only care about visible Steam windows
+            if ([ "$app_id" = "steam" ] || [ "$app_id" = "steam_app_"* ]) && [ "$tag" = "" ] && [ "$visible" = "true" ]; then
+              # "''$()"
+              prev=''${last_floating[$id]:-auto_off}
+
+              # Trigger sequence ONLY when window just exited floating and is NOT fullscreen
+              if [ "$prev" != "auto_off" ] && [ "$floating" = "auto_off" ] && [ "$fullscreen" != "1" ]; then
+                echo "Doing"
+                ignore_until=$(( now + debounce_ms ))
+                last_floating[$id]=$floating
+
+                # Fix xwayland-satellite scaling
+                swaymsg "[con_id=$id] floating enable"
+                sleep 0.1
+                swaymsg "[con_id=$id] fullscreen enable"
+                sleep 0.1
+                swaymsg "[con_id=$id] floating disable"
+                sleep 0.1
+                swaymsg "[con_id=$id] fullscreen disable"
+              else
+                # Update last_floating if nothing triggered
+                last_floating[$id]=$floating
+              fi
+            fi
+          done
+          # "''$()"
+        '';
 		in
 		''
 		  exec systemctl --user restart xdg-desktop-portal
@@ -137,6 +183,7 @@
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
 		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
 		  exec ${vrrFullscreen}
+		  exec ${satellite-steam-unfloat-fix}
 
 		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec (sleep 3 && gtk-launch steam.desktop); workspace 1"; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
@@ -204,7 +251,11 @@
 		      # TODO: See if matching on content_type works in the future (to match "game")
 		      {
 		        command = "exec ${proton-borderless-fs-fix}";
-		        criteria = { tag = ".*game.*"; };
+		        criteria = { tag = ".*game.*"; }; # Wayland native
+		      }
+		      {
+		        command = "exec ${proton-borderless-fs-fix}";
+		        criteria = { app_id = "^steam_app_.*"; }; # XWayland
 		      }
 		      {
 		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
