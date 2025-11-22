@@ -28,7 +28,7 @@
     };
 
     xwayland-satellite = {
-      url = "github:Supreeeme/xwayland-satellite";
+      url = "github:Supreeeme/xwayland-satellite?ref=unscaled-dpi";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
