@@ -427,7 +427,7 @@
 		        ')
 
                 # If exactly one output intersects, store in a variable
-                ${pkgs.libnotify}/bin/notify-send "$OUTPUTS"
+                #${pkgs.libnotify}/bin/notify-send "$OUTPUTS"
                 if [[ ''${#OUTPUTS[@]} -eq 2 ]]; then
                   TARGET_OUTPUT="''${OUTPUTS[0]}"
                   if [[ "''${OUTPUTS[0]}" == "HEADLESS*" ]]; then
