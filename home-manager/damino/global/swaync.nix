@@ -86,7 +86,7 @@
           border-radius: 12.6px;
         }
 
-        .notification image {
+        .notification image:first-child {
           min-width: 64px;
           min-height: 64px;
           max-width: 96px;
