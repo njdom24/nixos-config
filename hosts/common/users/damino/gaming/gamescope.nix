@@ -8,6 +8,7 @@ let
   gamescope_immediate = pkgs.gamescope.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches) ++ [
       ../../../../../patches/gamescope-vblank-hack.patch
+      ../../../../../patches/gamescope-hypr-composite-hack.patch
     ];
   });
   # TODO: Consider removing. Hasn't been a problem in a while (only KDE?)

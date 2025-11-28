@@ -1,0 +1,33 @@
+diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
+index ab6d30c..efb3878 100644
+--- a/src/Backends/WaylandBackend.cpp
++++ b/src/Backends/WaylandBackend.cpp
+@@ -59,6 +59,8 @@ static LogScope xdg_log( "xdg_backend" );
+ static const char *GAMESCOPE_proxy_tag = "gamescope-proxy";
+ static const char *GAMESCOPE_plane_tag = "gamescope-plane";
+ static const char *GAMESCOPE_toplevel_tag = "gamescope-toplevel";
++const char *pDesktopName = getenv( "XDG_CURRENT_DESKTOP" );
++const bool isHyprland = pDesktopName && strstr(pDesktopName, "Hyprland");
+ 
+ template <typename Func, typename... Args>
+ auto CallWithAllButLast(Func pFunc, Args&&... args)
+@@ -1134,9 +1136,16 @@ namespace gamescope
+                 compositeLayer.colorspace = pFrameInfo->outputEncodingEOTF == EOTF_PQ ? GAMESCOPE_APP_TEXTURE_COLORSPACE_HDR10_PQ : GAMESCOPE_APP_TEXTURE_COLORSPACE_SRGB;
+ 
+                 m_Planes[0].Present( &compositeLayer );
+-
+-                for ( int i = 1; i < 8; i++ )
+-                    m_Planes[i].Present( nullptr );
++                
++                if(isHyprland) {
++                    uint32_t uCurrentPlane = 1;
++                    for ( int i = 0; i < 8 && uCurrentPlane < 8; i++ )
++                        m_Planes[uCurrentPlane++].Present( i < pFrameInfo->layerCount ? &pFrameInfo->layers[i] : nullptr );
++                }
++                else {
++                    for ( int i = 1; i < 8; i++ )
++                        m_Planes[i].Present( nullptr );
++                }
+             }
+         }
+ 
