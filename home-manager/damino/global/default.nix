@@ -100,7 +100,12 @@
       # "''$()
 
       echo "Playing HDR: $format"
-      ${pkgs.mpv}/bin/mpv --ytdl-format="bestvideo+bestaudio/best" "$url"
+      # Use mpv on PATH to use LUA scripts (home-manager package quirk workaround)
+      if command -v mpv >/dev/null 2>&1; then
+        mpv --ytdl-format="bestvideo+bestaudio/best" "$url"
+      else
+        ${pkgs.mpv}/bin/mpv --ytdl-format="bestvideo+bestaudio/best" "$url"
+      fi
     ''; in with pkgs; [
       nwg-look
       nwg-displays
