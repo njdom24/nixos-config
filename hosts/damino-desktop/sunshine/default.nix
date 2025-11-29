@@ -330,7 +330,8 @@
               export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
             fi
 
-            $(${pkgs.coreutils}/bin/timeout 5 ${pkgs.kanshi}/bin/kanshi) &
+            (${pkgs.coreutils}/bin/timeout 5 ${pkgs.kanshi}/bin/kanshi) &
+            (sleep 5 && swaymsg reload) &
             ;;
           KDE)
             echo "→ Running KDE/KWin-specific logic"
