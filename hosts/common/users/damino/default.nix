@@ -86,7 +86,6 @@ in
 	  pulseaudio # Needed for pactl
 	  remmina
 	  filezilla
-	  #gammastep
 	  blueberry
 	  warpinator
 	  gnome-font-viewer

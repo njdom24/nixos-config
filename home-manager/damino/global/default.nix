@@ -198,23 +198,12 @@
   services = {
   	syncthing.enable = true;
   	arrpc.enable = true;
-  	gammastep = {
-  	  enable = true;
-  	  provider = "manual";
-  	  temperature = {
-  	    day = 4500;
-  	    night = 4500;
-  	  };
-  	  latitude = 40.0;
-  	  longitude = 74.0;
-  	};
   };
 
   systemd.user = {
     # Nicely reload system units when changing configs
     startServices = "sd-switch";
     services = {
-      gammastep.Install.WantedBy = lib.mkForce [ ];
       stable-render-nodes = let
         stable-render-nodes = pkgs.writeShellScript "stable-render-nodes.sh" ''
           #!/usr/bin/env bash          

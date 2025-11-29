@@ -221,11 +221,25 @@
     	        fi
     	        sleep 0.1 && pkill -RTMIN+10 waybar
     	        ;;
-    	      status|*)
-    	        if ! ${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
-    	          echo "{\"text\":\"\",\"tooltip\":\"wl-gammarelay-rs active\"}"
+    	      increase)
+    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"
+    	        if [ "$temp" -ge 6500 ]; then
+    	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6500
     	        else
-    	          echo "{\"text\":\"\",\"tooltip\":\"wl-gammarelay-rs inactive\"}"
+    	          ${pkgs.systemd}/bin/busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n +100
+    	        fi
+    	        sleep 0.1 && pkill -RTMIN+10 waybar
+    	        ;;
+    	      decrease)
+    	        ${pkgs.systemd}/bin/busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -100
+    	        sleep 0.1 && pkill -RTMIN+10 waybar
+    	        ;;
+    	      status|*)
+    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"K
+    	        if ! ${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
+    	          echo "{\"text\":\"\",\"tooltip\":\"Color Temperature: $temp\"}"
+    	        else
+    	          echo "{\"text\":\"\",\"tooltip\":\"Color Temperature: $temp\"}"
     	        fi
     	        ;;
     	    esac
@@ -233,6 +247,8 @@
     	in {
     	  exec = "${nightlight} status";
     	  on-click = "${nightlight} toggle";
+    	  on-scroll-up = "${nightlight} increase";
+    	  on-scroll-down = "${nightlight} decrease";
     	  return-type = "json";
     	  signal = 10;
     	  format = "  {}  ";
