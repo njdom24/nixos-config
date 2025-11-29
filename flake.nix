@@ -32,7 +32,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     #hyprland.url = "github:UjinT34/Hyprland/fp16?submodules=1";
 
     #hy3 = {
