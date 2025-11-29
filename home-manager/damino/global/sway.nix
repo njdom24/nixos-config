@@ -257,12 +257,15 @@
 		        command = "exec ${proton-borderless-fs-fix}";
 		        criteria = { app_id = "^steam_app_.*"; }; # XWayland
 		      }
+		      # https://github.com/ValveSoftware/gamescope/issues/645#issuecomment-1772740921
 		      {
-		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
+		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
+		        #command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
 		        criteria = { app_id = "gamescope"; };
 		      }
 		      {
-		        command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
+		        command = "move output current ; workspace back_and_forth ; workspace back_and_forth";
+		        #command = "exec sh -c 'orig=$(swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r \".[] | select(.focused).name\") && swaymsg move output current && swaymsg workspace __temp__ && swaymsg workspace \"$orig\"'";
 		        criteria = { app_id = ".gamescope-wrapped"; };
 		      }
 		    ];
