@@ -47,6 +47,20 @@
         if alreadyExists then existing else existing ++ [ myPatch ];
     });
 
+    hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
+      patches = (old.patches or []) ++ [
+        (prev.fetchpatch {
+          url = "https://patch-diff.githubusercontent.com/raw/hyprwm/Hyprland/pull/12204.patch";
+          sha256 = "sha256-R/EoC65SEIya8RxUKzmKOpV1CIyCqRKikrz1zxgDNbU=";
+        })
+        (prev.fetchpatch {
+          url = "https://patch-diff.githubusercontent.com/raw/hyprwm/Hyprland/pull/12127.patch";
+          sha256 = "sha256-auQhLiP5cIDSYXbD/6/Im7CbeguhaZf5xe1JGCsM9O0=";
+        })
+      ];
+    });
+    xdg-desktop-portal-hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+
     xwayland-satellite = inputs.xwayland-satellite.packages.${prev.stdenv.hostPlatform.system}.xwayland-satellite;
   };
 

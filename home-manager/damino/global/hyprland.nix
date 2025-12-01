@@ -91,11 +91,11 @@
   in {
     enable = true;
     systemd.enable = true;
-    package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
+    # Tempotary config when using overlayed patched Hyprland alongside flake
+    package = null;
+    #package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
     #importantPrefixes = [ "output" ];
-    #plugins = [ pkgs.hyprlandPlugins.hy3 ];
-    #plugins = [ inputs.hy3.packages.x86_64-linux.hy3 ];
     settings = {
       "$mainMod" = "SUPER";
       # Kanshi handles non-HDR stuff
@@ -515,8 +515,6 @@
     };
 
     extraConfig = ''
-      #plugin = ${pkgs.hyprlandPlugins.hy3}/lib/libhy3.so
-      #plugin = $inputs.hy3.packages.x86_64-linux.hy3}/lib/libhy3.so
       debug:disable_scale_checks = true
       ## Resize mode/submap
       bind=$mainMod,R,submap,resize
