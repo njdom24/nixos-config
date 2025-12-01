@@ -502,14 +502,13 @@
         #"[workspace 4 silent] steam"
         "hyprctl dispatch workspace 1"
         "${pkgs.stable.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
+        "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && systemctl --user restart gpu-screen-recorder"
       ];
       exec = [
         "${pkgs.hyprpaper}/bin/hyprpaper &"
         #"timeout 10 kanshi &"
         # Waybar freezes on reload on Hyprland sometimes, so just restart
         "kill `pgrep waybar`; waybar &"
-
-        "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && systemctl --user restart gpu-screen-recorder"
         "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
       ];
     };
