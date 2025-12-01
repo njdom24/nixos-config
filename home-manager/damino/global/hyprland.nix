@@ -193,9 +193,9 @@
           "layersOut, 1, 1.5, quick, slide"
           "fadeLayersIn, 1, 1.79, almostLinear"
           "fadeLayersOut, 1, 1.39, almostLinear"
-          "workspaces, 1, 1.94, almostLinear, fade"
-          "workspacesIn, 1, 1.21, almostLinear, fade"
-          "workspacesOut, 1, 1.94, almostLinear, fade"
+          "workspaces, 1, 0.94, almostLinear, fade"
+          "workspacesIn, 0, 1.21, almostLinear, fade"
+          "workspacesOut, 1, 0.94, almostLinear, fade"
         ];
       };
 
