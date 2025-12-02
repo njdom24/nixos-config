@@ -1,0 +1,56 @@
+diff --git a/src/rendervulkan.cpp b/src/rendervulkan.cpp
+index df01314..fcf2903 100644
+--- a/src/rendervulkan.cpp
++++ b/src/rendervulkan.cpp
+@@ -390,19 +390,7 @@ bool CVulkanDevice::selectPhysDev(VkSurfaceKHR surface)
+ 				m_generalQueueFamily = generalIndex;
+ 				m_physDev = cphysDev;
+ 
+-				/* When Intel uses compute-only queue for Gamescope composition, some games
+-				 * experience performance loss. Using the general queue alleviates the issue
+-				 * for now.
+-				 * See: https://gitlab.freedesktop.org/drm/xe/kernel/-/issues/4452
+-				 *
+-				 * TODO: Remove vendorID check for Intel once issue is resolved.
+-				 */
+-				if (deviceProperties.vendorID == 0x8086) /* Intel */
+-				{
+-					vk_log.infof("Intel device detected, forcing general queue family instead of compute-only queue");
+-					m_queueFamily = generalIndex;
+-				}
+-				else if ( env_to_bool( getenv( "GAMESCOPE_FORCE_GENERAL_QUEUE" ) ) )
++				if ( env_to_bool( getenv( "GAMESCOPE_FORCE_GENERAL_QUEUE" ) ) )
+ 					m_queueFamily = generalIndex;
+ 			}
+ 		}
+@@ -2182,6 +2170,30 @@ bool CVulkanTexture::BInit( uint32_t width, uint32_t height, uint32_t depth, uin
+ 				continue;
+ 
+ 			modifiers.push_back( modifier );
++			vk_log.infof( "Added modifier 0x%016" PRIx64 " for format 0x%08x", modifier, drmFormat );
++		}
++
++		// Remove LINEAR if we have any tiled modifiers
++		// LINEAR has size limitations (e.g., 2560x2560 on RADV)
++		bool hasNonLinear = false;
++		for ( uint64_t modifier : modifiers )
++		{
++			if ( modifier != DRM_FORMAT_MOD_LINEAR && modifier != DRM_FORMAT_MOD_INVALID )
++			{
++				hasNonLinear = true;
++				break;
++			}
++		}
++		if ( hasNonLinear )
++		{
++			vk_log.infof( "Found tiled modifiers for format 0x%08x, removing LINEAR (0x%016" PRIx64 ")", drmFormat, DRM_FORMAT_MOD_LINEAR );
++			auto it = std::remove_if( modifiers.begin(), modifiers.end(),
++				[]( uint64_t mod ) { return mod == DRM_FORMAT_MOD_LINEAR; } );
++			modifiers.erase( it, modifiers.end() );
++		}
++		else
++		{
++			vk_log.infof( "No tiled modifiers found for format 0x%08x, keeping LINEAR", drmFormat );
+ 		}
+ 
+ 		assert( modifiers.size() > 0 );
