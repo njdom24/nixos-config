@@ -190,6 +190,7 @@ in
 
     noisetorch.enable = true;
     virt-manager.enable = true;
+    coolercontrol.enable = true;
 
     hyprland = {	
       enable = true; # I don't condone Vaxry, but I need tiling + HDR
