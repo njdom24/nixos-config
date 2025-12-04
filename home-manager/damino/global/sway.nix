@@ -668,7 +668,7 @@
 	  sway = {
 	    default = [ "gtk" ];
 	    "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
-	    "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+	    "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ]; # TODO: Wait until xdpw adopts color-representation-v1 and https://github.com/emersion/xdg-desktop-portal-wlr/issues/351
 	  };
 	};
 

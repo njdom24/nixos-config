@@ -564,12 +564,84 @@
 
   home = {
     file = {
-      ".config/hypr/xdph.conf" = lib.mkDefault {
+      ".config/hypr/xdph.conf" = let screenshare-fix =
+         let portal-watcher = pkgs.writeShellScript "portal-watcher.sh" ''
+           #! /usr/bin/env bash
+           ${pkgs.pipewire}/bin/pw-mon | while read -r line; do
+             if [[ "$line" == *"Stream/Input/Video"* ]]; then
+               streaming_sources=$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.gnugrep}/bin/grep -o Stream/Input/Video | ${pkgs.coreutils}/bin/wc -l)
+               if [[ "$streaming_sources" == "0" ]]; then
+                 HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+
+                 if [[ -z "$HEADLESS" ]]; then
+                   echo "No headless output found. Ignoring" >&2
+                 else
+                   ${pkgs.sway}/bin/swaymsg output "$HEADLESS" unplug > /dev/null 2>&1 &
+                 fi
+
+                 ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
+                 exit 0
+               fi
+             fi
+           done
+         ''; 
+         in pkgs.writeShellScript "screenshare-fix.sh" ''
+           #! /usr/bin/env bash
+           # Example outputs:
+           # [SELECTION]/screen:DP-2
+           # [SELECTION]/window:447338992
+           # [SELECTION]/region:DP-1@697,422,953,722
+
+           if [[ "$XDG_CURRENT_DESKTOP" != "sway" ]]; then
+             hyprland-share-picker
+             exit 0
+           fi
+
+           # Run the real command with all args, capture stdout
+           display="$(${pkgs.slurp}/bin/slurp -f '%o' -or)"
+
+           if [[ "$display" != "HEADLESS-"* ]]; then
+             is_hdr="$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$display\") | .hdr")"
+             if [[ "$is_hdr" != "true" ]]; then
+               echo "[SELECTION]/screen:$display"
+             else
+               HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+               if [[ -z "$HEADLESS" ]]; then
+                 echo "No headless output found, creating one..." >&2
+                 ${pkgs.sway}/bin/swaymsg create_output > /dev/null 2>&1 &
+                 HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+                 sleep 0.5
+               fi
+
+               DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
+               # Get resolution, scale, and refresh rate
+               WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
+               HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
+               REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
+               SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
+               XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
+               YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
+               REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
+               
+               # Apply settings to headless output
+               ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+               echo "[SELECTION]/screen:$HEADLESS"
+
+               ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
+               ${pkgs.systemd}/bin/systemctl --user reset-failed
+               ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
+             fi
+           else
+             echo "$output"
+           fi
+
+           exit 0
+        ''; in lib.mkDefault {
         text = ''
           screencopy {
             max_fps = 60
             allow_token_by_default = true
-            custom_picker_binary = hyprland-share-picker
+            custom_picker_binary = ${screenshare-fix}
           }
         '';
       };
