@@ -412,6 +412,14 @@ label:focus {
 .modelbutton, .menuitem, modelbutton, menuitem, .listboxrow, .listrow, .menu > * {
     padding: 2px 2px;
 }
+
+/* make context-menu text normal weight */
+modelbutton > label,
+.modelbutton > label,
+menuitem > label,
+.menuitem > label {
+    font-weight: normal;
+}
 '';
   };
 }
