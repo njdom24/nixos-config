@@ -127,6 +127,8 @@
                 ignore_until=$(( now + debounce_ms ))
                 last_floating[$id]=$floating
 
+                swaymsg floating_maximum_size 0 x 0
+
                 # Fix xwayland-satellite scaling
                 swaymsg "[con_id=$id] floating enable"
                 sleep 0.1
@@ -135,6 +137,8 @@
                 swaymsg "[con_id=$id] floating disable"
                 sleep 0.1
                 swaymsg "[con_id=$id] fullscreen disable"
+
+                swaymsg floating_maximum_size 2500 x 1400
               else
                 # Update last_floating if nothing triggered
                 last_floating[$id]=$floating
@@ -170,6 +174,8 @@
 		  client.urgent           $base08 $base08 $base00 $base08 $base08
 		  client.placeholder      $base00 $base00 $base05 $base00 $base00
 		  client.background       $base07
+
+		  floating_maximum_size 2500 x 1400
 
           #exec_always timeout 10 kanshi
           exec_always ${displaySetup}
