@@ -407,6 +407,11 @@ label:focus {
 #mpd.paused {
     background-color: #51a37a;
 }
+
+/* menu rows / buttons */
+.modelbutton, .menuitem, modelbutton, menuitem, .listboxrow, .listrow, .menu > * {
+    padding: 2px 2px;
+}
 '';
   };
 }
