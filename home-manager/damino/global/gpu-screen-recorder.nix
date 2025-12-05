@@ -172,6 +172,7 @@ in {
             sway)
               monitors=$(${pkgs.sway}/bin/swaymsg -t get_outputs -r | ${pkgs.jq}/bin/jq -r '
                   .[] | "\(.name):\(.make // "unknown") \(.model // "")" | select(. != ":")' | ${pkgs.coreutils}/bin/sort)
+              monitors=$(echo "$monitors" | ${pkgs.gnugrep}/bin/grep -v '^HEADLESS')
               ;;
             KDE)
               monitors=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected == true and .priority > 0) | "\(.name):\(.pos.x)x\(.pos.y)"' | ${pkgs.coreutils}/bin/sort)
