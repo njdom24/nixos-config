@@ -601,36 +601,36 @@
            display="$(${pkgs.slurp}/bin/slurp -f '%o' -or)"
 
            if [[ "$display" != "HEADLESS-"* ]]; then
-             is_hdr="$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$display\") | .hdr")"
-             if [[ "$is_hdr" != "true" ]]; then
-               echo "[SELECTION]/screen:$display"
-             else
+             # Create headless display to avoid direct scanout stutter: https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5173
+             #   and get tonemapping when toggling HDR
+             # Or maybe https://github.com/waycrate/wayshot/issues/181 when xdg-desktop-portal-luminous takes this,
+             #   but libwayshot uses libplacebo's bt.2390 instead of gamma,param=2.2
+
+             HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+             if [[ -z "$HEADLESS" ]]; then
+               echo "No headless output found, creating one..." >&2
+               ${pkgs.sway}/bin/swaymsg create_output > /dev/null 2>&1 &
                HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
-               if [[ -z "$HEADLESS" ]]; then
-                 echo "No headless output found, creating one..." >&2
-                 ${pkgs.sway}/bin/swaymsg create_output > /dev/null 2>&1 &
-                 HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
-                 sleep 0.5
-               fi
-
-               DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
-               # Get resolution, scale, and refresh rate
-               WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
-               HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
-               REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
-               SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
-               XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
-               YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
-               REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
-               
-               # Apply settings to headless output
-               ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
-               echo "[SELECTION]/screen:$HEADLESS"
-
-               ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
-               ${pkgs.systemd}/bin/systemctl --user reset-failed
-               ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
+               sleep 0.5
              fi
+
+             DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
+             # Get resolution, scale, and refresh rate
+             WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
+             HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
+             REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
+             SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
+             XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
+             YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
+             REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
+
+             # Apply settings to headless output
+             ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+             echo "[SELECTION]/screen:$HEADLESS"
+
+             ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
+             ${pkgs.systemd}/bin/systemctl --user reset-failed
+             ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
            else
              echo "$output"
            fi
