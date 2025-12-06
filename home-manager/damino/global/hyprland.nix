@@ -515,7 +515,7 @@
         #"[workspace 2 silent] discord"
         #"[workspace 4 silent] steam"
         "hyprctl dispatch workspace 1"
-        "${pkgs.stable.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
+        "${pkgs.legacy.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
         "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && systemctl --user restart gpu-screen-recorder"
       ];
       exec = [

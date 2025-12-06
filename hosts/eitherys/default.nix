@@ -161,7 +161,7 @@ in
 	  libnotify
 	  xorg.xeyes
 	  corefonts
-	  vistafonts
+	  vista-fonts
       wol
 	  zip
     ];

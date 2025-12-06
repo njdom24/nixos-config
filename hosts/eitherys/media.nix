@@ -26,7 +26,7 @@ in
   	extraPackages = with pkgs; [
   	  vpl-gpu-rt
 
-  	  intel-media-sdk
+  	  # intel-media-sdk # Deprecated
   	  intel-compute-runtime
   	  intel-media-driver
   	  libvdpau-va-gl
