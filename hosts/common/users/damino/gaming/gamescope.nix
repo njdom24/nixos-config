@@ -118,6 +118,12 @@ let
 
     trap cleanup EXIT INT TERM HUP QUIT
 
+    # Drop leading '--' if present
+    if [[ "''${1-}" == "--" ]]; then
+      shift
+    fi
+    # "''$()"
+
     "$@"
   '';
 
