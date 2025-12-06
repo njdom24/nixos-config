@@ -385,12 +385,6 @@
 		    tmpfile=$(${pkgs.mktemp}/bin/mktemp)
 		    HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
 		    trap 'rm -f "$tmpfile && swaymsg output $HEADLESS unplug 2> /dev/null"' EXIT
-		    
-            if [[ -z "$HEADLESS" ]]; then
-              echo "No headless output found, creating one..." >&2
-              swaymsg create_output > /dev/null 2>&1 &
-              HEADLESS=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
-            fi
 
             set_headless_mode() {
               local display="$1"
@@ -403,6 +397,12 @@
               XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
               YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
               REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
+
+              if [[ -z "$HEADLESS" ]]; then
+                echo "No headless output found, creating one..." >&2
+                swaymsg create_output > /dev/null 2>&1 &
+                HEADLESS=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+              fi
 
               swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
             }
