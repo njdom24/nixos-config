@@ -342,6 +342,31 @@
     "org/gnome/desktop/interface".color-scheme = "prefer-dark";
   };
 
+  home.file = {
+    ".config/lsfg-vk/conf.toml".text = ''
+      version = 1
+      # [global]
+      # override the location of Lossless Scaling
+      # dll = "/games/Lossless Scaling/Lossless.dll"
+
+      # [[game]] # example entry
+      # exe = "Game.exe"
+      #
+      # multiplier = 3
+      # flow_scale = 0.7
+      # performance_mode = true
+      # hdr_mode = false
+      #
+      # experimental_present_mode = "fifo"
+
+      #[[game]] # default vkcube entry
+      #exe = "vkcube"
+
+      #multiplier = 4
+      #performance_mode = true
+    '';
+  };
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "24.11";
 }
