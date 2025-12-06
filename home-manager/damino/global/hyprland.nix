@@ -83,8 +83,22 @@
         if [[ "$line" =~ ^openwindow.*gamescope ]] || [[ "$line" =~ ^openwindow.*gamescope-wrapped ]]; then
           # wait a moment to ensure window is mapped
           sleep 0.1
+          
           # Toggle focus
-          hyprctl dispatch focuscurrentorlast; hyprctl dispatch focuscurrentorlast 
+          # Causes fullscreen exit -- needs reapply
+
+          pre_fullscreen=$(hyprctl -j clients \
+            | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
+          
+          hyprctl dispatch focuscurrentorlast; hyprctl dispatch focuscurrentorlast
+
+          post_fullscreen=$(hyprctl -j clients \
+            | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
+
+          if [[ "$pre_fullscreen" -gt 0 && "$post_fullscreen" -eq 0 ]]; then
+            hyprctl dispatch fullscreen
+          fi
+
         fi
       done
     '';
