@@ -234,6 +234,7 @@
         # Help deal with gamescope input going through to Steam
         "match:class ^(steam)$, no_initial_focus 1"
         "match:title ^(Steam Big Picture Mode)$, fullscreen 1"
+        "match:class ^(steam)$, match:title negative:^(Steam)$, float 1"
 
         "match:class ^(vesktop)$, workspace 2 silent"
         "match:class ^(discord)$, workspace 2 silent"

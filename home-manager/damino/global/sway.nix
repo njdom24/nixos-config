@@ -276,6 +276,9 @@
 		      }
 		    ];
 		  };
+		  floating.criteria = [
+		    { app_id = "steam"; title = "^(?!Steam$).*"; }
+		  ];
 		  bars = [{
 		  	command = "waybar";
 		  	position = "top";
