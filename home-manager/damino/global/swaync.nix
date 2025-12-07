@@ -86,11 +86,12 @@
           border-radius: 12.6px;
         }
 
-        .notification image:first-child {
-          min-width: 64px;
-          min-height: 64px;
-          max-width: 96px;
-          max-height: 96px;
+        .notification image.image {
+          -gtk-icon-size: 64px;
+        }
+
+        .notification image.app-icon {
+          -gtk-icon-size: 16px;
         }
         
         .notification-background .notification.critical {
