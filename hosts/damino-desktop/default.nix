@@ -33,6 +33,8 @@
   	"-r 144"
   	"-O HDMI-A-1"
   ];
+
+  programs.coolercontrol.enable = lib.mkDefault true;
   
   services = {
     apcupsd = {

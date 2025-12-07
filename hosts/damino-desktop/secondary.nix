@@ -25,6 +25,8 @@
   	"-O HDMI-A-1"
   ];
 
+  programs.coolercontrol.enable = false;
+
   environment.systemPackages = with pkgs; [
   ];
 }
