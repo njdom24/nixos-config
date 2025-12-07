@@ -801,6 +801,8 @@ let
               if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
                 focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
                 swaymsg output $focused_display hdr on
+              elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+                hypr-toggle-hdr on
               fi
             fi
           elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
@@ -810,6 +812,8 @@ let
               if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
                 focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
                 swaymsg output $focused_display hdr off
+              elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+                hypr-toggle-hdr off
               fi
             fi
           fi
