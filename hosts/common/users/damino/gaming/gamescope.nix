@@ -799,8 +799,12 @@ let
               echo "gsc: Detected HDR swapchain: $line" >&2
               curr_colorspace="HDR"
               if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-                focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-                swaymsg output $focused_display hdr on
+                if command -v sway-toggle-hdr >/dev/null 2>&1; then
+                  sway-toggle-hdr on
+                else
+                  focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+                  swaymsg output $focused_display hdr on
+                fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hypr-toggle-hdr on
               fi
@@ -810,8 +814,12 @@ let
               echo "gsc: Detected SDR swapchain: $line" >&2
               curr_colorspace="SDR"
               if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-                focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-                swaymsg output $focused_display hdr off
+                if command -v sway-toggle-hdr >/dev/null 2>&1; then
+                  sway-toggle-hdr off
+                else
+                  focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+                  swaymsg output $focused_display hdr off
+                fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hypr-toggle-hdr off
               fi

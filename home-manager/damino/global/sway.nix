@@ -795,7 +795,22 @@
           echo "Display $focused_display does not support HDR: $supports_hdr"
           exit 1
         fi
-        swaymsg output "$focused_display" hdr toggle
+
+        # Default to toggle if no argument given
+        action="''${1:-toggle}"
+        # "''$()"
+
+        case "$action" in
+          on|off|toggle)
+            ;;
+          *)
+            echo "Invalid argument: $action"
+            echo "Usage: $0 [on|off|toggle]"
+            exit 1
+            ;;
+        esac
+
+        swaymsg output "$focused_display" hdr "$action"
         sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder
       '')
     ];
