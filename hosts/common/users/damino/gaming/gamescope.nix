@@ -833,11 +833,19 @@ let
           # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
           if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
             curr_colorspace="HDR"
-            focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-            swaymsg output $focused_display hdr on
-            toggle_vrr
-            last_colorspace="HDR"
+            if command -v sway-toggle-hdr >/dev/null 2>&1; then
+              sway-toggle-hdr on
+            else
+              focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+              swaymsg output $focused_display hdr on
+            fi
+          elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+            # Assuming cm_auto_hdr > 0, switching back to SDR is fine
+            hypr-toggle-hdr off
           fi
+
+          toggle_vrr
+          last_colorspace="HDR"
         fi
 
       fi
