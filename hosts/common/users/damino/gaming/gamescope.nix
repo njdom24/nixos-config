@@ -767,7 +767,34 @@ let
     fi
   '';
 
-  gsc-watcher = pkgs.writeShellScriptBin "gsc-watcher" ''
+  gsc-watcher =
+    # Work around TV signal loss when switching in/out of direct scanout with VRR
+    let hypr-scanout-watcher = pkgs.writeShellScript "hypr-scanout-watcher" ''
+    renice -n 19 $$ >/dev/null
+
+    MON="DP-3"
+    last=""
+
+    get_scanout() {
+      hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$MON\") | .directScanoutTo"
+    }
+
+    last="$(get_scanout)"
+    while sleep 0.15; do
+      cur="$(get_scanout)"
+      if [[ "$cur" != "$last" ]]; then
+        vrr_mode="$(${get_vrr})"
+        if ! ${pkgs.procps}/bin/pgrep -x novrr >/dev/null && [[ "$vrr_mode" == "1" ]]; then
+          (${set_vrr} 0
+          sleep 5
+          ${set_vrr} 1
+          ) &
+        fi
+        last="$cur"
+      fi
+    done
+  ''; in
+  pkgs.writeShellScriptBin "gsc-watcher" ''
     vrr_mode="$(${get_vrr})"
 
     # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
@@ -784,6 +811,12 @@ let
         vrr_pid=$!
       fi
     }
+
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+      (sleep 15 && ${hypr-scanout-watcher}) &
+      CHILD=$!
+      trap "kill $CHILD" EXIT
+    fi
 
     ${pkgs.expect}/bin/unbuffer ${gsc}/bin/gsc "$@" 2>&1 | while IFS= read -r line; do
       echo "$line"
@@ -859,10 +892,11 @@ let
         ${set_vrr} "$vrr_mode"
       fi
     fi
+    # "''$()"
   '';
 
   # Convenience script. Hacky, but seems to get VRR going stable too
-  gsc-tv = pkgs.writeShellScriptBin "gsc-tv" ''
+  gsc-tv =  pkgs.writeShellScriptBin "gsc-tv" ''
     pushd ~
     
     if pgrep -x steam >/dev/null; then
@@ -902,7 +936,6 @@ let
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
-    # "''$()"
   '';
 in 
 {
