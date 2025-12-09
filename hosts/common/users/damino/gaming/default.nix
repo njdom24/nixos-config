@@ -96,6 +96,7 @@
   	#xpadneo.enable = true; 
   	#xone.enable = true;
   	#openrazer.enable = true;
+  	bluetooth.settings.General.FastConnectable = true; # May help with gamepad disconnections
   };
 
   services = {
