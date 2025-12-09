@@ -72,8 +72,8 @@
         mv -f "$display_cfg".gsc "$display_cfg"
       fi
       ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
-      ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
       ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 4 silent] steam"
+      sleep 1 && ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
     '';
     # Bodge to work around gamescope cursor grab not working on games with launchers
     gamescope-cursor-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
