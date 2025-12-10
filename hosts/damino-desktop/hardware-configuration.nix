@@ -22,10 +22,10 @@ in
   boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
   # https://gitlab.freedesktop.org/drm/amd/-/issues/3149
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
-  #boot.kernelPatches = [ {
-  #	name = "enable-hdmi-freesync";
-  #	patch = ../../patches/enable-hdmi-freesync.mypatch;
-  #}];
+  boot.kernelPatches = [ {
+  	name = "enable-hdmi-freesync";
+  	patch = ../../patches/0001-amdgpu-Add-CH7218-PCON-to-the-VRR-whitelist.patch;
+  }];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/68204c3c-28fc-4294-b954-3b69b21690e0";
