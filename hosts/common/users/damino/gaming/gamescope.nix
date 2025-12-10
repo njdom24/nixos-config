@@ -11,27 +11,6 @@ let
       ../../../../../patches/gamescope-hypr-composite-hack.patch
     ];
   });
-  # TODO: Consider removing. Hasn't been a problem in a while (only KDE?)
-  # Work around HDR needing an extra "push" with VMM7100 Firmware v124 (VRR, HDR, 4k144Hz)
-  vmm7100_hdr_fix = pkgs.writeShellScript "vmm7100-hdr-fix" ''
-    #!/usr/bin/env bash
-
-    if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
-      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
-      DISPLAY="$_GSC_PARENT_DISPLAY"
-      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
-      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
-    fi
-
-    if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.wcg.enable output.DP-3.hdr.enable 
-      # TODO: Get current mode and reapply
-      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@60 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.mode.3840x2160@120
-    elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      ${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3,3840x2160@60,auto,1,cm,hdr
-      ${pkgs.hyprland}/bin/hyprctl reload
-    fi
-  '';
 
   get_vrr = pkgs.writeShellScript "get_vrr.sh" ''
     # Account for nested case
