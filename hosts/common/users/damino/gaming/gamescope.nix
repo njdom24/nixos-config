@@ -710,6 +710,11 @@ let
       extra_flags+=("1440")
     fi
 
+    if [[ "$steam_mode" == "1" ]]; then
+      extra_flags+=("--xwayland-count")
+      extra_flags+=("2")
+    fi
+
     # React to gamescope's errors
     set -o pipefail
     while true; do
@@ -719,7 +724,7 @@ let
         config.programs.gamescope.args} \
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
         $mangoapp_flag "''${extra_flags[@]}" \
-        -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
+        -- env STEAM_MULTIPLE_XWAYLANDS="$steam_mode" DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
 
       then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
@@ -983,12 +988,10 @@ in
         DXVK_HDR = "1";
         ENABLE_GAMESCOPE_WSI = "1";
         ENABLE_HDR_WSI = "0";
-        STEAM_MULTIPLE_XWAYLANDS = "1";
         WLR_XWAYLAND = "${pkgs.xwayland}/bin/Xwayland";
       };
       args = [
         "-f"
-        "--xwayland-count 2"
         #"--backend sdl" # https://github.com/ValveSoftware/gamescope/issues/1622 and causes stutter (maybe https://github.com/ValveSoftware/gamescope/issues/995)
         "--hdr-enabled"
         "--adaptive-sync"
