@@ -31,7 +31,7 @@ let
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
-      vfr_status=$(${pkgs.hyprland}/bin/hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
+      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       # TODO
@@ -63,7 +63,7 @@ let
     fi
 
     if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      ${pkgs.hyprland}/bin/hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
+      LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
@@ -114,7 +114,7 @@ let
         .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
       '
     elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
-      read width height refresh <<< $(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '
+      read width height refresh <<< $(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '
         .[] 
         | select(.focused == true) 
         | [.width, .height, (.refreshRate | floor)] 
@@ -334,7 +334,7 @@ let
           echo "0 0 0"
         fi
       elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-        focused_display=$(${pkgs.hyprland}/bin/hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+        focused_display=$(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
         conf="$HOME/.config/hypr/displays.conf"
 
         # TODO: Replace with more reliable check after https://github.com/hyprwm/Hyprland/pull/12019
@@ -755,7 +755,7 @@ let
     last=""
 
     get_scanout() {
-      hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$MON\") | .directScanoutTo"
+      LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$MON\") | .directScanoutTo"
     }
 
     last="$(get_scanout)"
