@@ -7,7 +7,7 @@ let
   # Patched for improved VRR
   gamescope_immediate = pkgs.gamescope.overrideAttrs (oldAttrs: {
     patches = (oldAttrs.patches) ++ [
-      ../../../../../patches/gamescope-vblank-hack.patch
+      # ../../../../../patches/gamescope-vblank-hack.patch
       ../../../../../patches/gamescope-hypr-composite-hack.patch
     ];
   });
