@@ -642,14 +642,15 @@
              # Apply settings to headless output
              ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
 
-             # Treat as allow_token_by_default=true
-             echo "[SELECTION]r/screen:$HEADLESS"
+             # r: Treat as allow_token_by_default=true
+             #echo "[SELECTION]r/screen:$HEADLESS"
+             echo "[SELECTION]/screen:$HEADLESS"
 
              ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
              ${pkgs.systemd}/bin/systemctl --user reset-failed
              ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
            else
-             echo "[SELECTION]r/screen:$display"
+             echo "[SELECTION]/screen:$display"
            fi
 
            exit 0
