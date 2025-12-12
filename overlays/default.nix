@@ -1,7 +1,8 @@
 # This file defines overlays
-{inputs, ...}: {
+{ inputs, ...}: let addIfMissing = existing: p: if builtins.any (x: x == p) existing then [] else [p];
+in {
   # This one brings our custom packages from the 'pkgs' directory
-  additions = final: _prev: import ../pkgs {pkgs = final;};
+  additions = final: _prev: import ../pkgs {pkgs = final; inputs = inputs;};
 
   # This one contains whatever you want to overlay
   # You can change versions, add patches, set compilation flags, anything really.
@@ -15,29 +16,33 @@
     #    #./my-mesa-fix.patch
     #  ];
     #});
-    gamescope = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.gamescope_git.overrideAttrs (oldAttrs: {
-      # https://github.com/ValveSoftware/gamescope/issues/1622#issuecomment-2508182530
-      NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
-
-      # https://github.com/ValveSoftware/gamescope/issues/1604#issuecomment-2603198783
-      patches = (oldAttrs.patches or []) ++ [
+    gamescope = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.gamescope_git.overrideAttrs (old: let
+    #gamescope = prev.gamescope.overrideAttrs (old: let
+      existing = old.patches or [];
+      newPatches = [
         ../patches/gamescope-crash-fix.patch
         ../patches/gamescope-hdr-sway-fix.patch
       ];
+      #addIfMissing = p: if builtins.any (x: x == p) existing then [] else [p];
+    in rec {
+      NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
+      #patches = existing ++ builtins.concatMap addIfMissing newPatches;
+       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
     mangohud = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.mangohud_git;
 
     # sway pinned to PR #8922 state
-    sway-unwrapped = prev.sway-unwrapped_git.overrideAttrs (old: {
-      #src = prev.fetchFromGitHub {
-      #  owner = "poisotf";
-      #  repo  = "sway";
-      #  rev   = "4b2643e0a8e9ed67c62572e6cfb6c9b97e8d7568";  # use the branch name from the fork
-      #  sha256 = "sha256-ss0ctrinia/QNgwvwnz7MBvZdIuG27SEWdgEwm4wrMw=";
-      #};
-
-      buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.wlroots_git ];
+    sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
+      src = inputs.sway-git;
+      #buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.wlroots_git ];
+      buildInputs = (old.buildInputs or []) ++ [
+        (
+          prev.wlroots_0_19.overrideAttrs (old: {
+            src = inputs.wlroots-git;
+          })
+        )
+      ];
       
       patches = let
         existing = old.patches or [];

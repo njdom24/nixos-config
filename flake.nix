@@ -33,6 +33,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    sway-git = {
+      url = "github:swaywm/sway";
+      flake = false;
+    };
+    wlroots-git = {
+      url = "git+https://gitlab.freedesktop.org/wlroots/wlroots.git";
+      flake = false;
+    };
+
     hyprland = {
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -68,6 +77,8 @@
     home-manager-stable,
     plasma-manager,
     xwayland-satellite,
+    sway-git,
+    wlroots-git,
     hyprland,
     #hy3,
     hardware,
@@ -89,7 +100,11 @@
   in {
     # Your custom packages
     # Accessible through 'nix build', 'nix shell', etc
-    packages = forAllSystems (system: import ./pkgs nixpkgs.legacyPackages.${system});
+    packages = forAllSystems (system: import ./pkgs {
+      pkgs = nixpkgs.legacyPackages.${system};
+      inputs = inputs;
+    });
+    
     # Formatter for your nix files, available through 'nix fmt'
     # Other options beside 'alejandra' include 'nixpkgs-fmt'
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);

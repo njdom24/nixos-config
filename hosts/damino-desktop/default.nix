@@ -21,9 +21,6 @@
   #chaotic.mesa-git = {
   #  enable = true;
   #};
-  hardware = {
-    firmware = lib.mkBefore [ pkgs.unstable.linux-firmware ];
-  };
 
   environment.sessionVariables = {
   };

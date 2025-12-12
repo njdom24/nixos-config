@@ -797,6 +797,8 @@
         "nixpkgs-legacy": "nixpkgs-legacy",
         "nixpkgs-stable": "nixpkgs-stable",
         "plasma-manager": "plasma-manager",
+        "sway-git": "sway-git",
+        "wlroots-git": "wlroots-git",
         "xwayland-satellite": "xwayland-satellite"
       }
     },
@@ -839,6 +841,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "sway-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764318377,
+        "narHash": "sha256-2k4M3H5E4+9QVR7uV2+R834fiA8vFNjUSDEZpR0fM/I=",
+        "owner": "swaywm",
+        "repo": "sway",
+        "rev": "f4aba22582184c9a4a20fd7a9ffd70c63b4b393d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "swaywm",
+        "repo": "sway",
         "type": "github"
       }
     },
@@ -903,6 +921,22 @@
         "owner": "numtide",
         "repo": "flake-utils",
         "type": "github"
+      }
+    },
+    "wlroots-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764962089,
+        "narHash": "sha256-kiWjr1NzA1GvOCNhiq3Br2PxnpSN94ImQHh6YHa8Ojs=",
+        "ref": "refs/heads/master",
+        "rev": "a962d58727bf5a95ef0da50dce21031728c92f2c",
+        "revCount": 7667,
+        "type": "git",
+        "url": "https://gitlab.freedesktop.org/wlroots/wlroots.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://gitlab.freedesktop.org/wlroots/wlroots.git"
       }
     },
     "xdph": {

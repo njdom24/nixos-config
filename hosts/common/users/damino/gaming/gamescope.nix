@@ -4,9 +4,10 @@
 
 { inputs, outputs, config, lib, pkgs, ... }:
 let
+  addIfMissing = existing: p: if builtins.any (x: x == p) existing then [] else [p];
   # Patched for improved VRR
-  gamescope_immediate = pkgs.gamescope.overrideAttrs (oldAttrs: {
-    patches = (oldAttrs.patches) ++ [
+  gamescope_immediate = pkgs.gamescope.overrideAttrs (old: {
+    patches = (old.patches or []) ++ [
       # ../../../../../patches/gamescope-vblank-hack.patch
       ../../../../../patches/gamescope-hypr-composite-hack.patch
     ];
