@@ -175,10 +175,11 @@
         # Screen transitions look weird with blur enabled
         blur = {
           enabled = true;
-          size = 3;
+          size = 2;
           passes = 1;
           vibrancy = 0.1696;
-          brightness = 1.5;
+          vibrancy_darkness = 1.0;
+          contrast = 2.0;
         };
       };
 
