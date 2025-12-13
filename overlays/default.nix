@@ -16,7 +16,7 @@ in {
     #    #./my-mesa-fix.patch
     #  ];
     #});
-    gamescope = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.gamescope_git.overrideAttrs (old: let
+    gamescope = prev.gamescope.overrideAttrs (old: let
     #gamescope = prev.gamescope.overrideAttrs (old: let
       existing = old.patches or [];
       newPatches = [
@@ -30,7 +30,7 @@ in {
        patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
-    mangohud = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.mangohud_git;
+    # mangohud = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.mangohud_git;
 
     # sway pinned to PR #8922 state
     sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
