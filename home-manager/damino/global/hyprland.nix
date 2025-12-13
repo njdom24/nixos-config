@@ -145,9 +145,9 @@
       #};
 
       general = {
-        gaps_in = 3;
-        gaps_out = 6;
-        border_size = 1;
+        gaps_in = 2;
+        gaps_out = 4;
+        border_size = 2;
         # https://wiki.hypr.land/Configuring/Variables/#variable-types for info about colors
         "col.active_border" = "rgba(${config.colorScheme.palette.base05}ff)";
         "col.inactive_border" = "rgba(${config.colorScheme.palette.base01}ff)";
