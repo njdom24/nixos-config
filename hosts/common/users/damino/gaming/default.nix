@@ -5,7 +5,6 @@
 { inputs, outputs, config, lib, pkgs, ... }: {
   imports =
     [
-      inputs.chaotic.nixosModules.default
       ./gamescope.nix
     ] ++ (builtins.attrValues outputs.nixosModules);
 
@@ -230,17 +229,18 @@
   	  #wineWowPackages.stagingFull
   	  wineWowPackages.waylandFull
   	  winetricks
-  	  latencyflex-vulkan
   	  libstrangle # Better for some games with launchers, where MangoHud can crash
   	];
 
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
   	  #"MANGOHUD" = "1";
-  	  "MESA_GIT" = lib.concatStringsSep ":" [
-  	    "${pkgs.mesa_git}/share/vulkan/icd.d/radeon_icd.x86_64.json"
-  	    "${pkgs.mesa32_git}/share/vulkan/icd.d/radeon_icd.i686.json"
-  	  ];
+
+  	  # TODO: Reintroduce an overridden mesa-git package (opt-in with config option?)
+  	  #"MESA_GIT" = lib.concatStringsSep ":" [
+  	  #  "${pkgs.mesa_git}/share/vulkan/icd.d/radeon_icd.x86_64.json"
+  	  #  "${pkgs.mesa32_git}/share/vulkan/icd.d/radeon_icd.i686.json"
+  	  #];
   	};
   };
 

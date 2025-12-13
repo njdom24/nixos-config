@@ -11,16 +11,10 @@
       ./common.nix
       ./displays.nix
       ./openrgb
-      #inputs.chaotic.nixosModules.default
     ];
 
   networking.hostName = "damino-desktop"; # Define your hostname.
   networking.interfaces.enp10s0.wakeOnLan.enable = true;
-
-  # TODO: Remove in 25.05 in favor of https://github.com/NixOS/nixpkgs/issues/269419
-  #chaotic.mesa-git = {
-  #  enable = true;
-  #};
 
   environment.sessionVariables = {
     # https://github.com/Etaash-mathamsetty/Proton/blob/em-10/docs/FSR4.md

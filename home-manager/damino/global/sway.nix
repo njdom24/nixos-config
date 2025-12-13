@@ -1,6 +1,5 @@
 { inputs, lib, config, pkgs, ... }: {
 	imports = [
-      inputs.chaotic.homeManagerModules.default
       ./wlogout.nix
       ./waybar.nix
       ./rofi.nix

@@ -30,12 +30,9 @@ in {
        patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
-    # mangohud = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.mangohud_git;
-
     # sway pinned to PR #8922 state
     sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
       src = inputs.sway-git;
-      #buildInputs = (old.buildInputs or []) ++ [ inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.wlroots_git ];
       buildInputs = (old.buildInputs or []) ++ [
         (
           prev.wlroots_0_19.overrideAttrs (old: {

@@ -65,8 +65,6 @@
     # Shameless plug: looking for a way to nixify your themes and make
     # everything match nicely? Try nix-colors!
     nix-colors.url = "github:misterio77/nix-colors";
-
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };
 
   outputs = {
@@ -82,7 +80,6 @@
     hyprland,
     #hy3,
     hardware,
-    chaotic,
     ...
   } @ inputs: let
     inherit (self) outputs;
