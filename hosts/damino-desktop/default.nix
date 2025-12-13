@@ -23,6 +23,9 @@
   #};
 
   environment.sessionVariables = {
+    # https://github.com/Etaash-mathamsetty/Proton/blob/em-10/docs/FSR4.md
+    PROTON_FSR4_UPGRADE = 1;
+    FSR4_UPGRADE = 1;
   };
 
   programs.steam.gamescopeSession.args = [
