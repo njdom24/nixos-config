@@ -19,13 +19,20 @@ in
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-amd" "it87" ]; # For Gigabyte motherboard fan control
   boot.extraModulePackages = with config.boot.kernelPackages; [ it87 ]; # https://www.reddit.com/r/NixOS/comments/1ooa2eh/it87_driver_for_it8613e_not_being_loaded_by/
-  boot.kernelParams = [ "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
+  # Avoid audio crackle: https://wiki.cachyos.org/features/cachyos_settings/#udev-rules
+  boot.kernelParams = [ "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPatches = [ {
-  	name = "enable-hdmi-freesync";
-  	patch = ../../patches/0001-amdgpu-Add-CH7218-PCON-to-the-VRR-whitelist.patch;
-  }];
+  boot.kernelPatches = [
+    {
+      name = "enable-adapter-freesync";
+      patch = ../../patches/0001-amdgpu-Add-CH7218-PCON-to-the-VRR-whitelist.patch;
+    }
+    #{
+    #  name = "force-hdmi-vrr";
+    #  patch = ../../patches/0002-amdgpu-force-vrr.patch;
+    #}
+  ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/68204c3c-28fc-4294-b954-3b69b21690e0";
