@@ -160,7 +160,7 @@
       RestartSec = "5s";
 
       ExecStart = pkgs.writeShellScript "bluetooth-watcher" ''
-        PATTERN='hidp_report_req_timeout'
+        PATTERN='hidp_report_req_timeout|Set device flags return status: Invalid Parameters'
         WINDOW=10        # seconds
         THRESHOLD=2      # number of messages
         SERVICE=bluetooth.service
