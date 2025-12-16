@@ -1,0 +1,42 @@
+ 
+    From 0dd904ad957f08e6c731b4eb692c4d8135869172 Mon Sep 17 00:00:00 2001
+	From: =?UTF-8?q?Tomasz=20Paku=C5=82a?= <tomasz.pakula.oficjalny@gmail.com>
+	Date: Wed, 10 Dec 2025 22:27:19 +0100
+	Subject: [PATCH] Force VRR becasue why not
+
+	---
+	 drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c | 14 ++++++--------
+	 1 file changed, 6 insertions(+), 8 deletions(-)
+
+	diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+	index 7fe40bbba265..bc48026d26b5 100644
+	--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+	+++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+	@@ -13005,19 +13005,17 @@ void amdgpu_dm_update_freesync_caps(struct drm_connector *connector,
+	 
+	 	if (as_type == FREESYNC_TYPE_PCON_IN_WHITELIST) {
+	 		i = parse_hdmi_amd_vsdb(amdgpu_dm_connector, edid, &vsdb_info);
+	-		if (i >= 0 && vsdb_info.freesync_supported && vsdb_info.amd_vsdb_version > 0) {
+	-
+	+		if (true) {
+	 			amdgpu_dm_connector->pack_sdp_v1_3 = true;
+	 			amdgpu_dm_connector->as_type = as_type;
+	 			amdgpu_dm_connector->vsdb_info = vsdb_info;
+	 
+	-			amdgpu_dm_connector->min_vfreq = vsdb_info.min_refresh_rate_hz;
+	-			amdgpu_dm_connector->max_vfreq = vsdb_info.max_refresh_rate_hz;
+	-			if (amdgpu_dm_connector->max_vfreq - amdgpu_dm_connector->min_vfreq > 10)
+	-				freesync_capable = true;
+	+			amdgpu_dm_connector->min_vfreq = 48;
+	+			amdgpu_dm_connector->max_vfreq = 120;
+	+			freesync_capable = true;
+	 
+	-			connector->display_info.monitor_range.min_vfreq = vsdb_info.min_refresh_rate_hz;
+	-			connector->display_info.monitor_range.max_vfreq = vsdb_info.max_refresh_rate_hz;
+	+			connector->display_info.monitor_range.min_vfreq = 48;
+	+			connector->display_info.monitor_range.max_vfreq = 120;
+	 		}
+	 	}
+	 
+	-- 
+	2.52.0
