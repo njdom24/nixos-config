@@ -419,9 +419,10 @@ in
                 echo "Primary display set to: $PRIMARY_DISPLAY"
 
                 # Disable all non-primary outputs
-                ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+                # Wait to avoid putting Chrontel CH7218 DP1.4->HDMI2.1 adapter into a no-audio bad state
+                (sleep 2 && ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable) &
 
-                # Enable, the primary display if it's disabled, scale
+                # Enable the primary display if it's disabled, scale
                 scale="$(${monitorScale} $PRIMARY_DISPLAY)" || scale="1"
                 ${pkgs.sway}/bin/swaymsg output "$PRIMARY_DISPLAY" pos 0 0 scale $scale
               else
