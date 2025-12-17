@@ -419,8 +419,31 @@ in
                 echo "Primary display set to: $PRIMARY_DISPLAY"
 
                 # Disable all non-primary outputs
-                # Wait to avoid putting Chrontel CH7218 DP1.4->HDMI2.1 adapter into a no-audio bad state
-                (sleep 2 && ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable) &
+                # Wait before dpms off to avoid putting Chrontel CH7218 DP1.4->HDMI2.1 adapter into a no-audio bad state
+                #(sleep 5 && ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$PRIMARY_DISPLAY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable) &
+
+                # Detect TV connector name
+                TV_OUTPUT=$(
+                  ${pkgs.sway}/bin/swaymsg -t get_outputs \
+                    | ${pkgs.jq}/bin/jq -r '.[] | select((.make + " " + .model) | test("\\bTV\\b"; "i")) | .name' \
+                    | head -n1
+                )
+
+                # Disable non-primary, non-TV (TODO: Only need CH7218 and/or better TV heuristic via EDID)
+                ${pkgs.sway}/bin/swaymsg -t get_outputs \
+                  | ${pkgs.jq}/bin/jq -r '
+                      .[]
+                      | select(.name | IN("'"$PRIMARY_DISPLAY"'", "'"$TV_OUTPUT"'") | not)
+                      | .name
+                    ' \
+                  | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+
+                # Move TV login screen out of the way while it warms up. Then disable after a wait
+                if [[ "$PRIMARY_DISPLAY" != "$TV_OUTPUT" ]]; then
+                  ${pkgs.sway}/bin/swaymsg "output $TV_OUTPUT pos 10000 10000; output $PRIMARY_DISPLAY pos 0 0"
+                  ${pkgs.sway}/bin/swaymsg "mouse_warping container; workspace __dummy__ output $TV_OUTPUT; workspace __dummy__; workspace primary output $PRIMARY_DISPLAY; workspace primary"
+                  (sleep 10 && ${pkgs.sway}/bin/swaymsg output "$TV_OUTPUT" disable) &
+                fi
 
                 # Enable the primary display if it's disabled, scale
                 scale="$(${monitorScale} $PRIMARY_DISPLAY)" || scale="1"
