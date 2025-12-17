@@ -90,7 +90,7 @@ let
     cleanup() {
       local ec=$?
       ${set_vrr} $vrr_start
-      if [[ -v SWAYSOCK ]]; then
+      if [[ -v SWAYSOCK ]] && ! ${pkgs.procps}/bin/pgrep -f "novrr" | ${pkgs.gnugrep}/bin/grep -v $$ >/dev/null; then
         rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
       fi
       exit "$ec"
@@ -901,13 +901,10 @@ let
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
-    
-    # timeout 5 ${gsc}/bin/gsc -- ${pkgs.mesa-demos}/bin/vkgears
 
-    # TODO: Make extra confs for Hyprland,sway if VRR is still an issue
-    if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-      (sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.never && sleep 20 && ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.vrrpolicy.automatic) &
-    fi
+    # "Warm up" CH7218 for 5 minutes to prevent VRR signal drop
+    (${novrr}/bin/novrr sleep 600) &
+
     sleep 3 && env ${gsc-watcher}/bin/gsc-watcher -e -F fsr --hdr-debug-force-support -- env DXVK_HDR=1 ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
