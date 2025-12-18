@@ -46,6 +46,12 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    mesa-git = {
+      url = "github:chaotic-cx/mesa-mirror"; # Faster, less-likely to get rate-limited
+      #url = "git+https://gitlab.freedesktop.org/mesa/mesa.git";
+      flake = false;
+    };
     #hyprland.url = "github:UjinT34/Hyprland/fp16?submodules=1";
 
     #hy3 = {

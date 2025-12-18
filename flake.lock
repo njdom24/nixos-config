@@ -520,6 +520,22 @@
         "type": "github"
       }
     },
+    "mesa-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766029078,
+        "narHash": "sha256-zrYfAC/rpPxg3ZnJUMJ0NgvTwJUtdaZLfCOhzF260kA=",
+        "owner": "chaotic-cx",
+        "repo": "mesa-mirror",
+        "rev": "3c5c96fedb77220eac590327699bffcb611a9896",
+        "type": "github"
+      },
+      "original": {
+        "owner": "chaotic-cx",
+        "repo": "mesa-mirror",
+        "type": "github"
+      }
+    },
     "nix-colors": {
       "inputs": {
         "base16-schemes": "base16-schemes",
@@ -672,6 +688,7 @@
         "home-manager-unstable": "home-manager-unstable",
         "hyprland": "hyprland",
         "kwin-effects-forceblur": "kwin-effects-forceblur",
+        "mesa-git": "mesa-git",
         "nix-colors": "nix-colors",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-legacy": "nixpkgs-legacy",

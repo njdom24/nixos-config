@@ -19,7 +19,7 @@ in
   imports = [
     ../../desktops/sway
     ./gaming
-  ] ++ (builtins.attrValues outputs.nixosModules);
+  ]; # ++ (builtins.attrValues outputs.nixosModules);
 
   nixpkgs.overlays = [
     outputs.overlays.stable-packages

@@ -921,9 +921,6 @@ let
   '';
 in 
 {
-  imports =
-    [ ] ++ (builtins.attrValues outputs.nixosModules);
-
   nixpkgs.overlays = [
   	outputs.overlays.unstable-packages
   	outputs.overlays.legacy-packages

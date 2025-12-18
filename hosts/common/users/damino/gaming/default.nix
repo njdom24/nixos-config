@@ -6,7 +6,8 @@
   imports =
     [
       ./gamescope.nix
-    ] ++ (builtins.attrValues outputs.nixosModules);
+      outputs.nixosModules.mesa-git
+    ];
 
   nixpkgs.overlays = [
   	outputs.overlays.unstable-packages
@@ -14,6 +15,8 @@
   	outputs.overlays.additions
   	outputs.overlays.modifications
   ];
+
+  mesa-git.enable = false;
 
   programs = {
     steam = {
@@ -235,12 +238,6 @@
   	variables = {
   	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
   	  #"MANGOHUD" = "1";
-
-  	  # TODO: Reintroduce an overridden mesa-git package (opt-in with config option?)
-  	  #"MESA_GIT" = lib.concatStringsSep ":" [
-  	  #  "${pkgs.mesa_git}/share/vulkan/icd.d/radeon_icd.x86_64.json"
-  	  #  "${pkgs.mesa32_git}/share/vulkan/icd.d/radeon_icd.i686.json"
-  	  #];
   	};
   };
 
