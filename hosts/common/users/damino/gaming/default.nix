@@ -16,7 +16,10 @@
   	outputs.overlays.modifications
   ];
 
-  mesa-git.enable = false;
+  mesa-git = {
+    enable = false;
+    global = false;
+  };
 
   programs = {
     steam = {
