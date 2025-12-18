@@ -309,6 +309,30 @@
 		  	outer = 0;
 		  };
 		  keybindings = let
+		  container-move-helper = pkgs.writeShellScript "container-move-helper.sh" ''
+		    #!/usr/bin/env bash
+
+		    # Works around issues inherent to the autotiling-rs script or weird state
+		    # that introduces nested containers: https://github.com/ammgws/autotiling-rs/issues/7
+
+		    dir="$1"
+
+		    get_focus_rect() {
+		      swaymsg -t get_tree | ${pkgs.jq}/bin/jq -r '
+		      .. | objects
+		      | select(.focused == true and .rect? != null)
+		      | "\(.rect.x),\(.rect.y),\(.rect.width),\(.rect.height)"
+		      '
+		    }
+
+		    before="$(get_focus_rect)"
+		    swaymsg move "$dir"
+		    after="$(get_focus_rect)"
+		    
+		    if [[ "$before" == "$after" ]]; then
+		      swaymsg move "$dir"
+		    fi
+		  '';
 		  bind-hold = pkgs.writeShellScript "bind-hold" ''
 		    # Usage: bind-hold <action> <id> [start_cmd] [charged_cmd]
 		    
@@ -525,10 +549,15 @@
 			"$mod+Shift+9" = "move container to workspace number $ws9";
 			"$mod+Shift+0" = "move container to workspace number $ws10";
 
-			"$mod+Shift+Left" = "move left";
-			"$mod+Shift+Right" = "move right";
-			"$mod+Shift+Up" = "move up";
-			"$mod+Shift+Down" = "move down";
+            #"$mod+Shift+Left" = "move left";
+            #"$mod+Shift+Right" = "move right";
+            #"$mod+Shift+Up" = "move up";
+            #"$mod+Shift+Down" = "move down";
+
+            "$mod+Shift+Left"  = "exec ${container-move-helper} left";
+            "$mod+Shift+Right" = "exec ${container-move-helper} right";
+            "$mod+Shift+Up"    = "exec ${container-move-helper} up";
+            "$mod+Shift+Down"  = "exec ${container-move-helper} down";
 			
 			"$mod+Left" = "focus left";
 			"$mod+Right" = "focus right";
