@@ -28,10 +28,6 @@ in
   	outputs.overlays.additions
   ];
 
-  #nixpkgs.config.permittedInsecurePackages = [
-  #  "qtwebengine-5.15.19" # For jellyfin-media-player: https://github.com/NixOS/nixpkgs/issues/437865
-  #];
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.damino = {
     isNormalUser = true;
@@ -100,7 +96,7 @@ in
 	  #betterdiscord-installer
 	  betterdiscordctl
 	  vesktop
-	  #jellyfin-media-player
+	  jellyfin-media-player
 	  kdePackages.kdenlive
 	  shotcut
 	  video-trimmer
