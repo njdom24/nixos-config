@@ -33,20 +33,17 @@ in {
     # sway pinned to PR #8922 state
     sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
       src = inputs.sway-git;
-      buildInputs = (old.buildInputs or []) ++ [
-        (
-          prev.wlroots_0_19.overrideAttrs (old: {
-            src = inputs.wlroots-git;
-          })
-        )
-      ];
-      
-      patches = let
-        existing = old.patches or [];
-        myPatch = ../patches/sway-no-srgb-eotf.patch;
-        alreadyExists = builtins.any (p: p == myPatch) existing;
-      in
-        if alreadyExists then existing else existing ++ [ myPatch ];
+      buildInputs = (old.buildInputs or []) ++ [(
+        prev.wlroots_0_19.overrideAttrs (old: let
+          existing = old.patches or [];
+          newPatches = [
+            ../patches/wlroots-no-srgb-eotf.patch
+          ];
+        in {
+          src = inputs.wlroots-git;
+          patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
+        })
+      )];
     });
 
     hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
