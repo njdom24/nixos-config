@@ -335,27 +335,27 @@
 		  '';
 		  bind-hold = pkgs.writeShellScript "bind-hold" ''
 		    # Usage: bind-hold <action> <id> [start_cmd] [charged_cmd]
-		    
+
 		    runtime_dir="''${XDG_RUNTIME_DIR:-/tmp}"
 		    statefile="''${runtime_dir}/charge_state_$2"
 		    pidfile="''${statefile}.pid"
-		    
+
 		    # Default commands if not supplied
 		    start_cmd="''${3:-notify-send 'Charging'}"
 		    charged_cmd="''${4:-notify-send 'Charged!'}"
 		    # "''$()"
-		    
+
 		    case "$1" in
 		      start)
 		        # If already charging, do nothing
 		        if [[ -f "$statefile" ]]; then
 		          exit 0
 		        fi
-		    
+
 		        # Execute start command
 		        eval "$start_cmd"
 		        touch "$statefile"
-		    
+
 		        (
 		          sleep 1
 		          # Only execute charged command if still held
@@ -368,7 +368,7 @@
 		      stop)
 		        # Cancel timer process if running
 		        if [[ -f "$pidfile" ]]; then
-		          kill "$(cat "$pidfile")" 2>/dev/null
+		          ${pkgs.procps}/bin/kill -3 "$(cat "$pidfile")" 2>/dev/null
 		          rm -f "$pidfile"
 		        fi
 		        rm -f "$statefile"
