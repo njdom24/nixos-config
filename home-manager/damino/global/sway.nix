@@ -408,7 +408,10 @@
 		  '';
 		  hdr-screenshot = pkgs.writeShellScript "hdr-screenshot" ''
 		    mode="$1"
-		    tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+		    SCREENSHOT_DIR="$XDG_RUNTIME_DIR/screenshots"
+		    mkdir -p "$SCREENSHOT_DIR"
+		    timestamp=$(date +%s)
+		    tmpfile="$SCREENSHOT_DIR/$timestamp.png"
 		    HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
 		    trap 'rm -f "$tmpfile && swaymsg output $HEADLESS unplug 2> /dev/null"' EXIT
 
@@ -461,6 +464,10 @@
 		          ) | .name
 		        ')
 
+                # Should be good to clean out old screenshot
+       		    rm -f "$SCREENSHOT_DIR/"*
+       		    ${pkgs.wl-clipboard-rs}/bin/wl-copy ""
+
                 # If exactly one output intersects, store in a variable
                 #${pkgs.libnotify}/bin/notify-send "$OUTPUTS"
                 if [[ ''${#OUTPUTS[@]} -eq 2 ]]; then
@@ -491,9 +498,18 @@
 		    esac
 
 		    if [[ -s "$tmpfile" ]]; then
-		      ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
-		      # cat "$tmpfile" | ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png
+		      # Compression can take a while. Put current image in clipboard for immediate pasting
+		      ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$tmpfile"
 		      ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
+
+		      # Compress to WebP for pasting in chat apps
+		      newfile="$SCREENSHOT_DIR/$timestamp.webp"
+		      ${pkgs.imagemagick}/bin/magick "$tmpfile" \
+		        -define webp:lossless=true \
+		        "$newfile"
+
+		      ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$newfile"
+		      #${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$newfile" "Screenshot converted"
 		    fi
 		    swaymsg output $HEADLESS unplug 2> /dev/null
 		    # "''$()"

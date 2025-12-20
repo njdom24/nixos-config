@@ -341,7 +341,10 @@
       '';
       screenshot = pkgs.writeShellScript "screenshot" ''
         mode="$1"
-        tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+        SCREENSHOT_DIR="$XDG_RUNTIME_DIR/screenshots"
+        mkdir -p "$SCREENSHOT_DIR"
+        timestamp=$(date +%s)
+        tmpfile="$SCREENSHOT_DIR/$timestamp.png"
         trap 'rm -f "$tmpfile"' EXIT
 
         case "$mode" in
@@ -360,9 +363,22 @@
         esac
 
         if [[ -s "$tmpfile" ]]; then
-          ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png < "$tmpfile"
-          # cat "$tmpfile" | ${pkgs.wl-clipboard-rs}/bin/wl-copy --type image/png
+          # Should be good to clean out old screenshot
+          rm -f "$SCREENSHOT_DIR/"*
+          ${pkgs.wl-clipboard-rs}/bin/wl-copy ""
+
+          # Compression can take a while. Put current image in clipboard for immediate pasting
+          ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$tmpfile"
           ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
+
+          # Compress to WebP for pasting in chat apps
+          newfile="$SCREENSHOT_DIR/$timestamp.webp"
+          ${pkgs.imagemagick}/bin/magick "$tmpfile" \
+            -define webp:lossless=true \
+            "$newfile"
+
+          ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$newfile"
+          #${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$newfile" "Screenshot converted"
         fi
       ''; in [
         "$mainMod, Return, exec, $terminal"
