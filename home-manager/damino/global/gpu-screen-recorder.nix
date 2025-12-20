@@ -198,21 +198,16 @@ in {
           detect_hdr() {
             local out="$1"
             case "$XDG_CURRENT_DESKTOP" in
-              # Detect HDR from ~/.config/hypr/displays.conf
               Hyprland)
-                local conf="$HOME/.config/hypr/displays.conf"
-                [[ -f "$conf" ]] || { echo "sdr"; return; }
+                current_mode="$(${pkgs.hyprland}/bin/hyprctl monitors -j \
+                  | ${pkgs.jq}/bin/jq -r --arg monitor "$out" \
+                    '.[] | select(.name == $monitor) | .colorManagementPreset')"
 
-                ${pkgs.gawk}/bin/awk -v out="$out" '
-                  $1 == "monitorv2" { in_block=1; buf=""; next }
-                  in_block && $1 == "}" {
-                    in_block=0
-                    if (buf ~ "output *= *"out) print buf
-                    buf=""
-                    next
-                  }
-                  in_block { buf = buf "\n" $0 }
-                ' "$conf" | ${pkgs.gnugrep}/bin/grep -q "cm *= *hdr" && echo "hdr" || echo "sdr"
+                if [[ "$current_mode" == "hdr" ]]; then
+                  echo "hdr"
+                else
+                  echo "sdr"
+                fi
                 ;;
               sway)
                 is_hdr="$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$out\") | .hdr")"
