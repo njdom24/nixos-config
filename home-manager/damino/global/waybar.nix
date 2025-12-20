@@ -13,6 +13,21 @@
 	  	modules-left = [ "sway/workspaces" "sway/mode" "hyprland/workspaces" "hyprland/submap" ];
 	  	modules-center = [ "clock" ];
 	  	modules-right = [ "pulseaudio" "bluetooth" "custom/weather" "custom/nightlight" "tray" "custom/menu" ];
+	  	#modules-right = [ "pulseaudio" "group/extras" "custom/menu" ];
+
+	  	"group/extras" = {
+	  	  orientation = "horizontal";
+	  	  drawer = {
+	  	    "transition-duration" = 300;
+	  	    "children-class" = "tray-children";
+	  	  };
+	  	  "modules" = [
+	  	    "custom/weather"
+	  	    "bluetooth"
+	  	    "custom/nightlight"
+	  	    "tray"
+	  	  ];
+	  	};
 
 	  	"sway/workspaces" = {
           disable-scroll = true;
@@ -172,7 +187,7 @@
     	"custom/menu" = {
     	  #format = "{}";
     	  interval = 10;
-    	  format = "{icon}    ";
+    	  format = " {icon}    ";
 	      format-icons = {
             default = "";
           };
