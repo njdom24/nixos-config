@@ -153,54 +153,6 @@
  	};
   };
 
-  systemd.services.bluetooth-watcher = {
-    description = "Watch bluetooth.service logs for fatal errors";
-
-    partOf   = [ "bluetooth.service" ];
-    after    = [ "bluetooth.service" ];
-    wantedBy = [ "bluetooth.service" ];
-
-    serviceConfig = {
-      Type = "simple";
-      Restart = "on-failure";
-      RestartSec = "5s";
-
-      ExecStart = pkgs.writeShellScript "bluetooth-watcher" ''
-        PATTERN='hidp_report_req_timeout|Set device flags return status: Invalid Parameters'
-        WINDOW=10        # seconds
-        THRESHOLD=2      # number of messages
-        SERVICE=bluetooth.service
-
-        # Remember when we started, so we ignore earlier logs
-        START_TS=$(date +%s)
-
-        echo "[bluetooth-watcher] Started at timestamp $START_TS."
-
-        while true; do
-          NOW=$(date +%s)
-          SINCE=$((NOW - WINDOW))
-
-          # Get messages since the watcher started
-          ${pkgs.systemd}/bin/journalctl -u "$SERVICE" \
-            --since "@$(( START_TS > SINCE ? START_TS : SINCE ))" \
-            --no-pager -o short-unix |
-            ${pkgs.gnugrep}/bin/grep -E "$PATTERN" |
-              ${pkgs.coreutils}/bin/wc -l | {
-                read COUNT
-                if [[ "$COUNT" -ge "$THRESHOLD" ]]; then
-                  echo "[bluetooth-watcher] Detected $COUNT messages — restarting bluetooth.service"
-                  ${pkgs.systemd}/bin/systemctl restart "$SERVICE"
-                  # After restart, advance START_TS so old logs don’t re-trigger
-                  START_TS=$(date +%s)
-                fi
-              }
-
-            sleep 2
-        done
-      '';
-    };
-  };
-
   environment = {
   	systemPackages = with pkgs; [
   	  steam-run
