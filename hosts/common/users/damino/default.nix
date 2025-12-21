@@ -204,7 +204,7 @@ in
       enable = true;
       powerOnBoot = true;
       # package = pkgs.legacy.bluez;
-      settings = {
+      input = {
         General = {
           UserspaceHID = "true";
         };
