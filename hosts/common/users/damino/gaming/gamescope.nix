@@ -792,7 +792,7 @@ let
 
       echo "gsc: VRR mode: $vrr_mode"
       if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-        (${set_vrr} 0 && sleep 10 && ${set_vrr} "$vrr_mode") &
+        (${set_vrr} 0 && sleep 500 && ${set_vrr} "$vrr_mode") &
         vrr_pid=$!
       fi
     }
