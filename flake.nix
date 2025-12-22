@@ -46,13 +46,24 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    #hyprland.url = "git+https://github.com/UjinT34/Hyprland/fp16?submodules=1";
 
     mesa-git = {
       url = "github:chaotic-cx/mesa-mirror"; # Faster, less-likely to get rate-limited
       #url = "git+https://gitlab.freedesktop.org/mesa/mesa.git";
       flake = false;
     };
-    #hyprland.url = "github:UjinT34/Hyprland/fp16?submodules=1";
+
+    moonlight-qt-git = {
+      # https://github.com/NixOS/nix/issues/4423#issuecomment-1580924502
+      url = "git+https://github.com/moonlight-stream/moonlight-qt?submodules=1";
+      flake = false;
+    };
+
+    gamescope-git = {
+      url = "git+https://github.com/ValveSoftware/gamescope?submodules=1";
+      flake = false;
+    };
 
     #hy3 = {
     #  url = "github:outfoxxed/hy3";
@@ -86,6 +97,8 @@
     hyprland,
     #hy3,
     hardware,
+    moonlight-qt-git,
+    gamescope-git,
     ...
   } @ inputs: let
     inherit (self) outputs;

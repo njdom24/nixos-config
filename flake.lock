@@ -83,6 +83,24 @@
         "type": "github"
       }
     },
+    "gamescope-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766300589,
+        "narHash": "sha256-4Ec4BhSOe1pm88tuQqtUS7qIOvVkWNc4DAmbS40lZj0=",
+        "ref": "refs/heads/master",
+        "rev": "221394fedaed213f9bce6d18f60242e3120b661f",
+        "revCount": 2511,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/ValveSoftware/gamescope"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/ValveSoftware/gamescope"
+      }
+    },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
@@ -536,6 +554,24 @@
         "type": "github"
       }
     },
+    "moonlight-qt-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766422490,
+        "narHash": "sha256-G4qGj03Fhx/s0wZ055YGY+JlkGwaF/bpCtqMekzcIbs=",
+        "ref": "refs/heads/master",
+        "rev": "b448e5bbd7f85b4b24c6d036fa348544a4a41d05",
+        "revCount": 3027,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/moonlight-stream/moonlight-qt"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/moonlight-stream/moonlight-qt"
+      }
+    },
     "nix-colors": {
       "inputs": {
         "base16-schemes": "base16-schemes",
@@ -682,6 +718,7 @@
     },
     "root": {
       "inputs": {
+        "gamescope-git": "gamescope-git",
         "hardware": "hardware",
         "home-manager": "home-manager",
         "home-manager-stable": "home-manager-stable",
@@ -689,6 +726,7 @@
         "hyprland": "hyprland",
         "kwin-effects-forceblur": "kwin-effects-forceblur",
         "mesa-git": "mesa-git",
+        "moonlight-qt-git": "moonlight-qt-git",
         "nix-colors": "nix-colors",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-legacy": "nixpkgs-legacy",
