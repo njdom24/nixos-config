@@ -682,11 +682,11 @@
 		  fi
 
 		  if [[ "$(${pkgs.systemd}/bin/systemctl --user is-active sunshine.service 2>/dev/null)" == "active" ]] || \
-		     ( [ -f /tmp/sunshine_login ] && ${pkgs.gawk}/bin/awk '
-		        /CLIENT CONNECTED/ {e=1}
-		        e && /CLIENT DISCONNECTED/ {cancel=1}
-		        END { if (e && !cancel) exit 0; else exit 1 }
-		      ' <(${pkgs.gnused}/bin/sed ':a;N;$!ba;s/\n/ /g' /tmp/sunshine_login) ); then
+		     ( [ -f /tmp/sunshine_login ] && \
+		       ${pkgs.coreutils}/bin/tail -n 200 /tmp/sunshine_login \
+		         | ${pkgs.gnugrep}/bin/grep -E 'CLIENT (CONNECTED|DISCONNECTED)' \
+		         | ${pkgs.coreutils}/bin/tail -n 1 \
+		         | ${pkgs.gnugrep}/bin/grep -q 'CONNECTED' ); then
 		    export REMOTE_ENABLED=1
 		    #export WLR_DRM_DEVICES=/dev/dri/card1
 		    export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0
