@@ -17,7 +17,6 @@
           mkdir -p $out/lib/firmware/edid
           cp ${./edid_aoc_Q27G40XMN_72vrr.bin} $out/lib/firmware/edid/edid_aoc_Q27G40XMN_72vrr.bin
           cp ${./edid_q800t_xiaomi_lumi.bin} $out/lib/firmware/edid/edid_q800t_xiaomi_lumi.bin
-          #cp ${./edid_qm851g.bin} $out/lib/firmware/edid/edid_qm851g.bin
           #cp ${./edid_55r635.bin} $out/lib/firmware/edid/edid_55r635.bin
         '')
       ];
