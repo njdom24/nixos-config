@@ -47,24 +47,37 @@
 		'';
 		extraConfig = let
 		  displaySetup = pkgs.writeShellScript "sway-headless-output.sh" ''
-		    #!/bin/bash
-		
-		    if [ "$REMOTE_ENABLED" = "1" ]; then
-		      # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
-		      existing_headless=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
-		      
-		      if [ -z "$existing_headless" ]; then
-		        # If no HEADLESS output exists, create one
-		        swaymsg create_output
+            #!/bin/bash
+
+            if [ "$REMOTE_ENABLED" = "1" ]; then
+              conf="$(${pkgs.systemd}/bin/systemctl --user show sunshine.service -p ExecStart --value \
+		               | ${pkgs.gnugrep}/bin/grep -o 'argv\[\]=[^;]*' \
+		               | ${pkgs.gnused}/bin/sed 's/argv\[\]=//' \
+		               | ${pkgs.gawk}/bin/awk '{print $NF}')"
+
+              # Read capture value if it exists
+              if [[ -f "$conf" ]]; then
+                capture="$(${pkgs.gawk}/bin/awk -F= '$1=="capture"{print $2}' "$conf" 2>/dev/null || true)"
+                echo "$capture"
+              fi
+
+              if [[ "$capture" != "kms" ]]; then
+                # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
+                existing_headless=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
+
+		        if [ -z "$existing_headless" ]; then
+		          # If no HEADLESS output exists, create one
+		          swaymsg create_output
+		        fi
+		        # Disable all non-HEADLESS outputs
+		        swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+		        swaymsg output "*" render_bit_depth 10
 		      fi
-		      # Disable all non-HEADLESS outputs
-		      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
-		      swaymsg output "*" render_bit_depth 10
-		    else
-		      # If not remote, run kanshi
-		      ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
-		    fi
-		  '';
+            else
+              # If not remote, run kanshi
+              ${pkgs.coreutils}/bin/timeout 10 ${pkgs.kanshi}/bin/kanshi
+            fi
+          '';
 
 		  # Taken from https://gist.github.com/GrabbenD/adc5a7a863cbd1553461376cf4c50467
 		  vrrFullscreen = pkgs.writeShellScript "sway-vrr-fullscreen.sh" ''
