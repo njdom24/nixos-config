@@ -347,6 +347,10 @@
         tmpfile="$SCREENSHOT_DIR/$timestamp.png"
         trap 'rm -f "$tmpfile"' EXIT
 
+        # Clear out old screenshot
+        rm -f "$SCREENSHOT_DIR/"*
+        ${pkgs.wl-clipboard-rs}/bin/wl-copy ""
+
         case "$mode" in
           focused)
             monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
@@ -363,10 +367,6 @@
         esac
 
         if [[ -s "$tmpfile" ]]; then
-          # Should be good to clean out old screenshot
-          rm -f "$SCREENSHOT_DIR/"*
-          ${pkgs.wl-clipboard-rs}/bin/wl-copy ""
-
           # Compression can take a while. Put current image in clipboard for immediate pasting
           ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$tmpfile"
           ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
