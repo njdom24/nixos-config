@@ -175,7 +175,7 @@
             vrr = 2
             supports_hdr = 1
             sdr_min_luminance = 0.005
-            sdr_max_luminance = 203
+            sdr_max_luminance = 260
             min_luminance = 0.005
             max_luminance = 1156
             max_avg_luminance = 1156
@@ -212,7 +212,7 @@
 	        vrr = 2
 	        supports_hdr = 1
 	        sdr_min_luminance = 0.005
-	        sdr_max_luminance = 203
+	        sdr_max_luminance = 260
 	        min_luminance = 0.005
 	        max_luminance = 1300
 	        max_avg_luminance = 1300

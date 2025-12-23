@@ -22,10 +22,10 @@
            supports_hdr = 1
            vrr = 2
            sdr_min_luminance = 0.005
-           sdr_max_luminance = 203
+           sdr_max_luminance = 260
            min_luminance = 0.005
            max_luminance = 1156
-           max_avg_luminance = 203
+           max_avg_luminance = 1156
            bitdepth = 10
            cm = srgb
         }
