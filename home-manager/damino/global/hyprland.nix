@@ -229,6 +229,7 @@
         "match:class ^(xwaylandvideobridge)$, opacity 0.0 override, no_anim 1, no_initial_focus 1, max_size 1 1, no_blur 1, no_focus 1"
         # Fix some dragging issues with XWayland ?
         #"match:xwayland 1, match:float 1, match:fullscreen 0, match:pin 0, no_focus 1"
+        "match:class ^(com.moonlight_stream.Moonlight)$, content game"
         "match:class ^gamescope$, content game"
         "match:class ^.gamescope-wrapped$, content game"
         "match:class ^(steam_app_\\d+)$, content game" # All Steam apps are considered games
