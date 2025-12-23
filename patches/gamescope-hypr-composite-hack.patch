@@ -1,5 +1,5 @@
 diff --git a/src/Backends/WaylandBackend.cpp b/src/Backends/WaylandBackend.cpp
-index ab6d30c..efb3878 100644
+index 964132b..319865b 100644
 --- a/src/Backends/WaylandBackend.cpp
 +++ b/src/Backends/WaylandBackend.cpp
 @@ -59,6 +59,8 @@ static LogScope xdg_log( "xdg_backend" );
@@ -11,23 +11,12 @@ index ab6d30c..efb3878 100644
  
  template <typename Func, typename... Args>
  auto CallWithAllButLast(Func pFunc, Args&&... args)
-@@ -1134,9 +1136,16 @@ namespace gamescope
-                 compositeLayer.colorspace = pFrameInfo->outputEncodingEOTF == EOTF_PQ ? GAMESCOPE_APP_TEXTURE_COLORSPACE_HDR10_PQ : GAMESCOPE_APP_TEXTURE_COLORSPACE_SRGB;
+@@ -1076,7 +1078,7 @@ namespace gamescope
  
-                 m_Planes[0].Present( &compositeLayer );
--
--                for ( int i = 1; i < 8; i++ )
--                    m_Planes[i].Present( nullptr );
-+                
-+                if(isHyprland) {
-+                    uint32_t uCurrentPlane = 1;
-+                    for ( int i = 0; i < 8 && uCurrentPlane < 8; i++ )
-+                        m_Planes[uCurrentPlane++].Present( i < pFrameInfo->layerCount ? &pFrameInfo->layers[i] : nullptr );
-+                }
-+                else {
-+                    for ( int i = 1; i < 8; i++ )
-+                        m_Planes[i].Present( nullptr );
-+                }
-             }
-         }
+             bNeedsFullComposite |= !!(g_uCompositeDebug & CompositeDebugFlag::Heatmap);
  
+-            if ( !bNeedsFullComposite )
++            if ( !bNeedsFullComposite || isHyprland )
+             {
+                 bool bNeedsBacking = true;
+                 if ( pFrameInfo->layerCount >= 1 )
