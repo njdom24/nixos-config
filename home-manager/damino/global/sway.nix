@@ -58,7 +58,6 @@
               # Read capture value if it exists
               if [[ -f "$conf" ]]; then
                 capture="$(${pkgs.gawk}/bin/awk -F= '$1=="capture"{print $2}' "$conf" 2>/dev/null || true)"
-                echo "$capture"
               fi
 
               if [[ "$capture" != "kms" ]]; then
@@ -711,9 +710,24 @@
 
 		  ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=$REMOTE_ENABLED
 
+          # "''$()"
 		  export WLR_NO_HARDWARE_CURSORS="''${WLR_NO_HARDWARE_CURSORS:-$REMOTE_ENABLED}"
 		  #export WLR_BACKENDS=$([ $REMOTE_ENABLED = 1 ] && echo "headless,libinput" || echo "drm,libinput")
-		  export WLR_RENDERER=$([ $REMOTE_ENABLED = 1 ] && echo "gles2" || echo "vulkan")
+
+		  export WLR_RENDERER=vulkan
+		  conf="$(${pkgs.systemd}/bin/systemctl --user show sunshine.service -p ExecStart --value \
+		               | ${pkgs.gnugrep}/bin/grep -o 'argv\[\]=[^;]*' \
+		               | ${pkgs.gnused}/bin/sed 's/argv\[\]=//' \
+		               | ${pkgs.gawk}/bin/awk '{print $NF}')"
+
+		  # Read capture value if it exists
+		  if [[ "$REMOTE_ENABLED" == "1" ]] && [[ -f "$conf" ]]; then
+		    capture="$(${pkgs.gawk}/bin/awk -F= '$1=="capture"{print $2}' "$conf" 2>/dev/null || true)"
+		    if [[ "$capture" != "kms" ]]; then
+		      export WLR_RENDERER=gles2
+		    fi
+		  fi
+
 		  #export WLR_RENDER_NO_EXPLICIT_SYNC=1
 		    
 		  eval $(${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)
