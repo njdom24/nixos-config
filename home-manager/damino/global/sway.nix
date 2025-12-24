@@ -188,6 +188,8 @@
 
 		  floating_maximum_size 2500 x 1400
 
+          # Useful for Sunshine scripts
+          exec systemctl --user import-environment PATH
           #exec_always timeout 10 kanshi
           exec_always ${displaySetup}
           # Start recording only on desktops (dGPU heuristic)

@@ -527,6 +527,7 @@
       exec-once = [
         "${pkgs.systemd}/bin/systemctl --user stop plasma-xdg-desktop-portal-kde"
         "${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal"
+        "${pkgs.systemd}/bin/exec systemctl --user import-environment PATH" # Useful for Sunshine scripts
         "${set-displays}"
         "${gamescope-cursor-fix}"
         "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
