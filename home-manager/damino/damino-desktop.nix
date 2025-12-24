@@ -115,6 +115,13 @@
 	  	  	    #position = "2560,0";
 	  	  	    #adaptiveSync = true;
 	  	  	  }
+	  	  	  {
+	  	  	    criteria = "Technical Concepts Ltd 55R635 0x5BED4FBA";
+	  	  	    status = "disable";
+	  	  	    mode = "2560x1440@120Hz";
+	  	  	    position = "5120,0";
+	  	  	    #adaptiveSync = true;
+	  	  	  }
 	  	    ];
 	  	    exec = [
 	  	      "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
@@ -140,6 +147,13 @@
 	  	  	    mode = "2560x1440@143.999Hz";
 	  	  	    position = "0,0";
 	  	  	    #position = "2560,0";
+	  	  	    #adaptiveSync = true;
+	  	  	  }
+	  	  	  {
+	  	  	    criteria = "Technical Concepts Ltd 55R635 0x5BED4FBA";
+	  	  	    status = "disable";
+	  	  	    mode = "2560x1440@120Hz";
+	  	  	    position = "5120,0";
 	  	  	    #adaptiveSync = true;
 	  	  	  }
 	  	  	  {
