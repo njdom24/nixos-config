@@ -482,6 +482,11 @@
         #}
       ];
     };
+
+    # Needed for Sunshine DualSense input
+    udev.extraRules = ''
+      KERNEL=="uhid", MODE="0660", GROUP="input"
+    '';
   };
 
   environment.systemPackages = with pkgs; [
