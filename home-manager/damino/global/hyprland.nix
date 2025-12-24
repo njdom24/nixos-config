@@ -290,6 +290,10 @@
         full_cm_proto = true;
       };
 
+      quirks = {
+        prefer_hdr = 2;
+      };
+
       ### INPUT ###
 
       input = {
@@ -750,7 +754,7 @@
               ;;
           esac
 
-          systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder
+          sleep 1 && systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder
 
         else
           echo "HDR not supported on $monitor; no changes made."
