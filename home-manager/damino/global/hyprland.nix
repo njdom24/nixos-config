@@ -260,7 +260,7 @@
         pseudotile = true;
         preserve_split = true;
         force_split = 2; # Split to right, down
-        split_width_multiplier = 1.1; # Work around autotiling preferring vertical splits somewhat often
+        split_width_multiplier = 1.3; # Work around autotiling preferring vertical splits somewhat often
       };
 
       master = {
