@@ -10,14 +10,14 @@
       outputs."DP-1".mode = "e";
       outputs."HDMI-A-1".edid = "edid_q800t_xiaomi_lumi.bin";
       outputs."HDMI-A-1".mode = "e";
-      #outputs."DP-3".edid = "edid_55r635.bin"; # For "headless" streaming through unused DP port on GPU. Add VRR range (48-120), EDID MaxFALL 686 MaxCLL 1114 MinCLL 0.1
-      #outputs."DP-3".mode = "e";
+      outputs."DP-3".edid = "edid_55r635.bin"; # Add VRR range (48-120), EDID MaxFALL 686 MaxCLL 1114 MinCLL 0.1
+      outputs."DP-3".mode = "e";
       edid.packages = [
         (pkgs.runCommand "custom-edid" {} ''
           mkdir -p $out/lib/firmware/edid
           cp ${./edid_aoc_Q27G40XMN_72vrr.bin} $out/lib/firmware/edid/edid_aoc_Q27G40XMN_72vrr.bin
           cp ${./edid_q800t_xiaomi_lumi.bin} $out/lib/firmware/edid/edid_q800t_xiaomi_lumi.bin
-          #cp ${./edid_55r635.bin} $out/lib/firmware/edid/edid_55r635.bin
+          cp ${./edid_55r635.bin} $out/lib/firmware/edid/edid_55r635.bin
         '')
       ];
     };

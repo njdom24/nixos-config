@@ -150,7 +150,7 @@
 	  	  	    #adaptiveSync = true;
 	  	  	  }
 	  	  	  {
-	  	  	    criteria = "Technical Concepts Ltd 55R635 0x5BED4FBA";
+	  	  	    criteria = "Technical Concepts Ltd 55R635 *";
 	  	  	    status = "disable";
 	  	  	    mode = "2560x1440@120Hz";
 	  	  	    position = "5120,0";

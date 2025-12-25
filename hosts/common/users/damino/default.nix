@@ -424,7 +424,7 @@ in
                 # Detect TV connector name
                 TV_OUTPUT=$(
                   ${pkgs.sway}/bin/swaymsg -t get_outputs \
-                    | ${pkgs.jq}/bin/jq -r '.[] | select((.make + " " + .model) | test("\\bTV\\b"; "i")) | .name' \
+                    | ${pkgs.jq}/bin/jq -r '.[] | select((.make + " " + .model) | test("\\b(CH7218|Beyond TV|55R635)\\b"; "i")) | .name' \
                     | head -n1
                 )
 
