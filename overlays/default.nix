@@ -23,6 +23,10 @@ in {
       newPatches = [
         ../patches/gamescope-crash-fix.patch
         ../patches/gamescope-hdr-sway-fix.patch
+        (prev.fetchpatch {
+          url = "https://patch-diff.githubusercontent.com/raw/ValveSoftware/gamescope/pull/2049.patch";
+          sha256 = "sha256-g/WILRVbuJhrNsQNlQL3nYO8Lz4YdYpuaUf7jN/yYgg=";
+        })
       ];
       #addIfMissing = p: if builtins.any (x: x == p) existing then [] else [p];
     in rec {
