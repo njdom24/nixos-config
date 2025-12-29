@@ -888,8 +888,37 @@ let
       echo "Error: Steam is already running." >&2
       exit 1
     fi
+
+    # Custom Res, Refresh
+    OUTPUT="DP-3"
+    WIDTH=3840
+    HEIGHT=2160
+    REFRESH=120
+    SINK="alsa_output.pci-0000_03_00.1.pro-output-8"
+
+    # TODO: Use for more than Sway
+    usage() {
+      echo "Usage: $0 [-W WIDTH] [-H HEIGHT] [-r REFRESH] [-O OUTPUT]" >&2
+      exit 1
+    }
+
+    while getopts ":W:H:r:O:A:" opt; do
+      case "$opt" in
+        W) WIDTH="$OPTARG" ;;
+        H) HEIGHT="$OPTARG" ;;
+        r) REFRESH="$OPTARG" ;;
+        O) OUTPUT="$OPTARG" ;;
+        A) SINK="$OPTARG" ;;
+        \?) echo "Invalid option: -$OPTARG" >&2; usage ;;
+        :)  echo "Option -$OPTARG requires an argument." >&2; usage ;;
+      esac
+    done
+
+    shift $((OPTIND - 1))
+
+    default_speakers="$(${pkgs.pulseaudio}/bin/pactl get-default-sink)"
     
-    ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-8 # TV speakers
+    ${pkgs.pulseaudio}/bin/pactl set-default-sink "$SINK" # TV speakers
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable output.DP-1.disable output.DP-2.disable
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
@@ -897,8 +926,8 @@ let
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-      swaymsg output DP-3 enable mode 3840x2160@120Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
-      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"DP-3\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
+      swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
+      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
 
@@ -917,7 +946,7 @@ let
       swaymsg reload # Contains exec_always kanshi
       (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
     fi
-    ${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3 # Desktop speakers
+    ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
   '';
 in 
 {
