@@ -917,6 +917,7 @@ let
     shift $((OPTIND - 1))
 
     default_speakers="$(${pkgs.pulseaudio}/bin/pactl get-default-sink)"
+    gsr_status="$(${pkgs.systemd}/bin/systemctl --user is-active gpu-screen-recorder.service)"
     
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$SINK" # TV speakers
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
@@ -924,11 +925,11 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
-      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+      (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
-      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+      (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     fi
 
     # "Warm up" CH7218 for 5 minutes to prevent VRR signal drop
@@ -940,11 +941,11 @@ let
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
-      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+      (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &
       swaymsg reload # Contains exec_always kanshi
-      (sleep 2 && systemctl --user is-active --quiet gpu-screen-recorder.service && systemctl --user restart gpu-screen-recorder.service) &
+      (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
   '';
