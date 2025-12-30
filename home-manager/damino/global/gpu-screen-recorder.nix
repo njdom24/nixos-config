@@ -171,7 +171,11 @@ in {
               ;;
             sway)
               monitors=$(${pkgs.sway}/bin/swaymsg -t get_outputs -r | ${pkgs.jq}/bin/jq -r '
-                  .[] | "\(.name):\(.make // "unknown") \(.model // "")" | select(. != ":")' | ${pkgs.coreutils}/bin/sort)
+                .[]
+                | select(.active == true)
+                | "\(.name):\(.make // "unknown") \(.model // "")"
+              ' | ${pkgs.coreutils}/bin/sort)
+              
               monitors=$(echo "$monitors" | ${pkgs.gnugrep}/bin/grep -v '^HEADLESS')
               ;;
             KDE)
