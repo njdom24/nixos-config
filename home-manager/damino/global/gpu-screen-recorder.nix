@@ -238,11 +238,19 @@ in {
             if [[ -s "$kms_token" ]]; then
               output=$(${pkgs.coreutils}/bin/cat "$kms_token")
             else
-              selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
-              if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
-                output="''${BASH_REMATCH[1]}"
+              monitor_count=$(printf '%s\n' "$monitors" | ${pkgs.coreutils}/bin/wc -l)
+              echo "Monitor count: $monitor_count"
+              if [ "$monitor_count" -eq 1 ]; then
                 # "''$()"
-                echo "$output" > "$kms_token"
+                output=''${monitors%%:*}
+                echo "Using only output: $output"
+              else
+                selection=$(${pkgs.xdg-desktop-portal-hyprland}/bin/hyprland-share-picker 2>/dev/null || true)
+                if [[ "$selection" =~ ^.*/screen:(.+)$ ]]; then
+                  output="''${BASH_REMATCH[1]}"
+                  # "''$()"
+                  echo "$output" > "$kms_token"
+                fi
               fi
             fi
 
