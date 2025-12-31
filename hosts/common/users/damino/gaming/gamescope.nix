@@ -935,7 +935,7 @@ let
     # "Warm up" CH7218 for 5 minutes to prevent VRR signal drop
     (${novrr}/bin/novrr sleep 600) &
 
-    sleep 3 && env ${gsc-watcher}/bin/gsc-watcher -e -F fsr --hdr-debug-force-support -- env DXVK_HDR=1 ${pkgs.steam}/bin/steam -gamepadui -pipewire-dmabuf -console -cef-force-gpu
+    sleep 3 && env ${gsc-watcher}/bin/gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
