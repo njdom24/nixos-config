@@ -76,9 +76,17 @@
         keyutils
         # Where gamescope-session looks for "Exit to Desktop" when -steamos3 is provided
         (writeShellScriptBin "steamos-session-select" ''
-            /usr/bin/env steam -shutdown
+          /usr/bin/env steam -shutdown
+        '')
+        (writeScriptBin "steamos-select-branch" ''
+          #!${pkgs.stdenv.shell}
+          exit 7
         '')
         (writeScriptBin "steamos-polkit-helpers/steamos-update" ''
+          #!${pkgs.stdenv.shell}
+          exit 7
+        '')
+        (writeScriptBin "steamos-polkit-helpers/jupiter-dock-updater" ''
           #!${pkgs.stdenv.shell}
           exit 7
         '')
