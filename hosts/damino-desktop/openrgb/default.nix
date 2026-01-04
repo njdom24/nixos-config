@@ -45,7 +45,7 @@
   };
 
   systemd.services.openrgb = {
-    after = [ "network.target" ];
+    after = [ "multi-user.target" ];
     serviceConfig = {
       TimeoutStopSec = "20s";
       ExecStartPost = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
