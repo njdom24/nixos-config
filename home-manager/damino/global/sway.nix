@@ -532,14 +532,14 @@
 		    #"--release $mod+t" = "exec ${bind-hold} stop t";
 		    "XF86AudioRaiseVolume" = "exec wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+";
 		    "XF86AudioLowerVolume" = "exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-";
-		    "XF86AudioMute" = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-		    "XF86AudioMicMute" = "exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+		    "--no-repeat XF86AudioMute" = "exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+		    "--no-repeat XF86AudioMicMute" = "exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
 		  	#"XF86AudioRaiseVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%";
 		  	#"XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
 		  	#"XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
 		  	#"XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SINK@ toggle";
-		  	"Control+grave" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --toggle-panel";
-		  	"Control+space" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --hide-latest";
+		  	"--no-repeat Control+grave" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --toggle-panel";
+		  	"--no-repeat Control+space" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --hide-latest";
 		  	#"Control+grave" = "exec makoctl restore";
 		  	#"Control+space" = "exec makoctl dismiss";
 		  	"Control+Shift+b" = "exec sway-toggle-hdr";
@@ -584,10 +584,10 @@
             #"$mod+Shift+Up" = "move up";
             #"$mod+Shift+Down" = "move down";
 
-            "$mod+Shift+Left"  = "exec ${container-move-helper} left";
-            "$mod+Shift+Right" = "exec ${container-move-helper} right";
-            "$mod+Shift+Up"    = "exec ${container-move-helper} up";
-            "$mod+Shift+Down"  = "exec ${container-move-helper} down";
+            "--no-repeat $mod+Shift+Left"  = "exec ${container-move-helper} left";
+            "--no-repeat $mod+Shift+Right" = "exec ${container-move-helper} right";
+            "--no-repeat $mod+Shift+Up"    = "exec ${container-move-helper} up";
+            "--no-repeat $mod+Shift+Down"  = "exec ${container-move-helper} down";
 			
 			"$mod+Left" = "focus left";
 			"$mod+Right" = "focus right";
@@ -596,24 +596,24 @@
 
 			"$mod+Shift+c" = "reload";
 			"$mod+Shift+r" = "restart";
-			"$mod+Shift+e" = "exec wlogout -p layer-shell";
+			"--no-repeat $mod+Shift+e" = "exec wlogout -p layer-shell";
 			"$mod+r" = "mode \"resize\"";
 
-			"Shift+Print" = "exec ${hdr-screenshot} select";
-			"Shift+Prior" = "exec ${hdr-screenshot} select";
-			"Print" = "exec ${hdr-screenshot} focused";
-			"Shift+Next" = "exec ${hdr-screenshot} focused";
+			"--no-repeat Shift+Print" = "exec ${hdr-screenshot} select";
+			"--no-repeat Shift+Prior" = "exec ${hdr-screenshot} select";
+			"--no-repeat Print" = "exec ${hdr-screenshot} focused";
+			"--no-repeat Shift+Next" = "exec ${hdr-screenshot} focused";
 
 			# Save replay if gpu-screen-recorder -r is running
 			#"Control+Print" = "exec ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'";
-			"Control+Print" = "exec ${bind-hold} start gsc-replay \"${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'\" \"killall -SIGUSR1 gpu-screen-recorder\"";
-			"Control+Shift+Next" = "exec ${bind-hold} start gsc-replay \"${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'\" \"killall -SIGUSR1 gpu-screen-recorder\"";
+			"--no-repeat Control+Print" = "exec ${bind-hold} start gsc-replay \"${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'\" \"killall -SIGUSR1 gpu-screen-recorder\"";
+			"--no-repeat Control+Shift+Next" = "exec ${bind-hold} start gsc-replay \"${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'\" \"killall -SIGUSR1 gpu-screen-recorder\"";
 			"--release Control+Print" = "exec ${bind-hold} stop gsc-replay";
 			"--release Control+Shift+Next" = "exec ${bind-hold} stop gsc-replay";
 
 			# Start / stop manual recording if gpu-screen-recorder -ro is running
-			"Control+Shift+Print" = "exec ${bind-hold} start gsc-record ${checkrec} ${screenrec}";
-			"Control+Shift+Prior" = "exec ${bind-hold} start gsc-record ${checkrec} ${screenrec}";
+			"--no-repeat Control+Shift+Print" = "exec ${bind-hold} start gsc-record ${checkrec} ${screenrec}";
+			"--no-repeat Control+Shift+Prior" = "exec ${bind-hold} start gsc-record ${checkrec} ${screenrec}";
 			"--release Control+Shift+Print" = "exec ${bind-hold} stop gsc-record";
 			"--release Control+Shift+Prior" = "exec ${bind-hold} stop gsc-record";
 		  };
