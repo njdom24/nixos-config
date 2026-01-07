@@ -59,10 +59,7 @@ in
       handbrake
       firefox
       vdhcoapp
-      (chromium.override {
-        enableWideVine = true;
-        commandLineArgs = [ "--disable-features=WaylandWpColorManagerV1" ];
-      })
+      chromium
       kdePackages.kate
       kitty
       ffmpeg-full
@@ -106,7 +103,7 @@ in
 	  xorg.xeyes
 	  corefonts
 	  vista-fonts
-	  (vscode.override { commandLineArgs = [ "--disable-features=WaylandWpColorManagerV1" ]; })
+	  vscode
 	  linux-wifi-hotspot
     ];
   };
