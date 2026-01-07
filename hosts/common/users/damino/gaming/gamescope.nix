@@ -711,10 +711,11 @@ let
       extra_flags+=("1440")
     fi
 
-    if [[ "$steam_mode" == "1" ]]; then
-      extra_flags+=("--xwayland-count")
-      extra_flags+=("2")
-    fi
+    # --xwayland-count 2 Causes a limit of 1080p with -steamos3
+    #if [[ "$steam_mode" == "1" ]]; then
+    #  extra_flags+=("--xwayland-count")
+    #  extra_flags+=("2")
+    #fi
 
     # React to gamescope's errors
     set -o pipefail
@@ -725,7 +726,8 @@ let
         config.programs.gamescope.args} \
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
         $mangoapp_flag "''${extra_flags[@]}" \
-        -- env STEAM_MULTIPLE_XWAYLANDS="$steam_mode" DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
+        -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
+        #-- env STEAM_MULTIPLE_XWAYLANDS="$steam_mode" DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
 
       then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
@@ -877,7 +879,6 @@ let
         ${set_vrr} "$vrr_mode"
       fi
     fi
-    # "''$()"
   '';
 
   # Convenience script. Hacky, but seems to get VRR going stable too
@@ -935,7 +936,12 @@ let
     # "Warm up" CH7218 for 5 minutes to prevent VRR signal drop
     (${novrr}/bin/novrr sleep 600) &
 
-    sleep 3 && env ${gsc-watcher}/bin/gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
+    # -steamos3 flag prevents DualSense input from passing through the overlay, but limits to 1080p with --xwayland-count 2 -- env STEAM_MULTIPLE_XWAYLANDS=1
+    # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
+    #  Also seems to prevent AVIF HDR screenshots from saving...
+    sleep 3 && env ${gsc-watcher}/bin/gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
+    # May also disable Bluetooth (toggle is default off...)
+    (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
