@@ -845,8 +845,8 @@ let
               #cp "$latest_jpg" "$latest_jpg".orig
               thumbnail="$screenshot_dir/thumbnails/$(basename "$latest_jpg")"
               (
-                ${pkgs.imagemagick}/bin/magick "$latest_jpg" -brightness-contrast 7x14 "$latest_jpg"
-                ${pkgs.imagemagick}/bin/magick "$thumbnail" -brightness-contrast 7x14 "$thumbnail"
+                ${pkgs.imagemagick}/bin/magick "$latest_jpg" -brightness-contrast 8x16 "$latest_jpg"
+                ${pkgs.imagemagick}/bin/magick "$thumbnail" -brightness-contrast 8x16 "$thumbnail"
               ) &
               latest_screenshot="$latest_jpg"
               break

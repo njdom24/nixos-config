@@ -102,7 +102,7 @@
               #${pkgs.imagemagick}/bin/magick "$avif_file" -clamp -sigmoidal-contrast 16x52% -level 0%,100%,2.2 -colorspace sRGB "$output"
               #${pkgs.imagemagick}/bin/magick "$avif_file" -clamp -sigmoidal-contrast 14x52% -level 0%,100%,2.2 -evaluate multiply 1.0 -modulate 100,120,100 -colorspace sRGB "$output"
 
-              ${pkgs.imagemagick}/bin/magick "$fullpath" -brightness-contrast 7x14 "$output" # Works, but has banding
+              ${pkgs.imagemagick}/bin/magick "$fullpath" -brightness-contrast 8x16 "$output" # Works, but has banding
 
               # Compress to match original size
               ref_size=$(stat -c%s "$dir/$newfile")
