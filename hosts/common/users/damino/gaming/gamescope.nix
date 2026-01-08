@@ -727,6 +727,7 @@ let
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
         $mangoapp_flag "''${extra_flags[@]}" \
         -- env DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
+        # "''$()"
         #-- env STEAM_MULTIPLE_XWAYLANDS="$steam_mode" DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
 
       then
@@ -805,19 +806,60 @@ let
       trap "kill $CHILD" EXIT
     fi
 
+    echo "" > /tmp/gsc.log
+
+    # Vars to help find screenshot dir
+    USER_LOG="$HOME/.steam/steam/logs/connection_log.txt"
+    STEAM_USERID=$(${pkgs.gnugrep}/bin/grep -Po '\[U:1:\K[0-9]+' "$USER_LOG" | tail -n1)
+    SCREENSHOT_BASE="$HOME/.local/share/Steam/userdata/$STEAM_USERID/760/remote"
+    app_id=""
+    latest_screenshot=""
     ${pkgs.expect}/bin/unbuffer ${gsc}/bin/gsc "$@" 2>&1 | while IFS= read -r line; do
       echo "$line"
+      echo "$line" >> /tmp/gsc.log
 
-      if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-        # Strip ANSI escape codes
-        line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
+      # Strip ANSI escape codes
+      line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
-        if [[ "$line" == "[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
-          if [[ "$line" == *"VK_COLOR_SPACE_HDR10_ST2084_EXT"* \
-             || "$line" == *"VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT"* ]]; then
-            if [[ "''${last_colorspace:-}" != "HDR" ]]; then
-              echo "gsc: Detected HDR swapchain: $line" >&2
-              curr_colorspace="HDR"
+      if [[ "$line" == "Adding process "*" for gameID "* ]]; then
+        #"''$()"
+        new_app_id="''${line##*for gameID }"
+        if [[ "$app_id" != "$new_app_id" ]]; then
+          app_id="$new_app_id"
+          screenshot_dir="$SCREENSHOT_BASE/$app_id/screenshots"
+          latest_jpg="$(ls -t "$screenshot_dir"/*.jpg 2>/dev/null | head -n1)"
+        fi
+      elif [[ "$line" == "[gamescope] [Info]  xwm: Screenshot saved to "*".png" ]]; then
+        if [[ "$curr_colorspace" == "HDR" ]]; then
+          # Brighten tonemapped HDR screenshot because Steam underexposes them
+          screenshot_dir="$SCREENSHOT_BASE/$app_id/screenshots"
+          echo "Checking screenshot dir for APPID $app_id: $screenshot_dir"
+
+          while true; do
+            sleep 1
+            latest_jpg="$(ls -t "$screenshot_dir"/*.jpg 2>/dev/null | head -n1)"
+
+            # Check if the newest file changed
+            if [[ "$latest_jpg" != "$latest_screenshot" ]]; then
+              echo "Brightening HDR screenshot: $latest_jpg"
+              #cp "$latest_jpg" "$latest_jpg".orig
+              thumbnail="$screenshot_dir/thumbnails/$(basename "$latest_jpg")"
+              (
+                ${pkgs.imagemagick}/bin/magick "$latest_jpg" -brightness-contrast 7x14 "$latest_jpg"
+                ${pkgs.imagemagick}/bin/magick "$thumbnail" -brightness-contrast 7x14 "$thumbnail"
+              ) &
+              latest_screenshot="$latest_jpg"
+              break
+            fi
+          done
+        fi
+      elif [[ "$line" == "[Gamescope WSI]"* && "$line" == *"colorspace:"* ]]; then
+        if [[ "$line" == *"VK_COLOR_SPACE_HDR10_ST2084_EXT"* \
+           || "$line" == *"VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT"* ]]; then
+          if [[ "''${last_colorspace:-}" != "HDR" ]]; then
+            echo "gsc: Detected HDR swapchain: $line" >&2
+            curr_colorspace="HDR"
+            if [[ "$GSC_HDR_MODESET" == "1" ]]; then
               if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
                 if command -v sway-toggle-hdr >/dev/null 2>&1; then
                   sway-toggle-hdr on
@@ -829,10 +871,12 @@ let
                 hypr-toggle-hdr on
               fi
             fi
-          elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
-            if [[ "''${last_colorspace:-}" != "SDR" ]]; then
-              echo "gsc: Detected SDR swapchain: $line" >&2
-              curr_colorspace="SDR"
+          fi
+        elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
+          if [[ "''${last_colorspace:-}" != "SDR" ]]; then
+            echo "gsc: Detected SDR swapchain: $line" >&2
+            curr_colorspace="SDR"
+            if [[ "$GSC_HDR_MODESET" == "1" ]]; then
               if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
                 if command -v sway-toggle-hdr >/dev/null 2>&1; then
                   sway-toggle-hdr off
@@ -845,12 +889,16 @@ let
               fi
             fi
           fi
-          if [[ "$curr_colorspace" != "$last_colorspace" ]]; then
+        fi
+        if [[ "$curr_colorspace" != "$last_colorspace" ]]; then
+          if [[ "$GSC_HDR_MODESET" == "1" ]]; then
             toggle_vrr
-            last_colorspace="$curr_colorspace"
           fi
-        elif [[ "''${last_colorspace:-}" != "HDR" ]] && [[ "$line" == "Game Recording - game stopped"* || "$line" == "Removing process"*"for gameID"* ]]; then
-          # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
+          last_colorspace="$curr_colorspace"
+        fi
+      elif [[ "''${last_colorspace:-}" != "HDR" ]] && [[ "$line" == "Game Recording - game stopped"* || "$line" == "Removing process"*"for gameID"* ]]; then
+        # Restore HDR on game exit, or Gamescope will lose HDR capability for next launched game
+        if [[ "$GSC_HDR_MODESET" == "1" ]]; then
           if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
             curr_colorspace="HDR"
             if command -v sway-toggle-hdr >/dev/null 2>&1; then
@@ -865,14 +913,13 @@ let
           fi
 
           toggle_vrr
-          last_colorspace="HDR"
         fi
-
+        last_colorspace="HDR"
       fi
     done
 
     # Restore VRR if gamescope closes while toggle job is running
-    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+    if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]] || [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
       if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
         ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
         wait "$vrr_pid" 2>/dev/null
@@ -939,7 +986,7 @@ let
     # -steamos3 flag prevents DualSense input from passing through the overlay, but limits to 1080p with --xwayland-count 2 -- env STEAM_MULTIPLE_XWAYLANDS=1
     # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
     #  Also seems to prevent AVIF HDR screenshots from saving...
-    sleep 3 && env ${gsc-watcher}/bin/gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
+    sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
     (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
 
