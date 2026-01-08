@@ -397,7 +397,7 @@
           ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service 2> /dev/null || true
           ${pkgs.systemd}/bin/systemctl --user reset-failed
 
-          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET=1 gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
+          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET=1 gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3'
         fi
       '';
       in
