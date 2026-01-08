@@ -211,6 +211,8 @@
 	    };
 	    DoVi = {
 	      profile-cond ="(p[\"video-params/colormatrix\"] == \"dolbyvision\")";
+	      vo = "gpu-next";
+	      target-colorspace-hint = "yes";
 	      target-trc = "pq";
 	      target-prim = "bt.2020";
 	      target-peak = 1300;
