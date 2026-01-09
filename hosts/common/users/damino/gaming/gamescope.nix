@@ -64,7 +64,9 @@ let
     fi
 
     if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode" > /dev/null
+      monitor=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
+      LD_LIBRARY_PATH="" hyprctl keyword "monitorv2[$monitor]:vrr" "$vrr_mode"
+      LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
@@ -77,8 +79,6 @@ let
   '';
 
   novrr = pkgs.writeShellScriptBin "novrr" ''
-    set -euo pipefail
-
     # Communicate with sway VRR fullscreen script to prevent it from overriding
     if [[ -v SWAYSOCK ]]; then
       touch "$XDG_RUNTIME_DIR"/sway_vrr_lock
@@ -92,6 +92,9 @@ let
       ${set_vrr} $vrr_start
       if [[ -v SWAYSOCK ]] && ! ${pkgs.procps}/bin/pgrep -f "novrr" | ${pkgs.gnugrep}/bin/grep -v $$ >/dev/null; then
         rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
+      elif [[ -v HYPRLAND_INSTANCE_SIGNATURE ]] && ! ${pkgs.procps}/bin/pgrep -f "novrr" | ${pkgs.gnugrep}/bin/grep -v $$ >/dev/null; then
+        # Hyprland doesn't expose the value of monitorv2[<display>]:vrr, so we can't tell if we originally set 1 or 2 for "on". Just reload
+        LD_LIBRARY_PATH="" hyprctl reload
       fi
       exit "$ec"
     }
