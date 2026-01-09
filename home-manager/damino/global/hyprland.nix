@@ -349,7 +349,15 @@
         mkdir -p "$SCREENSHOT_DIR"
         timestamp=$(date +%s)
         tmpfile="$SCREENSHOT_DIR/$timestamp.png"
-        trap 'rm -f "$tmpfile"' EXIT
+        scanout=$(${pkgs.hyprland}/bin/hyprctl getoption render:direct_scanout -j | ${pkgs.jq}/bin/jq -r '.int')
+
+        cleanup() {
+          rm -f "$tmpfile"
+          hyprctl keyword "render:direct_scanout" "$scanout"
+        }
+        trap cleanup EXIT
+
+        hyprctl keyword "render:direct_scanout" "0"
 
         # Clear out old screenshot
         rm -f "$SCREENSHOT_DIR/"*
@@ -516,11 +524,7 @@
         force_zero_scaling = true;
       };
 
-      experimental = {
-        # https://github.com/hyprwm/Hyprland/discussions/11677#discussioncomment-14397277
-        # Despite above, still needed for auto HDR in gamescope as of 9/14/2025. Maybe since I'm not using VK_hdr_layer
-        xx_color_management_v4 = true;
-      };
+
 
       ### AUTOSTART ###
       exec-once = [
