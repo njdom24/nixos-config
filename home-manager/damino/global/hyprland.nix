@@ -585,8 +585,14 @@
     hyprpaper = {
       enable = true;
       settings = {
-        preload = [ "${./theming/wallpapers/new_gridania.jpg}" ];
-        wallpaper = ",${./theming/wallpapers/new_gridania.jpg}";
+        splash = false;
+        wallpaper = [
+          {
+            monitor = "";
+            path = "${./theming/wallpapers/new_gridania.jpg}";
+            fit_mode = "cover";
+          }
+        ];
       };
     };
   };

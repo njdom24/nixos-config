@@ -172,7 +172,6 @@ in
 	#};
   
     zsh.enable = true;
-    adb.enable = true;
 
     obs-studio = {
       enable = true;
@@ -647,6 +646,7 @@ in
   	  ddcutil
   	  gnome-firmware
   	  seahorse
+  	  android-tools
   	] ++ gst_plugins;
 
     # TODO: Remove after https://github.com/NixOS/nixpkgs/issues/409986#issuecomment-3217982330

@@ -251,7 +251,7 @@
   	  steam-run
   	  steamtinkerlaunch
   	  samrewritten
-  	  sgdboop
+  	  stable.sgdboop
   	  protontricks
   	  protonplus
   	];
