@@ -54,10 +54,10 @@
         done
         STEAM_PID=$(${pkgs.procps}/bin/pgrep -x steam | head -n1)
         echo "Monitoring Steam process PID $STEAM_PID"
-        sleep 5
+        sleep 30
 
         while kill -0 "$STEAM_PID" 2>/dev/null; do
-          sleep 5
+          sleep 30
         done
         echo "Steam exited — cleaning up everything"
         cleanup
