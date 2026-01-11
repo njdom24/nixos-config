@@ -751,15 +751,15 @@
                 exit 0
               fi
               echo "Disabling HDR"
-              hyprctl keyword "monitorv2[DP-1]:cm" srgb
+              hyprctl keyword "monitorv2[$monitor]:cm" srgb
               ;;
             *)
               if [ "$current_mode" = "hdr" ]; then
                 echo "Toggling: disabling HDR"
-                hyprctl keyword "monitorv2[DP-1]:cm" srgb
+                hyprctl keyword "monitorv2[$monitor]:cm" srgb
               else
                 echo "Toggling: enabling HDR"
-                hyprctl keyword "monitorv2[DP-1]:cm" hdr
+                hyprctl keyword "monitorv2[$monitor]:cm" hdr
               fi
               ;;
           esac
