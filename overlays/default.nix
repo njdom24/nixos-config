@@ -58,6 +58,10 @@ in {
           url = "https://patch-diff.githubusercontent.com/raw/hyprwm/Hyprland/pull/12965.patch";
           sha256 = "sha256-NgPTGrZLD5xeoJWftVdndiT99+yDnn1ex2g9za7dmWw=";
         })
+        (prev.fetchpatch {
+          url = "https://patch-diff.githubusercontent.com/raw/hyprwm/Hyprland/pull/12781.patch";
+          sha256 = "sha256-YgpeCPXDWzoECw4uR2Sn7WZN/nJpp7MqtyEpIBdV1kI=";
+        })
       ];
     });
     xdg-desktop-portal-hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;

@@ -5,13 +5,6 @@
 { inputs, outputs, config, lib, pkgs, ... }:
 let
   addIfMissing = existing: p: if builtins.any (x: x == p) existing then [] else [p];
-  # Patched for improved VRR
-  gamescope_immediate = pkgs.gamescope.overrideAttrs (old: {
-    patches = (old.patches or []) ++ [
-      # ../../../../../patches/gamescope-vblank-hack.patch
-      ../../../../../patches/gamescope-hypr-composite-hack.patch
-    ];
-  });
 
   get_vrr = pkgs.writeShellScript "get_vrr.sh" ''
     # Account for nested case
@@ -722,7 +715,7 @@ let
     set -o pipefail
     while true; do
 
-      if env -u LD_PRELOAD env -u WLR_XWAYLAND ${gamescope_immediate}/bin/gamescope \
+      if env -u LD_PRELOAD env -u WLR_XWAYLAND ${pkgs.gamescope}/bin/gamescope \
       ${lib.concatMapStringsSep " " (arg: lib.escapeShellArgs (lib.splitString " " arg))
         config.programs.gamescope.args} \
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
@@ -756,34 +749,7 @@ let
     fi
   '';
 
-  gsc-watcher =
-    # Work around TV signal loss when switching in/out of direct scanout with VRR
-    let hypr-scanout-watcher = pkgs.writeShellScript "hypr-scanout-watcher" ''
-    renice -n 19 $$ >/dev/null
-
-    MON="DP-3"
-    last=""
-
-    get_scanout() {
-      LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$MON\") | .directScanoutTo"
-    }
-
-    last="$(get_scanout)"
-    while sleep 0.15; do
-      cur="$(get_scanout)"
-      if [[ "$cur" != "$last" ]]; then
-        vrr_mode="$(${get_vrr})"
-        if ! ${pkgs.procps}/bin/pgrep -x novrr >/dev/null && [[ "$vrr_mode" == "1" ]]; then
-          (${set_vrr} 0
-          sleep 5
-          ${set_vrr} 1
-          ) &
-        fi
-        last="$cur"
-      fi
-    done
-  ''; in
-  pkgs.writeShellScriptBin "gsc-watcher" ''
+  gsc-watcher = pkgs.writeShellScriptBin "gsc-watcher" ''
     vrr_mode="$(${get_vrr})"
 
     # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
@@ -801,14 +767,6 @@ let
       fi
     }
 
-    #if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-    #  (sleep 15 && ${hypr-scanout-watcher}) &
-    #  CHILD=$!
-    #  trap "kill $CHILD" EXIT
-    #fi
-
-    echo "" > /tmp/gsc.log
-
     # Vars to help find screenshot dir
     USER_LOG="$HOME/.steam/steam/logs/connection_log.txt"
     STEAM_USERID=$(${pkgs.gnugrep}/bin/grep -Po '\[U:1:\K[0-9]+' "$USER_LOG" | tail -n1)
@@ -817,7 +775,6 @@ let
     latest_screenshot=""
     ${pkgs.expect}/bin/unbuffer ${gsc}/bin/gsc "$@" 2>&1 | while IFS= read -r line; do
       echo "$line"
-      echo "$line" >> /tmp/gsc.log
 
       # Strip ANSI escape codes
       line=$(echo "$line" | ${pkgs.gnused}/bin/sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
