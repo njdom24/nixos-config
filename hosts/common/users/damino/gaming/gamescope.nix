@@ -92,9 +92,6 @@ let
       ${set_vrr} $vrr_start
       if [[ -v SWAYSOCK ]] && ! ${pkgs.procps}/bin/pgrep -f "novrr" | ${pkgs.gnugrep}/bin/grep -v $$ >/dev/null; then
         rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
-      elif [[ -v HYPRLAND_INSTANCE_SIGNATURE ]] && ! ${pkgs.procps}/bin/pgrep -f "novrr" | ${pkgs.gnugrep}/bin/grep -v $$ >/dev/null; then
-        # Hyprland doesn't expose the value of monitorv2[<display>]:vrr, so we can't tell if we originally set 1 or 2 for "on". Just reload
-        LD_LIBRARY_PATH="" hyprctl reload
       fi
       exit "$ec"
     }
@@ -367,11 +364,12 @@ let
         ' "$conf")
 
         hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
-        cm=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*cm[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
-        sdr_max=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*sdr_max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
+        cm=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r --arg o "$focused_display" '.[] | select(.name == $o) | .colorManagementPreset')
+        sdr_max=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r --arg o "$focused_display" '.[] | select(.name == $o) | .sdrMaxLuminance')
         max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
      
-        if [[ "$hdr_support" != "0" ]] && [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" || "$max_lum" -gt 400 ]]; then
+        #if [[ "$hdr_support" != "0" ]] && [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" || "$max_lum" -gt 400 ]]; then
+        if [[ "$hdr_support" != "0" ]] && [[ "$cm" = "hdr" || "$cm" = "hdredid" || "$max_lum" -gt 400 || "$sdr_max" -gt 80 ]]; then
           echo "1 $sdr_max $max_lum"
         else
           echo "0 0 0"
@@ -803,11 +801,11 @@ let
       fi
     }
 
-    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      (sleep 15 && ${hypr-scanout-watcher}) &
-      CHILD=$!
-      trap "kill $CHILD" EXIT
-    fi
+    #if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+    #  (sleep 15 && ${hypr-scanout-watcher}) &
+    #  CHILD=$!
+    #  trap "kill $CHILD" EXIT
+    #fi
 
     echo "" > /tmp/gsc.log
 
@@ -974,8 +972,15 @@ let
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-3.enable output.DP-1.disable output.DP-2.disable
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
-      cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
+      #cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
+      #cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
+      hyprctl keyword "monitorv2[$OUTPUT]:disabled" 0
+      hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
+        [[ "$m" != "$OUTPUT" ]] && hyprctl keyword "monitorv2[$m]:disabled" 1
+      done
+      hyprctl keyword "monitorv2[$OUTPUT]:mode" "$WIDTH"x"$HEIGHT"@"$REFRESH"
+      hyprctl keyword "monitorv2[$OUTPUT]:scale" 1.5
+      hyprctl keyword "monitorv2[$OUTPUT]:vrr" 1
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
@@ -989,14 +994,15 @@ let
     # -steamos3 flag prevents DualSense input from passing through the overlay, but limits to 1080p with --xwayland-count 2 -- env STEAM_MULTIPLE_XWAYLANDS=1
     # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
     #  Also seems to prevent AVIF HDR screenshots from saving...
-    sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
+    sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
     (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
+      #mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
+      hyprctl reload
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &

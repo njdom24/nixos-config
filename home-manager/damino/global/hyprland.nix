@@ -276,7 +276,7 @@
       };
 
       render = {
-        direct_scanout = 2;
+        direct_scanout = 1;
         cm_fs_passthrough = 2;
         cm_auto_hdr = 1;
         cm_sdr_eotf = 2;
@@ -291,6 +291,7 @@
 
       quirks = {
         prefer_hdr = 2;
+        skip_non_kms_dmabuf_formats = true;
       };
 
       ### INPUT ###
@@ -548,10 +549,10 @@
         "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder"
       ];
       exec = [
-        "${pkgs.hyprpaper}/bin/hyprpaper &"
+        "kill `pgrep hyprpaper`; sleep 1 && ${pkgs.hyprpaper}/bin/hyprpaper &"
         #"timeout 10 kanshi &"
         # Waybar freezes on reload on Hyprland sometimes, so just restart
-        "kill `pgrep waybar`; waybar &"
+        "kill `pgrep waybar`; sleep 1 && waybar &"
         "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
       ];
     };

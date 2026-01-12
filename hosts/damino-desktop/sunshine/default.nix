@@ -220,46 +220,33 @@
                 SUNSHINE_CLIENT_FPS=120
               fi
 
-              tmpfile=$(${pkgs.mktemp}/bin/mktemp)
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:disabled" 0
+              ${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
+                [[ "$m" != "$DUMMY" ]] && ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$m]:disabled" 1
+              done
 
-              ${pkgs.coreutils}/bin/printf "%s\n" \
-                "monitorv2 {" \
-                "	output = HDMI-A-1" \
-                "	mode = ''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}" \
-                "	position = 0x0" \
-                "	scale = 1" \
-                "	transform = 0" \
-                "	vrr = 0" \
-                "	sdr_min_luminance = 0.005" \
-                "	sdr_max_luminance = 203" \
-                "	min_luminance = 0" \
-                "	max_luminance = 203" \
-                "	max_avg_luminance = 203" \
-                "	cm = srgb" \
-                "	supports_wide_color = 0" \
-                "	supports_hdr = 0" \
-                "	bitdepth = 8" \
-                "}" \
-                "" \
-                "monitor = DP-1, disable" \
-                "monitor = DP-2, disable" \
-                "monitor = DP-3, disable" \
-                > "$tmpfile"
-
-              # "''$()"
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:mode" "$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:bitdepth" 10
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:position" 0x0
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_min_luminance" 0.005
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:min_luminance" 0
+              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:cm" srgb
 
               if [[ "$1" == "hdr" ]]; then
                 echo "Enabling HDR"
-                #${pkgs.gnused}/bin/sed -i 's/cm = srgb/cm = hdr/' "$tmpfile"
-                ${pkgs.gnused}/bin/sed -i 's/bitdepth = 8/bitdepth = 10/' "$tmpfile"
-                ${pkgs.gnused}/bin/sed -i 's/max_luminance = 203/max_luminance = 1000/' "$tmpfile"
-                ${pkgs.gnused}/bin/sed -i 's/max_avg_luminance = 203/max_avg_luminance = 1000/' "$tmpfile"
-                ${pkgs.gnused}/bin/sed -i 's/sdr_max_luminance = 1000/sdr_max_luminance = 203/' "$tmpfile"
-                ${pkgs.gnused}/bin/sed -i 's/supports_wide_color = 0/supports_wide_color = 1/' "$tmpfile"
-                ${pkgs.gnused}/bin/sed -i 's/supports_hdr = 0/supports_hdr = 1/' "$tmpfile"
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_wide_color" 1
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_hdr" 1
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_max_luminance" 203
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_luminance" 1000
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_avg_luminance" 1000
+              else
+                echo "Disabling HDR"
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_wide_color" 0
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_hdr" 0
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_max_luminance" 80
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_luminance" 80
+                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_avg_luminance" 80
               fi
-
-              mv -f "$tmpfile" ~/.config/hypr/displays.conf
 
               ${pkgs.procps}/bin/kill $($pkgs.procps}/bin/pgrep hyprland-share) || true
               ;;
@@ -366,6 +353,8 @@
             display_cfg="/home/$USER/.config/hypr/displays.conf"
             if [[ -f "$display_cfg".gsc ]]; then
               mv -f "$display_cfg".gsc "$display_cfg"
+            else
+              ${pkgs.hyprland}/bin/hyprctl reload
             fi
             ;;
           *)
