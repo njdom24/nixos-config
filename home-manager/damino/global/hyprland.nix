@@ -276,7 +276,7 @@
       };
 
       render = {
-        direct_scanout = 1;
+        direct_scanout = 2;
         cm_fs_passthrough = 2;
         cm_auto_hdr = 1;
         cm_sdr_eotf = 2;
