@@ -721,7 +721,7 @@ let
         -r "$refresh" -w "$width" -h "$height" -W "$width" -H "$height" \
         $mangoapp_flag "''${extra_flags[@]}" \
         -- env STEAM_MULTIPLE_XWAYLANDS="$steam_mode" DXVK_HDR="$hdr_enabled" LD_PRELOAD="$ld_preload_pass" "''${to_run[@]}"
-        # "''$()"
+
       then
         ## } -r "''${rate:-$refresh}" -W "$width" -H "$height" $mangoapp_flag "$@"; then
         break
@@ -873,7 +873,7 @@ let
         fi
         last_colorspace="HDR"
       else
-        pattern='method return time=* sender=:1.23 -> destination=:* serial=* reply_serial=2'
+        pattern='method return time=* sender=:* -> destination=:* serial=* reply_serial=2'
         if [[ "$line" == $pattern ]]; then
           # Respond to "Switch to Desktop" without -steamos3
           /usr/bin/env steam -shutdown
@@ -943,6 +943,7 @@ let
       hyprctl keyword "monitorv2[$OUTPUT]:mode" "$WIDTH"x"$HEIGHT"@"$REFRESH"
       hyprctl keyword "monitorv2[$OUTPUT]:scale" 1.5
       hyprctl keyword "monitorv2[$OUTPUT]:vrr" 1
+      hyprctl keyword "monitorv2[$OUTPUT]:bitdepth" 10
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
@@ -951,7 +952,7 @@ let
     fi
 
     # "Warm up" CH7218 for 5 minutes to prevent VRR signal drop
-    (${novrr}/bin/novrr sleep 600) &
+    (${novrr}/bin/novrr sleep 10) &
 
     # -steamos3 flag prevents DualSense input from passing through the overlay, but limits to 1080p with --xwayland-count 2 -- env STEAM_MULTIPLE_XWAYLANDS=1
     # Doesn't fix all games, and breaks FSR1
