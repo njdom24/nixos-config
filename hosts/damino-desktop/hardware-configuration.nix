@@ -25,8 +25,20 @@ in
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelPatches = [
     {
-      name = "enable-adapter-freesync";
+      name = "enable-adapter-freesync-0";
       patch = ../../patches/0001-amdgpu-Add-CH7218-PCON-to-the-VRR-whitelist.patch;
+    }
+    {
+      name = "enable-adapter-freesync-1";
+      patch = ../../patches/v2-0001-drm-edid-parse-more-info-from-HDMI-Forum-vsdb.patch;
+    }
+    {
+      name = "enable-adapter-freesync-2";
+      patch = ../../patches/v2-0002-drm-amd-display-rename-PCON-adaptive-sync-types.patch;
+    }
+    {
+      name = "enable-adapter-freesync-3";
+      patch = ../../patches/v2-0003-drm-amd-display-enable-HDMI-VRR-over-PCON.patch;
     }
     #{
     #  name = "force-hdmi-vrr";
