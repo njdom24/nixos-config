@@ -741,11 +741,12 @@
           case "$1" in
             on)
               if [ "$current_mode" = "hdr" ]; then
-                echo "Already in HDR mode; nothing to do."
-                exit 0
+                echo "Already in HDR mode; reapplying."
+              else
+                echo "Enabling HDR"
+                hyprctl keyword "monitorv2[$monitor]:cm" hdr
               fi
-              echo "Enabling HDR"
-              hyprctl keyword "monitorv2[$monitor]:cm" hdr
+
               hyprctl keyword "monitorv2[$monitor]:bitdepth" 10
               ;;
             off)

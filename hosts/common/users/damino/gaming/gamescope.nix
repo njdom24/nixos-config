@@ -58,8 +58,15 @@ let
 
     if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       monitor=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
-      LD_LIBRARY_PATH="" hyprctl keyword "monitorv2[$monitor]:vrr" "$vrr_mode"
       LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
+      LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+      LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+      (
+        sleep 1
+        LD_LIBRARY_PATH="" hyprctl keyword "monitorv2[$monitor]:vrr" "$vrr_mode"
+        LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+        LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+      ) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
@@ -748,20 +755,15 @@ let
   '';
 
   gsc-watcher = pkgs.writeShellScriptBin "gsc-watcher" ''
-    vrr_mode="$(${get_vrr})"
-
-    # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
+    vrr_pid=""
     toggle_vrr() {
-      if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
-        ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
-        wait "$vrr_pid" 2>/dev/null
-        vrr_pid=
-      fi
-
-      echo "gsc: VRR mode: $vrr_mode"
+      # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
+      #echo "gsc: VRR mode: $vrr_mode"
       if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-        (${set_vrr} 0 && sleep 500 && ${set_vrr} "$vrr_mode") &
-        vrr_pid=$!
+        if ! ${pkgs.procps}/bin/pgrep -x "novrr" >/dev/null; then
+          (${set_vrr} 0 && sleep 10 && ${set_vrr} "1") &
+          vrr_pid=$!
+        fi
       fi
     }
 
@@ -827,6 +829,9 @@ let
                 hypr-toggle-hdr on
               fi
             fi
+          elif [[ "$GSC_HDR_MODESET" == "1" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+            # Bodge to fix bit depth reverting to 8 sometimes
+            hypr-toggle-hdr on
           fi
         elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
           if [[ "''${last_colorspace:-}" != "SDR" ]]; then
@@ -849,6 +854,9 @@ let
         if [[ "$curr_colorspace" != "$last_colorspace" ]]; then
           if [[ "$GSC_HDR_MODESET" == "1" ]]; then
             toggle_vrr
+            if [[ "$GSC_MODESET_HOTPLUG" == "1" ]]; then
+              (sleep 3 && systemctl start trigger-hotplug@DP-3) &
+            fi
           fi
           last_colorspace="$curr_colorspace"
         fi
@@ -886,7 +894,7 @@ let
       if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
         ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
         wait "$vrr_pid" 2>/dev/null
-        ${set_vrr} "$vrr_mode"
+        ${set_vrr} "1"
       fi
     fi
   '';
@@ -936,6 +944,7 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       #cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       #cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
+      hyprctl dispatch workspace 999
       hyprctl keyword "monitorv2[$OUTPUT]:disabled" 0
       hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
         [[ "$m" != "$OUTPUT" ]] && hyprctl keyword "monitorv2[$m]:disabled" 1
@@ -951,17 +960,15 @@ let
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     fi
 
-    # "Warm up" CH7218 for 5 minutes to prevent VRR signal drop
-    (${novrr}/bin/novrr sleep 10) &
-
     # -steamos3 flag prevents DualSense input from passing through the overlay, but limits to 1080p with --xwayland-count 2 -- env STEAM_MULTIPLE_XWAYLANDS=1
     # Doesn't fix all games, and breaks FSR1
     # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
     #  Also seems to prevent AVIF HDR screenshots from saving...
-    sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
+    (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
+    (sleep 5 && systemctl start trigger-hotplug@DP-3) &
+    sleep 3 && env GSC_MODESET_HOTPLUG=1 env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
     # sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
-    (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
@@ -1058,6 +1065,40 @@ in
       ];
     };
   };
+
+  systemd.services."trigger-hotplug@" = {
+    description = "Trigger DRM hotplug on %i";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.writeShellScript "trigger-hotplug" ''
+        conn="$1"
+
+        for path in /sys/kernel/debug/dri/*/"$conn"/trigger_hotplug; do
+          if [ -e "$path" ]; then
+            echo 1 > "$path"
+            echo "Triggered hotplug via $path"
+            exit 0
+          fi
+        done
+
+        echo "No DRM connector named $conn found" >&2
+        exit 1
+      ''} %i";
+    };
+  };
+
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      // Allow user 'damino' to start ANY instance of trigger-hotplug@
+      if (
+          action.id == "org.freedesktop.systemd1.manage-units" &&
+          action.lookup("unit").startsWith("trigger-hotplug@") &&
+          subject.user == "damino"
+      ) {
+          return polkit.Result.YES;
+      }
+    });
+  '';
 
   environment = {
   	systemPackages = with pkgs; [
