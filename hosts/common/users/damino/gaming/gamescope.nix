@@ -601,6 +601,7 @@ let
 
           # Set peak brightness
           ${pkgs.gnused}/bin/sed -i "s/^ToneMapPeakNits=.*/ToneMapPeakNits=$adjusted_peak/" "$reshade_file"
+          ${pkgs.gnused}/bin/sed -i "s/^toneMapPeakNits=.*/toneMapPeakNits=$adjusted_peak/" "$reshade_file"
         fi
 
       fi
