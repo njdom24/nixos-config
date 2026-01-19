@@ -222,6 +222,7 @@
         stdenv.cc.cc.lib
         libkrb5
         keyutils
+        steamtinkerlaunch
         # Where gamescope-session looks for "Exit to Desktop" when -steamos3 is provided
         (writeShellScriptBin "steamos-session-select" ''
           /usr/bin/env steam -shutdown
@@ -242,6 +243,7 @@
 
       extraCompatPackages = with pkgs; [
         vulkan-loader
+        steamtinkerlaunch
       ];
     };
   };
