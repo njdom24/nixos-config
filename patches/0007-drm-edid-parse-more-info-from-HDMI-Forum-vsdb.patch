@@ -1,7 +1,7 @@
-From 4e9d8c06f1b66d28234edbdadcf9c514af80a7bf Mon Sep 17 00:00:00 2001
+From 09b5ff421d54f8778eb90faf9fdfbd4983b7f3e6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Tomasz=20Paku=C5=82a?= <tomasz.pakula.oficjalny@gmail.com>
-Date: Fri, 19 Dec 2025 11:51:35 +0100
-Subject: [PATCH v2 1/3] drm/edid: parse more info from HDMI Forum vsdb
+Date: Wed, 14 Jan 2026 20:28:05 +0100
+Subject: [PATCH 07/11] drm/edid: parse more info from HDMI Forum vsdb
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

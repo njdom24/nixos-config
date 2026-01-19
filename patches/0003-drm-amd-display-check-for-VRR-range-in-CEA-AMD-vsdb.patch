@@ -1,0 +1,45 @@
+From 1cb8abf2f657419bbb2a10eb84770cc9e0cfe18b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tomasz=20Paku=C5=82a?= <tomasz.pakula.oficjalny@gmail.com>
+Date: Wed, 14 Jan 2026 20:28:04 +0100
+Subject: [PATCH 03/11] drm/amd/display: check for VRR range in CEA AMD vsdb
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+For DP and eDP connections, check for VRR ranges provided in AMD vendor-
+specific data block if VRR range wasn't detected. Some monitors only
+expose GTF ranges (or others, without Range Limits Only flag). This
+breaks VRR even though they have explicit FreeSync support.
+
+Currently, if monitor ranges were missing, amdgpu only searched for AMD
+vsdb in DisplayID but many monitors have it in CEA, just like HDMI.
+
+Closes: https://gitlab.freedesktop.org/drm/amd/-/issues/3894
+Closes: https://gitlab.freedesktop.org/drm/amd/-/issues/4457
+Closes: https://gitlab.freedesktop.org/drm/amd/-/issues/4747
+Closes: https://gitlab.freedesktop.org/drm/amd/-/issues/4856
+Signed-off-by: Tomasz Pakuła <tomasz.pakula.oficjalny@gmail.com>
+---
+ drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+index e0e25820bd03..67670ce0ff6d 100644
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+@@ -13014,6 +13014,12 @@ void amdgpu_dm_update_freesync_caps(struct drm_connector *connector,
+ 
+ 	if (edid && (sink->sink_signal == SIGNAL_TYPE_DISPLAY_PORT ||
+ 		     sink->sink_signal == SIGNAL_TYPE_EDP)) {
++		/*
++		 * Many monitors expose AMD vsdb in CAE even for DP and their
++		 * monitor ranges do not contain Range Limits Only flag
++		 */
++		if (valid_vsdb_cea && is_monitor_range_invalid(connector))
++			monitor_range_from_vsdb(connector, &vsdb_info);
+ 
+ 		if (amdgpu_dm_connector->dc_link &&
+ 		    amdgpu_dm_connector->dc_link->dpcd_caps.allow_invalid_MSA_timing_param)
+-- 
+2.52.0
+

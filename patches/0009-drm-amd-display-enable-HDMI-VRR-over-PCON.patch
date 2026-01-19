@@ -1,0 +1,84 @@
+From 3a6375be79b1abf1a938c8c3f04a3549d230cf8b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tomasz=20Paku=C5=82a?= <tomasz.pakula.oficjalny@gmail.com>
+Date: Wed, 14 Jan 2026 20:28:05 +0100
+Subject: [PATCH 09/11] drm/amd/display: enable HDMI VRR over PCON
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This works the same as FreeSync over PCON just without sending FreeSync
+info packets (we're sending standard DisplayPort info packets) + reading
+the VRR range from the HDMI Forum vendor specific data block. PCONs take
+over HDMI VRR triggering.
+
+Prefer HDMI VRR over FreeSync to reduce VRR flickering on many TVs.
+FreeSync over HDMI seems to be a fallback solution and not a first-class
+citizen. This especially helps VMM7100.
+
+In case of VRRmin == 0, the selected video mode is the upper boundary.
+
+Tested with VMM7100 and CH7218 based adapters on multiple HDMI 2.1 and
+HDMI 2.0 devices. (Samsung S95B, LG C4, Sony Bravia 8, Dell AW3423DWF)
+
+Closes: https://gitlab.freedesktop.org/drm/amd/-/issues/4805
+
+Signed-off-by: Tomasz Pakuła <tomasz.pakula.oficjalny@gmail.com>
+Tested-by: Bernhard Berger <bernhard.berger@gmail.com>
+---
+ .../gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c | 25 ++++++++++++++-----
+ 1 file changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+index 06edfef79bdf..79f105a96e89 100644
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm.c
+@@ -12988,6 +12988,7 @@ void amdgpu_dm_update_freesync_caps(struct drm_connector *connector,
+ 	struct dc_sink *sink;
+ 	struct amdgpu_device *adev = drm_to_adev(connector->dev);
+ 	struct amdgpu_hdmi_vsdb_info vsdb_info = {0};
++	struct drm_hdmi_vrr_cap *hdmi_vrr;
+ 	const struct edid *edid;
+ 	bool freesync_capable = false;
+ 	bool valid_vsdb_cea = false;
+@@ -13023,6 +13024,7 @@ void amdgpu_dm_update_freesync_caps(struct drm_connector *connector,
+ 	edid = drm_edid_raw(drm_edid); // FIXME: Get rid of drm_edid_raw()
+ 	valid_vsdb_cea = parse_amd_vsdb_cea(amdgpu_dm_connector, edid, &vsdb_info) >= 0;
+ 	vsdb_freesync = valid_vsdb_cea && vsdb_info.freesync_supported;
++	hdmi_vrr = &connector->display_info.hdmi.vrr_cap;
+ 
+ 	/* Some eDP panels only have the refresh rate range info in DisplayID */
+ 	if (is_monitor_range_invalid(connector))
+@@ -13062,13 +13064,24 @@ void amdgpu_dm_update_freesync_caps(struct drm_connector *connector,
+ 	if (amdgpu_dm_connector->dc_link)
+ 		as_type = dm_get_adaptive_sync_support_type(amdgpu_dm_connector->dc_link);
+ 
+-	if (as_type == ADAPTIVE_SYNC_TYPE_PCON_IN_WHITELIST && vsdb_freesync) {
+-		amdgpu_dm_connector->pack_sdp_v1_3 = true;
+-		amdgpu_dm_connector->as_type = as_type;
+-		amdgpu_dm_connector->vsdb_info = vsdb_info;
++	if (as_type == ADAPTIVE_SYNC_TYPE_PCON_IN_WHITELIST) {
++		/* Prefer HDMI VRR over FreeSync */
++		if (hdmi_vrr->supported && hdmi_vrr->vrr_max > 0) {
++			amdgpu_dm_connector->pack_sdp_v1_3 = true;
++			amdgpu_dm_connector->as_type = as_type;
+ 
+-		monitor_range_from_vsdb(connector, &vsdb_info);
+-		freesync_capable = copy_range_to_amdgpu_connector(connector);
++			connector->display_info.monitor_range.min_vfreq = hdmi_vrr->vrr_min;
++			connector->display_info.monitor_range.max_vfreq = hdmi_vrr->vrr_max;
++			freesync_capable = copy_range_to_amdgpu_connector(connector);
++
++		} else if (vsdb_freesync) {
++			amdgpu_dm_connector->pack_sdp_v1_3 = true;
++			amdgpu_dm_connector->as_type = as_type;
++			amdgpu_dm_connector->vsdb_info = vsdb_info;
++
++			monitor_range_from_vsdb(connector, &vsdb_info);
++			freesync_capable = copy_range_to_amdgpu_connector(connector);
++		}
+ 	}
+ 
+ update:
+-- 
+2.52.0
+

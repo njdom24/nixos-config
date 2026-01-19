@@ -1,7 +1,7 @@
-From 941725c67e25021a4321cf21eed4a69048526b1e Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Tomasz=20Paku=C5=82a?= <forest10pl@gmail.com>
-Date: Tue, 9 Dec 2025 14:38:45 +0100
-Subject: [PATCH] amdgpu: Add CH7218 PCON to the VRR whitelist
+From 695ea32ec7432e79b9ca844b677ac5f3a9c2a730 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tomasz=20Paku=C5=82a?= <tomasz.pakula.oficjalny@gmail.com>
+Date: Wed, 14 Jan 2026 20:28:05 +0100
+Subject: [PATCH 06/11] drm/amd/display: Add CH7218 PCON to the VRR whitelist
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -10,6 +10,8 @@ Chrontel CH7218 found in Ugreen DP -> HDMI 2.1 adapter (model 85564)
 works perfectly with VRR after testing. VRR and FreeSync compatibility
 is explicitly advertised as a feature so it's addition is a formality.
 
+Closes: https://gitlab.freedesktop.org/drm/amd/-/issues/4773
+
 Signed-off-by: Tomasz Pakuła <tomasz.pakula.oficjalny@gmail.com>
 ---
  drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c | 1 +
@@ -17,7 +19,7 @@ Signed-off-by: Tomasz Pakuła <tomasz.pakula.oficjalny@gmail.com>
  2 files changed, 2 insertions(+)
 
 diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c
-index d0f770dd0a95..f01f30a245ad 100644
+index 0fe881d4157e..3db0ddffdc12 100644
 --- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c
 +++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c
 @@ -1374,6 +1374,7 @@ static bool dm_is_freesync_pcon_whitelist(const uint32_t branch_dev_id)
