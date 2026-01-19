@@ -744,10 +744,9 @@
                 echo "Already in HDR mode; reapplying."
               else
                 echo "Enabling HDR"
-                hyprctl keyword "monitorv2[$monitor]:cm" hdr
               fi
 
-              hyprctl keyword "monitorv2[$monitor]:bitdepth" 10
+              hyprctl --batch "keyword monitorv2[$monitor]:cm hdr ; keyword monitorv2[$monitor]:bitdepth 10"
               ;;
             off)
               if [ "$current_mode" = "srgb" ]; then
