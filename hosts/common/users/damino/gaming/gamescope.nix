@@ -768,6 +768,38 @@ let
       fi
     }
 
+    hdr_mod_enable() {
+      if [[ "$GSC_HDR_MOD" == "1" ]]; then
+        if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+          scanout=$(hyprctl getoption render:direct_scanout -j | jq -r '.int')
+          hyprctl keyword "render:direct_scanout" "0"
+        fi
+
+        busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 0.875
+        busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1.1
+
+        if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+          hyprctl keyword "render:direct_scanout" "$scanout"
+        fi
+      fi
+    }
+
+    hdr_mod_disable() {
+       if [[ "$GSC_HDR_MOD" == "1" ]]; then
+         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+           scanout=$(hyprctl getoption render:direct_scanout -j | jq -r '.int')
+           hyprctl keyword "render:direct_scanout" "0"
+         fi
+
+         busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1
+         busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1
+
+         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+           hyprctl keyword "render:direct_scanout" "$scanout"
+         fi
+       fi
+    }
+
     # Vars to help find screenshot dir
     USER_LOG="$HOME/.steam/steam/logs/connection_log.txt"
     STEAM_USERID=$(${pkgs.gnugrep}/bin/grep -Po '\[U:1:\K[0-9]+' "$USER_LOG" | tail -n1)
@@ -829,10 +861,8 @@ let
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hypr-toggle-hdr on
               fi
+              hdr_mod_enable
             fi
-          elif [[ "$GSC_HDR_MODESET" == "1" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-            # Bodge to fix bit depth reverting to 8 sometimes
-            hypr-toggle-hdr on
           fi
         elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
           if [[ "''${last_colorspace:-}" != "SDR" ]]; then
@@ -849,15 +879,13 @@ let
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hypr-toggle-hdr off
               fi
+              hdr_mod_disable
             fi
           fi
         fi
         if [[ "$curr_colorspace" != "$last_colorspace" ]]; then
           if [[ "$GSC_HDR_MODESET" == "1" ]]; then
             toggle_vrr
-            if [[ "$GSC_MODESET_HOTPLUG" == "1" ]]; then
-              (sleep 3 && systemctl start trigger-hotplug@DP-3) &
-            fi
           fi
           last_colorspace="$curr_colorspace"
         fi
@@ -869,6 +897,7 @@ let
             curr_colorspace="HDR"
             if command -v sway-toggle-hdr >/dev/null 2>&1; then
               sway-toggle-hdr on
+              hdr_mod_enable
             else
               focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
               swaymsg output $focused_display hdr on
@@ -876,6 +905,7 @@ let
           elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
             # Assuming cm_auto_hdr > 0, switching back to SDR is fine
             hypr-toggle-hdr off
+            hdr_mod_disable
           fi
 
           toggle_vrr
@@ -900,8 +930,18 @@ let
     fi
   '';
 
-  # Convenience script. Hacky, but seems to get VRR going stable too
-  gsc-tv =  pkgs.writeShellScriptBin "gsc-tv" ''
+  gsc-tv = let debandConfig = pkgs.writeText "deband.conf" ''
+    # Ref: https://github.com/DadSchoorse/vkBasalt/issues/225
+    effects = deband
+    depthCapture = off
+    enableOnLaunch = True
+    debandAvgdiff = 2.0
+    debandMaxdiff = 4.0
+    debandMiddiff = 3.0
+    debandRange = 20
+    debandIterations = 1
+  ''; in
+  pkgs.writeShellScriptBin "gsc-tv" ''
     pushd ~
     
     if pgrep -x steam >/dev/null; then
@@ -945,7 +985,6 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       #cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       #cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
-      hyprctl dispatch workspace 999
       hyprctl keyword "monitorv2[$OUTPUT]:disabled" 0
       hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
         [[ "$m" != "$OUTPUT" ]] && hyprctl keyword "monitorv2[$m]:disabled" 1
@@ -954,11 +993,29 @@ let
       hyprctl keyword "monitorv2[$OUTPUT]:scale" 1.5
       hyprctl keyword "monitorv2[$OUTPUT]:vrr" 1
       hyprctl keyword "monitorv2[$OUTPUT]:bitdepth" 10
+
+      # Workaround for HDMI HDR EOTF being broken
+      if [[ $OUTPUT == HDMI* ]]; then
+        # TODO: Pass the 1.15 as _GSC_GAMMA_MOD, _GSC_BRIGHTNESS_MOD to use only when in HDR
+        busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 0.875
+        busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1.1
+        #hyprctl keyword "monitorv2[$OUTPUT]:bitdepth" 8
+        #export ENABLE_VKBASALT=1
+        #export VKBASALT_CONFIG_FILE="${debandConfig}"
+        export GSC_HDR_MOD=1
+      fi
+
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
+
+      # Workaround for 4:2:0 chroma (on TCL TVs?)
+      if (( WIDTH * HEIGHT >= 3840 * 2160 && REFRESH > 60 )) \
+         && [[ $OUTPUT == HDMI* ]]; then
+        export GSC_HDR_MOD=1
+      fi
     fi
 
     # -steamos3 flag prevents DualSense input from passing through the overlay, but limits to 1080p with --xwayland-count 2 -- env STEAM_MULTIPLE_XWAYLANDS=1
@@ -966,8 +1023,7 @@ let
     # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
     #  Also seems to prevent AVIF HDR screenshots from saving...
     (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
-    (sleep 5 && systemctl start trigger-hotplug@DP-3) &
-    sleep 3 && env GSC_MODESET_HOTPLUG=1 env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
+    sleep 3 && env GSC_HDR_MODESET=1 GSC_HDR_MOD="$GSC_HDR_MOD" ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- env ENABLE_VKBASALT="$ENABLE_VKBASALT" steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
     # sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
 
@@ -975,6 +1031,10 @@ let
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.DP-3.disable # Restore monitor setup
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       #mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
+      if [[ $OUTPUT == HDMI* ]]; then
+        busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1
+        busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1
+      fi
       hyprctl reload
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
@@ -1066,40 +1126,6 @@ in
       ];
     };
   };
-
-  systemd.services."trigger-hotplug@" = {
-    description = "Trigger DRM hotplug on %i";
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.writeShellScript "trigger-hotplug" ''
-        conn="$1"
-
-        for path in /sys/kernel/debug/dri/*/"$conn"/trigger_hotplug; do
-          if [ -e "$path" ]; then
-            echo 1 > "$path"
-            echo "Triggered hotplug via $path"
-            exit 0
-          fi
-        done
-
-        echo "No DRM connector named $conn found" >&2
-        exit 1
-      ''} %i";
-    };
-  };
-
-  security.polkit.extraConfig = ''
-    polkit.addRule(function(action, subject) {
-      // Allow user 'damino' to start ANY instance of trigger-hotplug@
-      if (
-          action.id == "org.freedesktop.systemd1.manage-units" &&
-          action.lookup("unit").startsWith("trigger-hotplug@") &&
-          subject.user == "damino"
-      ) {
-          return polkit.Result.YES;
-      }
-    });
-  '';
 
   environment = {
   	systemPackages = with pkgs; [
