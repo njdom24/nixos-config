@@ -40,7 +40,7 @@
 
         ${pkgs.coreutils}/bin/printf "%s\n" \
           "monitorv2 {" \
-          "	output = HDMI-A-1" \
+          "	output = DP-3" \
           "	mode = 1920x1080@60" \
           "	position = 0x0" \
           "	scale = 1" \
@@ -54,7 +54,7 @@
           "" \
           "monitor = DP-1, disable" \
           "monitor = DP-2, disable" \
-          "monitor = DP-3, disable" \
+          "monitor = HDMI-A-1, disable" \
           > "$tmpfile"
 
         mv -f "$tmpfile" ~/.config/hypr/displays.conf
@@ -554,6 +554,7 @@
         #"timeout 10 kanshi &"
         # Waybar freezes on reload on Hyprland sometimes, so just restart
         "kill `pgrep waybar`; sleep 1 && waybar &"
+        #"${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs"
         "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
       ];
     };
@@ -746,7 +747,8 @@
                 echo "Enabling HDR"
               fi
 
-              hyprctl --batch "keyword monitorv2[$monitor]:cm hdr ; keyword monitorv2[$monitor]:bitdepth 10"
+              hyprctl keyword "monitorv2[$monitor]:cm" hdr
+              #hyprctl --batch "keyword monitorv2[$monitor]:cm hdr ; keyword monitorv2[$monitor]:bitdepth 10"
               ;;
             off)
               if [ "$current_mode" = "srgb" ]; then

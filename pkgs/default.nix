@@ -1,6 +1,7 @@
 # Custom packages, that can be defined similarly to ones from nixpkgs
 # You can build them using 'nix build .#example'
 { pkgs, inputs, ...}: {
+  wlr-hdr-calibrator = inputs.wlr-hdr-calibrator.packages.${pkgs.stdenv.hostPlatform.system}.default;
   kwin-effects-geometry-change = pkgs.callPackage ./kwin-effects-geometry-change.nix { };
   virtual-desktops-only-on-primary = pkgs.callPackage ./kwin-virtual-desktops-only-on-primary.nix { };
   plasma-toggle-hdr = pkgs.writeShellScriptBin "plasma-toggle-hdr" ''

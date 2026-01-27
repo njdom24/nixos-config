@@ -100,7 +100,7 @@
                 export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
               fi
 
-              DUMMY="HDMI-A-1"
+              DUMMY="DP-3"
               existing_dummy=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$DUMMY\")) | .name")
               # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
               existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
@@ -157,7 +157,7 @@
               echo "→ Running KDE/KWin-specific logic"
 
               # Assume dummy display used for headless
-              DUMMY="HDMI-A-1"
+              DUMMY="DP-3"
 
               # Configure display to match client
               if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
@@ -324,7 +324,7 @@
             echo "→ Running KDE/KWin-specific logic"
 
             # Assume dummy display used for headless
-            DUMMY="HDMI-A-1"
+            DUMMY="DP-3"
 
             # Get all connected and enabled outputs
             outputs=($(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '

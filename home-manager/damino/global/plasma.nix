@@ -408,7 +408,7 @@
           ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
 
           # Assume dummy display used for headless
-          DUMMY="HDMI-A-1"
+          DUMMY="DP-3"
           
           ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output."$DUMMY".enable
           

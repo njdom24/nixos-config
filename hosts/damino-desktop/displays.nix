@@ -6,19 +6,16 @@
   hardware = {
     # https://github.com/NixOS/nixpkgs/pull/279789#issuecomment-2148560802
     display = {
-      outputs."HDMI-A-1".edid = "edid_q800t_xiaomi_lumi.bin"; # For "headless" streaming through unused DP port on GPU. 2024 Odyssey G8 OLED (4k240) w/ Xiaomi G Pro 27i's luminance metadata
-      outputs."HDMI-A-1".mode = "e";
-      outputs."DP-3".edid = "edid_qm851g_hdr_ugreen_32frl_dsc.bin"; # Add VRR range and HDR metadata for Chrontel CH7218 adapter
+      outputs."DP-3".edid = "edid_q800t_xiaomi_lumi.bin"; # For "headless" streaming through unused DP port on GPU. 2024 Odyssey G8 OLED (4k240) w/ Xiaomi G Pro 27i's luminance metadata
       outputs."DP-3".mode = "e";
+      outputs."HDMI-A-1".mode = "e";
+      outputs."HDMI-A-1".edid = "edid_qm851g_hdr_ugreen_32frl.bin"; # Add VRR range and HDR metadata for Chrontel CH7218 adapter
       
       edid.packages = [
         (pkgs.runCommand "custom-edid" {} ''
           mkdir -p $out/lib/firmware/edid
           cp ${./edid_q800t_xiaomi_lumi.bin} $out/lib/firmware/edid/edid_q800t_xiaomi_lumi.bin
-          cp ${./edid_qm851g_ugreen_hdr_vrr.bin} $out/lib/firmware/edid/edid_qm851g_ugreen_hdr_vrr.bin
-          cp ${./edid_qm851g_ugreen_hdr_24vrr.bin} $out/lib/firmware/edid/edid_qm851g_ugreen_hdr_24vrr.bin
           cp ${./edid_qm851g_hdr_ugreen_32frl.bin} $out/lib/firmware/edid/edid_qm851g_hdr_ugreen_32frl.bin
-          cp ${./edid_qm851g_hdr_ugreen_32frl_dsc.bin} $out/lib/firmware/edid/edid_qm851g_hdr_ugreen_32frl_dsc.bin
         '')
       ];
     };

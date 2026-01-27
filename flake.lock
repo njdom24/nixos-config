@@ -733,6 +733,7 @@
         "nixpkgs-stable": "nixpkgs-stable",
         "plasma-manager": "plasma-manager",
         "sway-git": "sway-git",
+        "wlr-hdr-calibrator": "wlr-hdr-calibrator",
         "wlroots-git": "wlroots-git",
         "xwayland-satellite": "xwayland-satellite"
       }
@@ -834,6 +835,43 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "wlr-hdr-calibrator": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "wlr-protocols": "wlr-protocols"
+      },
+      "locked": {
+        "lastModified": 1769390117,
+        "narHash": "sha256-kmd+7tvXBuRmepAMxW7MmKVSCM6cas+l2y/lJI2exg4=",
+        "owner": "njdom24",
+        "repo": "wlr-hdr-calibrator",
+        "rev": "f1c012206f3e196278152fafbcbc7060a199faf0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "njdom24",
+        "repo": "wlr-hdr-calibrator",
+        "type": "github"
+      }
+    },
+    "wlr-protocols": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1635761232,
+        "narHash": "sha256-XdMNURKA/9yd3rPY3L8By+uxKqDZptNi28FoOFHL3dY=",
+        "owner": "swaywm",
+        "repo": "wlr-protocols",
+        "rev": "b010a03648b88d143236de193bddbfea0c08bc84",
+        "type": "github"
+      },
+      "original": {
+        "owner": "swaywm",
+        "repo": "wlr-protocols",
         "type": "github"
       }
     },

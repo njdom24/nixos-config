@@ -222,17 +222,12 @@
             # Gammastep causes stutters when gaming. Kill it to take over
     	    kill -9 $(${pkgs.procps}/bin/pgrep gammastep) 2> /dev/null
 
-    	    if ! ${pkgs.procps}/bin/pgrep -f wl-gammarelay-rs >/dev/null; then
-    	      ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs &
-    	      sleep 0.5
-    	    fi
-
     	    case "$1" in
     	      toggle)
     	        if ! ${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
     	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6500
     	        else
-    	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6000 &
+    	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6000
     	        fi
     	        sleep 0.1 && pkill -RTMIN+10 waybar
     	        ;;
