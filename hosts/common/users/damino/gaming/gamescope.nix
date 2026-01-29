@@ -758,15 +758,8 @@ let
   gsc-watcher = let
     eotfConfig = pkgs.writeText "hdmi_lut" ''
       0 0
-      100 50
-      160 75
-      400 230
-      700 270
-      800 400
-      1000 450
-      2000 400
-      3000 500
-      10000 10000
+      100 33
+      10000 3333
     '';
   in pkgs.writeShellScriptBin "gsc-watcher" ''
     vrr_pid=""
