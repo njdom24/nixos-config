@@ -112,10 +112,11 @@
   	  latencyflex
   	];
 
-  	variables = {
-  	  "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
-  	  #"MANGOHUD" = "1";
-  	};
+    variables = {
+      "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS" = "0";
+      #"MANGOHUD" = "1";
+      "ENABLE_LAYER_MESA_ANTI_LAG" = "1"; # Auto-disabled with FSR4_UPGRADE=1
+    };
   };
 
   boot = {
