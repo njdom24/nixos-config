@@ -282,6 +282,7 @@
         cm_auto_hdr = 1;
         cm_sdr_eotf = 2;
         non_shader_cm = 2;
+        send_content_type = 0;
       };
 
       debug = {
