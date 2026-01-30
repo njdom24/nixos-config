@@ -57,6 +57,7 @@
 	          #"sh -c '${pkgs.sway}/bin/swaymsg output \"*\" render_bit_depth 10'" # Breaks xdg-desktop-portal-wlr/pipewire capture
 	          "${pkgs.xorg.xrandr}/bin/xrandr --output DP-1 --primary"
 	          "${pkgs.sway}/bin/swaymsg output HDMI-A-1 disable"
+	          "${pkgs.sway}/bin/swaymsg output DP-3 disable"
 	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
 	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
 	        ];
