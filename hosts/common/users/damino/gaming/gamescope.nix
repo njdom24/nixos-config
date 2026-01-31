@@ -766,7 +766,7 @@ let
     toggle_vrr() {
       # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
       #echo "gsc: VRR mode: $vrr_mode"
-      if [[ "$GSC_MODESET_NOVRR" != "1" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+      if [[ "$GSC_MODESET_NOVRR" == "1" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
         if ! ${pkgs.procps}/bin/pgrep -x "novrr" >/dev/null; then
           (${set_vrr} 0 && sleep 10 && ${set_vrr} "1") &
           vrr_pid=$!
