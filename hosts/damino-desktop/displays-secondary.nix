@@ -8,9 +8,9 @@
     display = {
       outputs."DP-1".edid = "edid_aoc_Q27G40XMN_72vrr.bin"; # Increase VRR range to 70 to work around flicker
       outputs."DP-1".mode = "e";
-      outputs."HDMI-A-1".edid = "edid_q800t_xiaomi_lumi.bin";
+      outputs."HDMI-A-1".edid = "edid_55r635.bin"; # Add VRR range (48-120), EDID MaxFALL 686 MaxCLL 1114 MinCLL 0.1
       outputs."HDMI-A-1".mode = "e";
-      outputs."DP-3".edid = "edid_55r635.bin"; # Add VRR range (48-120), EDID MaxFALL 686 MaxCLL 1114 MinCLL 0.1
+      outputs."DP-3".edid = "edid_q800t_xiaomi_lumi.bin";
       outputs."DP-3".mode = "e";
       edid.packages = [
         (pkgs.runCommand "custom-edid" {} ''
