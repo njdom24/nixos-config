@@ -90,6 +90,9 @@
             done
           fi
 
+          # Assume dummy display used for headless
+          DUMMY="DP-3"
+
           case "$XDG_CURRENT_DESKTOP" in
             sway)
               echo "→ Running sway-specific logic"
@@ -100,7 +103,6 @@
                 export SWAYSOCK=/run/user/$(${pkgs.coreutils}/bin/id -u)/sway-ipc.$(${pkgs.coreutils}/bin/id -u).$(${pkgs.procps}/bin/pgrep -x sway).sock
               fi
 
-              DUMMY="DP-3"
               existing_dummy=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$DUMMY\")) | .name")
               # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
               existing_headless=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
@@ -155,9 +157,6 @@
               ;;
             KDE)
               echo "→ Running KDE/KWin-specific logic"
-
-              # Assume dummy display used for headless
-              DUMMY="DP-3"
 
               # Configure display to match client
               if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
