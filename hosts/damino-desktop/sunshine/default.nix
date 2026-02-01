@@ -230,6 +230,7 @@
               ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_min_luminance" 0.005
               ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:min_luminance" 0
               ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:cm" srgb
+              ${pkgs.hyprland}/bin/hyprctl keyword render:cm_auto_hdr 1
 
               if [[ "$1" == "hdr" ]]; then
                 echo "Enabling HDR"
@@ -385,6 +386,7 @@
           ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service 2> /dev/null || true
           ${pkgs.systemd}/bin/systemctl --user reset-failed
 
+          sleep 1
           ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET=1 gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
         fi
       '';

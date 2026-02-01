@@ -24,40 +24,11 @@
 
         sleep 1
         # Enable headless display if remote
-        # Hyprctl is unreliable and extremely buggy for disabling
-        #${pkgs.hyprland}/bin/hyprctl keyword monitor HDMI-A-1, 1920x1080@60,0x0,1
-        #sleep 1
-        #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-1, disable
-        #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-2, disable
-        #${pkgs.hyprland}/bin/hyprctl keyword monitor DP-3, disable
-
-        if [[ ! -f "$display_cfg".gsc ]]; then
-          # Make backup
-          cp -f "$display_cfg" "$display_cfg".gsc
-        fi
-
-        tmpfile=$(${pkgs.mktemp}/bin/mktemp)
-
-        ${pkgs.coreutils}/bin/printf "%s\n" \
-          "monitorv2 {" \
-          "	output = DP-3" \
-          "	mode = 1920x1080@60" \
-          "	position = 0x0" \
-          "	scale = 1" \
-          "	transform = 0" \
-          "	vrr = 0" \
-          "	cm = srgb" \
-          "	supports_wide_color = 0" \
-          "	supports_hdr = 0" \
-          "	bitdepth = 8" \
-          "}" \
-          "" \
-          "monitor = DP-1, disable" \
-          "monitor = DP-2, disable" \
-          "monitor = HDMI-A-1, disable" \
-          > "$tmpfile"
-
-        mv -f "$tmpfile" ~/.config/hypr/displays.conf
+        hyprctl keyword "monitorv2[DP-3]:disabled" 0
+        sleep 1
+        hyprctl keyword "monitorv2[DP-1]:disabled" 1
+        hyprctl keyword "monitorv2[DP-2]:disabled" 1
+        hyprctl keyword "monitorv2[HDMI-A-1]:disabled" 1
 
         sleep 1 && ${pkgs.hyprland}/bin/hyprctl reload
         sleep 3 && ${pkgs.systemd}/bin/systemctl --user restart sunshine
@@ -67,10 +38,6 @@
 
       ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
 
-      # Restore desktop config if not remote
-      if [[ -f "$display_cfg".gsc ]]; then
-        mv -f "$display_cfg".gsc "$display_cfg"
-      fi
       ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
       ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 4 silent] steam"
       sleep 1 && ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
