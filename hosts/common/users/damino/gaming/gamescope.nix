@@ -782,7 +782,11 @@ let
           sleep 1
         fi
 
-        ${pkgs.wlr-hdr-calibrator}/bin/wlr-hdr-calibrator ${eotfConfig} &
+        if [[ -f "$GSC_LUT" ]]; then
+          ${pkgs.wlr-hdr-calibrator}/bin/wlr-hdr-calibrator "$GSC_LUT" &
+        else
+          ${pkgs.wlr-hdr-calibrator}/bin/wlr-hdr-calibrator ${eotfConfig} &
+        fi
         sleep 1
 
         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
@@ -1003,7 +1007,7 @@ let
       hyprctl keyword "monitorv2[$OUTPUT]:bitdepth" 10
 
       # Workaround for HDMI HDR EOTF being broken
-      if [[ $OUTPUT == HDMI* ]]; then
+      if [[ $OUTPUT == HDMI* ]] || [[ -f "$GSC_LUT" ]]; then
         kill `pgrep wl-gammarelay` 2> /dev/null || true
         export GSC_HDR_MOD=1
 
@@ -1039,7 +1043,7 @@ let
     #  Also seems to prevent AVIF HDR screenshots from saving...
     (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
     sleep 3 && env GSC_HDR_MODESET=1 GSC_HDR_MOD="$GSC_HDR_MOD" GSC_MODESET_NOVRR=0 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- env ENABLE_VKBASALT="$ENABLE_VKBASALT" steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
-    # sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
+    # sleep 3 && env GSC_HDR_MODESET=1 GSC_LUT="$GSC_LUT" ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
