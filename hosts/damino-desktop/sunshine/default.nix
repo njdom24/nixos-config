@@ -387,7 +387,7 @@
           ${pkgs.systemd}/bin/systemctl --user reset-failed
 
           sleep 1
-          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET=1 gsc-watcher -e -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
+          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET=1 gsc-watcher -e -- env ENABLE_LAYER_MESA_ANTI_LAG=0 LFX=0 steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
         fi
       '';
       in
