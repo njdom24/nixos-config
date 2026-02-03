@@ -43,6 +43,22 @@ let
   set_vrr = pkgs.writeShellScript "set_vrr.sh" ''
     vrr_mode="$1"
 
+    # Hyprland workaround (resets bit depth to 8 on VRR change)
+    get_bitdepth_from_format() {
+      local fmt="$1"
+      case "$fmt" in
+        *8888*)
+          echo 8
+          ;;
+        *101010*)
+          echo 10
+          ;;
+        *)
+          echo 10
+          ;;
+      esac
+    }
+
     # Account for nested case
     desktop="$XDG_CURRENT_DESKTOP"
     display="$DISPLAY"
@@ -58,13 +74,16 @@ let
 
     if [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       monitor=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
+      mon_json=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq --arg m "$monitor" '.[] | select(.name==$m)')
+      fmt=$(echo "$mon_json" | ${pkgs.jq}/bin/jq -r '.currentFormat')
+      bitdepth=$(get_bitdepth_from_format "$fmt")
+
       LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
-      LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
-      LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
       (
         sleep 1
         LD_LIBRARY_PATH="" hyprctl keyword "monitorv2[$monitor]:vrr" "$vrr_mode"
         LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+        LD_LIBRARY_PATH="" hyprctl keyword monitorv2["$monitor"]:bitdepth "$bitdepth"
         LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
       ) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
