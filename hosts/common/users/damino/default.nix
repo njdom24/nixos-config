@@ -58,7 +58,6 @@ in
       rclone
       handbrake
       firefox
-      vdhcoapp
       chromium
       kdePackages.kate
       kitty

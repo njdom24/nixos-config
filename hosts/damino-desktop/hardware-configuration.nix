@@ -24,54 +24,10 @@ in
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelPatches = [
-    {
-      name = "enable-adapter-freesync-1";
-      patch = ../../patches/0001-drm-amd-display-return-if-DisplayID-not-found-in-par.patch;
-    }
-    {
-      name = "enable-adapter-freesync-2";
-      patch = ../../patches/0002-drm-amd-display-clean-up-amdgpu_dm_update_freesync_c.patch;
-    }
-    {
-      name = "enable-adapter-freesync-3";
-      patch = ../../patches/0003-drm-amd-display-check-for-VRR-range-in-CEA-AMD-vsdb.patch;
-    }
-    {
-      name = "enable-adapter-freesync-4";
-      patch = ../../patches/0004-drm-amd-display-Use-bigger-VRR-range-if-found-in-AMD.patch;
-    }
-    {
-      name = "enable-adapter-freesync-5";
-      patch = ../../patches/0005-drm-amd-display-Add-PCON-VRR-whitelist-override.patch;
-    }
-    {
-      name = "enable-adapter-freesync-6";
-      patch = ../../patches/0006-drm-amd-display-Add-CH7218-PCON-to-the-VRR-whitelist.patch;
-    }
-    {
-      name = "enable-adapter-freesync-7";
-      patch = ../../patches/0007-drm-edid-parse-more-info-from-HDMI-Forum-vsdb.patch;
-    }
-    {
-      name = "enable-adapter-freesync-8";
-      patch = ../../patches/0008-drm-amd-display-rename-PCON-adaptive-sync-types.patch;
-    }
-    {
-      name = "enable-adapter-freesync-9";
-      patch = ../../patches/0009-drm-amd-display-enable-HDMI-VRR-over-PCON.patch;
-    }
-    {
-      name = "enable-adapter-freesync-10";
-      patch = ../../patches/0010-drm-amd-display-try-supporting-HDMI-VRRmax-0.patch;
-    }
-    {
-      name = "enable-adapter-freesync-11";
-      patch = ../../patches/0011-drm-amd-display-HDMI-ALLM-in-HDMI-Forum-vsif-support.patch;
-    }
-    {
-      name = "bump-dp-hdmi-clocks";
-      patch = ../../patches/0012-bump-dp-hdmi-clocks.patch;
-    }
+    #{
+    #  name = "enable-adapter-freesync-1";
+    #  patch = ../../patches/0001-drm-amd-display-return-if-DisplayID-not-found-in-par.patch;
+    #}
   ];
 
   fileSystems."/" =

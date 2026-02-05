@@ -42,9 +42,7 @@ in {
       buildInputs = (old.buildInputs or []) ++ [(
         prev.wlroots_0_19.overrideAttrs (old: let
           existing = old.patches or [];
-          newPatches = [
-            ../patches/wlroots-no-srgb-eotf.patch
-          ];
+          newPatches = [];
         in {
           src = inputs.wlroots-git;
           patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
@@ -56,7 +54,7 @@ in {
       patches = (old.patches or []) ++ [
         (prev.fetchpatch {
           url = "https://patch-diff.githubusercontent.com/raw/hyprwm/Hyprland/pull/12965.patch";
-          sha256 = "sha256-f1vzWKIz8dFX3YnwLT4PDkwlOZiWVEQOgBXRibzuMPc=";
+          sha256 = "sha256-ehQxPn5JUVP8WRt08bPevV2u0qCNWvKZJWzlj9upUpg=";
         })
       ];
     });
