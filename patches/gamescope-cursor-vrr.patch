@@ -1,0 +1,22 @@
+diff --git a/src/wlserver.cpp b/src/wlserver.cpp
+index 1631ca7..cd838cf 100644
+--- a/src/wlserver.cpp
++++ b/src/wlserver.cpp
+@@ -2417,7 +2417,7 @@ void wlserver_oncursorevent()
+ 
+ 	if ( !wlserver.bCursorHidden && wlserver.bCursorHasImage )
+ 	{
+-		hasRepaint = true;
++		// hasRepaint = true;
+ 	}
+ }
+ 
+@@ -2490,7 +2490,7 @@ void wlserver_mousehide()
+ 	if ( wlserver.bCursorHidden != true )
+ 	{
+ 		wlserver.bCursorHidden = true;
+-		hasRepaint = true;
++		// hasRepaint = true;
+ 	}
+ }
+ 
