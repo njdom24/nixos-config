@@ -728,8 +728,8 @@ let
     fi
 
     if [[ "$height" -gt 1440 ]]; then
-      extra_flags+=("--cursor-scale-height")
-      extra_flags+=("1440")
+      # "''$()"
+      extra_flags=("--cursor-scale-height" "1440" "''${extra_flags[@]}")
     fi
 
     # --xwayland-count 2 Causes a limit of 1080p with -steamos3
@@ -777,8 +777,8 @@ let
   gsc-watcher = let
     eotfConfig = pkgs.writeText "hdmi_lut" ''
       0 0
-      100 33
-      10000 3333
+      1000 130
+      10000 2333
     '';
   in pkgs.writeShellScriptBin "gsc-watcher" ''
     vrr_pid=""
