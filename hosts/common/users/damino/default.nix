@@ -504,6 +504,7 @@ in
  	gnome.gnome-keyring.enable = true;
  	gvfs.enable = true;
  	fstrim.enable = true;
+    flatpak.enable = true;
   };
 
   security = {
