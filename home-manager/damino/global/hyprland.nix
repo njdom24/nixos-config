@@ -211,6 +211,9 @@
         "match:class ^(steam)$, workspace 4 silent"
 
         "match:class ^()$ match:title ^()$ no_blur"
+
+        "match:class ^(ffxiv_dx11.exe)$, content none"
+        "match:initial_title ^(XIVLauncher-RB).*$, content none"
       ];
 
       layerrule = [
