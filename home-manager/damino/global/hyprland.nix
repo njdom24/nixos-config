@@ -212,8 +212,8 @@
 
         "match:class ^()$ match:title ^()$ no_blur"
 
-        "match:class ^(ffxiv_dx11.exe)$, content none"
-        "match:initial_title ^(XIVLauncher-RB).*$, content none"
+        #"match:class ^(ffxiv_dx11.exe)$, content none"
+        #"match:initial_title ^(XIVLauncher-RB).*$, content none"
       ];
 
       layerrule = [
@@ -292,7 +292,7 @@
         # https://github.com/hyprwm/Hyprland/discussions/7386
         no_break_fs_vrr = 2; # 0 ironically works better for mouselook games, but requires HW cursor not to spike FPS
         no_hardware_cursors = 0;
-        min_refresh_rate = 80; # 48 is technically OK, but causes stutters (even when set to 72)
+        min_refresh_rate = 48;
       };
 
       device = [
