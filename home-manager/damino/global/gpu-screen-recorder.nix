@@ -183,7 +183,7 @@ in {
               ;;
             *)
               # Fallback to xrandr for other desktops or if other tools are missing
-              monitors=$(${pkgs.xorg.xrandr}/bin/xrandr --query 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/ {print $1 ":unknown"}' | ${pkgs.coreutils}/bin/sort)
+              monitors=$(${pkgs.xrandr}/bin/xrandr --query 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/ {print $1 ":unknown"}' | ${pkgs.coreutils}/bin/sort)
               ;;
           esac
 

@@ -153,12 +153,12 @@ let
       echo "$width $height $refresh"
       
     # XWayland / X11 fallback (nested gamescope)
-    elif ${pkgs.xorg.xrandr}/bin/xrandr >/dev/null 2>&1; then
+    elif ${pkgs.xrandr}/bin/xrandr >/dev/null 2>&1; then
       # Get primary or first
-      primary=$(${pkgs.xorg.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk '/ connected/ {if(/ primary /){print $1;exit}else if(!f)f=$1} END{print f}')
+      primary=$(${pkgs.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk '/ connected/ {if(/ primary /){print $1;exit}else if(!f)f=$1} END{print f}')
 
       read resolution refresh_raw < <(
-        ${pkgs.xorg.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk -v primary="$primary" '
+        ${pkgs.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk -v primary="$primary" '
           $1 == primary {in_primary=1; next}
           in_primary && /\*/ {
             print $1, $2

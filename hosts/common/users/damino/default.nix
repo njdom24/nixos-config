@@ -99,7 +99,7 @@ in
 	  kdePackages.kdenlive
 	  shotcut
 	  video-trimmer
-	  xorg.xeyes
+	  xeyes
 	  corefonts
 	  vista-fonts
 	  vscode

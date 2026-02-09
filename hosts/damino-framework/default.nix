@@ -59,7 +59,6 @@
   };
 
   # Enable the X11 windowing system.
-  # ''$(${pkgs.xorg.xrandr}/bin/xrandr --current | grep 'eDP-[0-1] connected' | awk '{print ''$1;}') > /tmp/wha.txt
   services = {
     xserver = {
    	  enable = true;
@@ -71,8 +70,8 @@
       };
       # Only show login screen on external monitor when it's connected
       displayManager.setupCommands = ''
-        if [ "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep '[0-9] connected' | ${pkgs.coreutils}/bin/wc -l)" -gt 1 ]; then
-    	${pkgs.xorg.xrandr}/bin/xrandr --output "$(${pkgs.xorg.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'eDP-[0-9] connected' | ${pkgs.gawk}/bin/awk '{print $1;}')" --off
+        if [ "$(${pkgs.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep '[0-9] connected' | ${pkgs.coreutils}/bin/wc -l)" -gt 1 ]; then
+    	${pkgs.xrandr}/bin/xrandr --output "$(${pkgs.xrandr}/bin/xrandr --current | ${pkgs.gnugrep}/bin/grep 'eDP-[0-9] connected' | ${pkgs.gawk}/bin/awk '{print $1;}')" --off
     	fi
       '';
     };

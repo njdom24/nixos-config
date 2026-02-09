@@ -655,7 +655,7 @@
 	        exec ${pkgs.xwayland}/bin/Xwayland "$@"
 	      else
 	        # Try to force 1x scaling
-	        swaymsg exec '${pkgs.xwayland-satellite}/bin/xwayland-satellite; sleep 1; ${pkgs.xorg.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"'
+	        swaymsg exec '${pkgs.xwayland-satellite}/bin/xwayland-satellite; sleep 1; ${pkgs.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"'
 	      fi
 	    '';
 	    in ''

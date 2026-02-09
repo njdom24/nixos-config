@@ -191,7 +191,7 @@
                   sleep 1
                   echo "Attempting to start Steam on XWayland-Satellite"
                   export DISPLAY=:1
-                  ${pkgs.xorg.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"
+                  ${pkgs.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"
                 fi
               fi
               # Needed until https://github.com/emersion/xdg-desktop-portal-wlr/issues/278
@@ -212,10 +212,10 @@
       };
 
       extraPackages = with pkgs; [
-        xorg.libXcursor
-        xorg.libXi
-        xorg.libXinerama
-        xorg.libXScrnSaver
+        libxcursor
+        libxi
+        libxinerama
+        libxscrnsaver
         libpng
         libpulseaudio
         libvorbis

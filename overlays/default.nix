@@ -53,10 +53,6 @@ in {
 
     hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
       patches = (old.patches or []) ++ [
-        (prev.fetchpatch {
-          url = "https://patch-diff.githubusercontent.com/raw/hyprwm/Hyprland/pull/12965.patch";
-          sha256 = "sha256-ehQxPn5JUVP8WRt08bPevV2u0qCNWvKZJWzlj9upUpg=";
-        })
         ../patches/hypr_scrgb_no_ds.patch
       ];
     });
