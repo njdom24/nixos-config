@@ -38,7 +38,10 @@ in {
     });
 
     # sway pinned to PR #8922 state
-    sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: {
+    sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: let
+      existing = old.patches or [];
+      newPatches = [];
+    in {
       src = inputs.sway-git;
       buildInputs = (old.buildInputs or []) ++ [(
         prev.wlroots_0_19.overrideAttrs (old: let
@@ -49,11 +52,11 @@ in {
           patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
         })
       )];
+      patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
     hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
       patches = (old.patches or []) ++ [
-        ../patches/hypr_scrgb_no_ds.patch
       ];
     });
     xdg-desktop-portal-hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
