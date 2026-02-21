@@ -45,28 +45,58 @@
     # Bodge to work around gamescope cursor grab not working on games with launchers
     gamescope-cursor-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
       SOCK="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
-      
+
+      declare -A gamescopes
+      direct_scanout=$(
+        ${pkgs.hyprland}/bin/hyprctl getoption render:direct_scanout -j \
+        | ${pkgs.jq}/bin/jq -r '.int'
+      )
+
       ${pkgs.socat}/bin/socat -U - UNIX-CONNECT:"$SOCK" | while read -r line; do
-        if [[ "$line" =~ ^openwindow.*gamescope ]] || [[ "$line" =~ ^openwindow.*gamescope-wrapped ]]; then
-          # wait a moment to ensure window is mapped
-          sleep 0.1
-          
-          # Toggle focus
-          # Causes fullscreen exit -- needs reapply
+        case "$line" in
 
-          pre_fullscreen=$(hyprctl -j clients \
-            | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
-          
-          hyprctl dispatch focuscurrentorlast; hyprctl dispatch focuscurrentorlast
+          openwindow*)
+            IFS=',' read -r addr workspace class title <<< "''${line#openwindow>>}"
 
-          post_fullscreen=$(hyprctl -j clients \
-            | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
+            if [[ "$class" == "gamescope" || "$class" == "gamescope-wrapped" ]]; then
+              gamescopes["$addr"]=1
 
-          if [[ "$pre_fullscreen" -gt 0 && "$post_fullscreen" -eq 0 ]]; then
-            hyprctl dispatch fullscreen
-          fi
+              # Disable DS when Gamescope is active (work around flicker bug)
+              if [[ ''${#gamescopes[@]} -eq 1 ]]; then
+                ${pkgs.hyprland}/bin/hyprctl keyword "render:direct_scanout" "0"
+              fi
 
-        fi
+              # Unfocus, refocus to fix stuck cursor
+              sleep 0.1
+
+              pre_fullscreen=$(hyprctl -j clients \
+                | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
+
+              ${pkgs.hyprland}/bin/hyprctl dispatch focuscurrentorlast
+              ${pkgs.hyprland}/bin/hyprctl dispatch focuscurrentorlast
+
+              post_fullscreen=$(hyprctl -j clients \
+                | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
+
+              if [[ "$pre_fullscreen" -gt 0 && "$post_fullscreen" -eq 0 ]]; then
+                hyprctl dispatch fullscreen
+              fi
+            fi
+            ;;
+
+          closewindow*)
+            addr="''${line#closewindow>>}"
+
+            if [[ -n "''${gamescopes[$addr]}" ]]; then
+              unset gamescopes["$addr"]
+
+              # Re-enable DS when all Gamescope instances are closed
+              if [[ ''${#gamescopes[@]} -eq 0 ]]; then
+                ${pkgs.hyprland}/bin/hyprctl keyword "render:direct_scanout" "$direct_scanout"
+              fi
+            fi
+            ;;
+        esac
       done
     '';
   in {
