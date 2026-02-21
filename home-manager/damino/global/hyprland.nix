@@ -201,7 +201,7 @@
         "match:class ^.gamescope-wrapped$, content game"
         "match:class ^(steam_app_\\d+)$, content game" # All Steam apps are considered games
         # Help deal with gamescope input going through to Steam
-        "match:class ^(steam)$, no_initial_focus 1, no_blur 1"
+        "match:class ^(steam)$, no_initial_focus 1, no_blur 1, suppress_event activate, suppress_event activatefocus"
         "match:class ^(steam)$, match:title ^$, match:float 1, no_blur 1, no_anim 1"
         "match:title ^(Steam Big Picture Mode)$, fullscreen 1"
         "match:class ^(steam)$, match:title negative:^(Steam)$, float 1"
@@ -251,7 +251,7 @@
         cm_fs_passthrough = 2;
         cm_auto_hdr = 1;
         cm_sdr_eotf = 2;
-        non_shader_cm = 2;
+        non_shader_cm = 1;
         send_content_type = 0;
       };
 
