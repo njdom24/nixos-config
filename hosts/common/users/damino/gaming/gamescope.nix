@@ -24,7 +24,7 @@ let
       vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .adaptive_sync_status')
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately avoids touching monitor configs, so we use it
+      # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately, avoids touching monitor configs, so we use it
       vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
@@ -77,15 +77,19 @@ let
       mon_json=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq --arg m "$monitor" '.[] | select(.name==$m)')
       fmt=$(echo "$mon_json" | ${pkgs.jq}/bin/jq -r '.currentFormat')
       bitdepth=$(get_bitdepth_from_format "$fmt")
-
+      scanout=$(LD_LIBRARY_PATH="" hyprctl getoption render:direct_scanout -j | jq -r '.int')
+      animations=$(LD_LIBRARY_PATH="" hyprctl getoption animations:enabled -j | jq -r '.int')
+      LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "0"
+      sleep 1
       LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
-      (
-        sleep 1
-        LD_LIBRARY_PATH="" hyprctl keyword "monitorv2[$monitor]:vrr" "$vrr_mode"
-        LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
-        LD_LIBRARY_PATH="" hyprctl keyword monitorv2["$monitor"]:bitdepth "$bitdepth"
-        LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
-      ) &
+      sleep 1
+      if [[ "$vrr_mode" = "1" ]]; then
+        vrr_mode=2
+      fi
+      LD_LIBRARY_PATH="" hyprctl --batch "keyword animations:enabled 0; keyword monitorv2[$monitor]:vrr $vrr_mode; dispatch fullscreen" && LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+      sleep 1
+      LD_LIBRARY_PATH="" hyprctl keyword animations:enabled $animations
+      LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "$scanout"
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
