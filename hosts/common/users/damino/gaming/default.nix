@@ -98,15 +98,14 @@
 	  dolphin-emu
 	  unstable.cemu
 	  unstable.rpcs3
-	  (unstable.melonDS.overrideAttrs (finalAttrs: prevAttrs: {
+	  (unstable.melonds.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
 	  unstable.azahar
       (retroarch.withCores (cores: with cores; [
         mgba
       ]))
-  	  #wineWowPackages.stagingFull
-  	  wineWowPackages.waylandFull
+      wineWow64Packages.waylandFull
   	  winetricks
   	  libstrangle # Better for some games with launchers, where MangoHud can crash
   	  latencyflex

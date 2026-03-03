@@ -288,7 +288,7 @@
         Plugins = {
           magiclampEnabled = true;
           "virtual-desktops-only-on-primaryEnabled" = true;
-          forceblurEnabled = true; # Better Blur
+          better_blur_dxEnabled = true; # Better Blur
         };
         "Script-virtual-desktops-only-on-primary" = {
           primaryOutputIndex = 0;
@@ -300,8 +300,8 @@
         EdgeBarrier.EdgeBarrier = 0;
         "Effect-slide"."SlideBackground" = false;
 
-        # Better Blur
-        "Effect-blurplus" = {
+        # Better Blur DX
+        "Effect-better-blur-dx" = {
           BlurMatching = false;
           BlurNonMatching = true;
           BlurStrength = 5;
@@ -490,7 +490,7 @@
       kdePackages.krohnkite
       plasma-panel-colorizer
       plasma-toggle-hdr
-      inputs.kwin-effects-forceblur.packages.${pkgs.stdenv.hostPlatform.system}.default
+      inputs.kwin-effects-better-blur-dx.packages.${pkgs.stdenv.hostPlatform.system}.default
       kwin-effects-geometry-change
       virtual-desktops-only-on-primary
     ];

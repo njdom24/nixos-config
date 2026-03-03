@@ -895,7 +895,9 @@ let
                   swaymsg output $focused_display hdr on
                 fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+                hyprctl dispatch fullscreen
                 hypr-toggle-hdr on
+                hyprctl dispatch fullscreen
               fi
               hdr_mod_enable
             fi
@@ -913,7 +915,9 @@ let
                   swaymsg output $focused_display hdr off
                 fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+                hyprctl dispatch fullscreen
                 hypr-toggle-hdr off
+                hyprctl dispatch fullscreen
               fi
               hdr_mod_disable
             fi

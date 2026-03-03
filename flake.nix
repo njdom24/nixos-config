@@ -22,8 +22,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
-    kwin-effects-forceblur = {
-      url = "github:taj-ny/kwin-effects-forceblur";
+    kwin-effects-better-blur-dx = {
+      url = "github:xarblu/kwin-effects-better-blur-dx";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
