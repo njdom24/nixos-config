@@ -509,12 +509,6 @@ let
           steam_mode=1
         fi
 
-        if [[ "$arg" == "--hdr-enabled" ]]; then
-          if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-            hypr-toggle-hdr on
-          fi
-        fi
-
         if [[ "$arg" == "--" ]]; then
           scope_vars_done=1
         else
@@ -836,6 +830,15 @@ let
        fi
     }
 
+    if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+      # If already in HDR, apply LUT
+      focused_display="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')"
+      hdr_enabled="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$focused_display\") | .hdr")"
+      if [[ "$hdr_enabled" == "true" ]]; then
+        hdr_mod_enable
+      fi
+    fi
+
     # Vars to help find screenshot dir
     USER_LOG="$HOME/.steam/steam/logs/connection_log.txt"
     STEAM_USERID=$(${pkgs.gnugrep}/bin/grep -Po '\[U:1:\K[0-9]+' "$USER_LOG" | tail -n1)
@@ -1048,6 +1051,7 @@ let
 
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
+      # Gamescope won't allow HDR when launching games, unless already in HDR
       swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
