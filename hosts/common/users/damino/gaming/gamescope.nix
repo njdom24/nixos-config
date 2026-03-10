@@ -183,6 +183,41 @@ let
     fi
   '';
 
+  optifg-min = pkgs.writeShellScriptBin "optifg-min" ''
+    # Enables / Disabled FG in OptiScaler depending on refresh rate
+    # Assumes other FG settings are set manually
+    #  Intended for OptiFG (injected) input, but should work with anything
+    if [ $# -lt 1 ]; then
+      echo "Usage: $(basename "$0") <min_refresh_rate>" >&2
+      exit 1
+    fi
+
+    min="$1"
+    shift
+
+    opti_file="$(${pkgs.coreutils}/bin/timeout 5 ${pkgs.findutils}/bin/find "$PWD" -type f -name 'OptiScaler.ini' | ${pkgs.coreutils}/bin/head -n 1)"
+    if [ ! -e "$opti_file" ]; then
+      exec "$@"
+    fi
+
+    if mode="$(${get_display_mode})"; then
+      read width height refresh <<< "$mode"
+    else
+      width=1920 height=1080 refresh=60
+    fi
+    refresh=$(echo $refresh | ${pkgs.num-utils}/bin/round)
+    if [ "$refresh" -ge "$min" ]; then
+      fg=true
+    else
+      fg=false
+    fi
+
+    # "''$()"
+    ${pkgs.gnused}/bin/sed -i "/^\[FrameGen\]/,/^\[/ s/^\s*Enabled\s*=\s*.*/Enabled = ''${fg:-false}/" "$opti_file"
+
+    exec "$@"
+  '';
+
   # LSFG helper (place after FPS limits to be smart about them)
   # Only activate above a set refresh rate
   lsfg-min = pkgs.writeShellScriptBin "lsfg-min" ''
@@ -1187,6 +1222,7 @@ in
   	  gsc
   	  gsc-tv
   	  gsc-watcher
+  	  optifg-min
   	  lsfg-min
   	  lsfg-vk
   	  novrr
