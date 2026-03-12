@@ -81,7 +81,7 @@ let
       animations=$(LD_LIBRARY_PATH="" hyprctl getoption animations:enabled -j | jq -r '.int')
       LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "0"
       sleep 1
-      LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
+      #LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
       sleep 1
       if [[ "$vrr_mode" = "1" ]]; then
         vrr_mode=2
