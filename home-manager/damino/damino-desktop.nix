@@ -58,6 +58,7 @@
 	          "${pkgs.xrandr}/bin/xrandr --output DP-1 --primary"
 	          "${pkgs.sway}/bin/swaymsg output HDMI-A-1 disable"
 	          "${pkgs.sway}/bin/swaymsg output DP-3 disable"
+	          "${pkgs.sway}/bin/swaymsg output DP-1 hdr on"
 	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
 	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
 	        ];
@@ -126,6 +127,7 @@
 	  	    ];
 	  	    exec = [
 	  	      "${pkgs.xrandr}/bin/xrandr --output DP-1 --primary"
+	  	      "${pkgs.sway}/bin/swaymsg output DP-1 hdr on"
 	  	      #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
 	  	      #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-9"
 	  	    ];
