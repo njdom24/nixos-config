@@ -215,7 +215,19 @@ let
     # "''$()"
     ${pkgs.gnused}/bin/sed -i "/^\[FrameGen\]/,/^\[/ s/^\s*Enabled\s*=\s*.*/Enabled = ''${fg:-false}/" "$opti_file"
 
-    exec "$@"
+    # Helps VRR frame pacing
+    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*AllowAsync\s*=\s*.*/AllowAsync = true/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTHybridSpin\s*=\s*.*/FPTHybridSpin = true/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTHybridSpinTime\s*=\s*.*/FPTHybridSpinTime = 1/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTWaitForSingleObjectOnFence\s*=\s*.*/FPTWaitForSingleObjectOnFence = true/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTSafetyMarginInMs\s*=\s*.*/FPTSafetyMarginInMs = 0.010000/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTVarianceFactor\s*=\s*.*/FPTVarianceFactor = 0.010000/" "$opti_file"
+
+    # Helps non-VRR frame pacing
+    ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*ForceVsync\s*=\s*.*/ForceVsync = true/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*SyncInterval\s*=\s*.*/SyncInterval = 1/" "$opti_file"
+
+    exec env -u MESA_VK_WSI_PRESENT_MODE "$@"
   '';
 
   # LSFG helper (place after FPS limits to be smart about them)
