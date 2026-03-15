@@ -187,11 +187,33 @@ let
     # Enables / Disabled FG in OptiScaler depending on refresh rate
     # Assumes other FG settings are set manually
     #  Intended for OptiFG (injected) input, but should work with anything
+    vrr=false
+    
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --vrr)
+          vrr=true
+          shift
+          ;;
+        --)
+          shift
+          break
+          ;;
+        -*)
+          echo "Unknown option: $1" >&2
+          exit 1
+          ;;
+        *)
+          break
+          ;;
+      esac
+    done
+    
     if [ $# -lt 1 ]; then
-      echo "Usage: $(basename "$0") <min_refresh_rate>" >&2
+      echo "Usage: $(basename "$0") [--vrr] <min_refresh_rate> <command...>" >&2
       exit 1
     fi
-
+    
     min="$1"
     shift
 
@@ -210,24 +232,23 @@ let
       fg=true
     else
       fg=false
+      vrr=true
     fi
 
-    # "''$()"
     ${pkgs.gnused}/bin/sed -i "/^\[FrameGen\]/,/^\[/ s/^\s*Enabled\s*=\s*.*/Enabled = ''${fg:-false}/" "$opti_file"
 
-    # Helps VRR frame pacing
+    # Helps general frame pacing
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*AllowAsync\s*=\s*.*/AllowAsync = true/" "$opti_file"
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTHybridSpin\s*=\s*.*/FPTHybridSpin = true/" "$opti_file"
-    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTHybridSpinTime\s*=\s*.*/FPTHybridSpinTime = 1/" "$opti_file"
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTWaitForSingleObjectOnFence\s*=\s*.*/FPTWaitForSingleObjectOnFence = true/" "$opti_file"
-    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTSafetyMarginInMs\s*=\s*.*/FPTSafetyMarginInMs = 0.010000/" "$opti_file"
-    ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTVarianceFactor\s*=\s*.*/FPTVarianceFactor = 0.010000/" "$opti_file"
-
-    # Helps non-VRR frame pacing
     ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*ForceVsync\s*=\s*.*/ForceVsync = true/" "$opti_file"
     ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*SyncInterval\s*=\s*.*/SyncInterval = 1/" "$opti_file"
 
-    exec env -u MESA_VK_WSI_PRESENT_MODE "$@"
+    if [ "$vrr" = "true" ]; then
+      exec env -u MESA_VK_WSI_PRESENT_MODE "$@"
+    else
+      exec env -u MESA_VK_WSI_PRESENT_MODE ${novrr}/bin/novrr "$@"
+    fi
   '';
 
   # LSFG helper (place after FPS limits to be smart about them)
