@@ -81,7 +81,7 @@ in
 	  pulseaudio # Needed for pactl
 	  remmina
 	  filezilla
-	  blueberry
+	  overskride
 	  warpinator
 	  gnome-font-viewer
 	  gnome-disk-utility
@@ -165,10 +165,10 @@ in
 
 	# Enabling Seahorse globally has issues with Plasma -- Manually using for Sway instead
 	#seahorse.enable = true;
-	#ssh = {
-	#  enableAskPassword = true;
-	#  askPassword = pkgs.lib.mkForce "${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass";
-	#};
+	ssh = {
+	  enableAskPassword = true;
+	  askPassword = pkgs.lib.mkForce "${pkgs.seahorse.out}/libexec/seahorse/ssh-askpass";
+	};
   
     zsh.enable = true;
 
@@ -230,6 +230,7 @@ in
   };
 
   services = {
+    desktopManager.gnome.enable = true;
     power-profiles-daemon.enable = true;
     fwupd.enable = true;
 

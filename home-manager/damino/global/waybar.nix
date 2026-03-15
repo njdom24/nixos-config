@@ -48,7 +48,7 @@
      	  tooltip-format-connected = "{device_enumerate}";
      	  tooltip-format-enumerate-connected = "{device_alias}\t{device_battery_percentage}%";
      	  #tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
-     	  on-click = "kill `pgrep blueberry` || ${pkgs.blueberry}/bin/blueberry";
+     	  on-click = "kill `pgrep overskride` || ${pkgs.overskride}/bin/overskride";
      	};
 
      	"sway/mode" = {

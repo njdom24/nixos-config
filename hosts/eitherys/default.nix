@@ -154,7 +154,6 @@ in
 	  pulseaudio # Needed for pactl
 	  remmina
 	  filezilla
-	  blueberry
 	  warpinator
 	  gnome-disk-utility
 	  gnome-system-monitor
