@@ -236,7 +236,11 @@ let
     fi
 
     ${pkgs.gnused}/bin/sed -i "/^\[FrameGen\]/,/^\[/ s/^\s*Enabled\s*=\s*.*/Enabled = ''${fg:-false}/" "$opti_file"
+    if [ "$fg" = "false" ]; then
+      exec "$@"
+    fi
 
+    # "''$()"
     # Helps general frame pacing
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*AllowAsync\s*=\s*.*/AllowAsync = true/" "$opti_file"
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTHybridSpin\s*=\s*.*/FPTHybridSpin = true/" "$opti_file"
