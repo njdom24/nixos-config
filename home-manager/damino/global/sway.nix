@@ -670,6 +670,8 @@
 		  export XDG_CURRENT_DESKTOP=sway
 		  export NIXOS_OZONE_WL=1
 		  #export WLR_RENDERER=vulkan
+		  # Fix "Open with..." showing no apps in Dolphin
+		  export XDG_MENU_PREFIX=plasma-
 
 		  # Monitor the wayvnc process to see if it's still running
 		  if pgrep -x "wayvnc" > /dev/null; then
