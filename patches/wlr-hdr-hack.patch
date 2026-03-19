@@ -1,0 +1,21 @@
+diff --git a/types/wlr_color_management_v1.c b/types/wlr_color_management_v1.c
+index 0a19e8e7..f69bdda0 100644
+--- a/types/wlr_color_management_v1.c
++++ b/types/wlr_color_management_v1.c
+@@ -438,7 +438,7 @@ static bool check_mastering_luminance_range(struct wl_resource *params_resource,
+ 	if (!data->has_mastering_luminance || value == 0) {
+ 		return true;
+ 	}
+-
++	/*
+ 	if (value <= data->mastering_luminance.min) {
+ 		wl_resource_post_error(params_resource,
+ 			WP_IMAGE_DESCRIPTION_CREATOR_PARAMS_V1_ERROR_INVALID_LUMINANCE,
+@@ -453,6 +453,7 @@ static bool check_mastering_luminance_range(struct wl_resource *params_resource,
+ 			name);
+ 		return false;
+ 	}
++	*/
+ 
+ 	return true;
+ }

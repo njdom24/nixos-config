@@ -50,7 +50,7 @@ in {
       buildInputs = (old.buildInputs or []) ++ [(
         prev.wlroots_0_19.overrideAttrs (old: let
           existing = old.patches or [];
-          newPatches = [];
+          newPatches = [ ../patches/wlr-hdr-hack.patch ];
         in {
           src = inputs.wlroots-git;
           patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
