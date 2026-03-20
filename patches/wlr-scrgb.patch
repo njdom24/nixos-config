@@ -1,62 +1,21 @@
-diff --git a/types/scene/wlr_scene.c b/types/scene/wlr_scene.c
-index 36294623..849bbd42 100644
---- a/types/scene/wlr_scene.c
-+++ b/types/scene/wlr_scene.c
-@@ -316,6 +316,7 @@ struct render_data {
- 	int trans_width, trans_height;
- 
- 	struct wlr_scene_output *output;
-+	const struct wlr_output_image_description *output_description;
- 
- 	struct wlr_render_pass *render_pass;
- 	pixman_region32_t damage;
-@@ -1499,6 +1500,21 @@ static void scene_entry_render(struct render_list_entry *entry, const struct ren
- 			scene_buffer->transfer_function, &src_lum);
- 		wlr_color_transfer_function_get_default_luminance(
- 			WLR_COLOR_TRANSFER_FUNCTION_SRGB, &srgb_lum);
-+
-+		if (scene_buffer->transfer_function == WLR_COLOR_TRANSFER_FUNCTION_EXT_LINEAR) {
-+			enum wlr_color_transfer_function dst_tf = WLR_COLOR_TRANSFER_FUNCTION_GAMMA22;
-+			if (data->output_description != NULL) {
-+				dst_tf = data->output_description->transfer_function;
-+			}
-+
-+			if (dst_tf != WLR_COLOR_TRANSFER_FUNCTION_EXT_LINEAR) {
-+				struct wlr_color_luminances pq_lum;
-+				wlr_color_transfer_function_get_default_luminance(
-+					WLR_COLOR_TRANSFER_FUNCTION_ST2084_PQ, &pq_lum);
-+				src_lum.reference = pq_lum.reference;
-+			}
-+		}
-+
- 		float luminance_multiplier = get_luminance_multiplier(&src_lum, &srgb_lum);
- 
- 		wlr_render_pass_add_texture(data->render_pass, &(struct wlr_render_texture_options) {
-@@ -2289,11 +2305,15 @@ bool wlr_scene_output_build_state(struct wlr_scene_output *scene_output,
- 		}
- 	}
- 
-+	const struct wlr_output_image_description *output_description =
-+		output_pending_image_description(output, state);
-+
- 	struct render_data render_data = {
- 		.transform = output->transform,
- 		.scale = output->scale,
- 		.logical = { .x = scene_output->x, .y = scene_output->y },
- 		.output = scene_output,
-+		.output_description = output_description,
- 	};
- 
- 	int resolution_width, resolution_height;
-@@ -2453,8 +2473,6 @@ bool wlr_scene_output_build_state(struct wlr_scene_output *scene_output,
- 			&& scene_output->gamma_lut_color_transform != scene_output->prev_gamma_lut_color_transform)
- 			|| scene_output->prev_supplied_color_transform != options->color_transform
- 			|| (state->committed & WLR_OUTPUT_STATE_IMAGE_DESCRIPTION)) {
--		const struct wlr_output_image_description *output_description =
--			output_pending_image_description(output, state);
- 		if (!scene_output_combine_color_transforms(scene_output, options->color_transform,
- 				output_description, render_gamma_lut)) {
- 			wlr_buffer_unlock(buffer);
+diff --git a/render/color.c b/render/color.c
+index e89fab26..e4dcde33 100644
+--- a/render/color.c
++++ b/render/color.c
+@@ -415,6 +415,13 @@ void wlr_color_transfer_function_get_default_luminance(enum wlr_color_transfer_f
+ 			.reference = 203,
+ 		};
+ 		break;
++	case WLR_COLOR_TRANSFER_FUNCTION_EXT_LINEAR:
++		*lum = (struct wlr_color_luminances){
++			.min = 0.2,
++			.max = 80,
++			.reference = 203,
++		};
++		break;
+ 	case WLR_COLOR_TRANSFER_FUNCTION_BT1886:
+ 		*lum = (struct wlr_color_luminances){
+ 			.min = 0.01,
 diff --git a/types/wlr_color_management_v1.c b/types/wlr_color_management_v1.c
 index 0a19e8e7..445a4d53 100644
 --- a/types/wlr_color_management_v1.c
