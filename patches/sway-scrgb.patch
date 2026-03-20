@@ -1,0 +1,12 @@
+diff --git a/sway/server.c b/sway/server.c
+index 5d446579..35d26e07 100644
+--- a/sway/server.c
++++ b/sway/server.c
+@@ -459,6 +459,7 @@ bool server_init(struct sway_server *server) {
+ 			.features = {
+ 				.parametric = true,
+ 				.set_mastering_display_primaries = true,
++				.windows_scrgb = true,
+ 			},
+ 			.render_intents = render_intents,
+ 			.render_intents_len = sizeof(render_intents) / sizeof(render_intents[0]),

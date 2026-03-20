@@ -1,0 +1,94 @@
+diff --git a/types/scene/wlr_scene.c b/types/scene/wlr_scene.c
+index 36294623..849bbd42 100644
+--- a/types/scene/wlr_scene.c
++++ b/types/scene/wlr_scene.c
+@@ -316,6 +316,7 @@ struct render_data {
+ 	int trans_width, trans_height;
+ 
+ 	struct wlr_scene_output *output;
++	const struct wlr_output_image_description *output_description;
+ 
+ 	struct wlr_render_pass *render_pass;
+ 	pixman_region32_t damage;
+@@ -1499,6 +1500,21 @@ static void scene_entry_render(struct render_list_entry *entry, const struct ren
+ 			scene_buffer->transfer_function, &src_lum);
+ 		wlr_color_transfer_function_get_default_luminance(
+ 			WLR_COLOR_TRANSFER_FUNCTION_SRGB, &srgb_lum);
++
++		if (scene_buffer->transfer_function == WLR_COLOR_TRANSFER_FUNCTION_EXT_LINEAR) {
++			enum wlr_color_transfer_function dst_tf = WLR_COLOR_TRANSFER_FUNCTION_GAMMA22;
++			if (data->output_description != NULL) {
++				dst_tf = data->output_description->transfer_function;
++			}
++
++			if (dst_tf != WLR_COLOR_TRANSFER_FUNCTION_EXT_LINEAR) {
++				struct wlr_color_luminances pq_lum;
++				wlr_color_transfer_function_get_default_luminance(
++					WLR_COLOR_TRANSFER_FUNCTION_ST2084_PQ, &pq_lum);
++				src_lum.reference = pq_lum.reference;
++			}
++		}
++
+ 		float luminance_multiplier = get_luminance_multiplier(&src_lum, &srgb_lum);
+ 
+ 		wlr_render_pass_add_texture(data->render_pass, &(struct wlr_render_texture_options) {
+@@ -2289,11 +2305,15 @@ bool wlr_scene_output_build_state(struct wlr_scene_output *scene_output,
+ 		}
+ 	}
+ 
++	const struct wlr_output_image_description *output_description =
++		output_pending_image_description(output, state);
++
+ 	struct render_data render_data = {
+ 		.transform = output->transform,
+ 		.scale = output->scale,
+ 		.logical = { .x = scene_output->x, .y = scene_output->y },
+ 		.output = scene_output,
++		.output_description = output_description,
+ 	};
+ 
+ 	int resolution_width, resolution_height;
+@@ -2453,8 +2473,6 @@ bool wlr_scene_output_build_state(struct wlr_scene_output *scene_output,
+ 			&& scene_output->gamma_lut_color_transform != scene_output->prev_gamma_lut_color_transform)
+ 			|| scene_output->prev_supplied_color_transform != options->color_transform
+ 			|| (state->committed & WLR_OUTPUT_STATE_IMAGE_DESCRIPTION)) {
+-		const struct wlr_output_image_description *output_description =
+-			output_pending_image_description(output, state);
+ 		if (!scene_output_combine_color_transforms(scene_output, options->color_transform,
+ 				output_description, render_gamma_lut)) {
+ 			wlr_buffer_unlock(buffer);
+diff --git a/types/wlr_color_management_v1.c b/types/wlr_color_management_v1.c
+index 0a19e8e7..445a4d53 100644
+--- a/types/wlr_color_management_v1.c
++++ b/types/wlr_color_management_v1.c
+@@ -843,9 +843,19 @@ static void manager_handle_create_parametric_creator(struct wl_client *client,
+ 
+ static void manager_handle_create_windows_scrgb(struct wl_client *client,
+ 		struct wl_resource *manager_resource, uint32_t id) {
+-	wl_resource_post_error(manager_resource,
+-		WP_COLOR_MANAGER_V1_ERROR_UNSUPPORTED_FEATURE,
+-		"get_windows_scrgb is not supported");
++		struct wlr_color_manager_v1 *manager = manager_from_resource(manager_resource);
++	if (!manager->features.windows_scrgb) {
++		wl_resource_post_error(manager_resource,
++			WP_COLOR_MANAGER_V1_ERROR_UNSUPPORTED_FEATURE,
++			"get_windows_scrgb is not supported");
++		return;
++	}
++
++	struct wlr_image_description_v1_data data = {
++		.tf_named = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR,
++		.primaries_named = WP_COLOR_MANAGER_V1_PRIMARIES_SRGB,
++	};
++	image_desc_create_ready(manager, manager_resource, id, &data, false);
+ }
+ 
+ static const struct wp_color_manager_v1_interface manager_impl = {
+@@ -939,7 +949,6 @@ struct wlr_color_manager_v1 *wlr_color_manager_v1_create(struct wl_display *disp
+ 	assert(!options->features.set_tf_power);
+ 	assert(!options->features.set_luminances);
+ 	assert(!options->features.extended_target_volume);
+-	assert(!options->features.windows_scrgb);
+ 
+ 	struct wlr_color_manager_v1 *manager = calloc(1, sizeof(*manager));
+ 	if (manager == NULL) {

@@ -44,13 +44,13 @@ in {
     # sway pinned to PR #8922 state
     sway-unwrapped = prev.sway-unwrapped.overrideAttrs (old: let
       existing = old.patches or [];
-      newPatches = [];
+      newPatches = [ ../patches/sway-scrgb.patch ];
     in {
       src = inputs.sway-git;
       buildInputs = (old.buildInputs or []) ++ [(
         prev.wlroots_0_19.overrideAttrs (old: let
           existing = old.patches or [];
-          newPatches = [ ../patches/wlr-hdr-hack.patch ];
+          newPatches = [ ../patches/wlr-scrgb.patch ../patches/wlr-hdr-hack.patch ];
         in {
           src = inputs.wlroots-git;
           patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
