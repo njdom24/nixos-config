@@ -119,7 +119,7 @@
             
             mkdir -p "$CACHE_DIR"
             
-            # Check if cache exists and is fresh enough
+            ### Local cache ###
             if [[ -f "$CACHE_FILE" ]]; then
               now=$(date +%s)
               mtime=$(stat -c %Y "$CACHE_FILE")
@@ -146,6 +146,39 @@
                 exit 0
               fi
             fi
+
+            ### Open Meteo ###
+            weather_emoji() {
+              local code=$1
+              case $code in
+                0) echo "☀️" ;;
+                1|2|3) echo "⛅" ;;
+                45|48) echo "🌫️" ;;
+                51|53|55|61|63|65) echo "🌧️" ;;
+                71|73|75|77) echo "🌨️" ;;
+                80|81|82) echo "🌦️" ;;
+                95|96|99) echo "⛈️" ;;
+                *) echo "❓" ;;
+              esac
+            }
+            
+            get_weather() {
+              IFS=',' read -r lat lng <<< $(${pkgs.curl}/bin/curl -s ipinfo.io/loc)
+              json=$(${pkgs.curl}/bin/curl -s "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&current=temperature_2m,weathercode&temperature_unit=celsius")
+              temp=$(echo $json | ${pkgs.jq}/bin/jq '.current.temperature_2m')
+              code=$(echo $json | ${pkgs.jq}/bin/jq '.current.weathercode')
+              emoji=$(weather_emoji $code)
+              # "''$()"
+              text="$emoji ''${temp}°C"
+              tooltip="$text"
+
+              echo "{\"text\":\"$text\", \"tooltip\":\"$tooltip\"}"
+            }
+
+            get_weather
+            exit 0
+
+            ### wttr.in (Unused) ###
 
             # Perform the fetch, retrying up to 5 times
             for i in {1..5}; do
