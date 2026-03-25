@@ -15,6 +15,19 @@ in
     [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
+  #nixpkgs.overlays = [
+  #  (final: prev: {
+  #    linux_6_19 = prev.linux_6_19.overrideAttrs (old: {
+  #      src = prev.fetchFromGitHub {
+  #        owner = "mkopec";
+  #        repo = "linux";
+  #        rev = "hdmi_frl_stable";
+  #        sha256 = "sha256-lR1V49vlKsBgAVwYetQvBbvdoraJHI+TViUBne1oUaI=";
+  #      };
+  #    });
+  #  })
+  #];
+
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ "amdgpu" ];
   boot.kernelModules = [ "kvm-amd" "it87" ]; # For Gigabyte motherboard fan control
@@ -22,7 +35,8 @@ in
   # Avoid audio crackle: https://wiki.cachyos.org/features/cachyos_settings/#udev-rules
   boot.kernelParams = [ "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_latest;
+  #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_6_19;
   boot.kernelPatches = [
     #{
     #  name = "enable-adapter-freesync-1";
