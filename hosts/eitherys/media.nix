@@ -1,14 +1,4 @@
 { inputs, outputs, config, pkgs, lib, ... }:
-let
-  # https://github.com/NixOS/nixpkgs/issues/360592#issuecomment-2513490613
-  # Workaround for Sonarr breakage in 24.05. Remove ASAP 
-  insecure-unstable = import inputs.nixpkgs {
-    system = pkgs.stdenv.hostPlatform.system;
-    config = {
-      allowUnfree = true;
-    };
-  };
-in
 {
   imports = [
   	./containers
@@ -58,7 +48,7 @@ in
   services = {
     sonarr = {
       enable = true;
-      package = insecure-unstable.sonarr;
+      package = pkgs.unstable.sonarr;
       openFirewall = true;
       user = "jellyfin";
       group = "jellyfin";
