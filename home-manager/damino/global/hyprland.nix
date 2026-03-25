@@ -555,7 +555,7 @@
         #"timeout 10 kanshi &"
         # Waybar freezes on reload on Hyprland sometimes, so just restart
         "kill `pgrep waybar`; sleep 1 && waybar &"
-        #"${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs"
+        "sleep 1; ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs"
         "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
       ];
     };
