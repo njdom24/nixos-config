@@ -166,11 +166,12 @@
               IFS=',' read -r lat lng <<< $(${pkgs.curl}/bin/curl -s ipinfo.io/loc)
               json=$(${pkgs.curl}/bin/curl -s "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lng&current=temperature_2m,weathercode&temperature_unit=celsius")
               temp=$(echo $json | ${pkgs.jq}/bin/jq '.current.temperature_2m')
+              temp_f=$(printf "%.2f" "$(echo "$temp * 9 / 5 + 32" | ${pkgs.bc}/bin/bc -l)")
               code=$(echo $json | ${pkgs.jq}/bin/jq '.current.weathercode')
               emoji=$(weather_emoji $code)
-              # "''$()"
+  
               text="$emoji ''${temp}°C"
-              tooltip="$text"
+              tooltip="$emoji ''${temp_f}°F"
 
               echo "{\"text\":\"$text\", \"tooltip\":\"$tooltip\"}"
             }
