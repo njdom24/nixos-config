@@ -488,6 +488,7 @@
     packages = with pkgs; [
       kdePackages.plasma-browser-integration
       kdePackages.krohnkite
+      kdePackages.kfind
       plasma-panel-colorizer
       plasma-toggle-hdr
       inputs.kwin-effects-better-blur-dx.packages.${pkgs.stdenv.hostPlatform.system}.default
