@@ -847,7 +847,7 @@ let
   gsc-watcher = let
     eotfConfig = pkgs.writeText "hdmi_lut" ''
       0 0
-      400 50
+      400 51
       1000 130
       10000 2333
     '';
