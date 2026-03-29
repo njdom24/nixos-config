@@ -92,6 +92,13 @@ let
       LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "$scanout"
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+
+      # Communicate with sway VRR fullscreen script to prevent it from overriding
+      if [[ "$vrr_mode" = "0" ]]; then
+        touch "$XDG_RUNTIME_DIR"/sway_vrr_lock
+      else
+        rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
+      fi
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
     fi
 
@@ -102,18 +109,15 @@ let
   '';
 
   novrr = pkgs.writeShellScriptBin "novrr" ''
-    # Communicate with sway VRR fullscreen script to prevent it from overriding
-    if [[ -v SWAYSOCK ]]; then
-      touch "$XDG_RUNTIME_DIR"/sway_vrr_lock
-    fi
-
     vrr_start="$(${get_vrr})"
     ${set_vrr} 0
 
     cleanup() {
       local ec=$?
-      ${set_vrr} $vrr_start
-      if [[ -v SWAYSOCK ]] && ! ${pkgs.procps}/bin/pgrep -f "novrr" | ${pkgs.gnugrep}/bin/grep -v $$ >/dev/null; then
+      if ! ${pkgs.procps}/bin/pgrep -f "novrr" --ignore-ancestors >/dev/null; then
+        ${set_vrr} $vrr_start
+      fi
+      if [[ -v SWAYSOCK ]]; then
         rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
       fi
       exit "$ec"
