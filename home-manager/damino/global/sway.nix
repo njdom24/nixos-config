@@ -201,7 +201,7 @@
 		  exec ${pkgs.swaynotificationcenter}/bin/swaync
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
-		  exec ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
+		  exec_always ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
 		  exec ${vrrFullscreen}
 		  exec ${satellite-steam-unfloat-fix}
 
