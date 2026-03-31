@@ -27,7 +27,7 @@
 	        name = "desktop-headless";
 	        outputs = [
 	          {
-	            criteria = "Beihai Century Joint Innovation Technology Co.,Ltd P275MV PLUS 0000000000000";
+	            criteria = "Beihai Century Joint Innovation Technology Co.,Ltd P275MV PLUS *";
 	      	    status = "enable";
 	      	    mode = "3840x2160@160Hz";
 	      	    position = "0,0";
