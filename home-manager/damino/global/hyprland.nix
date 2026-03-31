@@ -519,8 +519,8 @@
         #",XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -5%"
         #",XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
         #",XF86AudioMicMute, exec, pactl set-source-mute @DEFAULT_SINK@ toggle"
-        ",XF86MonBrightnessUp, exec, brightnessctl -e4 -n2 set 5%+"
-        ",XF86MonBrightnessDown, exec, brightnessctl -e4 -n2 set 5%-"
+        ",XF86MonBrightnessUp, exec, ${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%+"
+        ",XF86MonBrightnessDown, exec, ${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%-"
       ];
 
       xwayland = {

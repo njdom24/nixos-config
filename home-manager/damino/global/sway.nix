@@ -33,8 +33,9 @@
 		  set $ws9 "9"
 		  set $ws10 "10"
 
-		  bindsym --locked XF86MonBrightnessUp exec light -A 4
-		  bindsym --locked XF86MonBrightnessDown exec light -U 4
+		  bindsym --locked XF86MonBrightnessUp exec ${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%+
+		  bindsym --locked XF86MonBrightnessDown exec ${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%-
+
 		  input "1356:3302:Sony_Interactive_Entertainment_DualSense_Wireless_Controller_Touchpad" {
 		    events disabled
 		  }

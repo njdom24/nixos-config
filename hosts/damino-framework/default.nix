@@ -133,10 +133,6 @@
     micro
   ];
 
-  programs = {
-  	light.enable = true;
-  };
-
   # eGPU setup
   services.sunshine = {
     enable = true;
