@@ -203,6 +203,7 @@
 
           status="$(${pkgs.systemd}/bin/systemctl --user is-active steam-screenshot-watcher.service)"
           if [[ "$status" != "active" ]]; then
+            ${pkgs.systemd}/bin/systemctl --user stop steam-screenshot-watcher || true
             ${pkgs.systemd}/bin/systemctl --user reset-failed steam-screenshot-watcher
             ${pkgs.systemd}/bin/systemd-run --user --unit=steam-screenshot-watcher --description="Monitor Steam HDR screenshots to increase brightness" ${steam-hdr-screenshot-watcher}
           fi
