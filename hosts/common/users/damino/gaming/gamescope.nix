@@ -191,12 +191,16 @@ let
     # Enables / Disabled FG in OptiScaler depending on refresh rate
     # Assumes other FG settings are set manually
     #  Intended for OptiFG (injected) input, but should work with anything
-    vrr=false
+    vrr=true
     
     while [ $# -gt 0 ]; do
       case "$1" in
         --vrr)
           vrr=true
+          shift
+          ;;
+        --novrr)
+          vrr=false
           shift
           ;;
         --)
@@ -214,7 +218,7 @@ let
     done
     
     if [ $# -lt 1 ]; then
-      echo "Usage: $(basename "$0") [--vrr] <min_refresh_rate> <command...>" >&2
+      echo "Usage: $(basename "$0") [--novrr, --vrr] <min_refresh_rate> <command...>" >&2
       exit 1
     fi
     
