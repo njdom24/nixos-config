@@ -765,7 +765,7 @@ let
 
       # Remove settings that can affect gamescope's frame pacing (Primarily for Steam mode, but won't hurt in general)
       ${pkgs.gnused}/bin/sed -i '/^fps_limit=/d' "$mangohud_file" # Remove FPS limiter
-      ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Remove FPS limit method
+      # ${pkgs.gnused}/bin/sed -i '/^fps_limit_method=/d' "$mangohud_file" # Remove FPS limit method: Used to cause issues, seems fine now(?)
       ${pkgs.gnused}/bin/sed -i "1i fps_limit=$refresh" "$mangohud_file"
 
       # Force 'late' FPS limiter because 'early' is broken
@@ -1251,6 +1251,7 @@ in
         "--hdr-enabled"
         "--adaptive-sync"
         "--force-grab-cursor"
+        "--immediate-flips"
         #"-r 360" # Default that is a multiple of 120 and 180
         #"--mangoapp"
         "-F fsr"
