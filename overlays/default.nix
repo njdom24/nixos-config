@@ -50,7 +50,14 @@ in {
       buildInputs = (old.buildInputs or []) ++ [(
         prev.wlroots_0_19.overrideAttrs (old: let
           existing = old.patches or [];
-          newPatches = [ ../patches/wlr-scrgb.patch ../patches/wlr-hdr-hack.patch ];
+          newPatches = [
+            (prev.fetchpatch {
+              url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5143.diff";
+              sha256 = "sha256-At3PsGV5KChIuNdGgfht/r7XydKiIqDahbeGFWM1Rok=";
+            })
+            #../patches/wlr-scrgb.patch
+            ../patches/wlr-hdr-hack.patch
+          ];
         in {
           src = inputs.wlroots-git;
           patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
