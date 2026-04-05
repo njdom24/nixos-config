@@ -945,6 +945,7 @@ let
           screenshot_dir="$SCREENSHOT_BASE/$app_id/screenshots"
           echo "Checking screenshot dir for APPID $app_id: $screenshot_dir"
 
+          loop_count=0
           while true; do
             sleep 1
             latest_jpg="$(ls -t "$screenshot_dir"/*.jpg 2>/dev/null | head -n1)"
@@ -959,6 +960,11 @@ let
                 ${pkgs.imagemagick}/bin/magick "$thumbnail" -brightness-contrast 8x16 "$thumbnail"
               ) &
               latest_screenshot="$latest_jpg"
+              break
+            fi
+            (( loop_count++ ))
+            if (( loop_count >= 5 )); then
+              echo "No screenshot found, stopping."
               break
             fi
           done
