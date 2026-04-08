@@ -102,8 +102,9 @@ in
 	  xeyes
 	  corefonts
 	  vista-fonts
-	  vscode
 	  linux-wifi-hotspot
+	  gcc
+	  vscode-fhs
     ];
   };
 
