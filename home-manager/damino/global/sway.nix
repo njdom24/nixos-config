@@ -655,8 +655,18 @@
 	      if [ "$1" != ":0" ]; then
 	        exec ${pkgs.xwayland}/bin/Xwayland "$@"
 	      else
-	        # Try to force 1x scaling
-	        swaymsg exec '${pkgs.xwayland-satellite}/bin/xwayland-satellite; sleep 1; ${pkgs.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"'
+	        max_attempts=5
+	        attempt=1
+	        
+	        while (( attempt <= max_attempts )); do
+	          # Try to force 1x scaling
+	          sleep 1
+              swaymsg exec '${pkgs.xwayland-satellite}/bin/xwayland-satellite; exec sleep 1; exec ${pkgs.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"'
+              if ${pkgs.procps}/bin/pgrep -f xwayland-satellite > /dev/null; then
+                exit 0
+              fi
+              ((attempt++))
+	        done
 	      fi
 	    '';
 	    in ''
