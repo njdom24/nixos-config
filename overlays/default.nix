@@ -31,6 +31,10 @@ in {
           url = "https://patch-diff.githubusercontent.com/raw/ValveSoftware/gamescope/pull/2100.patch";
           sha256 = "sha256-dbM7kOLAa2MthKYgMLdt/YA1IzSStFapyQDvyq+VnF4=";
         })
+        (prev.fetchpatch {
+          url = "https://patch-diff.githubusercontent.com/raw/ValveSoftware/gamescope/pull/2134.patch";
+          sha256 = "sha256-xEAtT8evRoDgnDlgIDknHkhjmIQ0mPA93hyd5wei75I=";
+        })
         ../patches/gamescope-cursor-vrr.patch
       ];
       #addIfMissing = p: if builtins.any (x: x == p) existing then [] else [p];
