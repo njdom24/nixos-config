@@ -126,6 +126,7 @@
   	git = {
   	  enable = true;
   	  package = pkgs.gitFull;
+      signing.format = "openpgp";
   	  settings = {
   	    safe.directory = "/etc/nixos";
   	  	credential.helper = "libsecret";
@@ -349,7 +350,10 @@
         gtk-application-prefer-dark-theme = 1;
       }
     ];
-    gtk4.extraConfig = commonExtraConfig;
+    gtk4 = {
+      theme = config.gtk.theme;
+      extraConfig = commonExtraConfig;
+    };
   };
 
   # Preferred over setting GTK_THEME, to support runtime changes for Libadwaita GTK4 apps
