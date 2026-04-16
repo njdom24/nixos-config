@@ -61,7 +61,12 @@
                 capture="$(${pkgs.gawk}/bin/awk -F= '$1=="capture"{print $2}' "$conf" 2>/dev/null || true)"
               fi
 
-              if [[ "$capture" != "kms" ]]; then
+              if [[ "$capture" = "kms" ]]; then
+                # Disable all non-DUMMY outputs
+                DUMMY="HDMI-A-1"
+                swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"$DUMMY\") | not).name" | ${pkgs.findutils}/bin/xargs -r -I{} ${pkgs.sway}/bin/swaymsg output {} disable
+                swaymsg output "*" render_bit_depth 10
+              else
                 # Check if any HEADLESS output exists (HEADLESS-1, HEADLESS-2, etc.)
                 existing_headless=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name | test(\"HEADLESS\")) | .name")
 
