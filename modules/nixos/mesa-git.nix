@@ -10,10 +10,17 @@ in
   };
 
   config = let
-    mesa-git = pkgs.mesa.overrideAttrs (_: {
+    mesa-git = pkgs.mesa.overrideAttrs (old: {
       src = inputs.mesa-git;
       # Compute unique version string from src
       version = "git-${inputs.mesa-git.rev}";
+
+      patches = (old.patches or []) ++ [
+        (pkgs.fetchpatch {
+          url = "https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/39551.patch";
+          hash = "sha256-70rzGbmnzQBcumwOOUgIFlgiM2+IAVKoVYLAZBI8OWk=";
+        })
+      ];
     });
 
     mesa32-git = pkgs.driversi686Linux.mesa.overrideAttrs (_: {
