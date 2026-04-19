@@ -25,7 +25,7 @@ let
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately, avoids touching monitor configs, so we use it
-      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vfr | ${pkgs.jq}/bin/jq '.int')
+      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption debug:vfr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       # TODO
@@ -81,7 +81,7 @@ let
       animations=$(LD_LIBRARY_PATH="" hyprctl getoption animations:enabled -j | jq -r '.int')
       LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "0"
       sleep 1
-      #LD_LIBRARY_PATH="" hyprctl keyword "misc:vfr" "$vrr_mode"
+      #LD_LIBRARY_PATH="" hyprctl keyword "debug:vfr" "$vrr_mode"
       sleep 1
       if [[ "$vrr_mode" = "1" ]]; then
         vrr_mode=2
