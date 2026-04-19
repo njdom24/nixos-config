@@ -18,8 +18,8 @@
   ];
 
   mesa-git = {
-    enable = false;
-    global = false;
+    enable = lib.mkDefault false;
+    global = lib.mkDefault false;
   };
 
   programs = {
