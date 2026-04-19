@@ -300,14 +300,11 @@
         ''; in {
         Unit = {
           Description = "Create stable GPU symlinks for Wayland compositors";
-          After = [ "default.target" ];
-          Before = [ "graphical-session-pre.target" "graphical-session.target" ];
-          PartOf = [ "graphical-session.target" ];
+          Before = [ "default.target" "graphical-session-pre.target" "graphical-session.target" ];
         };
         Service = {
           Type = "oneshot";
           ExecStart = "${stable-render-nodes}";
-          RemainAfterExit = "yes";
         };
         Install = {
           WantedBy = [ "default.target" ];
