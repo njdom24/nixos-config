@@ -35,8 +35,8 @@ in
   # Avoid audio crackle: https://wiki.cachyos.org/features/cachyos_settings/#udev-rules
   boot.kernelParams = [ "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
 
-  boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_latest;
-  #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_6_19;
+  #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_latest;
+  boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_6_19;
   boot.kernelPatches = [
     #{
     #  name = "enable-adapter-freesync-1";
