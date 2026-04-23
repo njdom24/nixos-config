@@ -52,12 +52,14 @@
  	  package = pkgs.ananicy-cpp;
  	  rulesProvider = pkgs.ananicy-rules-cachyos;
       # Breaks login 50% of the time, possibly since Sway run under sddm?
- 	  #extraTypes = [
- 	  #  {
- 	  #    type = "LowLatency_RT";
- 	  #    sched = "rr";
- 	  #  }
- 	  #];
+      extraTypes = [
+        {
+          type = "LowLatency_RT";
+          #sched = "rr";
+          nice = -20;
+          ioclass = "best-effort";
+        }
+      ];
  	  extraRules = [
  	    # -12: https://github.com/CachyOS/ananicy-rules/blob/master/00-default/DEs-and-WMs/sway.rules
  	    #{
