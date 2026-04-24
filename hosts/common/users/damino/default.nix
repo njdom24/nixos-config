@@ -157,10 +157,14 @@ in
         extraArgs = "--keep-since 7d --keep 10";
       };
     };
+
+    direnv.enable = true;
+
     appimage = {
       enable = true;
       binfmt = true;
     };
+
 	dconf.enable = true;
 	#ssh.startAgent = true;
 
