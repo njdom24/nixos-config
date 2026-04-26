@@ -50,6 +50,8 @@
 		  displaySetup = pkgs.writeShellScript "sway-headless-output.sh" ''
             #!/bin/bash
 
+            swaymsg output "*" scale_filter linear
+
             if [ "$REMOTE_ENABLED" = "1" ]; then
               conf="$(${pkgs.systemd}/bin/systemctl --user show sunshine.service -p ExecStart --value \
 		               | ${pkgs.gnugrep}/bin/grep -o 'argv\[\]=[^;]*' \
