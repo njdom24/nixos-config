@@ -122,6 +122,7 @@
   };
 
   boot = {
+    kernelModules = [ "ntsync" ];
     # https://gitlab.freedesktop.org/drm/amd/-/issues/2516#note_1874760
     kernelParams = [ "gpu_sched.sched_policy=0" "split_lock_detect=off" ];
     kernel.sysctl = {
