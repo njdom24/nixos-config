@@ -10,24 +10,38 @@ in
   };
 
   config = let
-    mesa-git = pkgs.mesa.overrideAttrs (old: {
+    libdrm-git = pkgs.libdrm.overrideAttrs (old: let
+      parts = lib.splitString "." old.version;
+      major = lib.toInt (builtins.elemAt parts 0);
+      minor = lib.toInt (builtins.elemAt parts 1);
+      patch = lib.toInt (builtins.elemAt parts 2);
+    in {
+      src = inputs.libdrm-git;
+      version =
+        "${toString major}.${toString (minor + 2)}.${toString patch}-git-${inputs.libdrm-git.rev}";
+    });
+
+    mesa-git = (pkgs.mesa.override {
+      libdrm = libdrm-git;
+    }).overrideAttrs (old: {
       src = inputs.mesa-git;
-      # Compute unique version string from src
       version = "git-${inputs.mesa-git.rev}";
 
       patches = (old.patches or []) ++ [
         (pkgs.fetchpatch {
           url = "https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/39551.patch";
-          hash = "sha256-70rzGbmnzQBcumwOOUgIFlgiM2+IAVKoVYLAZBI8OWk=";
+          hash = "sha256-phqyDnkBFgpEgAsWPxR4aQ9TikgIeI1NWEjXP1dqQvI=";
         })
       ];
     });
 
-    mesa32-git = pkgs.driversi686Linux.mesa.overrideAttrs (_: {
+    mesa32-git = (pkgs.driversi686Linux.mesa.override {
+      libdrm = libdrm-git;
+    }).overrideAttrs (old: {
       src = inputs.mesa-git;
-      # Compute unique version string from src
       version = "32-git-${inputs.mesa-git.rev}";
     });
+
   in lib.mkIf cfg.enable {
     environment.variables.MESA_GIT =
       lib.concatStringsSep ":" [
@@ -39,3 +53,4 @@ in
     hardware.graphics.package32 = lib.mkIf cfg.global mesa32-git;
   };
 }
+

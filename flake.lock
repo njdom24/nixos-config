@@ -520,6 +520,22 @@
         "type": "github"
       }
     },
+    "libdrm-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777307000,
+        "narHash": "sha256-BrUIoA3mwykCB0O4kaMHNcqw+RV0zsacEt8RcTCpx6Y=",
+        "ref": "refs/heads/main",
+        "rev": "b8b7c57c00954b22ac182543602bd8f654ea1c30",
+        "revCount": 7224,
+        "type": "git",
+        "url": "https://gitlab.freedesktop.org/mesa/libdrm.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://gitlab.freedesktop.org/mesa/libdrm.git"
+      }
+    },
     "mesa-git": {
       "flake": false,
       "locked": {
@@ -707,6 +723,7 @@
         "home-manager-unstable": "home-manager-unstable",
         "hyprland": "hyprland",
         "kwin-effects-better-blur-dx": "kwin-effects-better-blur-dx",
+        "libdrm-git": "libdrm-git",
         "mesa-git": "mesa-git",
         "moonlight-qt-git": "moonlight-qt-git",
         "nix-colors": "nix-colors",

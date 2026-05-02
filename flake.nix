@@ -53,6 +53,10 @@
       #url = "git+https://gitlab.freedesktop.org/mesa/mesa.git";
       flake = false;
     };
+    libdrm-git = {
+      url = "git+https://gitlab.freedesktop.org/mesa/libdrm.git";
+      flake = false;
+    };
 
     moonlight-qt-git = {
       # https://github.com/NixOS/nix/issues/4423#issuecomment-1580924502
