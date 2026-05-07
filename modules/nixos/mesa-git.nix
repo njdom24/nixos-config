@@ -21,6 +21,17 @@ in
         "${toString major}.${toString (minor + 2)}.${toString patch}-git-${inputs.libdrm-git.rev}";
     });
 
+    libdrm32-git = pkgs.pkgsi686Linux.libdrm.overrideAttrs (old: let
+      parts = lib.splitString "." old.version;
+      major = lib.toInt (builtins.elemAt parts 0);
+      minor = lib.toInt (builtins.elemAt parts 1);
+      patch = lib.toInt (builtins.elemAt parts 2);
+    in {
+      src = inputs.libdrm-git;
+      version =
+        "${toString major}.${toString (minor + 2)}.${toString patch}-git-${inputs.libdrm-git.rev}";
+    });
+
     mesa-git = (pkgs.mesa.override {
       libdrm = libdrm-git;
     }).overrideAttrs (old: {
@@ -36,7 +47,7 @@ in
     });
 
     mesa32-git = (pkgs.driversi686Linux.mesa.override {
-      libdrm = libdrm-git;
+      libdrm = libdrm32-git;
     }).overrideAttrs (old: {
       src = inputs.mesa-git;
       version = "32-git-${inputs.mesa-git.rev}";
