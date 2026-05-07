@@ -92,7 +92,7 @@
   environment = {
   	systemPackages = with pkgs; [
   	  moonlight-qt
-  	  unstable.lutris
+      stable.lutris
   	  unstable.xivlauncher
   	  vkbasalt
 	  unstable.ludusavi
