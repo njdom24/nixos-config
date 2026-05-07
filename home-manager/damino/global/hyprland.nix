@@ -1,6 +1,6 @@
 { inputs, lib, config, pkgs, ... }: {
   imports = [
-    inputs.hyprland.homeManagerModules.default
+    #inputs.hyprland.homeManagerModules.default
     ./wlogout.nix
     ./waybar.nix
     ./rofi.nix
@@ -105,7 +105,7 @@
     # Tempotary config when using overlayed patched Hyprland alongside flake
     package = null;
     #package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+    #portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
     #importantPrefixes = [ "output" ];
     settings = {
       "$mainMod" = "SUPER";

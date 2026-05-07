@@ -42,10 +42,10 @@
       flake = false;
     };
 
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    #hyprland = {
+    #  url = "github:hyprwm/Hyprland";
+    #  inputs.nixpkgs.follows = "nixpkgs";
+    #};
     #hyprland.url = "git+https://github.com/UjinT34/Hyprland/fp16?submodules=1";
 
     mesa-git = {
@@ -103,7 +103,7 @@
     xwayland-satellite,
     sway-git,
     wlroots-git,
-    hyprland,
+    #hyprland,
     #hy3,
     hardware,
     moonlight-qt-git,
