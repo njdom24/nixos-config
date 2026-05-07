@@ -22,10 +22,10 @@
     FSR4_UPGRADE = 1;
   };
 
-  mesa-git = {
-    enable = true;
-    global = true;
-  };
+  #mesa-git = {
+  #  enable = true;
+  #  global = true;
+  #};
 
   programs.steam.gamescopeSession.args = [
   	"-H 1440"
