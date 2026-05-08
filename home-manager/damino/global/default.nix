@@ -28,6 +28,7 @@
     ./terminals.nix
     ./theming
     ./gpu-screen-recorder.nix
+    ./al2
   ];
 
   colorScheme = inputs.nix-colors.colorSchemes.mocha;
