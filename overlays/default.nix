@@ -61,6 +61,7 @@ in {
             })
             #../patches/wlr-scrgb.patch
             ../patches/wlr-hdr-hack.patch
+            ../patches/wlr-desc-changed.patch
           ];
         in {
           src = inputs.wlroots-git;
