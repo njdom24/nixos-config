@@ -372,11 +372,12 @@
 
           if [[ "$1" == "hdr" ]]; then
             echo "Enabling HDR"
-            ${pkgs.gamescope}/bin/gamescopectl hdr_enabled 1
+            is_hdr=1
           else
             echo "Disabling HDR"
-            ${pkgs.gamescope}/bin/gamescopectl hdr_enabled 0
+            is_hdr=0
           fi
+          ${pkgs.gamescope}/bin/gamescopectl hdr_enabled "$is_hdr"
           # Gamescope FPS limiter is buggy
           # ${pkgs.gamescope}/bin/gamescopectl debug_set_fps_limit $SUNSHINE_CLIENT_FPS
         else
@@ -385,9 +386,16 @@
           ${pkgs.gamescope}/bin/gamescopectl shutdown 2> /dev/null || true
           ${pkgs.systemd}/bin/systemctl --user stop sunshine-steam.service 2> /dev/null || true
           ${pkgs.systemd}/bin/systemctl --user reset-failed
-
           sleep 1
-          ${pkgs.systemd}/bin/systemd-run --user --unit=sunshine-steam --remain-after-exit --description="Launch Steam Gamescope detached in desktop session" ${pkgs.bash}/bin/bash -c 'env GSC_HDR_MODESET=1 gsc-watcher -e -- env ENABLE_LAYER_MESA_ANTI_LAG=0 LFX=0 steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu'
+
+          ${pkgs.systemd}/bin/systemd-run --user \
+            --unit=sunshine-steam \
+            --remain-after-exit \
+            --setenv=GSC_HDR_MODESET="$([ "$is_hdr" = "1" ] && echo 1)" \
+            --description="Launch Steam Gamescope detached in desktop session" \
+            ${pkgs.bash}/bin/bash -c '
+              exec env ENABLE_LAYER_MESA_ANTI_LAG=0 LFX=0 steam
+            '
         fi
       '';
       in
