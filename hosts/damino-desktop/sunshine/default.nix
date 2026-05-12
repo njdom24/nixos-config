@@ -388,13 +388,15 @@
           ${pkgs.systemd}/bin/systemctl --user reset-failed
           sleep 1
 
+          # exec env ENABLE_LAYER_MESA_ANTI_LAG=0 LFX=0 steam
+
           ${pkgs.systemd}/bin/systemd-run --user \
             --unit=sunshine-steam \
             --remain-after-exit \
             --setenv=GSC_HDR_MODESET="$([ "$is_hdr" = "1" ] && echo 1)" \
             --description="Launch Steam Gamescope detached in desktop session" \
             ${pkgs.bash}/bin/bash -c '
-              exec env ENABLE_LAYER_MESA_ANTI_LAG=0 LFX=0 steam
+              exec steam
             '
         fi
       '';
