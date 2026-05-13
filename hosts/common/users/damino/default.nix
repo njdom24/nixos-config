@@ -26,7 +26,11 @@ in
   	outputs.overlays.unstable-packages
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
+  	inputs.nix-cachyos-kernel.overlays.default
   ];
+  nix.settings.substituters = [ "https://attic.xuyh0120.win/lantian" ];
+  nix.settings.trusted-public-keys = [ "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=" ];
+
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.damino = {

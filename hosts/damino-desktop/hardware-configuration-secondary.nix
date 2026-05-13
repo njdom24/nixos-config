@@ -22,7 +22,8 @@ in
   # Avoid audio crackle: https://wiki.cachyos.org/features/cachyos_settings/#udev-rules
   boot.kernelParams = [ "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.cachyosKernels.linuxPackages-cachyos-latest;
+  #boot.kernelPackages = pkgs.linuxPackages_latest;
   #boot.kernelPatches = [ {
   #	name = "enable-hdmi-freesync";
   #	patch = ../../patches/enable-hdmi-freesync.mypatch;

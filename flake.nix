@@ -17,6 +17,8 @@
     home-manager-unstable.url = "github:nix-community/home-manager";
     home-manager-unstable.inputs.nixpkgs.follows = "nixpkgs";
 
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
