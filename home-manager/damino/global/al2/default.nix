@@ -57,7 +57,6 @@ in
     };
   };
 
-  # Deploy the .so
   home = {
     packages = [ low-latency-layer ];
     sessionVariables = {
@@ -65,9 +64,10 @@ in
        LOW_LATENCY_LAYER_REFLEX = "1";
        PROTON_FORCE_NVAPI = "1"; # Needed for Reflex 2 on non-NVIDIA hardware
        # LOW_LATENCY_SPOOF_NVIDIA = "1";
-       # DISABLE_LOW_LATENCY = "0";
+       DISABLE_LOW_LATENCY_LAYER = "1";
     };
-    
+
+    # Deploy the .so
     file.".local/lib/libVkLayer_MESA_anti_lag.so" = {
       source = antiLagSo;
       executable = true;
