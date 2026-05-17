@@ -210,6 +210,24 @@
         "url": "https://gitlab.freedesktop.org/mesa/libdrm.git"
       }
     },
+    "low-latency-layer-git": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778989800,
+        "narHash": "sha256-dDZVQqVL47cWSZOwcavqR1Cmh8rsCdlbm+vPhUZklhw=",
+        "ref": "refs/heads/main",
+        "rev": "4633ada4cba4facafeeb91f473bce0c59401d91a",
+        "revCount": 152,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/Korthos-Software/low_latency_layer"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/Korthos-Software/low_latency_layer"
+      }
+    },
     "mesa-git": {
       "flake": false,
       "locked": {
@@ -428,6 +446,7 @@
         "home-manager-unstable": "home-manager-unstable",
         "kwin-effects-better-blur-dx": "kwin-effects-better-blur-dx",
         "libdrm-git": "libdrm-git",
+        "low-latency-layer-git": "low-latency-layer-git",
         "mesa-git": "mesa-git",
         "moonlight-qt-git": "moonlight-qt-git",
         "nix-cachyos-kernel": "nix-cachyos-kernel",

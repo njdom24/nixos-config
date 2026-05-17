@@ -71,6 +71,11 @@
       flake = false;
     };
 
+    low-latency-layer-git = {
+      url = "git+https://github.com/Korthos-Software/low_latency_layer?submodules=1";
+      flake = false;
+    };
+
     #hy3 = {
     #  url = "github:outfoxxed/hy3";
     #  #url = "github:outfoxxed/hy3?ref=hl{version}"; # where {version} is the hyprland release version
