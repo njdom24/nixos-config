@@ -40,7 +40,7 @@ in {
       #addIfMissing = p: if builtins.any (x: x == p) existing then [] else [p];
     in rec {
       NIX_CFLAGS_COMPILE = ["-fno-fast-math"];
-      src = inputs.gamescope-git;
+      #src = inputs.gamescope-git;
       #patches = existing ++ builtins.concatMap addIfMissing newPatches;
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
@@ -61,7 +61,6 @@ in {
             })
             #../patches/wlr-scrgb.patch
             ../patches/wlr-hdr-hack.patch
-            ../patches/wlr-desc-changed.patch
           ];
         in {
           src = inputs.wlroots-git;
