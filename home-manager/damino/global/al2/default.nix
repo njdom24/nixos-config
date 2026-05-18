@@ -62,7 +62,7 @@ in
     sessionVariables = {
        VK_ADD_IMPLICIT_LAYER_PATH = "${low-latency-layer}/share/vulkan/implicit_layer.d";
        LOW_LATENCY_LAYER_REFLEX = "1";
-       PROTON_FORCE_NVAPI = "1"; # Needed for Reflex 2 on non-NVIDIA hardware
+       # PROTON_FORCE_NVAPI = "1"; # Needed for Reflex 2 on non-NVIDIA hardware, but breaks OptiScaler's FakeNVAPI (Needed for FG)
        # LOW_LATENCY_SPOOF_NVIDIA = "1";
        DISABLE_LOW_LATENCY_LAYER = "1";
     };
