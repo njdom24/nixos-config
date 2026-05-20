@@ -87,6 +87,7 @@ in
 	  filezilla
 	  overskride
 	  warpinator
+	  inputs.wlr-hdr-cal.packages.${pkgs.stdenv.hostPlatform.system}.default
 	  gnome-font-viewer
 	  gnome-disk-utility
 	  gnome-system-monitor

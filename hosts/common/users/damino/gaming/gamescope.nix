@@ -852,14 +852,7 @@ let
     fi
   '';
 
-  gsc-watcher = let
-    eotfConfig = pkgs.writeText "hdmi_lut" ''
-      0 0
-      400 50
-      1000 130
-      10000 2333
-    '';
-  in pkgs.writeShellScriptBin "gsc-watcher" ''
+  gsc-watcher = pkgs.writeShellScriptBin "gsc-watcher" ''
     vrr_pid=""
     toggle_vrr() {
       # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
@@ -870,44 +863,6 @@ let
           vrr_pid=$!
         fi
       fi
-    }
-
-    hdr_mod_enable() {
-      if [[ "$GSC_HDR_MOD" == "1" ]]; then
-        if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-          scanout=$(hyprctl getoption render:direct_scanout -j | jq -r '.int')
-          hyprctl keyword "render:direct_scanout" "0"
-          sleep 1
-        fi
-
-        if [[ -f "$GSC_LUT" ]]; then
-          ${pkgs.wlr-hdr-calibrator}/bin/wlr-hdr-calibrator "$GSC_LUT" &
-        else
-          ${pkgs.wlr-hdr-calibrator}/bin/wlr-hdr-calibrator ${eotfConfig} &
-        fi
-        sleep 1
-
-        if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-          hyprctl keyword "render:direct_scanout" "$scanout"
-        fi
-      fi
-    }
-
-    hdr_mod_disable() {
-       if [[ "$GSC_HDR_MOD" == "1" ]]; then
-         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-           scanout=$(hyprctl getoption render:direct_scanout -j | jq -r '.int')
-           hyprctl keyword "render:direct_scanout" "0"
-           sleep 1
-         fi
-
-         kill `pgrep -f wlr-hdr-calibrator`
-         sleep 1
-
-         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-           hyprctl keyword "render:direct_scanout" "$scanout"
-         fi
-       fi
     }
 
     if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
@@ -1123,11 +1078,8 @@ let
       hyprctl keyword "monitorv2[$OUTPUT]:vrr" 1
       hyprctl keyword "monitorv2[$OUTPUT]:bitdepth" 10
 
-      # Workaround for HDMI HDR EOTF being broken
-      if [[ $OUTPUT == HDMI* ]] || [[ -f "$GSC_LUT" ]]; then
-        kill `pgrep wl-gammarelay` 2> /dev/null || true
-        export GSC_HDR_MOD=1
-
+      # Workaround for HDMI 2.0 banding in 4K
+      if [[ $OUTPUT == HDMI* ]]; then
         # Reduce banding for 4:2:0 chroma
         if [ $((WIDTH * HEIGHT)) -gt $((2560 * 1440)) ]; then
           export ENABLE_VKBASALT=1
@@ -1142,11 +1094,8 @@ let
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
 
-      # Workaround for HDMI HDR EOTF being broken
+      # Workaround for HDMI 2.0 banding in 4K
       if [[ $OUTPUT == HDMI* ]]; then
-        kill `pgrep wl-gammarelay` 2> /dev/null || true
-        export GSC_HDR_MOD=1
-
         # Reduce banding for 4:2:0 chroma
         if [ $((WIDTH * HEIGHT)) -gt $((2560 * 1440)) ]; then
           export ENABLE_VKBASALT=1
@@ -1160,25 +1109,17 @@ let
     # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
     #  Also seems to prevent AVIF HDR screenshots from saving...
     (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
-    sleep 3 && env GSC_HDR_MODESET=1 GSC_HDR_MOD="$GSC_HDR_MOD" GSC_MODESET_NOVRR=0 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- env ENABLE_VKBASALT="$ENABLE_VKBASALT" steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
-    # sleep 3 && env GSC_HDR_MODESET=1 GSC_LUT="$GSC_LUT" ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
+    sleep 3 && env GSC_HDR_MODESET=1 GSC_MODESET_NOVRR=0 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- env ENABLE_VKBASALT="$ENABLE_VKBASALT" steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
+    # sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
 
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.DP-1.enable output.DP-2.enable output.DP-1.position.0,0 output.DP-1.primary output.DP-2.position.2560,180 output.HDMI-A-1.disable # Restore monitor setup
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       #mv ~/.config/hypr/displays.conf.gsc ~/.config/hypr/displays.conf
-      if [[ $OUTPUT == HDMI* ]]; then
-        kill `pgrep -f wlr-hdr-calibrator` 2> /dev/null || true
-        #busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Brightness d 1
-        #busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1
-      fi
       hyprctl reload
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-      if [[ $OUTPUT == HDMI* ]]; then
-        kill `pgrep -f wlr-hdr-calibrator` 2> /dev/null || true
-      fi
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &
       swaymsg reload # Contains exec_always kanshi
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
@@ -1278,7 +1219,6 @@ in
   	  lsfg-min
   	  lsfg-vk
   	  novrr
-  	  wlr-hdr-calibrator
 
   	  # https://github.com/ValveSoftware/steam-for-linux/issues/11479
   	  # cd to /tmp to somehow avoid stutters with VRR

@@ -94,8 +94,8 @@
     # everything match nicely? Try nix-colors!
     nix-colors.url = "github:misterio77/nix-colors";
 
-    wlr-hdr-calibrator = {
-      url = "github:njdom24/wlr-hdr-calibrator";
+    wlr-hdr-cal = {
+      url = "github:njdom24/wlr-hdr-cal";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -115,7 +115,6 @@
     hardware,
     moonlight-qt-git,
     gamescope-git,
-    wlr-hdr-calibrator,
     ...
   } @ inputs: let
     inherit (self) outputs;

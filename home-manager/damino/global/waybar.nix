@@ -258,29 +258,30 @@
 
     	    case "$1" in
     	      toggle)
-    	        if ! ${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
-    	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6500
+    	        if ! ${pkgs.systemd}/bin/busctl --user get-property org.WlrHdrCal / org.WlrHdrCal Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^u 6500$'; then
+    	          ${pkgs.systemd}/bin/busctl --user set-property org.WlrHdrCal / org.WlrHdrCal Temperature u 6500
     	        else
-    	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6000
+    	          ${pkgs.systemd}/bin/busctl --user set-property org.WlrHdrCal / org.WlrHdrCal Temperature u 5000
     	        fi
     	        sleep 0.1 && pkill -RTMIN+10 waybar
     	        ;;
     	      increase)
-    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"
+    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property org.WlrHdrCal / org.WlrHdrCal Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"
     	        if [ "$temp" -ge 6500 ]; then
-    	          ${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Temperature q 6500
+    	          ${pkgs.systemd}/bin/busctl --user set-property org.WlrHdrCal / org.WlrHdrCal Temperature u 6500
     	        else
-    	          ${pkgs.systemd}/bin/busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n +100
+    	          ${pkgs.systemd}/bin/busctl --user set-property org.WlrHdrCal / org.WlrHdrCal Temperature u "$((temp + 100))"
     	        fi
     	        sleep 0.1 && pkill -RTMIN+10 waybar
     	        ;;
     	      decrease)
-    	        ${pkgs.systemd}/bin/busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -100
+    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property org.WlrHdrCal / org.WlrHdrCal Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"
+    	        ${pkgs.systemd}/bin/busctl --user set-property org.WlrHdrCal / org.WlrHdrCal Temperature u "$((temp - 100))"
     	        sleep 0.1 && pkill -RTMIN+10 waybar
     	        ;;
     	      status|*)
-    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"K
-    	        if ! ${pkgs.systemd}/bin/busctl --user get-property rs.wl-gammarelay / rs.wl.gammarelay Temperature 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q '^q 6500$'; then
+    	        temp="$(${pkgs.systemd}/bin/busctl --user get-property org.WlrHdrCal / org.WlrHdrCal Temperature | ${pkgs.gawk}/bin/awk '{print $2}')"K
+    	        if ! echo $temp | ${pkgs.gnugrep}/bin/grep -q '^u 6500$'; then
     	          echo "{\"text\":\"\",\"tooltip\":\"Color Temperature: $temp\"}"
     	        else
     	          echo "{\"text\":\"\",\"tooltip\":\"Color Temperature: $temp\"}"
