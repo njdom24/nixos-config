@@ -538,11 +538,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779162549,
-        "narHash": "sha256-2VlEgd33bu2wM9eYdSll98sjiom8Y4qNEYxDSTsQxt4=",
+        "lastModified": 1779424185,
+        "narHash": "sha256-NM6tdhTQf6vo5BTPsn9ADDYGyepmQYMpSpGTQbnqu5s=",
         "owner": "njdom24",
         "repo": "wlr-hdr-cal",
-        "rev": "61054d3910959f4d073c3fb784540bd9cbab12dd",
+        "rev": "443e4836538a9c57d4a91a07828cb47561a3fc51",
         "type": "github"
       },
       "original": {
