@@ -205,13 +205,15 @@
           exec_always sh -c "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
 
 		  #exec mako
-		  exec ${pkgs.swaynotificationcenter}/bin/swaync
+		  # Handled by Noctalia
+		  #exec ${pkgs.swaynotificationcenter}/bin/swaync
 		  exec ${pkgs.networkmanagerapplet}/bin/nm-applet
 		  exec_always ${pkgs.autotiling-rs}/bin/autotiling-rs
 		  #exec_always ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs
 		  exec_always wlr-hdr-cal
 		  exec ${vrrFullscreen}
 		  exec ${satellite-steam-unfloat-fix}
+		  exec_always noctalia
 
 		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec (sleep 3 && gtk-launch steam.desktop); workspace 1"; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
@@ -301,10 +303,12 @@
 		  floating.criteria = [
 		    { app_id = "steam"; title = "^(?!Steam$).*"; }
 		  ];
-		  bars = [{
-		  	command = "waybar";
-		  	position = "top";
-		  }];
+		  # Handled by Noctalia
+		  bars = [];
+		  #bars = [{
+		  #	command = "waybar";
+		  #	position = "top";
+		  #}];
 		  output = {
 		  	"*" = {
 		  	  bg = "${./theming/wallpapers/new_gridania.jpg} fill";
@@ -547,14 +551,17 @@
 		  	#"XF86AudioLowerVolume" = "exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%";
 		  	#"XF86AudioMute" = "exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle";
 		  	#"XF86AudioMicMute" = "exec --no-startup-id pactl set-source-mute @DEFAULT_SINK@ toggle";
-		  	"--no-repeat Control+grave" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --toggle-panel";
-		  	"--no-repeat Control+space" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --hide-latest";
+		  	"--no-repeat Control+grave" = "exec noctalia msg panel-toggle control-center notifications";
+		  	"--no-repeat Control+space" = "exec noctalia msg notification-clear-active";
+		  	#"--no-repeat Control+grave" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --toggle-panel";
+		  	#"--no-repeat Control+space" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client --hide-latest";
 		  	#"Control+grave" = "exec makoctl restore";
 		  	#"Control+space" = "exec makoctl dismiss";
 		  	"Control+Shift+b" = "exec sway-toggle-hdr";
 		  	"$mod+Return" = "exec alacritty";
 		  	"$mod+Shift+q" = "kill";
-		  	"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
+		  	#"$mod+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun\"";
+		  	"$mod+d" = "exec noctalia msg panel-toggle launcher";
 		  	"$mod+Shift+d" = "exec \"rofi -modi 'drun,run' -theme ${config.xdg.dataHome}/rofi/themes/custom.rasi -show drun -drun-show-actions\"";
 			"$mod+h" = "split h";
 			"$mod+v" = "split v";
@@ -605,7 +612,8 @@
 
 			"$mod+Shift+c" = "reload";
 			"$mod+Shift+r" = "restart";
-			"--no-repeat $mod+Shift+e" = "exec wlogout -p layer-shell";
+			#"--no-repeat $mod+Shift+e" = "exec wlogout -p layer-shell";
+			"--no-repeat $mod+Shift+e" = "exec noctalia msg panel-toggle session";
 			"$mod+r" = "mode \"resize\"";
 
 			"--no-repeat Shift+Print" = "exec ${hdr-screenshot} select";

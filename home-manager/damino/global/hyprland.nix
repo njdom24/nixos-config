@@ -114,7 +114,8 @@
 
       "$terminal" = "alacritty";
       "$fileManager" = "dolphin";
-      "$menu" = "rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun";
+      #"$menu" = "rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun";
+      "$menu" = "noctalia msg panel-toggle launcher";
       "$cursorTheme" = "XCursor-Pro-Dark";
 
       ### ENVIRONMENT VARIABLES ###
@@ -397,7 +398,8 @@
       ''; in [
         "$mainMod, Return, exec, $terminal"
         "$mainMod SHIFT, Q, killactive,"
-        "$mainMod SHIFT, E, exec, wlogout"
+        #"$mainMod SHIFT, E, exec, wlogout"
+        "$mainMod SHIFT, E, exec, noctalia msg panel-toggle session"
         "$mainMod SHIFT, Space, togglefloating,"
         "$mainMod, D, exec, $menu"
         # $mainMod, H, togglesplit, # dwindle
@@ -453,8 +455,10 @@
         "ALT, Tab, bringactivetotop"
 
         # Notification daemon
-        "CTRL, SPACE, exec, swaync-client --hide-latest"
-        "CTRL, grave, exec, swaync-client --toggle-panel"
+        "CTRL, SPACE, exec, noctalia msg notification-clear-active"
+        "CTRL, grave, exec, noctalia msg panel-toggle control-center notifications"
+        #"CTRL, SPACE, exec, swaync-client --hide-latest"
+        #"CTRL, grave, exec, swaync-client --toggle-panel"
 
         # Screenshot active monitor of focused window
         ", Print, exec, ${screenshot} focused"
@@ -553,7 +557,8 @@
         "kill `pgrep hyprpaper`; sleep 1 && ${pkgs.hyprpaper}/bin/hyprpaper &"
         #"timeout 10 kanshi &"
         # Waybar freezes on reload on Hyprland sometimes, so just restart
-        "kill `pgrep waybar`; sleep 1 && waybar &"
+        #"kill `pgrep waybar`; sleep 1 && waybar &"
+        "noctalia"
         #"sleep 1; ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs"
         "sleep 1; wlr-hdr-cal"
         "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"

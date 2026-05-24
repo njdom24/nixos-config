@@ -29,6 +29,7 @@
     ./theming
     ./gpu-screen-recorder.nix
     ./al2
+    ./noctalia.nix
   ];
 
   colorScheme = inputs.nix-colors.colorSchemes.mocha;

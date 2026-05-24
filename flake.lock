@@ -414,6 +414,27 @@
         "type": "github"
       }
     },
+    "noctalia": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779586543,
+        "narHash": "sha256-w2Xev1xbU4mYuldRwp6ghEczLCPaEpe1X5wMsJD7dGY=",
+        "owner": "noctalia-dev",
+        "repo": "noctalia-shell",
+        "rev": "f7c4e3102aa62a6cbd319e596c9abb526b9d8047",
+        "type": "github"
+      },
+      "original": {
+        "owner": "noctalia-dev",
+        "ref": "v5",
+        "repo": "noctalia-shell",
+        "type": "github"
+      }
+    },
     "plasma-manager": {
       "inputs": {
         "home-manager": [
@@ -454,6 +475,7 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-legacy": "nixpkgs-legacy",
         "nixpkgs-stable": "nixpkgs-stable",
+        "noctalia": "noctalia",
         "plasma-manager": "plasma-manager",
         "sway-git": "sway-git",
         "wlr-hdr-cal": "wlr-hdr-cal",
