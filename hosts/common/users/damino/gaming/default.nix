@@ -96,6 +96,8 @@
  	  ];
  	};
   };
+  # Soemtimes would start too early and enter a bad state
+  systemd.services.ananicy-cpp.after = lib.mkAfter [ "multi-user.target" ];
 
   environment = {
   	systemPackages = with pkgs; [
