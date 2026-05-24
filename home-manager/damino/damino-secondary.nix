@@ -9,6 +9,15 @@
     };
   };
 
+  programs = {
+    noctalia.settings = {
+      notifications = {
+        monitors = [ "DP-2" ];
+        position = "top_right";
+      };
+    };
+  };
+
   home.file = {
     # Force back to default
     ".config/hypr/hm/displays.conf" = lib.mkForce {
