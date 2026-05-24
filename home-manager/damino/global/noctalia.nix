@@ -17,7 +17,7 @@
 	    radius = 0;
 	    shadow = false;
 	    start = [ "workspaces" ];
-	    thickness = 22;
+	    thickness = 24;
 	    widget_spacing = 10;
 	  };
 
