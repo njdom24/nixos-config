@@ -85,6 +85,14 @@
  	      name = "sunshine";
  	      type = "LowLatency_RT";
  	    }
+ 	    {
+ 	      name = "wlr-hdr-cal";
+ 	      type = "BG_CPUIO";
+ 	    }
+ 	    {
+ 	      name = "noctalia";
+ 	      type = "service";
+ 	    }
  	  ];
  	};
   };
