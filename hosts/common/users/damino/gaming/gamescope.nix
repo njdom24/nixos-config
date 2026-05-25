@@ -25,7 +25,7 @@ let
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately, avoids touching monitor configs, so we use it
-      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption debug:vfr | ${pkgs.jq}/bin/jq '.int')
+      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption debug:vfr | ${pkgs.jq}/bin/jq -r 'if .bool then 1 else 0 end')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       # TODO
@@ -81,15 +81,16 @@ let
       animations=$(LD_LIBRARY_PATH="" hyprctl getoption animations:enabled -j | jq -r '.int')
       LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "0"
       sleep 1
-      #LD_LIBRARY_PATH="" hyprctl keyword "debug:vfr" "$vrr_mode"
-      sleep 1
       if [[ "$vrr_mode" = "1" ]]; then
         vrr_mode=2
       fi
-      LD_LIBRARY_PATH="" hyprctl --batch "keyword animations:enabled 0; keyword monitorv2[$monitor]:vrr $vrr_mode; dispatch fullscreen" && LD_LIBRARY_PATH="" hyprctl dispatch fullscreen
+      LD_LIBRARY_PATH="" hyprctl eval "hl.config({ animations = { enabled = false } })"
+      LD_LIBRARY_PATH="" hyprctl eval "hl.monitor({ output = \"$monitor\", vrr = $vrr_mode })"
+      LD_LIBRARY_PATH="" hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
+      LD_LIBRARY_PATH="" hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
       sleep 1
-      LD_LIBRARY_PATH="" hyprctl keyword animations:enabled $animations
-      LD_LIBRARY_PATH="" hyprctl keyword "render:direct_scanout" "$scanout"
+      LD_LIBRARY_PATH="" hyprctl eval "hl.config({ animations = { enabled = $([ "$animations" = "1" ] && echo true || echo false) } })"
+      LD_LIBRARY_PATH="" hyprctl eval "hl.config({ render = { direct_scanout = $scanout } })"
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
 
@@ -869,9 +870,6 @@ let
       # If already in HDR, apply LUT
       focused_display="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')"
       hdr_enabled="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$focused_display\") | .hdr")"
-      if [[ "$hdr_enabled" == "true" ]]; then
-        hdr_mod_enable
-      fi
     fi
 
     # Vars to help find screenshot dir
@@ -939,11 +937,10 @@ let
                   swaymsg output $focused_display hdr on
                 fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-                hyprctl dispatch fullscreen
+                hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr on
-                hyprctl dispatch fullscreen
+                hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
               fi
-              hdr_mod_enable
             fi
           fi
         elif [[ "$line" == *"VK_COLOR_SPACE_SRGB_NONLINEAR_KHR"* ]]; then
@@ -959,11 +956,10 @@ let
                   swaymsg output $focused_display hdr off
                 fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-                hyprctl dispatch fullscreen
+                hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr off
-                hyprctl dispatch fullscreen
+                hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
               fi
-              hdr_mod_disable
             fi
           fi
         fi
@@ -981,7 +977,6 @@ let
             curr_colorspace="HDR"
             if command -v sway-toggle-hdr >/dev/null 2>&1; then
               sway-toggle-hdr on
-              hdr_mod_enable
             else
               focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
               swaymsg output $focused_display hdr on
@@ -989,7 +984,6 @@ let
           elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
             # Assuming cm_auto_hdr > 0, switching back to SDR is fine
             hypr-toggle-hdr off
-            hdr_mod_disable
           fi
 
           toggle_vrr
@@ -1069,14 +1063,13 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       #cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
       #cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
-      hyprctl keyword "monitorv2[$OUTPUT]:disabled" 0
+      hyprctl eval "hl.monitor({ output = \"$OUTPUT\", disabled = false })"
       hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
-        [[ "$m" != "$OUTPUT" ]] && hyprctl keyword "monitorv2[$m]:disabled" 1
+        [[ "$m" != "$OUTPUT" ]] && hyprctl eval "hl.monitor({ output = \"$m\", disabled = true })"
       done
-      hyprctl keyword "monitorv2[$OUTPUT]:mode" "$WIDTH"x"$HEIGHT"@"$REFRESH"
-      hyprctl keyword "monitorv2[$OUTPUT]:scale" 1.5
-      hyprctl keyword "monitorv2[$OUTPUT]:vrr" 1
-      hyprctl keyword "monitorv2[$OUTPUT]:bitdepth" 10
+      # "''$()"
+      hyprctl eval "hl.monitor({ output = \"$OUTPUT\", mode = \"''${WIDTH}x''${HEIGHT}@''${REFRESH}\", scale = 1.5, vrr = 1, bitdepth = 10 })"
+      # "''$()"
 
       # Workaround for HDMI 2.0 banding in 4K
       if [[ $OUTPUT == HDMI* ]]; then

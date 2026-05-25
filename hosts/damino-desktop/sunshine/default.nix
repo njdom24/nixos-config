@@ -208,47 +208,60 @@
             Hyprland)
               echo "→ Running Hyprland-specific logic"
 
-              display_cfg="/home/$USER/.config/hypr/displays.conf"
-              if [[ ! -f "$display_cfg".gsc ]]; then
-                # Make backup
-                cp -f "$display_cfg" "$display_cfg".gsc
+              if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+                export HYPRLAND_INSTANCE_SIGNATURE=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^HYPRLAND_INSTANCE_SIGNATURE=' | ${pkgs.coreutils}/bin/cut -d= -f2)
+              fi
+              if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+                export HYPRLAND_INSTANCE_SIGNATURE=$(${pkgs.hyprland}/bin/hyprctl -j instances | ${pkgs.jq}/bin/jq -r '.[0] | .instance')
               fi
 
               # Configure display to match client
               if [ "$SUNSHINE_CLIENT_FPS" -gt 120 ]; then
                 SUNSHINE_CLIENT_FPS=120
               fi
-
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:disabled" 0
+              
+              ${pkgs.hyprland}/bin/hyprctl eval "hl.monitor({ output = \"$DUMMY\", disabled = false })"
               ${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
-                [[ "$m" != "$DUMMY" ]] && ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$m]:disabled" 1
+                [[ "$m" != "$DUMMY" ]] && ${pkgs.hyprland}/bin/hyprctl eval "hl.monitor({ output = \"$m\", disabled = true })"
               done
-
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:mode" "$SUNSHINE_CLIENT_WIDTH"x"$SUNSHINE_CLIENT_HEIGHT"@"$SUNSHINE_CLIENT_FPS"
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:bitdepth" 10
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:position" 0x0
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_min_luminance" 0.005
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:min_luminance" 0
-              ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:cm" srgb
-              ${pkgs.hyprland}/bin/hyprctl keyword render:cm_auto_hdr 1
-
+              
               if [[ "$1" == "hdr" ]]; then
                 echo "Enabling HDR"
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_wide_color" 1
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_hdr" 1
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_max_luminance" 203
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_luminance" 1000
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_avg_luminance" 1000
+                ${pkgs.hyprland}/bin/hyprctl eval "hl.monitor({
+                  output               = \"$DUMMY\",
+                  mode                 = \"''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}\",
+                  position             = \"0x0\",
+                  bitdepth             = 10,
+                  cm                   = \"srgb\",
+                  supports_wide_color  = true,
+                  supports_hdr         = true,
+                  sdr_min_luminance    = 0.005,
+                  sdr_max_luminance    = 203,
+                  min_luminance        = 0,
+                  max_luminance        = 1000,
+                  max_avg_luminance    = 1000
+                })"
               else
                 echo "Disabling HDR"
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_wide_color" 0
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:supports_hdr" 0
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:sdr_max_luminance" 80
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_luminance" 80
-                ${pkgs.hyprland}/bin/hyprctl keyword "monitorv2[$DUMMY]:max_avg_luminance" 80
+                ${pkgs.hyprland}/bin/hyprctl eval "hl.monitor({
+                  output               = \"$DUMMY\",
+                  mode                 = \"''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}\",
+                  position             = \"0x0\",
+                  bitdepth             = 10,
+                  cm                   = \"srgb\",
+                  supports_wide_color  = false,
+                  supports_hdr         = false,
+                  sdr_min_luminance    = 0.005,
+                  sdr_max_luminance    = 80,
+                  min_luminance        = 0,
+                  max_luminance        = 80,
+                  max_avg_luminance    = 80
+                })"
               fi
-
-              ${pkgs.procps}/bin/kill $($pkgs.procps}/bin/pgrep hyprland-share) || true
+              
+              ${pkgs.hyprland}/bin/hyprctl eval "hl.config({ render = { cm_auto_hdr = 1 } })"
+              
+              ${pkgs.procps}/bin/kill $(${pkgs.procps}/bin/pgrep hyprland-share) || true
               ;;
             "")
               echo "→ No known compositor found"
@@ -350,12 +363,14 @@
           Hyprland)
             echo "→ Running Hyprland-specific logic"
 
-            display_cfg="/home/$USER/.config/hypr/displays.conf"
-            if [[ -f "$display_cfg".gsc ]]; then
-              mv -f "$display_cfg".gsc "$display_cfg"
-            else
-              ${pkgs.hyprland}/bin/hyprctl reload
+            if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+              export HYPRLAND_INSTANCE_SIGNATURE=$(${pkgs.systemd}/bin/systemctl --user show-environment | ${pkgs.gnugrep}/bin/grep '^HYPRLAND_INSTANCE_SIGNATURE=' | ${pkgs.coreutils}/bin/cut -d= -f2)
             fi
+            if [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]; then
+              export HYPRLAND_INSTANCE_SIGNATURE=$(${pkgs.hyprland}/bin/hyprctl -j instances | ${pkgs.jq}/bin/jq -r '.[0] | .instance')
+            fi
+
+            ${pkgs.hyprland}/bin/hyprctl reload
             ;;
           *)
             echo "→ Unknown compositor: $compositor"

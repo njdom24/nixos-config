@@ -7,333 +7,106 @@
     ./swaync.nix
   ];
 
-  wayland.windowManager.hyprland =
-  let
-    set-displays = pkgs.writeShellScript "set-displays.sh" ''
-      display_cfg="/home/$USER/.config/hypr/displays.conf"
-
-      if [[ "$(${pkgs.systemd}/bin/systemctl --user is-active sunshine.service 2>/dev/null)" == "active" ]] || \
-         ( [ -f /tmp/sunshine_login ] && \
-           ${pkgs.coreutils}/bin/tail -n 200 /tmp/sunshine_login \
-             | ${pkgs.gnugrep}/bin/grep -E 'CLIENT (CONNECTED|DISCONNECTED)' \
-             | ${pkgs.coreutils}/bin/tail -n 1 \
-             | ${pkgs.gnugrep}/bin/grep -q 'CONNECTED' ); then
-        $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
-
-        ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
-
-        sleep 1
-        # Enable headless display if remote
-        hyprctl keyword "monitorv2[DP-3]:disabled" 0
-        sleep 1
-        hyprctl keyword "monitorv2[DP-1]:disabled" 1
-        hyprctl keyword "monitorv2[DP-2]:disabled" 1
-        hyprctl keyword "monitorv2[HDMI-A-1]:disabled" 1
-
-        sleep 1 && ${pkgs.hyprland}/bin/hyprctl reload
-        sleep 3 && ${pkgs.systemd}/bin/systemctl --user restart sunshine
-
-        exit 0          
-      fi
-
-      ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
-
-      ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 1 silent] firefox"
-      ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 4 silent] steam"
-      sleep 1 && ${pkgs.hyprland}/bin/hyprctl dispatch exec "[workspace 2 silent] discord"
-    '';
-    # Bodge to work around gamescope cursor grab not working on games with launchers
-    gamescope-cursor-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
-      SOCK="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
-
-      declare -A gamescopes
-      direct_scanout=$(
-        ${pkgs.hyprland}/bin/hyprctl getoption render:direct_scanout -j \
-        | ${pkgs.jq}/bin/jq -r '.int'
-      )
-
-      ${pkgs.socat}/bin/socat -U - UNIX-CONNECT:"$SOCK" | while read -r line; do
-        case "$line" in
-
-          openwindow*)
-            IFS=',' read -r addr workspace class title <<< "''${line#openwindow>>}"
-
-            if [[ "$class" == "gamescope" || "$class" == "gamescope-wrapped" ]]; then
-              gamescopes["$addr"]=1
-
-              # Disable DS when Gamescope is active (work around flicker bug)
-              if [[ ''${#gamescopes[@]} -eq 1 ]]; then
-                ${pkgs.hyprland}/bin/hyprctl keyword "render:direct_scanout" "0"
-              fi
-
-              # Unfocus, refocus to fix stuck cursor
-              sleep 0.1
-
-              pre_fullscreen=$(hyprctl -j clients \
-                | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
-
-              ${pkgs.hyprland}/bin/hyprctl dispatch focuscurrentorlast
-              ${pkgs.hyprland}/bin/hyprctl dispatch focuscurrentorlast
-
-              post_fullscreen=$(hyprctl -j clients \
-                | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
-
-              if [[ "$pre_fullscreen" -gt 0 && "$post_fullscreen" -eq 0 ]]; then
-                hyprctl dispatch fullscreen
-              fi
-            fi
-            ;;
-
-          closewindow*)
-            addr="''${line#closewindow>>}"
-
-            if [[ -n "''${gamescopes[$addr]}" ]]; then
-              unset gamescopes["$addr"]
-
-              # Re-enable DS when all Gamescope instances are closed
-              if [[ ''${#gamescopes[@]} -eq 0 ]]; then
-                ${pkgs.hyprland}/bin/hyprctl keyword "render:direct_scanout" "$direct_scanout"
-              fi
-            fi
-            ;;
-        esac
-      done
-    '';
-  in {
+  wayland.windowManager.hyprland = {
     enable = true;
+    configType = "lua";
     systemd.enable = true;
     # Tempotary config when using overlayed patched Hyprland alongside flake
     package = null;
     #package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
     #portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
     #importantPrefixes = [ "output" ];
-    settings = {
-      "$mainMod" = "SUPER";
-      # Kanshi handles non-HDR stuff
-      source = "~/.config/hypr/displays.conf";
+    settings = {};
 
-      "$terminal" = "alacritty";
-      "$fileManager" = "dolphin";
-      #"$menu" = "rofi -modi 'drun,run' -theme ~/.local/share/rofi/themes/custom.rasi -show drun";
-      "$menu" = "noctalia msg panel-toggle launcher";
-      "$cursorTheme" = "XCursor-Pro-Dark";
+    extraConfig = let
+      set-displays = pkgs.writeShellScript "set-displays.sh" ''
+        if [[ "$(${pkgs.systemd}/bin/systemctl --user is-active sunshine.service 2>/dev/null)" == "active" ]] || \
+           ( [ -f /tmp/sunshine_login ] && \
+             ${pkgs.coreutils}/bin/tail -n 200 /tmp/sunshine_login \
+               | ${pkgs.gnugrep}/bin/grep -E 'CLIENT (CONNECTED|DISCONNECTED)' \
+               | ${pkgs.coreutils}/bin/tail -n 1 \
+               | ${pkgs.gnugrep}/bin/grep -q 'CONNECTED' ); then
+          $(${pkgs.openrgb}/bin/openrgb --mode static --color 000000 > /dev/null 2>&1 || true) &
 
-      ### ENVIRONMENT VARIABLES ###
-      env = [
-        "XCURSOR_SIZE,24"
-        "HYPRCURSOR_SIZE,24"
-        "HYPRCURSOR_THEME,$cursorTheme"
-        "SSH_AUTH_SOCK,$XDG_RUNTIME_DIR/gcr/ssh"
-        "SSH_ASKPASS,/run/current-system/sw/libexec/seahorse/ssh-askpass"
-        "QT_QPA_PLATFORM,wayland;xcb"
-        "GDK_BACKEND,wayland,x11"
-        "CLUTTER_BACKEND,wayland"
-        "QT_QPA_PLATFORMTHEME,qt6ct"
-        "_JAVA_AWT_WM_NONREPARENTING,1"
-        "MOZ_ENABLE_WAYLAND,1"
-        "MOZ_DBUS_REMOTE,1"
-        "NIXOS_OZONE_WL,1"
-        "XDG_MENU_PREFIX,plasma-"
-      ];
+          ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=1
 
-      #plugin = {
-        #hy3 = {
-        #  autotile.enable = true;
-        #};
-      #};
+          sleep 1
+          # Enable headless display if remote
+          hyprctl eval "hl.monitor({ output = \"DP-3\", disabled = false })"
+          sleep 1
+          hyprctl eval "hl.monitor({ output = \"DP-1\", disabled = true })"
+          hyprctl eval "hl.monitor({ output = \"DP-2\", disabled = true })"
+          hyprctl eval "hl.monitor({ output = \"HDMI-A-1\", disabled = true })"
 
-      general = {
-        gaps_in = 2;
-        gaps_out = 4;
-        border_size = 2;
-        # https://wiki.hypr.land/Configuring/Variables/#variable-types for info about colors
-        "col.active_border" = "rgba(${config.colorScheme.palette.base05}ff)";
-        "col.inactive_border" = "rgba(${config.colorScheme.palette.base01}ff)";
-        # Set to true enable resizing windows by clicking and dragging on borders and gaps
-        resize_on_border = false;
-        # Please see https://wiki.hypr.land/Configuring/Tearing/ before you turn this on
-        allow_tearing = false;
-        layout = "dwindle";
-        #layout = "hy3";
-      };
+          sleep 1 && ${pkgs.hyprland}/bin/hyprctl reload
+          sleep 3 && ${pkgs.systemd}/bin/systemctl --user restart sunshine
 
-      decoration = {
-        rounding = 0;
-        rounding_power = 2;
-        # Change transparency of focused and unfocused windows
-        active_opacity = 1.0;
-        inactive_opacity = 1.0;
-        shadow = {
-          enabled = false;
-          range = 4;
-          render_power = 3;
-          color = "rgba(1a1a1aee)";
-        };
-        # https://wiki.hypr.land/Configuring/Variables/#blur
-        # Screen transitions look weird with blur enabled
-        blur = {
-          enabled = true;
-          size = 2;
-          passes = 1;
-          vibrancy = 0.1696;
-          vibrancy_darkness = 1.0;
-          contrast = 2.0;
-        };
-      };
+          exit 0          
+        fi
 
-      animations = {
-        enabled = true;
+        ${pkgs.systemd}/bin/systemctl --user set-environment REMOTE_ENABLED=0
 
-        bezier = [
-          "easeOutQuint,0.23,1,0.32,1"
-          "easeInOutCubic,0.65,0.05,0.36,1"
-          "linear,0,0,1,1"
-          "almostLinear,0.5,0.5,0.75,1.0"
-          "quick,0.15,0,0.1,1"
-        ];
+        hyprctl eval "hl.dispatch(hl.dsp.exec_cmd(\"[workspace 1 silent] firefox\"))"
+        hyprctl eval "hl.dispatch(hl.dsp.exec_cmd(\"[workspace 4 silent] steam\"))"
+        hyprctl eval "hl.dispatch(hl.dsp.exec_cmd(\"[workspace 2 silent] discord\"))"
+      '';
+      # Bodge to work around gamescope cursor grab not working on games with launchers
+      gamescope-cursor-fix = pkgs.writeShellScript "gamescope-cursor-fix.sh" ''
+        SOCK="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
 
-        animation = [
-          "global, 1, 10, default"
-          "border, 1, 5.39, easeOutQuint"
-          "windows, 1, 4.79, easeOutQuint"
-          "windowsIn, 1, 4.1, easeOutQuint, popin 87%"
-          "windowsOut, 1, 1.49, linear, popin 87%"
-          "fadeIn, 1, 1.73, almostLinear"
-          "fadeOut, 1, 1.46, almostLinear"
-          "fade, 1, 3.03, quick"
-          "layers, 1, 3.81, easeOutQuint"
-          "layersIn, 1, 4, quick, slide"
-          "layersOut, 1, 1.5, quick, slide"
-          "fadeLayersIn, 1, 1.79, almostLinear"
-          "fadeLayersOut, 1, 1.39, almostLinear"
-          "workspaces, 1, 0.94, almostLinear, fade"
-          "workspacesIn, 0, 1.21, almostLinear, fade"
-          "workspacesOut, 1, 0.94, almostLinear, fade"
-        ];
-      };
+        declare -A gamescopes
+        direct_scanout=$(
+          ${pkgs.hyprland}/bin/hyprctl getoption render:direct_scanout -j \
+          | ${pkgs.jq}/bin/jq -r '.int'
+        )
 
-      workspace = [
-        "w[tv1], gapsout:0, gapsin:0"
-        "f[1], gapsout:0, gapsin:0"
-        "1,monitor:DP-1"
-        "2,monitor:DP-2"
-        "4,monitor:DP-1"
-      ];
+        ${pkgs.socat}/bin/socat -U - UNIX-CONNECT:"$SOCK" | while read -r line; do
+          case "$line" in
 
-      windowrule = [
-        "match:workspace w[tv1], match:float 0, border_size 0, rounding 0"
-        "match:workspace f[1], match:float 0, border_size 0, rounding 0"
-        "match:class .*, suppress_event maximize"
-        "match:class ^(xwaylandvideobridge)$, opacity 0.0 override, no_anim 1, no_initial_focus 1, max_size 1 1, no_blur 1, no_focus 1"
-        # Fix some dragging issues with XWayland ?
-        #"match:xwayland 1, match:float 1, match:fullscreen 0, match:pin 0, no_focus 1"
-        "match:class ^(com.moonlight_stream.Moonlight)$, content game"
-        "match:class ^gamescope$, content game"
-        "match:class ^.gamescope-wrapped$, content game"
-        "match:class ^(steam_app_\\d+)$, content game" # All Steam apps are considered games
-        # Help deal with gamescope input going through to Steam
-        "match:class ^(steam)$, no_initial_focus 1, no_blur 1, suppress_event activate, suppress_event activatefocus"
-        "match:class ^(steam)$, match:title ^$, match:float 1, no_blur 1, no_anim 1"
-        "match:title ^(Steam Big Picture Mode)$, fullscreen 1"
-        "match:class ^(steam)$, match:title negative:^(Steam)$, float 1"
+            openwindow*)
+              IFS=',' read -r addr workspace class title <<< "''${line#openwindow>>}"
 
-        "match:class ^(vesktop)$, workspace 2 silent"
-        "match:class ^(discord)$, workspace 2 silent"
-        "match:class ^(steam)$, workspace 4 silent"
+              if [[ "$class" == "gamescope" || "$class" == "gamescope-wrapped" ]]; then
+                gamescopes["$addr"]=1
 
-        "match:class ^()$ match:title ^()$ no_blur"
+                # Disable DS when Gamescope is active (work around flicker bug)
+                if [[ ''${#gamescopes[@]} -eq 1 ]]; then
+                  hyprctl eval "hl.config({ render = { direct_scanout = 0 } })"
+                fi
 
-        #"match:class ^(ffxiv_dx11.exe)$, content none"
-        #"match:initial_title ^(XIVLauncher-RB).*$, content none"
-      ];
+                # Unfocus, refocus to fix stuck cursor
+                sleep 0.1
 
-      layerrule = [
-        # Don't clobber slurp's overlay window
-        "match:namespace selection, no_anim 1"
-        # https://github.com/ErikReider/SwayNotificationCenter/issues/424#issuecomment-2694101051
-        "match:namespace swaync-notification-window, blur 1, ignore_alpha 0.5"
-        "match:namespace swaync-control-center, blur 1, ignore_alpha 0.5"
-        "match:namespace rofi, blur 1, ignore_alpha 0.5"
-        "match:namespace waybar, blur 1, ignore_alpha 0.5"
-      ];
+                pre_fullscreen=$(hyprctl -j clients \
+                  | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
 
-      dwindle = {
-        #pseudotile = true;
-        preserve_split = true;
-        force_split = 2; # Split to right, down
-        split_width_multiplier = 1.3; # Work around autotiling preferring vertical splits somewhat often
-      };
+                hyprctl eval "hl.dispatch(hl.dsp.focus({ last = true }))"
+                hyprctl eval "hl.dispatch(hl.dsp.focus({ last = true }))"
 
-      master = {
-        new_status = "master";
-      };
+                post_fullscreen=$(hyprctl -j clients \
+                  | ${pkgs.jq}/bin/jq '.[] | select(.focusHistoryID == 0) | .fullscreen')
 
-      misc = {
-        force_default_wallpaper = -1; # Disable anime mascot wallpapers
-        disable_hyprland_logo = true; # If true disables the random hyprland logo / anime girl background
-        enable_anr_dialog = false; # Disable "not responding" popups
-        exit_window_retains_fullscreen = false; # Steam Big Picture retain fullscreen on game exit
-        vrr = 2;
-        screencopy_force_8b = true;
-      };
+                if [[ "$pre_fullscreen" -gt 0 && "$post_fullscreen" -eq 0 ]]; then
+                  hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
+                fi
+              fi
+              ;;
 
-      render = {
-        direct_scanout = 2;
-        cm_auto_hdr = 1;
-        cm_sdr_eotf = 2;
-        non_shader_cm = 1;
-        send_content_type = 0;
-      };
+            closewindow*)
+              addr="''${line#closewindow>>}"
 
-      debug = {
-        # Required for FFXVI to not crash with xx_color_management_v4 = true
-        # Required for Auto HDR to work with gamescope with xx_color_management_v4 = false
-        full_cm_proto = true;
-      };
+              if [[ -n "''${gamescopes[$addr]}" ]]; then
+                unset gamescopes["$addr"]
 
-      quirks = {
-        prefer_hdr = 2;
-        skip_non_kms_dmabuf_formats = true;
-      };
-
-      ### INPUT ###
-
-      input = {
-        kb_layout = "us";
-        #kb_variant = "";
-        #kb_model = "";
-        #kb_options = "";
-        #kb_rules = "";
-        follow_mouse = 1;
-        accel_profile = "flat";
-        sensitivity = 0; # -1.0 - 1.0, 0 means no modification.
-        touchpad = {
-          natural_scroll = true;
-        };
-      };
-
-      gesture = [
-        "3, horizontal, workspace"
-      ];
-
-      cursor = {
-        no_warps = false;
-        inactive_timeout = 10;
-        # https://github.com/hyprwm/Hyprland/discussions/7386
-        no_break_fs_vrr = 2; # 0 ironically works better for mouselook games, but requires HW cursor not to spike FPS
-        no_hardware_cursors = 0;
-        min_refresh_rate = 48;
-      };
-
-      device = [
-        {
-          name = "dualsense-wireless-controller-touchpad";
-          enabled = false;
-        }
-      ];
-
-      ### KEYBINDINGS ###
-      bind = let
+                # Re-enable DS when all Gamescope instances are closed
+                if [[ ''${#gamescopes[@]} -eq 0 ]]; then
+                  hyprctl eval "hl.config({ render = { direct_scanout = $direct_scanout } })"
+                fi
+              fi
+              ;;
+          esac
+        done
+      '';
       checkrec = pkgs.writeShellScript "checkrec" ''
         # Check if recording will be started, since GSR doesn't give feedback
         # Get the latest status line from the gpu-screen-recorder journal
@@ -395,198 +168,451 @@
           ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$newfile"
           #${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$newfile" "Screenshot converted"
         fi
-      ''; in [
-        "$mainMod, Return, exec, $terminal"
-        "$mainMod SHIFT, Q, killactive,"
-        #"$mainMod SHIFT, E, exec, wlogout"
-        "$mainMod SHIFT, E, exec, noctalia msg panel-toggle session"
-        "$mainMod SHIFT, Space, togglefloating,"
-        "$mainMod, D, exec, $menu"
-        # $mainMod, H, togglesplit, # dwindle
-        "$mainMod, F, fullscreen"
-        #"$mainMod, left, hy3:movefocus, l"
-        #"$mainMod, right, hy3:movefocus, r"
-        #"$mainMod, up, hy3:movefocus, u"
-        #"$mainMod, down, hy3:movefocus, d"
-        "$mainMod, left, movefocus, l"
-        "$mainMod, right, movefocus, r"
-        "$mainMod, up, movefocus, u"
-        "$mainMod, down, movefocus, d"
-        #"$mainMod, H, hy3:makegroup, h"
-        #"$mainMod, V, hy3:makegroup, v"
-        "$mainMod, space, exec, $(hyprctl activewindow -j | jq '.floating') && hyprctl dispatch cyclenext tiled || hyprctl dispatch cyclenext floating"
-        #"$mainMod, space, hy3:togglefocuslayer, nowarp"
+      ''; 
+      screenrec = pkgs.writeShellScript "screenrec" ''
+        # Check if recording will be started, since GSR doesn't give feedback
+        ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
 
-        # Move the active window (use SHIFT as the extra modifier)
-        #"$mainMod SHIFT, left,  hy3:movewindow, l"
-        #"$mainMod SHIFT, right, hy3:movewindow, r"
-        #"$mainMod SHIFT, up,    hy3:movewindow, u"
-        #"$mainMod SHIFT, down,  hy3:movewindow, d"
-        "$mainMod SHIFT, left,  movewindow, l"
-        "$mainMod SHIFT, right, movewindow, r"
-        "$mainMod SHIFT, up,    movewindow, u"
-        "$mainMod SHIFT, down,  movewindow, d"
+        # Get the latest status line from the gpu-screen-recorder journal
+        last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
 
-        # Switch workspaces with mainMod + [0-9]
-        "$mainMod, 1, workspace, 1"
-        "$mainMod, 2, workspace, 2"
-        "$mainMod, 3, workspace, 3"
-        "$mainMod, 4, workspace, 4"
-        "$mainMod, 5, workspace, 5"
-        "$mainMod, 6, workspace, 6"
-        "$mainMod, 7, workspace, 7"
-        "$mainMod, 8, workspace, 8"
-        "$mainMod, 9, workspace, 9"
-        "$mainMod, 0, workspace, 10"
-        # Move active window to a workspace with mainMod + SHIFT + [0-9]
-        "$mainMod SHIFT, 1, movetoworkspacesilent, 1"
-        "$mainMod SHIFT, 2, movetoworkspacesilent, 2"
-        "$mainMod SHIFT, 3, movetoworkspacesilent, 3"
-        "$mainMod SHIFT, 4, movetoworkspacesilent, 4"
-        "$mainMod SHIFT, 5, movetoworkspacesilent, 5"
-        "$mainMod SHIFT, 6, movetoworkspacesilent, 6"
-        "$mainMod SHIFT, 7, movetoworkspacesilent, 7"
-        "$mainMod SHIFT, 8, movetoworkspacesilent, 8"
-        "$mainMod SHIFT, 9, movetoworkspacesilent, 9"
-        "$mainMod SHIFT, 0, movetoworkspacesilent, 10"
+        if [[ "$last_line" != *"Started recording"* ]]; then
+          ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording started"
+        fi
 
-        # Standard Alt+Tab behavior, useful for Steam Input
-        "ALT, Tab, cyclenext"
-        "ALT, Tab, bringactivetotop"
+        ${pkgs.procps}/bin/pgrep -f "gpu-screen-recorder" | while read pid; do
+          cmd=$(${pkgs.ps}/bin/ps -p "$pid" -o args=)
 
-        # Notification daemon
-        "CTRL, SPACE, exec, noctalia msg notification-clear-active"
-        "CTRL, grave, exec, noctalia msg panel-toggle control-center notifications"
-        #"CTRL, SPACE, exec, swaync-client --hide-latest"
-        #"CTRL, grave, exec, swaync-client --toggle-panel"
-
-        # Screenshot active monitor of focused window
-        ", Print, exec, ${screenshot} focused"
-        "SHIFT, Next, exec, ${screenshot} focused"      
-        
-        # Screenshot selected region
-        "SHIFT, Print, exec, ${screenshot} selector"
-        "SHIFT, Prior, exec, ${screenshot} selector"
-
-        # Save replay if gpu-screen-recorder -r is running
-        "CTRL, Print, exec, ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'"
-        "CTRL SHIFT, Next, exec, ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'" # Page Down
-
-        # Start / stop manual recording if gpu-screen-recorder -ro is running
-        "CTRL SHIFT, Print, exec, ${checkrec}"
-        "CTRL SHIFT, Prior, exec, ${checkrec}" # Page Up
-
-        "CTRL SHIFT, B, exec, hypr-toggle-hdr"
-      ];
-
-      bindo = let
-        screenrec = pkgs.writeShellScript "screenrec" ''
-          # Check if recording will be started, since GSR doesn't give feedback
-          ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
-
-          # Get the latest status line from the gpu-screen-recorder journal
-          last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
-
-          if [[ "$last_line" != *"Started recording"* ]]; then
-            ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording started"
+          if [[ "$cmd" == *"-r"* && "$cmd" == *"-ro"* ]]; then
+            kill -SIGRTMIN "$pid"
           fi
+        done
+      '';
+    in ''
+      -- hyprland.lua
+      -- Converted from hyprland.conf (hyprlang) to Lua (Hyprland 0.55+)
+      -- Refer to: https://wiki.hypr.land/Configuring/Start/
+      
+      ---------------------
+      ---- MY PROGRAMS ----
+      ---------------------
+      
+      local cursorTheme  = "XCursor-Pro-Dark"
+      local fileManager  = "dolphin"
+      local mainMod      = "SUPER"
+      local menu         = "noctalia msg panel-toggle launcher"
+      local terminal     = "alacritty"
+      local xdgRuntimeDir = os.getenv("XDG_RUNTIME_DIR") or "/run/user/1000"
+      
+      ---------------------
+      ---- ENVIRONMENT ----
+      ---------------------
+      
+      hl.env("XCURSOR_SIZE",              "24")
+      hl.env("HYPRCURSOR_SIZE",           "24")
+      hl.env("HYPRCURSOR_THEME",          cursorTheme)
+      hl.env("SSH_AUTH_SOCK",  xdgRuntimeDir .. "/gcr/ssh")
+      hl.env("SSH_ASKPASS",               "/run/current-system/sw/libexec/seahorse/ssh-askpass")
+      hl.env("QT_QPA_PLATFORM",           "wayland;xcb")
+      hl.env("GDK_BACKEND",               "wayland,x11")
+      hl.env("CLUTTER_BACKEND",           "wayland")
+      hl.env("QT_QPA_PLATFORMTHEME",      "qt6ct")
+      hl.env("_JAVA_AWT_WM_NONREPARENTING","1")
+      hl.env("MOZ_ENABLE_WAYLAND",        "1")
+      hl.env("MOZ_DBUS_REMOTE",           "1")
+      hl.env("NIXOS_OZONE_WL",            "1")
+      hl.env("XDG_MENU_PREFIX",           "plasma-")
+      hl.env("AQ_DRM_DEVICES",            "/run/user/1000/dri/dgpu0")
+      
+      -------------------
+      ---- AUTOSTART ----
+      -------------------
+      
+      -- exec-once (run only on Hyprland start)
+      hl.on("hyprland.start", function()
+          hl.exec_cmd("systemctl --user stop plasma-xdg-desktop-portal-kde")
+          hl.exec_cmd("systemctl --user restart xdg-desktop-portal")
+          hl.exec_cmd("systemctl --user import-environment PATH")
+          hl.exec_cmd("${set-displays}")
+          hl.exec_cmd("${gamescope-cursor-fix}")
+          hl.exec_cmd("${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh")
+          hl.exec_cmd("${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'")
+          hl.exec_cmd("nm-applet &")
+          hl.exec_cmd("hyprctl setcursor " .. cursorTheme .. " 24")
+          hl.exec_cmd("swaync &")
+          hl.exec_cmd("hyprctl dispatch workspace 1")
+          hl.exec_cmd("${pkgs.legacy.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge")
+          hl.exec_cmd('ls "$XDG_RUNTIME_DIR/dri" 2> /dev/null | grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder')
+      
+          -- exec (re-run on reload) equivalents — run at start too
+          hl.exec_cmd("kill $(pgrep hyprpaper); sleep 1 && ${pkgs.hyprpaper}/bin/hyprpaper &")
+          hl.exec_cmd("noctalia")
+          hl.exec_cmd("sleep 1; wlr-hdr-cal")
+          hl.exec_cmd("sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder")
+      end)
+      
+      --------------------
+      ---- MONITORS ----
+      --------------------
+      
+      -- Machine-specific
+      require("displays")
+      
+      hl.monitor({
+          output   = "",
+          mode     = "preferred",
+          position = "auto",
+          scale    = 1,
+          mirror   = "DP-1",
+      })
+      
+      hl.workspace_rule({ workspace = "1", monitor = "DP-1" })
+      hl.workspace_rule({ workspace = "2", monitor = "DP-2" })
+      hl.workspace_rule({ workspace = "4", monitor = "DP-1" })
+      
+      -----------------------
+      ---- LOOK AND FEEL ----
+      -----------------------
+      
+      hl.config({
+          general = {
+              gaps_in          = 2,
+              gaps_out         = 4,
+              border_size      = 2,
+              col = {
+                  active_border   = "rgba(${config.colorScheme.palette.base05}ff)",
+                  inactive_border = "rgba(${config.colorScheme.palette.base01}ff)",
+              },
+              resize_on_border = false,
+              allow_tearing    = false,
+              layout           = "dwindle",
+          },
+      
+          decoration = {
+              rounding       = 0,
+              rounding_power = 2,
+              active_opacity   = 1.0,
+              inactive_opacity = 1.0,
+              shadow = {
+                  enabled      = false,
+                  range        = 4,
+                  render_power = 3,
+                  color        = 0xee1a1a1a,
+              },
+              blur = {
+                  enabled          = true,
+                  size             = 2,
+                  passes           = 1,
+                  contrast         = 2.0,
+                  vibrancy         = 0.1696,
+                  vibrancy_darkness = 1.0,
+              },
+          },
+      
+          animations = {
+              enabled = true,
+          },
+      
+          dwindle = {
+              force_split          = 2,
+              preserve_split       = true,
+              split_width_multiplier = 1.3,
+          },
+      
+          master = {
+              new_status = "master",
+          },
+      
+          input = {
+              kb_layout    = "us",
+              follow_mouse = 1,
+              sensitivity  = 0,
+              accel_profile = "flat",
+              touchpad = {
+                  natural_scroll = true,
+              },
+          },
+      
+          misc = {
+              disable_hyprland_logo        = true,
+              enable_anr_dialog            = false,
+              exit_window_retains_fullscreen = false,
+              force_default_wallpaper      = -1,
+              screencopy_force_8b          = true,
+              vrr                          = 2,
+          },
+      
+          cursor = {
+              inactive_timeout   = 10,
+              min_refresh_rate   = 48,
+              no_break_fs_vrr    = 2,
+              no_hardware_cursors = 0,
+              no_warps           = false,
+          },
+      
+          debug = {
+              full_cm_proto = true,
+          },
+      
+          render = {
+              cm_auto_hdr      = 1,
+              cm_sdr_eotf      = 2,
+              direct_scanout   = 2,
+              non_shader_cm    = 1,
+              send_content_type = 0,
+          },
+      
+          quirks = {
+              prefer_hdr               = 2,
+              skip_non_kms_dmabuf_formats = true,
+          },
+      
+          xwayland = {
+              force_zero_scaling = true,
+          },
+      })
+      
+      -- debug:disable_scale_checks
+      hl.config({ debug = { disable_scale_checks = true } })
+      
+      ------------------
+      ---- BEZIERS ----
+      ------------------
+      
+      hl.curve("easeOutQuint",    { type = "bezier", points = { {0.23, 1},    {0.32, 1}  } })
+      hl.curve("easeInOutCubic",  { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}  } })
+      hl.curve("linear",          { type = "bezier", points = { {0, 0},       {1, 1}     } })
+      hl.curve("almostLinear",    { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}  } })
+      hl.curve("quick",           { type = "bezier", points = { {0.15, 0},    {0.1, 1}   } })
+      
+      --------------------
+      ---- ANIMATIONS ----
+      --------------------
+      
+      hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
+      hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
+      hl.animation({ leaf = "windows",       enabled = true,  speed = 4.79, bezier = "easeOutQuint" })
+      hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 4.1,  bezier = "easeOutQuint", style = "popin 87%" })
+      hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 1.49, bezier = "linear",       style = "popin 87%" })
+      hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.73, bezier = "almostLinear" })
+      hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.46, bezier = "almostLinear" })
+      hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "quick" })
+      hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
+      hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    bezier = "quick",        style = "slide" })
+      hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.5,  bezier = "quick",        style = "slide" })
+      hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "almostLinear" })
+      hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "almostLinear" })
+      hl.animation({ leaf = "workspaces",    enabled = true,  speed = 0.94, bezier = "almostLinear", style = "fade" })
+      hl.animation({ leaf = "workspacesIn",  enabled = false, speed = 1.21, bezier = "almostLinear", style = "fade" })
+      hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 0.94, bezier = "almostLinear", style = "fade" })
+      
+      -----------------
+      ---- DEVICES ----
+      -----------------
+      
+      hl.device({
+          name    = "dualsense-wireless-controller-touchpad",
+          enabled = false,
+      })
+      
+      --------------------
+      ---- GESTURES ----
+      --------------------
+      
+      hl.gesture({
+          fingers   = 3,
+          direction = "horizontal",
+          action    = "workspace",
+      })
+      
+      ----------------------
+      ---- LAYER RULES ----
+      ----------------------
+      
+      hl.layer_rule({ name = "sel-no-anim",      match = { namespace = "selection" },                   no_anim = true })
+      hl.layer_rule({ name = "swaync-notif-blur",match = { namespace = "swaync-notification-window" },  blur = true, ignore_alpha = 0.5 })
+      hl.layer_rule({ name = "swaync-cc-blur",   match = { namespace = "swaync-control-center" },       blur = true, ignore_alpha = 0.5 })
+      hl.layer_rule({ name = "rofi-blur",        match = { namespace = "rofi" },                        blur = true, ignore_alpha = 0.5 })
+      hl.layer_rule({ name = "waybar-blur",      match = { namespace = "waybar" },                      blur = true, ignore_alpha = 0.5 })
+      
+      ----------------------
+      ---- WINDOW RULES ----
+      ----------------------
 
-          ${pkgs.procps}/bin/pgrep -f "gpu-screen-recorder" | while read pid; do
-            cmd=$(${pkgs.ps}/bin/ps -p "$pid" -o args=)
+      -- Smart gaps
+      hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
+      hl.workspace_rule({ workspace = "f[1]", gaps_out = 0, gaps_in = 0 })
+      hl.window_rule({ match = { float = false, workspace = "w[tv1]" }, border_size = 0 })
+      hl.window_rule({ match = { float = false, workspace = "w[tv1]" }, rounding = 0 })
+      hl.window_rule({ match = { float = false, workspace = "f[1]" }, border_size = 0 })
+      hl.window_rule({ match = { float = false, workspace = "f[1]" }, rounding = 0 })
+      
+      -- Suppress maximize for all windows
+      hl.window_rule({
+          name           = "suppress-maximize",
+          match          = { class = ".*" },
+          suppress_event = "maximize",
+      })
+      
+      -- xwaylandvideobridge — invisible overlay window
+      hl.window_rule({
+          name             = "xwaylandvideobridge",
+          match            = { class = "^(xwaylandvideobridge)$" },
+          opacity          = 0.0,
+          no_anim          = true,
+          no_initial_focus = true,
+          max_size         = { 1, 1 },
+          no_blur          = true,
+          no_focus         = true,
+      })
+      
+      -- Game content type
+      hl.window_rule({ name = "moonlight-game",   match = { class = "^(com.moonlight_stream.Moonlight)$" }, content = "game" })
+      hl.window_rule({ name = "gamescope-game",   match = { class = "^gamescope$" },                        content = "game" })
+      hl.window_rule({ name = "gamescope-wrap",   match = { class = "^.gamescope-wrapped$" },               content = "game" })
+      hl.window_rule({ name = "steam-app-game",   match = { class = "^(steam_app_%d+)$" },                  content = "game" })
+      
+      -- Steam rules
+      hl.window_rule({
+          name           = "steam-no-focus",
+          match          = { class = "^(steam)$" },
+          no_initial_focus = true,
+          no_blur        = true,
+          suppress_event = "activate",
+      })
+      hl.window_rule({
+          name           = "steam-suppress-activatefocus",
+          match          = { class = "^(steam)$" },
+          suppress_event = "activatefocus",
+      })
+      hl.window_rule({
+          name    = "steam-empty-title-float",
+          match   = { class = "^(steam)$", title = "^$", float = true },
+          no_blur = true,
+          no_anim = true,
+      })
+      hl.window_rule({
+          name      = "steam-big-picture",
+          match     = { title = "^(Steam Big Picture Mode)$" },
+          fullscreen = true,
+      })
+      hl.window_rule({
+          name  = "steam-non-main-float",
+          match = { class = "^(steam)$", title = "negative:^(Steam)$" },
+          float = true,
+      })
+      
+      -- App workspace assignments
+      hl.window_rule({ name = "vesktop-ws2",  match = { class = "^(vesktop)$" }, workspace = "2 silent" })
+      hl.window_rule({ name = "discord-ws2",  match = { class = "^(discord)$" }, workspace = "2 silent" })
+      hl.window_rule({ name = "steam-ws4",    match = { class = "^(steam)$" },   workspace = "4 silent" })
+      
+      -- Blank class/title — no blur
+      hl.window_rule({
+          name    = "blank-class-title-no-blur",
+          match   = { class = "^$", title = "^$" },
+          no_blur = true,
+      })
+      
+      ---------------------
+      ---- KEYBINDINGS ----
+      ---------------------
+      
+      -- Core
+      hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
+      hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
+      hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("noctalia msg panel-toggle session"))
+      hl.bind(mainMod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }))
+      hl.bind(mainMod .. " + D", hl.dsp.exec_cmd(menu))
+      hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
+      
+      -- Focus
+      hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left"  }))
+      hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+      hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up"    }))
+      hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down"  }))
+      
+      -- Cycle tiled/floating (preserves original logic via exec)
+      hl.bind(mainMod .. " + space", hl.dsp.exec_cmd(
+          "$(hyprctl activewindow -j | jq '.floating') && hyprctl dispatch cyclenext tiled || hyprctl dispatch cyclenext floating"
+      ))
+      
+      -- Move windows
+      hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left"  }))
+      hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+      hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up"    }))
+      hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down"  }))
+      
+      -- Workspaces 1–10
+      for i = 1, 10 do
+          local key = tostring(i % 10)
+          hl.bind(mainMod .. " + " .. key,          hl.dsp.focus({ workspace = i }))
+          hl.bind(mainMod .. " + SHIFT + " .. key,  hl.dsp.window.move({ workspace = i, follow = false }))
+      end
+      
+      -- Alt+Tab
+      hl.bind("ALT + Tab", function()
+          hl.dispatch(hl.dsp.window.cycle_next())
+          hl.dispatch(hl.dsp.window.bring_to_top())
+      end)
+      
+      -- Notifications / panels
+      hl.bind("CTRL + SPACE", hl.dsp.exec_cmd("noctalia msg notification-clear-active"))
+      hl.bind("CTRL + grave",  hl.dsp.exec_cmd("noctalia msg panel-toggle control-center notifications"))
+      
+      -- Screenshots
+      hl.bind("Print",       hl.dsp.exec_cmd("${screenshot} focused"))
+      hl.bind("SHIFT + Next",  hl.dsp.exec_cmd("${screenshot} focused"))
+      hl.bind("SHIFT + Print", hl.dsp.exec_cmd("${screenshot} selector"))
+      hl.bind("SHIFT + Prior", hl.dsp.exec_cmd("${screenshot} selector"))
+      
+      -- GPU screen recorder (save replay — bindo equivalent: only fires when service active)
+      hl.bind("CTRL + Print",       hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && notify-send -a 'gpu-screen-recorder' 'Saving replay...'"))
+      hl.bind("CTRL + Print",       hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && killall -SIGUSR1 gpu-screen-recorder"), { long_press = true })
+      hl.bind("CTRL + SHIFT + Next",  hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && notify-send -a 'gpu-screen-recorder' 'Saving replay...'"))
+      hl.bind("CTRL + SHIFT + Next",  hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && killall -SIGUSR1 gpu-screen-recorder"), { long_press = true })
 
-            if [[ "$cmd" == *"-r"* && "$cmd" == *"-ro"* ]]; then
-              kill -SIGRTMIN "$pid"
-            fi
-          done
-        '';
-      in  [
-        # Save replay if gpu-screen-recorder -r is running
-        "CTRL, Print, exec, killall -SIGUSR1 gpu-screen-recorder"
-        "CTRL SHIFT, Next, exec, killall -SIGUSR1 gpu-screen-recorder" # Page Down
-        # Start / stop manual recording if gpu-screen-recorder -ro is running
-        "CTRL SHIFT, Print, exec, ${screenrec}"
-        "CTRL SHIFT, Prior, exec, ${screenrec}" # Page Up
-      ];
+      hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("${checkrec}"))
+      hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("${screenrec}"), { long_press = true })
+      hl.bind("CTRL + SHIFT + Prior", hl.dsp.exec_cmd("${checkrec}"))
+      hl.bind("CTRL + SHIFT + Prior", hl.dsp.exec_cmd("${screenrec}"), { long_press = true })
+      
+      -- HDR toggle
+      hl.bind("CTRL + SHIFT + B", hl.dsp.exec_cmd("hypr-toggle-hdr"))
+      
+      -- Volume / brightness (locked = works on lockscreen, repeating = held key repeats)
+      hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),      { locked = true, repeating = true })
+      hl.bind("XF86AudioLowerVolume",  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),           { locked = true, repeating = true })
+      hl.bind("XF86AudioMute",         hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),          { locked = true })
+      hl.bind("XF86AudioMicMute",      hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),        { locked = true })
+      hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
+      hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+      
+      -- Mouse drag/resize
+      hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
+      hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+      
+      -----------------------
+      ---- RESIZE SUBMAP ----
+      -----------------------
+       
+      hl.bind(mainMod .. " + R", hl.dsp.submap("resize"))
 
-      bindm = [
-        "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindow"
-      ];
+      hl.define_submap("resize", function()
 
-      bindl = [
-        ",XF86AudioRaiseVolume, exec, wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"
-        ",XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-        ",XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-        #",XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +5%"
-        #",XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -5%"
-        #",XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
-        #",XF86AudioMicMute, exec, pactl set-source-mute @DEFAULT_SINK@ toggle"
-        ",XF86MonBrightnessUp, exec, ${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%+"
-        ",XF86MonBrightnessDown, exec, ${pkgs.brightnessctl}/bin/brightnessctl -e4 -n2 set 5%-"
-      ];
+          -- Set repeating binds for resizing the active window.
+          hl.bind("right", hl.dsp.window.resize({ x = 10, y = 0, relative = true}), { repeating = true })
+          hl.bind("left", hl.dsp.window.resize({ x = -10, y = 0, relative = true}), { repeating = true })
+          hl.bind("up", hl.dsp.window.resize({ x = 0, y = 10, relative = true}), { repeating = true })
+          hl.bind("down", hl.dsp.window.resize({ x = 0, y = -10, relative = true}), { repeating = true })
 
-      xwayland = {
-        force_zero_scaling = true;
-      };
+          -- Use `reset` to go back to the global submap
+          hl.bind("escape", hl.dsp.submap("reset"))
 
+          -- Exit resize mode
+          hl.bind(mainMod .. " + R", hl.dsp.submap("reset"))
 
-
-      ### AUTOSTART ###
-      exec-once = [
-        "${pkgs.systemd}/bin/systemctl --user stop plasma-xdg-desktop-portal-kde"
-        "${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal"
-        "${pkgs.systemd}/bin/exec systemctl --user import-environment PATH" # Useful for Sunshine scripts
-        "${set-displays}"
-        "${gamescope-cursor-fix}"
-        "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --daemonize --components=pkcs11,secrets,ssh)"
-        # 200 MiB limit
-        "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'"
-        "nm-applet &"
-        # Work around cursor config option unreliability
-        "hyprctl setcursor $cursorTheme 24"
-        "swaync &"
-        #"[workspace 1 silent] firefox"
-        #"[workspace 2 silent] discord"
-        #"[workspace 4 silent] steam"
-        "hyprctl dispatch workspace 1"
-        "${pkgs.legacy.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge"
-        "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder"
-      ];
-      exec = [
-        "kill `pgrep hyprpaper`; sleep 1 && ${pkgs.hyprpaper}/bin/hyprpaper &"
-        #"timeout 10 kanshi &"
-        # Waybar freezes on reload on Hyprland sometimes, so just restart
-        #"kill `pgrep waybar`; sleep 1 && waybar &"
-        "noctalia"
-        #"sleep 1; ${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs"
-        "sleep 1; wlr-hdr-cal"
-        "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
-      ];
-    };
-
-    extraConfig = ''
-      debug:disable_scale_checks = true
-      ## Resize mode/submap
-      bind=$mainMod,R,submap,resize
-      submap=resize
-          unbind = ,down
-          #binde = , right, resizeactive,  100 0
-          #binde = , left,  resizeactive, -100 0
-          #binde = , down,  resizeactive,  0 100
-          #binde = , up,    resizeactive,  0 -100
-          binde = , right, exec, hyprctl --batch "keyword misc:animate_manual_resizes true ; dispatch resizeactive 100 0 ; keyword misc:animate_manual_resizes false"
-          binde = , left,  exec, hyprctl --batch "keyword misc:animate_manual_resizes true ; dispatch resizeactive -100 0 ; keyword misc:animate_manual_resizes false"
-          binde = , down,  exec, hyprctl --batch "keyword misc:animate_manual_resizes true ; dispatch resizeactive 0 100 ; keyword misc:animate_manual_resizes false"
-          binde = , up,    exec, hyprctl --batch "keyword misc:animate_manual_resizes true ; dispatch resizeactive 0 -100 ; keyword misc:animate_manual_resizes false"
-          binde = SHIFT, right, resizeactive,  10 0
-          binde = SHIFT, left,  resizeactive, -10 0
-          binde = SHIFT, down,  resizeactive,  0 10
-          binde = SHIFT, up,    resizeactive,  0 -10
-          bind=SUPER,R,submap,reset
-          #bind = , escape,submap,reset 
-          #bind = , return,submap,reset 
-      submap=reset
+      end)
     '';
   };
 
@@ -753,7 +779,8 @@
                 echo "Enabling HDR"
               fi
 
-              hyprctl keyword "monitorv2[$monitor]:cm" hdr
+              #hyprctl keyword "monitorv2[$monitor]:cm" hdr
+              hyprctl eval "hl.monitor({ output = \"$monitor\", cm = \"hdr\" })"
               #hyprctl --batch "keyword monitorv2[$monitor]:cm hdr ; keyword monitorv2[$monitor]:bitdepth 10"
               ;;
             off)
@@ -762,15 +789,15 @@
                 exit 0
               fi
               echo "Disabling HDR"
-              hyprctl keyword "monitorv2[$monitor]:cm" srgb
+              hyprctl eval "hl.monitor({ output = \"$monitor\", cm = \"srgb\" })"
               ;;
             *)
               if [ "$current_mode" = "hdr" ]; then
                 echo "Toggling: disabling HDR"
-                hyprctl keyword "monitorv2[$monitor]:cm" srgb
+                hyprctl eval "hl.monitor({ output = \"$monitor\", cm = \"srgb\" })"
               else
                 echo "Toggling: enabling HDR"
-                hyprctl keyword "monitorv2[$monitor]:cm" hdr
+                hyprctl eval "hl.monitor({ output = \"$monitor\", cm = \"hdr\" })"
               fi
               ;;
           esac

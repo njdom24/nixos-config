@@ -7,11 +7,15 @@
 	  '';
 
 	  hyprland = {
-        settings = {
-          env = [ "AQ_DRM_DEVICES,$XDG_RUNTIME_DIR/dri/dgpu0" ];
-        };
         extraConfig = ''
-          monitor = , preferred, auto, 1, mirror, DP-1
+          hl.env("AQ_DRM_DEVICES", xdgRuntimeDir .. "/dri/dgpu0")
+          hl.monitor({
+          	output   = "",
+          	mode     = "preferred",
+          	position = "auto",
+          	scale    = 1,
+          	mirror   = "DP-1",
+          })
         '';
 	  };
 	};
@@ -189,81 +193,73 @@
 	};
 
 	home.file = {
-	  ".config/hypr/hm/displays.conf" = {
+	  ".config/hypr/displays.lua" = {
 	    text = ''
-	      monitorv2 {
-	        output = DP-1
-	        disabled = 0
-	        mode = 3840x2160@160
-	        position = 0x0
-	        scale = 1.5
-	        transform = 0
-	        vrr = 2
-	        supports_hdr = 1
-	        supports_wide_color = 1
-	        sdr_min_luminance = 0
-	        sdr_max_luminance = 230
-	        min_luminance = 0.005
-	        max_luminance = 1300
-	        max_avg_luminance = 1000
-	        bitdepth = 10
-	        cm = hdr
-	        #sdr_eotf = 2
-	      }
+	      hl.monitor({
+	          output            = "DP-1",
+	          mode              = "3840x2160@160",
+	          position          = "0x0",
+	          scale             = 1.5,
+	          transform         = 0,
+	          vrr               = 2,
+	          bitdepth          = 10,
+	          cm                = "hdr",
+	          supports_hdr      = true,
+	          sdr_min_luminance = 0.0,
+	          sdr_max_luminance = 230,
+	          min_luminance     = 0,
+	          max_luminance     = 1300,
+	          max_avg_luminance = 1300,
+	      })
 
-	      monitorv2 {
-	        output = DP-2
-	        disabled = 0
-	        mode = 1920x1080@144
-	        position = 2560x250
-	        scale = 1
-	        transform = 0
-	        vrr = 0
-	        bitdepth = 10
-	        cm = srgb
-	        #sdr_eotf = 2
-	      }
+	      hl.monitor({
+	          output              = "DP-2",
+	          mode                = "1920x1080@144",
+	          position            = "2560x250",
+	          scale               = 1,
+	          transform           = 0,
+	          vrr                 = 0,
+	          bitdepth            = 10,
+	          cm                  = "srgb",
+	          supports_hdr        = false,
+	          supports_wide_color = false,
+	      })
 
-	      monitorv2 {
-	        output = DP-3
-	        disabled = 1
-	        mode = 3840x2160@120
-	        position = 4480x0
-	        scale = 1.5
-	        transform = 0
-	        vrr = 0
-	        sdr_min_luminance = 0.005
-	        sdr_max_luminance = 203
-	        min_luminance = 0.005
-	        max_luminance = 1000
-	        max_avg_luminance = 1000
-	        cm = hdr
-	        supports_wide_color = 1
-	        supports_hdr = 1
-	        bitdepth = 10
-	      }
-	      
-	      monitorv2 {
-	        output = HDMI-A-1
-	        disabled = 1
-	        mode = 3840x2160@120
-	        position = 4480x0
-	        scale = 1.5
-	        transform = 0
-	        vrr = 1
-	        sdr_min_luminance = 0.005
-	        sdr_max_luminance = 203
-	        min_luminance = 0.005
-	        max_luminance = 1000
-	        max_avg_luminance = 1000
-	        cm = srgb
-	        supports_wide_color = 1
-	        supports_hdr = 1
-	        bitdepth = 10
-	      }
+	      hl.monitor({
+	          output            = "HDMI-A-1",
+	          disabled          = true,
+	          mode              = "3840x2160@120",
+	          position          = "4480x0",
+	          scale             = 1.5,
+	          transform         = 0,
+	          vrr               = 0,
+	          bitdepth          = 10,
+	          cm                = "srgb",
+	          supports_hdr      = true,
+	          sdr_min_luminance = 0.0,
+	          sdr_max_luminance = 230,
+	          min_luminance     = 0,
+	          max_luminance     = 1600,
+	          max_avg_luminance = 1600,
+	      })
 
-          # Bodge to fix refresh rate being 144 on first login
-          exec-once=sleep 1 && hyprctl keyword "monitorv2[DP-1]:mode" 3840x2160@160
+	      hl.monitor({
+	          output            = "DP-3",
+	          disabled          = true,
+	          mode              = "3840x2160@120",
+	          position          = "4480x0",
+	          scale             = 1.5,
+	          transform         = 0,
+	          vrr               = 2,
+	          bitdepth          = 10,
+	          cm                = "srgb",
+	          supports_hdr      = true,
+	          sdr_min_luminance = 0.0,
+	          sdr_max_luminance = 230,
+	          min_luminance     = 0,
+	          max_luminance     = 1000,
+	          max_avg_luminance = 1000,
+	      })
 	    '';
 	  };
     };

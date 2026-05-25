@@ -8,9 +8,15 @@
 	  '';
 
 	  hyprland = {
-	    settings.env = [ "AQ_DRM_DEVICES,$XDG_RUNTIME_DIR/dri/dgpu0:$XDG_RUNTIME_DIR/dri/igpu" ];
 	    extraConfig = ''
-	      monitor = , preferred, auto, 1, mirror, eDP-1
+	      hl.env("AQ_DRM_DEVICES", xdgRuntimeDir .. "/dri/dgpu0:" .. xdgRuntimeDir .. "/dri/igpu")
+	      hl.monitor({
+	        output   = "",
+	        mode     = "preferred",
+	        position = "auto",
+	        scale    = 1,
+	        mirror   = "eDP-1",
+	      })
 	    '';
 	  };
 	};
