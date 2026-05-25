@@ -32,7 +32,7 @@
 
 	  desktop_widgets.enabled = false;
 	  dock.launcher_position = "start";
-	  notification.scale = 0.8;
+	  notification.scale = 1.0;
 
 	  shell = {
 	    avatar_path = "/home/${config.home.username}/.face.icon";
