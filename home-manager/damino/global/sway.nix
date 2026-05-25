@@ -214,6 +214,7 @@
 		  exec ${vrrFullscreen}
 		  exec ${satellite-steam-unfloat-fix}
 		  exec_always noctalia
+		  exec sh -c 'sleep 1; xwayland-satellite'
 
 		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec (sleep 3 && gtk-launch steam.desktop); workspace 1"; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
@@ -671,18 +672,7 @@
 	      if [ "$1" != ":0" ]; then
 	        exec ${pkgs.xwayland}/bin/Xwayland "$@"
 	      else
-	        max_attempts=5
-	        attempt=1
-	        
-	        while (( attempt <= max_attempts )); do
-	          # Try to force 1x scaling
-	          sleep 1
-              swaymsg exec '${pkgs.xwayland-satellite}/bin/xwayland-satellite; exec sleep 1; exec ${pkgs.xrdb}/bin/xrdb -merge <<< "Xft.dpi: 96"'
-              if ${pkgs.procps}/bin/pgrep -f xwayland-satellite > /dev/null; then
-                exit 0
-              fi
-              ((attempt++))
-	        done
+            echo "dummy"
 	      fi
 	    '';
 	    in ''
