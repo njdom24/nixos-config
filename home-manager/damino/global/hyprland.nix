@@ -601,17 +601,16 @@
       hl.define_submap("resize", function()
 
           -- Set repeating binds for resizing the active window.
-          hl.bind("right", hl.dsp.window.resize({ x = 10, y = 0, relative = true}), { repeating = true })
-          hl.bind("left", hl.dsp.window.resize({ x = -10, y = 0, relative = true}), { repeating = true })
-          hl.bind("up", hl.dsp.window.resize({ x = 0, y = 10, relative = true}), { repeating = true })
-          hl.bind("down", hl.dsp.window.resize({ x = 0, y = -10, relative = true}), { repeating = true })
+          hl.bind("right", hl.dsp.window.resize({ x = 100, y = 0, relative = true}), { repeating = true })
+          hl.bind("left", hl.dsp.window.resize({ x = -100, y = 0, relative = true}), { repeating = true })
+          hl.bind("up", hl.dsp.window.resize({ x = 0, y = 100, relative = true}), { repeating = true })
+          hl.bind("down", hl.dsp.window.resize({ x = 0, y = -100, relative = true}), { repeating = true })
 
           -- Use `reset` to go back to the global submap
           hl.bind("escape", hl.dsp.submap("reset"))
 
-          -- Exit resize mode
-          hl.bind(mainMod .. " + R", hl.dsp.submap("reset"))
-
+          -- Exit resize mode (depends on https://github.com/hyprwm/Hyprland/pull/14578)
+          -- hl.bind(mainMod .. " + R", hl.dsp.submap("reset"))
       end)
     '';
   };
