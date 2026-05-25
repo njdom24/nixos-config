@@ -533,9 +533,14 @@
       hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down"  }))
       
       -- Cycle tiled/floating (preserves original logic via exec)
-      hl.bind(mainMod .. " + space", hl.dsp.exec_cmd(
-          "$(hyprctl activewindow -j | jq '.floating') && hyprctl dispatch cyclenext tiled || hyprctl dispatch cyclenext floating"
-      ))
+      hl.bind(mainMod .. " + space", function()
+          local w = hl.get_active_window()
+          if w ~= nil and w.floating then
+              hl.dispatch(hl.dsp.window.cycle_next({ floating = false }))
+          else
+              hl.dispatch(hl.dsp.window.cycle_next({ floating = true }))
+          end
+      end)
       
       -- Move windows
       hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left"  }))
