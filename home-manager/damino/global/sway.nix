@@ -166,6 +166,33 @@
           done
           # "''$()"
         '';
+        satellite-runner = pkgs.writeShellScript "satellite-runner.sh" ''
+          MAX_ATTEMPTS=10
+          ATTEMPT=0
+
+          while (( ATTEMPT < MAX_ATTEMPTS )); do
+              ATTEMPT=$(( ATTEMPT + 1 ))
+
+              xwayland-satellite &
+              XWS_PID=$!
+
+              # Give it a moment to initialize
+              sleep 1
+
+              if xrandr &>/dev/null; then
+                if [[ "$REMOTE_ENABLED" != "1" ]]; then
+                  swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec gtk-launch steam.desktop; workspace 1"
+                fi
+
+                exit 0
+              fi
+
+              # Started on wrong display. Kill and retry
+              kill "$XWS_PID" 2>/dev/null || true
+              wait "$XWS_PID" 2>/dev/null || true
+          done
+          exit 1
+        '';
 		in
 		''
 		  exec systemctl --user restart xdg-desktop-portal
@@ -214,15 +241,16 @@
 		  exec ${vrrFullscreen}
 		  exec ${satellite-steam-unfloat-fix}
 		  exec_always noctalia
-		  exec sh -c 'sleep 1; xwayland-satellite'
+		  exec ${satellite-runner}
+		  #exec sh -c 'sleep 1; xwayland-satellite'
 
-		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then swaymsg "workspace 1 output DP-1; workspace 2 output DP-2; workspace 4 output DP-1; workspace 1; exec firefox; workspace 2; exec discord; workspace 1; exec (sleep 3 && gtk-launch steam.desktop); workspace 1"; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch firefox.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch vesktop.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch discord.desktop; fi'
 		  #exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -ne 1 ]; then gtk-launch steam.desktop; fi'
 		  exec ${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'
 		  exec sh -c 'if [ "''${REMOTE_ENABLED:-0}" -eq 1 ]; then sleep 5 && ${pkgs.systemd}/bin/systemctl --user restart sunshine; fi'
+		  # "''$()"
 		'';
 
 		config = {
