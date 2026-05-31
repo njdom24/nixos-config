@@ -241,7 +241,7 @@
           hl.exec_cmd("hyprctl setcursor " .. cursorTheme .. " 24")
           hl.exec_cmd("swaync &")
           hl.exec_cmd("hyprctl dispatch workspace 1")
-          hl.exec_cmd("${pkgs.legacy.kdePackages.xwaylandvideobridge}/bin/xwaylandvideobridge")
+          hl.exec_cmd("xwaylandvideobridge")
           hl.exec_cmd('ls "$XDG_RUNTIME_DIR/dri" 2> /dev/null | grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder')
       
           -- exec (re-run on reload) equivalents — run at start too

@@ -92,7 +92,7 @@ in
 	  gnome-disk-utility
 	  gnome-system-monitor
 	  libnotify
-	  legacy.kdePackages.xwaylandvideobridge
+	  #legacy.kdePackages.xwaylandvideobridge
 	  (discord.override {
 	  	#withOpenASAR = true; # If this breaks, set to false and re-run Discord. https://github.com/NixOS/nixpkgs/issues/208749
 	  	withVencord = true;

@@ -508,7 +508,4 @@
     # Remove the variable from plasmashell's environment
     UnsetEnvironment=vblank_mode
   '';
-
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "24.11";
 }
