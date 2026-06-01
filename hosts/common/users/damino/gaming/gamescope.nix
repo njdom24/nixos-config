@@ -24,8 +24,7 @@ let
       vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .adaptive_sync_status')
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      # Toggling VRR doesn't apply until toggling fullscreen. VFR applies immediately, avoids touching monitor configs, so we use it
-      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption debug:vfr | ${pkgs.jq}/bin/jq -r 'if .bool then 1 else 0 end')
+      vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vrr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       # TODO
@@ -86,6 +85,7 @@ let
       fi
       LD_LIBRARY_PATH="" hyprctl eval "hl.config({ animations = { enabled = false } })"
       LD_LIBRARY_PATH="" hyprctl eval "hl.monitor({ output = \"$monitor\", vrr = $vrr_mode })"
+      LD_LIBRARY_PATH="" hyprctl eval "hl.config({ misc = { vrr = 2 } })"
       LD_LIBRARY_PATH="" hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
       LD_LIBRARY_PATH="" hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
       sleep 1
