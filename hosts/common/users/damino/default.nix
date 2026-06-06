@@ -17,6 +17,7 @@ let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.
 in
 {
   imports = [
+    inputs.chaotic.nixosModules.default
     ../../desktops/sway
     ./gaming
   ]; # ++ (builtins.attrValues outputs.nixosModules);
@@ -26,7 +27,6 @@ in
   	outputs.overlays.unstable-packages
   	outputs.overlays.legacy-packages
   	outputs.overlays.additions
-  	inputs.nix-cachyos-kernel.overlays.default
   ];
   nix.settings.substituters = [ "https://attic.xuyh0120.win/lantian" ];
   nix.settings.trusted-public-keys = [ "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=" ];

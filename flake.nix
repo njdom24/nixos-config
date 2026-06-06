@@ -17,7 +17,7 @@
     home-manager-unstable.url = "github:nix-community/home-manager";
     home-manager-unstable.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
     plasma-manager = {
       url = "github:nix-community/plasma-manager";
@@ -111,6 +111,7 @@
     nixpkgs,
     home-manager,
     home-manager-stable,
+    chaotic,
     plasma-manager,
     xwayland-satellite,
     sway-git,
