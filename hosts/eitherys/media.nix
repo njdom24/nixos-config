@@ -74,10 +74,47 @@
       group = "jellyfin";
     };
 
-    sabnzbd = {
+    sabnzbd = let
+      defaultCategory = {
+        order = 0;
+        pp = "";
+        script = "Default";
+        dir = "";
+        newzbin = "";
+        priority = -100;
+      };
+    in {
       enable = true;
       user = "jellyfin";
       group = "jellyfin";
+      settings = {
+        misc.port = 6788;
+        categories =
+          {
+            "*" = {
+              name = "*";
+              order = 0;
+              pp = 3;
+              script = "None";
+              dir = "";
+              newzbin = "";
+              priority = 0;
+            };
+          }
+          // builtins.listToAttrs (
+            map (name: {
+              inherit name;
+              value = defaultCategory // { inherit name; };
+            }) [
+              "movies"
+              "tv"
+              "audio"
+              "software"
+              "books"
+            ]
+          );
+      };
+      secretFiles = [ "/var/secrets/sabnzbd" ];
     };
 
     jellyfin = {
