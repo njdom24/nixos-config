@@ -356,7 +356,7 @@
       
           render = {
               cm_auto_hdr      = 1,
-              cm_sdr_eotf      = 2,
+              cm_sdr_eotf      = "gamma22",
               direct_scanout   = 2,
               non_shader_cm    = 1,
               send_content_type = 0,
@@ -448,11 +448,11 @@
       hl.window_rule({ match = { float = false, workspace = "f[1]" }, rounding = 0 })
       
       -- Suppress maximize for all windows
-      hl.window_rule({
-          name           = "suppress-maximize",
-          match          = { class = ".*" },
-          suppress_event = "maximize",
-      })
+      -- hl.window_rule({
+      --     name           = "suppress-maximize",
+      --     match          = { class = ".*" },
+      --     suppress_event = "maximize",
+      -- })
       
       -- xwaylandvideobridge — invisible overlay window
       hl.window_rule({
