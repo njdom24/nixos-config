@@ -49,10 +49,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    #hyprland = {
-    #  url = "github:hyprwm/Hyprland";
-    #  inputs.nixpkgs.follows = "nixpkgs";
-    #};
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     #hyprland.url = "git+https://github.com/UjinT34/Hyprland/fp16?submodules=1";
 
     mesa-git = {

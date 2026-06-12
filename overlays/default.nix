@@ -70,11 +70,11 @@ in {
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
-    #hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
-    #  patches = (old.patches or []) ++ [
-    #  ];
-    #});
-    #xdg-desktop-portal-hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+    hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
+      patches = (old.patches or []) ++ [
+      ];
+    });
+    xdg-desktop-portal-hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
 
     xwayland-satellite = inputs.xwayland-satellite.packages.${prev.stdenv.hostPlatform.system}.xwayland-satellite;
 
