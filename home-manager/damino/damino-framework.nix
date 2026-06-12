@@ -10,6 +10,15 @@
 	  hyprland = {
 	    extraConfig = ''
 	      hl.env("AQ_DRM_DEVICES", xdgRuntimeDir .. "/dri/dgpu0:" .. xdgRuntimeDir .. "/dri/igpu")
+
+	      hl.monitor({
+	        output   = "eDP-1",
+	        mode     = "2256x1504@59.999",
+	        position = "0x0",
+	        scale    = 1.175,
+	        cm       = "srgb",
+	        sdr_eotf = "auto",
+	      })
 	      hl.monitor({
 	        output   = "",
 	        mode     = "preferred",

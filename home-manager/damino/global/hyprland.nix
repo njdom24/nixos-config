@@ -355,11 +355,13 @@
           },
       
           render = {
-              cm_auto_hdr      = 1,
-              cm_sdr_eotf      = "gamma22",
-              direct_scanout   = 2,
-              non_shader_cm    = 1,
-              send_content_type = 0,
+              cm_auto_hdr           = 1,
+              cm_sdr_eotf           = "gamma22force",
+              non_shader_cm_interop = 1,
+              ctm_animation         = 0,
+              direct_scanout        = 2,
+              non_shader_cm         = 1,
+              send_content_type     = false,
           },
       
           quirks = {
@@ -453,6 +455,13 @@
       --     match          = { class = ".*" },
       --     suppress_event = "maximize",
       -- })
+
+      -- Disable tonemapping (prevents making HDR too dark outside of direct scanout)
+      hl.window_rule({
+          name           = "disable-tonemap",
+          match          = { class = ".*" },
+          tonemap        = "off",
+      })
       
       -- xwaylandvideobridge — invisible overlay window
       hl.window_rule({
