@@ -264,6 +264,15 @@
 	          max_luminance     = 1000,
 	          max_avg_luminance = 1000,
 	      })
+
+	      -- Bodge to fix refresh rate being 144 on first login
+
+	      local m = hl.get_monitor("DP-1")
+	      
+	      if m and math.abs(m.refresh_rate - 160) < 0.01 then
+	          hl.exec_cmd([[hyprctl eval 'hl.monitor({ output = "DP-1", mode = "3840x2160@120" })' &&
+	                        hyprctl eval 'hl.monitor({ output = "DP-1", mode = "3840x2160@160" })']])
+	      end
 	    '';
 	  };
     };
