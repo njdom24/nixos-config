@@ -83,6 +83,7 @@ in
 	  nix-index
 	  pavucontrol
 	  pwvucontrol
+	  easyeffects
 	  pulseaudio # Needed for pactl
 	  remmina
 	  filezilla
