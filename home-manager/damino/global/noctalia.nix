@@ -34,6 +34,9 @@
 	  dock.launcher_position = "start";
 	  notification.scale = 1.0;
 
+      # Disable constant "Now Playing" pop-ups
+	  osd.kinds.media = false;
+
 	  shell = {
 	    avatar_path = "/home/${config.home.username}/.face.icon";
 	    clipboard_enabled = false;
