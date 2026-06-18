@@ -82,6 +82,7 @@ in
       killall
 	  nix-index
 	  pavucontrol
+	  pwvucontrol
 	  pulseaudio # Needed for pactl
 	  remmina
 	  filezilla
