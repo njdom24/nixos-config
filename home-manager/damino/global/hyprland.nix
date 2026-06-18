@@ -355,7 +355,7 @@
           },
       
           render = {
-              cm_auto_hdr           = 1,
+              cm_auto_hdr           = 0,
               cm_sdr_eotf           = "gamma22force",
               non_shader_cm_interop = 1,
               ctm_animation         = 0,
