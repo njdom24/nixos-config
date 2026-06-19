@@ -153,6 +153,8 @@
         no_display = true;
         vsync = 3; # Currently broken due to https://gitlab.freedesktop.org/mesa/mesa/-/issues/11379, set MESA_VK_WSI_PRESENT_MODE=fifo for Mesa instead
         gl_vsync = 1;
+        # TODO: Check https://gitlab.freedesktop.org/mesa/mesa/-/work_items/14835
+        #vulkan_present_mode = "fifo_latest_ready";
         gpu_name = true;
         fps_limit = 180;
         fps_limit_method = "early";
