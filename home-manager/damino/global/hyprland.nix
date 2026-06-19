@@ -343,11 +343,11 @@
           },
       
           cursor = {
-              inactive_timeout   = 10,
-              min_refresh_rate   = 48,
-              no_break_fs_vrr    = 2,
-              no_hardware_cursors = 0,
-              no_warps           = false,
+              inactive_timeout    = 10,
+              min_refresh_rate    = 48,
+              no_break_fs_vrr     = 2,
+              no_hardware_cursors = 1,
+              no_warps            = false,
           },
       
           debug = {
