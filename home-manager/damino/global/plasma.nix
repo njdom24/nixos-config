@@ -287,12 +287,7 @@
         #};
         Plugins = {
           magiclampEnabled = true;
-          "virtual-desktops-only-on-primaryEnabled" = true;
           better_blur_dxEnabled = true; # Better Blur
-        };
-        "Script-virtual-desktops-only-on-primary" = {
-          primaryOutputIndex = 0;
-          numberOfScreens = 3;
         };
         Windows = {
           FocusPolicy = "FocusFollowsMouse";
@@ -492,8 +487,6 @@
       plasma-panel-colorizer
       plasma-toggle-hdr
       inputs.kwin-effects-better-blur-dx.packages.${pkgs.stdenv.hostPlatform.system}.default
-      kwin-effects-geometry-change
-      virtual-desktops-only-on-primary
     ];
   };
 
