@@ -109,7 +109,7 @@
 	  unstable.ryubing
 	  dolphin-emu
 	  unstable.cemu
-	  unstable.rpcs3
+	  rpcs3
 	  (unstable.melonds.overrideAttrs (finalAttrs: prevAttrs: {
 	    qtWrapperArgs = prevAttrs.qtWrapperArgs ++ ["--set QT_QPA_PLATFORM xcb"];
 	  }))
