@@ -125,7 +125,7 @@
 	    };
 
 	    workspaces = {
-	      hide_when_empty = true;
+	      hide_when_empty = false;
 	      focused_color = "outline";
 	      occupied_color = "surface_variant";
 	      empty_color = "surface_variant";
