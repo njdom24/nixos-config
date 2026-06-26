@@ -93,6 +93,10 @@
  	      name = "noctalia";
  	      type = "service";
  	    }
+        {
+          name = "jay";
+          type = "LowLatency_RT";
+        }
  	  ];
  	};
   };

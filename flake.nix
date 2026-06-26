@@ -44,8 +44,8 @@
       flake = false;
     };
 
-    noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
+    jay = {
+      url = "github:mahkoh/jay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -54,6 +54,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     #hyprland.url = "git+https://github.com/UjinT34/Hyprland/fp16?submodules=1";
+
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     mesa-git = {
       url = "github:chaotic-cx/mesa-mirror"; # Faster, less-likely to get rate-limited

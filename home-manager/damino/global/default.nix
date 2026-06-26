@@ -24,6 +24,7 @@
     ./../../common/zsh
     ./plasma.nix
     ./sway.nix
+    ./jay.nix
     ./hyprland.nix
     ./terminals.nix
     ./theming

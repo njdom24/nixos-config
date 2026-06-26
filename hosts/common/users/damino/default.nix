@@ -24,9 +24,10 @@ in
 
   nixpkgs.overlays = [
     outputs.overlays.stable-packages
-  	outputs.overlays.unstable-packages
-  	outputs.overlays.legacy-packages
-  	outputs.overlays.additions
+    outputs.overlays.unstable-packages
+    outputs.overlays.legacy-packages
+    outputs.overlays.additions
+    inputs.jay.overlays.default
   ];
   nix.settings.substituters = [ "https://attic.xuyh0120.win/lantian" ];
   nix.settings.trusted-public-keys = [ "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=" ];
@@ -241,8 +242,19 @@ in
   	};
   };
 
-  services = {
+  services = let
+    jaySession = (pkgs.writeTextDir "share/wayland-sessions/jay.desktop" ''
+      [Desktop Entry]
+      Name=Jay
+      Comment=Jay Wayland Compositor
+      Exec=${lib.getExe pkgs.jay} run
+      Type=Application
+    '').overrideAttrs (_: {
+      passthru.providedSessions = [ "jay" ];
+    });
+  in {
     desktopManager.gnome.enable = true;
+    displayManager.sessionPackages = [ jaySession ];
     power-profiles-daemon.enable = true;
     fwupd.enable = true;
 
@@ -622,6 +634,7 @@ in
 
   environment = {
   	systemPackages = with pkgs; [
+      jay
   	  lsof
   	  file
   	  wget
