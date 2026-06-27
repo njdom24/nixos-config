@@ -38,7 +38,7 @@ in
   home.file.".local/share/vulkan/implicit_layer.d/VkLayer_MESA_anti_lag.json".text = builtins.toJSON {
     file_format_version = "1.2.1";
     layer = {
-      name = "VK_LAYER_MESA_anti_lag";
+      name = "VK_LAYER_MESA_anti_lag_asty";
       type = "GLOBAL";
       library_path = "${config.home.homeDirectory}/.local/lib/libVkLayer_MESA_anti_lag.so";
       api_version = "1.4.303";
@@ -52,8 +52,8 @@ in
         spec_version = "1";
         entrypoints = [ "vkAntiLagUpdateAMD" ];
       }];
-      disable_environment = { DISABLE_LAYER_MESA_ANTI_LAG = "1"; };
-      enable_environment = { ENABLE_LAYER_MESA_ANTI_LAG = "1"; };
+      disable_environment = { DISABLE_LAYER_MESA_ANTI_LAG_ASTY = "1"; };
+      enable_environment = { ENABLE_LAYER_MESA_ANTI_LAG_ASTY = "1"; };
     };
   };
 
@@ -61,10 +61,11 @@ in
     packages = [ low-latency-layer ];
     sessionVariables = {
        VK_ADD_IMPLICIT_LAYER_PATH = "${low-latency-layer}/share/vulkan/implicit_layer.d";
-       LOW_LATENCY_LAYER_REFLEX = "1";
+       #LOW_LATENCY_LAYER_REFLEX = "1";
        # PROTON_FORCE_NVAPI = "1"; # Needed for Reflex 2 on non-NVIDIA hardware, but breaks OptiScaler's FakeNVAPI (Needed for FG)
        # LOW_LATENCY_SPOOF_NVIDIA = "1";
-       DISABLE_LOW_LATENCY_LAYER = "1";
+       #DISABLE_LOW_LATENCY_LAYER = "1";
+       ENABLE_LAYER_MESA_ANTI_LAG_ASTY = "1";
     };
 
     # Deploy the .so
