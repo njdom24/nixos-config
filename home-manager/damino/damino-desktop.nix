@@ -38,7 +38,7 @@
 	        name = "desktop-headless";
 	        outputs = [
 	          {
-	            criteria = "Beihai Century Joint Innovation Technology Co.,Ltd P275MV PLUS *";
+	            criteria = "*P275MV PLUS*";
 	      	    status = "enable";
 	      	    mode = "3840x2160@160Hz";
 	      	    position = "0,0";
@@ -46,7 +46,7 @@
 	      	    #adaptiveSync = true;
 	      	  }
 	          {
-	      	    criteria = "AOC 24G1WG4 0x00042EBB";
+                criteria = "AOC 24G1WG4*";
 	      	    status = "enable";
 	      	    mode = "1920x1080@144.001";
 	      	    position = "2560,250";
@@ -54,12 +54,12 @@
 	      	    adaptiveSync = false;
 	      	  }
 	      	  {
-	      	    criteria = "Technical Concepts Ltd Beyond TV 0x00010000";
+                criteria = "*Beyond TV*";
 	      	    status = "disable";
 	      	    adaptiveSync = false;
 	      	  }
 	      	  {
-	      	    criteria = "Samsung Electric Company SAMSUNG 0x01000E00"; # Dummy display
+                criteria = "*SAMSUNG*"; # Dummy display
 	      	    status = "enable"; # Sway breaks when disabled as of Oct 2025. Worked around below...
 	      	    adaptiveSync = false;
 	      	  }
@@ -70,6 +70,7 @@
 	          "${pkgs.sway}/bin/swaymsg output HDMI-A-1 disable"
 	          "${pkgs.sway}/bin/swaymsg output DP-3 disable"
 	          "${pkgs.sway}/bin/swaymsg output DP-1 hdr on"
+	          "jay randr output DP-3 disable"
 	          #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_03_00.1 pro-audio"
 	          #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.pro-output-3"
 	        ];
@@ -80,7 +81,7 @@
 	        name = "desktop";
 	        outputs = [
 	          {
-	            criteria = "Beihai Century Joint Innovation Technology Co.,Ltd P275MV PLUS 0000000000000";
+                criteria = "*P275MV PLUS*";
 	      	    status = "enable";
 	      	    mode = "3840x2160@160Hz";
 	      	    position = "0,0";
@@ -88,7 +89,7 @@
 	      	    #adaptiveSync = true;
 	      	  }
 	          {
-	      	    criteria = "AOC 24G1WG4 0x00042EBB";
+                criteria = "AOC 24G1WG4*";
 	      	    status = "enable";
 	      	    mode = "1920x1080@144.001";
 	      	    position = "2560,250";
@@ -96,7 +97,7 @@
 	      	    adaptiveSync = false;
 	      	  }
 	      	  {
-	      	    criteria = "Technical Concepts Ltd Beyond TV 0x00010000";
+                criteria = "*Beyond TV*";
 	      	    status = "disable";
 	      	    adaptiveSync = false;
 	      	  }
