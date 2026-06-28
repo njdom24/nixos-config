@@ -46,7 +46,7 @@
             position            = "0x0",
             scale               = 1,
             transform           = 0,
-            vrr                 = 0,
+            vrr                 = 2,
             bitdepth            = 10,
             cm                  = "srgb",
             sdr_eotf            = "auto",
@@ -91,6 +91,46 @@
             max_luminance     = 1000,
             max_avg_luminance = 1000,
         })
+      '';
+    };
+
+    ".config/jay/config.toml" = {
+      text = lib.mkAfter ''
+        [[outputs]]
+        match.connector = "DP-1"
+        mode = { width = 2560, height = 1440, refresh-rate = 180.0 }
+        x = 2560
+        y = 0
+        vrr = { mode = "variant1", cursor-hz = 80 }
+        transfer-function = "pq"
+        format = "xrgb2101010"
+        name = "primary"
+        tearing.mode = "never"
+        
+        [[outputs]]
+        match.connector = "DP-2"
+        mode = { width = 2560, height = 1440, refresh-rate = 144.0 }
+        x = 0
+        y = 0
+        vrr = { mode = "variant1", cursor-hz = 80 }
+        name = "secondary"
+        tearing.mode = "never"
+        
+        [[outputs]]
+        match.connector = "DP-3"
+        enabled = false
+        mode = { width = 2560, height = 1440, refresh-rate = 120.0 }
+        vrr = { mode = "never", cursor-hz = 80 }
+        format = "xrgb2101010"
+        tearing.mode = "never"
+        
+        [[outputs]]
+        match.connector = "HDMI-A-1"
+        enabled = false
+        mode = { width = 2560, height = 1440, refresh-rate = 120.0 }
+        vrr = { mode = "never", cursor-hz = 80 }
+        format = "xrgb2101010"
+        tearing.mode = "never"
       '';
     };
   };

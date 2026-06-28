@@ -276,5 +276,47 @@
 	      end, { timeout = 500, type = "oneshot" })
 	    '';
 	  };
+
+	  ".config/jay/config.toml" = {
+	    text = lib.mkAfter ''
+	      [[outputs]]
+	      match.connector = "DP-1"
+	      mode = { width = 3840, height = 2160, refresh-rate = 160.0 }
+	      scale = 1.5
+	      x = 0
+	      y = 0
+	      vrr = { mode = "variant1", cursor-hz = 80 }
+	      transfer-function = "pq"
+	      format = "xrgb2101010"
+	      name = "primary"
+	      tearing.mode = "never"
+	      
+	      [[outputs]]
+	      match.connector = "DP-2"
+	      mode = { width = 1920, height = 1080, refresh-rate = 120.0 }
+	      x = 2560
+	      y = 250
+	      vrr = { mode = "never", cursor-hz = 80 }
+	      name = "secondary"
+	      tearing.mode = "never"
+	      
+	      [[outputs]]
+	      match.connector = "DP-3"
+	      enabled = false
+	      mode = { width = 3840, height = 2160, refresh-rate = 120.0 }
+	      vrr = { mode = "never", cursor-hz = 80 }
+	      format = "xrgb2101010"
+	      tearing.mode = "never"
+	      
+	      [[outputs]]
+	      match.connector = "HDMI-A-1"
+	      enabled = false
+	      mode = { width = 3840, height = 2160, refresh-rate = 120.0 }
+	      vrr = { mode = "variant1", cursor-hz = 80 }
+	      transfer-function = "pq"
+	      format = "xrgb2101010"
+	      tearing.mode = "never"
+	    '';
+	  };
     };
 }
