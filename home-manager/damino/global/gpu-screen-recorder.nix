@@ -178,6 +178,31 @@ in {
               
               monitors=$(echo "$monitors" | ${pkgs.gnugrep}/bin/grep -v '^HEADLESS')
               ;;
+            jay)
+              monitors=$(jay randr | ${pkgs.gawk}/bin/awk '
+                /^      [A-Z]+-[0-9]+:$/ {
+                  if (active && manufacturer != "") print connector ":" manufacturer " " product
+                  connector = substr($0, 7, length($0) - 7)
+                  active = 0
+                  manufacturer = ""
+                  product = ""
+                }
+                /^        product:/ {
+                  sub(/^        product: /, "")
+                  product = $0
+                }
+                /^        manufacturer:/ {
+                  sub(/^        manufacturer: /, "")
+                  manufacturer = $0
+                }
+                /^        logical size:/ {
+                  active = 1
+                }
+                END {
+                  if (active && manufacturer != "") print connector ":" manufacturer " " product
+                }
+              ' | sort)
+              ;;
             KDE)
               monitors=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '.outputs[] | select(.connected == true and .priority > 0) | "\(.name):\(.pos.x)x\(.pos.y)"' | ${pkgs.coreutils}/bin/sort)
               ;;
@@ -216,6 +241,13 @@ in {
               sway)
                 is_hdr="$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$out\") | .hdr")"
                 [[ "$is_hdr" == "true" ]] && echo "hdr" || echo "sdr"
+                ;;
+              jay)
+                if jay randr | ${pkgs.gnugrep}/bin/grep -q 'pq (current)'; then
+                  echo "hdr"
+                else
+                  echo "sdr"
+                fi
                 ;;
               KDE)
                 echo "sdr" # TODO
