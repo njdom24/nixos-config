@@ -623,8 +623,8 @@
           -- Use `reset` to go back to the global submap
           hl.bind("escape", hl.dsp.submap("reset"))
 
-          -- Exit resize mode (depends on https://github.com/hyprwm/Hyprland/pull/14578)
-          -- hl.bind(mainMod .. " + R", hl.dsp.submap("reset"))
+          -- Exit resize mode
+          hl.bind(mainMod .. " + R", hl.dsp.submap("reset"))
       end)
     '';
   };
