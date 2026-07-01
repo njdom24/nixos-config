@@ -23,6 +23,13 @@ let
     if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .adaptive_sync_status')
       echo "$vrr_status"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
+      primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      vrr_mode=$(jay randr | ${pkgs.gawk}/bin/awk "
+        /^      $primary_display:/{found=1}
+        found && /VRR mode:/{print \$3; exit}
+      ")
+      echo "$vrr_mode"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vrr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
@@ -101,6 +108,15 @@ let
         rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
       fi
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
+      primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+
+      if [[ "$vrr_mode" = "1" ]]; then
+        vrr_mode="variant1"
+      elif [[ "$vrr_mode" = "0" ]]; then
+        vrr_mode="never"
+      fi
+      jay randr output "$primary_display" vrr set-mode "$vrr_mode"
     fi
 
     XDG_CURRENT_DESKTOP="$desktop"
@@ -142,6 +158,13 @@ let
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
         .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
       '
+    elif [ "$XDG_CURRENT_DESKTOP" = "jay" ]; then
+      # Jay has no way to detect focused display. Just choose primary or first display in xrandr...
+      primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      jay randr | ${pkgs.gawk}/bin/awk -v display="$primary_display" '
+        $0 ~ display":$" { found=1; next }
+        found && /^ +mode:/ && !/VRR/ { match($0, /([0-9]+) x ([0-9]+) @ ([0-9.]+)/, m); print m[1], m[2], m[3]; exit }
+      '
     elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
       read width height refresh <<< $(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '
         .[] 
@@ -164,7 +187,7 @@ let
     # XWayland / X11 fallback (nested gamescope)
     elif ${pkgs.xrandr}/bin/xrandr >/dev/null 2>&1; then
       # Get primary or first
-      primary=$(${pkgs.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk '/ connected/ {if(/ primary /){print $1;exit}else if(!f)f=$1} END{print f}')
+      primary="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
 
       read resolution refresh_raw < <(
         ${pkgs.xrandr}/bin/xrandr | ${pkgs.gawk}/bin/awk -v primary="$primary" '
@@ -438,46 +461,39 @@ let
         else
           echo "0 0 0"
         fi
-      elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-        focused_display=$(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
-        conf="$HOME/.config/hypr/displays.conf"
+      elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
+        primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+        randr_output=$(jay randr)
 
-        # TODO: Replace with more reliable check after https://github.com/hyprwm/Hyprland/pull/12019
-        if [[ ! -f "$conf" ]]; then
-          read edid_max edid_avg edid_min <<< "$(get_edid_luminance "$focused_display")"
-          if [[ "$edid_max" != "0" ]]; then
-            echo "1 203 $edid_max"
-          else
-            echo "0 0 0"
-          fi
-          return 0
-        fi
+        eotf=$(echo "$randr_output" | ${pkgs.gawk}/bin/awk "
+          /^      $primary_display:/{found=1}
+          found && /eotfs:/{in_eotf=1}
+          in_eotf && /\(current\)/{print; exit}
+          found && /^      [A-Z]/{if (!/^      $primary_display:/) exit}
+        " 2>/dev/null)
 
-        block=$(${pkgs.gawk}/bin/awk -v mon="$focused_display" '
-          /^[[:space:]]*monitorv2[[:space:]]*{/ { inblock=1; block="" }
-          inblock {
-            block = block $0 "\n"
-            if ($0 ~ /^[[:space:]]*}/) {
-              if (block ~ ("output[[:space:]]*=[[:space:]]*" mon)) {
-                print block
-                exit
-              }
-              inblock=0
-            }
-          }
-        ' "$conf")
+        if echo "$eotf" | ${pkgs.gnugrep}/bin/grep -q "pq"; then
+          max_brightness=$(echo "$randr_output" | ${pkgs.gawk}/bin/awk "
+            /^      $primary_display:/{found=1}
+            found && /max brightness:/{print \$3; exit}
+          ")
 
-        hdr_support=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*supports_hdr[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
-        cm=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r --arg o "$focused_display" '.[] | select(.name == $o) | .colorManagementPreset')
-        sdr_max=$(LD_LIBRARY_PATH="" hyprctl monitors -j | ${pkgs.jq}/bin/jq -r --arg o "$focused_display" '.[] | select(.name == $o) | .sdrMaxLuminance')
-        max_lum=$(${pkgs.gawk}/bin/awk -F'=' '/^[[:space:]]*max_luminance[[:space:]]*=/ {gsub(/[[:space:]]/, "", $2); print $2}' <<< "$block")
-     
-        #if [[ "$hdr_support" != "0" ]] && [[ "$hdr_support" = "1" || "$cm" = "hdr" || "$cm" = "hdredid" || "$max_lum" -gt 400 ]]; then
-        if [[ "$hdr_support" != "0" ]] && [[ "$cm" = "hdr" || "$cm" = "hdredid" || "$max_lum" -gt 400 || "$sdr_max" -gt 80 ]]; then
-          echo "1 $sdr_max $max_lum"
+          echo "1 203 $max_brightness"
         else
           echo "0 0 0"
         fi
+      elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
+        focused_display=$(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
+        read preset max_luminance < <(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r --arg monitor "$focused_display" \
+          '.[] | select(.name == $monitor) | "\(.colorManagementPreset) \(.sdrMaxLuminance)"')
+
+        if [[ "$preset" == "hdr" || "$preset" == "hdredid" ]] || (( $(echo "$max_luminance > 80" | bc -l) )); then
+          read edid_max edid_avg edid_min <<< "$(get_edid_luminance "$focused_display")"
+          if [[ "$edid_max" != "0" ]]; then
+            echo "1 203 $edid_max"
+          fi
+        fi
+        echo "0 0 0"
       elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
         json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
         enabled=$(${pkgs.jq}/bin/jq -r '
@@ -866,12 +882,6 @@ let
       fi
     }
 
-    if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
-      # If already in HDR, apply LUT
-      focused_display="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')"
-      hdr_enabled="$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name==\"$focused_display\") | .hdr")"
-    fi
-
     # Vars to help find screenshot dir
     USER_LOG="$HOME/.steam/steam/logs/connection_log.txt"
     STEAM_USERID=$(${pkgs.gnugrep}/bin/grep -Po '\[U:1:\K[0-9]+' "$USER_LOG" | tail -n1)
@@ -936,6 +946,8 @@ let
                   focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
                   swaymsg output $focused_display hdr on
                 fi
+              elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
+                jay-toggle-hdr on
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr on
@@ -955,6 +967,8 @@ let
                   focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
                   swaymsg output $focused_display hdr off
                 fi
+              elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
+                jay-toggle-hdr off
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr off
@@ -981,6 +995,8 @@ let
               focused_display=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .name')
               swaymsg output $focused_display hdr on
             fi
+          elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
+            jay-toggle-hdr on
           elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
             # Assuming cm_auto_hdr > 0, switching back to SDR is fine
             hypr-toggle-hdr off
@@ -1034,7 +1050,6 @@ let
     REFRESH=120
     SINK="alsa_output.pci-0000_03_00.1.pro-output-9"
 
-    # TODO: Use for more than Sway
     usage() {
       echo "Usage: $0 [-W WIDTH] [-H HEIGHT] [-r REFRESH] [-O OUTPUT]" >&2
       exit 1
@@ -1061,8 +1076,6 @@ let
     if [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor output.HDMI-A-1.enable output.DP-1.disable output.DP-2.disable
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
-      #cp ~/.config/hypr/displays.conf ~/.config/hypr/displays.conf.gsc
-      #cp ~/.config/hypr/displays/tv.conf ~/.config/hypr/displays.conf
       hyprctl eval "hl.monitor({ output = \"$OUTPUT\", disabled = false })"
       hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '.[].name' | while read -r m; do
         [[ "$m" != "$OUTPUT" ]] && hyprctl eval "hl.monitor({ output = \"$m\", disabled = true })"
@@ -1071,29 +1084,48 @@ let
       hyprctl eval "hl.monitor({ output = \"$OUTPUT\", mode = \"''${WIDTH}x''${HEIGHT}@''${REFRESH}\", scale = 1.5, vrr = 1, bitdepth = 10 })"
       # "''$()"
 
-      # Workaround for HDMI 2.0 banding in 4K
-      if [[ $OUTPUT == HDMI* ]]; then
-        # Reduce banding for 4:2:0 chroma
-        if [ $((WIDTH * HEIGHT)) -gt $((2560 * 1440)) ]; then
-          export ENABLE_VKBASALT=1
-          export VKBASALT_CONFIG_FILE="${debandConfig}"
-        fi
-      fi
-
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       # Gamescope won't allow HDR when launching games, unless already in HDR
       swaymsg output "$OUTPUT" enable mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz pos 0 0 render_bit_depth 10 hdr on adaptive_sync on
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
+    elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
+      displays=$(jay randr | ${pkgs.gawk}/bin/awk '
+        /^      [A-Z].*:$/{
+          connector = $1
+          sub(/:$/, "", connector)
+        }
+        /product:/{print connector}
+      ')
 
-      # Workaround for HDMI 2.0 banding in 4K
-      if [[ $OUTPUT == HDMI* ]]; then
-        # Reduce banding for 4:2:0 chroma
-        if [ $((WIDTH * HEIGHT)) -gt $((2560 * 1440)) ]; then
-          export ENABLE_VKBASALT=1
-          export VKBASALT_CONFIG_FILE="${debandConfig}"
+      # Snapshot current state
+      declare -A jay_enabled
+      while IFS= read -r line; do
+        if [[ "$line" =~ ^[[:space:]]{6}([A-Z][^:]+):$ ]]; then
+          connector="''${BASH_REMATCH[1]}"
+        elif [[ "$line" =~ position: ]]; then
+          jay_enabled["$connector"]=true
         fi
+      done < <(jay randr)
+
+      jay randr output "$OUTPUT" colors set default pq
+      jay randr output "$OUTPUT" format set xrgb2101010
+      jay randr output "$OUTPUT" vrr set-mode variant1
+      jay randr output "$OUTPUT" enable
+
+      for display in $displays; do
+        [ "$display" = "$OUTPUT" ] && continue
+        jay randr output "$display" disable
+      done
+    fi
+
+    # Workaround for HDMI 2.0 banding in 4K
+    if [[ $OUTPUT == HDMI* ]]; then
+      # Reduce banding for 4:2:0 chroma
+      if [ $((WIDTH * HEIGHT)) -gt $((2560 * 1440)) ]; then
+        export ENABLE_VKBASALT=1
+        export VKBASALT_CONFIG_FILE="${debandConfig}"
       fi
     fi
 
@@ -1116,6 +1148,19 @@ let
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &
       swaymsg reload # Contains exec_always kanshi
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
+    elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
+      # Restore previous state
+      for display in "''${!jay_enabled[@]}"; do
+        if [ "''${jay_enabled[$display]}" = "true" ]; then
+          jay randr output "$display" enable
+        else
+          jay randr output "$display" disable
+        fi
+      done
+      # Disable OUTPUT if it wasn't enabled before
+      if [ "''${was_enabled[$OUTPUT]}" != "true" ]; then
+        jay randr output "$OUTPUT" disable
+      fi
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
   '';
