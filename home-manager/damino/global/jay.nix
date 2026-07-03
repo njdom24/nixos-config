@@ -313,6 +313,7 @@
       text = ''
         render-device.name = "dedicated"
         auto-reload = true
+        device-config-filter = "all"
         window-management-key = "Super_L"
         focus-follows-mouse = true
         workspace-display-order = "sorted"
@@ -360,13 +361,16 @@
             #{ type = "exec", exec = ["jay", "input", "seat", "default", "set-cursor-size", "25"] },
             { type = "exec", exec = ["jay", "randr", "card", "$(readlink -f $XDG_RUNTIME_DIR/dri/dgpu0)", "primary"] },
             # GPU screen recorder replay buffer (with delay for display init)
-            #{ type = "exec", exec = ["sh", "-c", "sleep 2 && systemctl --user restart gpu-screen-recorder"] },
+            { type = "exec", exec = ["sh", "-c", "sleep 2 && systemctl --user stop gpu-screen-recorder"] },
         ]
 
         [[drm-devices]]
         name = "dedicated"
         match = { pci-vendor = 0x1002, pci-model = 0x7550 }
         #match.syspath = "$XDG_RUNTIME_DIR/dri/dgpu0"
+
+        [transactions]
+        timeout.millis = 200
 
         [color-management]
         enabled = true
@@ -392,6 +396,14 @@
         #[[inputs]]
         #match.name = "Wacom Intuos Pro M Pen"
         #output.name = "primary"
+
+        [[inputs]]
+        match.name = "Sony Interactive Entertainment Wireless Controller Touchpad"
+        detached = true
+
+        [[inputs]]
+        match.name = "DualSense Wireless Controller Touchpad"
+        detached = true
 
         [[clients]]
         name = "give-all-permissions"
@@ -535,8 +547,8 @@
 
         # ── Screen recording (gpu-screen-recorder) ───────────────────────────────────
         # Save replay (hold to charge, release to cancel)
-        #"ctrl-Print"             = { type = "exec", exec = ["sh", "-c", "systemctl --user is-active --quiet gpu-screen-recorder && notify-send -a gpu-screen-recorder 'Saving replay...' && killall -SIGUSR1 gpu-screen-recorder"] }
-        #"ctrl-shift-Next"        = { type = "exec", exec = ["sh", "-c", "systemctl --user is-active --quiet gpu-screen-recorder && notify-send -a gpu-screen-recorder 'Saving replay...' && killall -SIGUSR1 gpu-screen-recorder"] }
+        "ctrl-Print"             = { type = "exec", exec = ["sh", "-c", "systemctl --user is-active --quiet gpu-screen-recorder && notify-send -a gpu-screen-recorder 'Saving replay...' && killall -SIGUSR1 gpu-screen-recorder"] }
+        "ctrl-shift-Next"        = { type = "exec", exec = ["sh", "-c", "systemctl --user is-active --quiet gpu-screen-recorder && notify-send -a gpu-screen-recorder 'Saving replay...' && killall -SIGUSR1 gpu-screen-recorder"] }
 
         # ── Compositor control ───────────────────────────────────────────────────────
         "logo-shift-c"           = "reload-config-toml"
