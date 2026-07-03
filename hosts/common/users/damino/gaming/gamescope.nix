@@ -34,8 +34,10 @@ let
       vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vrr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-      # TODO
-      echo "0"
+      primary_display=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+        [.outputs[] | select(.enabled == true)] | min_by(.priority) | .name
+      ')
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r --arg name "$primary_display" '.outputs[] | select(.name==$name) | .vrrPolicy'
     else
       echo "0"
     fi
@@ -117,6 +119,22 @@ let
         vrr_mode="never"
       fi
       jay randr output "$primary_display" vrr set-mode "$vrr_mode"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
+      primary_display=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+        [.outputs[] | select(.enabled == true)] | min_by(.priority) | .name
+      ')
+
+      # Normalize numeric input to the string kscreen-doctor expects
+      case "$vrr_mode" in
+        never|0)     vrr_mode="never" ;;
+        always|1)    vrr_mode="always" ;;
+        automatic|2) vrr_mode="automatic" ;;
+        *)
+          echo "set_vrr: Unrecognized VRR option: $vrr_mode" >&2
+          ;;
+      esac
+
+      ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor "output.''${primary_display}.vrrpolicy.''${vrr_mode}"
     fi
 
     XDG_CURRENT_DESKTOP="$desktop"
