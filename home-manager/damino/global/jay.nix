@@ -291,7 +291,7 @@
           fi
         else
           if [ "$current_eotf" != "pq" ]; then
-            jay randr output "$primary_display" colors set default pq
+            jay randr output "$primary_display" colors set bt2020 pq
             ${set-bitdepth} 10
             ${display-refresh} "$primary_display"
           fi
@@ -540,7 +540,7 @@
         "shift-Next"             = { type = "exec", exec = ["${screenshot}", "focused"] }
 
         # ── HDR toggle ───────────────────────────────────────────────────────────────
-        "ctrl-shift-b"           = { type = "exec", exec = ["jay-toggle-hdr.sh"] }
+        "ctrl-shift-b"           = { type = "exec", exec = ["jay-toggle-hdr"] }
 
         # ── Rofi fallback (show actions) ─────────────────────────────────────────────
         "logo-shift-d"           = { type = "exec", exec = ["rofi", "-modi", "drun,run", "-show", "drun", "-drun-show-actions"] }
