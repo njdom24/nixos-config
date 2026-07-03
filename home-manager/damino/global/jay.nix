@@ -564,8 +564,8 @@
         "logo-r"                 = { type = "push-mode", name = "resize" }
 
         [modes."resize".shortcuts]
-        Left      = { type = "resize", dx2 = -100 }
-        Right     = { type = "resize", dx2 =  100 }
+        Left      = { type = "resize", dx1 =  100 }
+        Right     = { type = "resize", dx1 = -100 }
         Up        = { type = "resize", dy1 =  100 }
         Down      = { type = "resize", dy1 = -100 }
         Return    = "pop-mode"
