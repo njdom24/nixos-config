@@ -32,6 +32,10 @@
 	};
 
 	services = {
+      mako.settings = {
+        output = "DP-2";
+        anchor = lib.mkForce "top-left";
+      };
 	  kanshi.settings = [
 	    {
 	      profile = {
@@ -110,87 +114,7 @@
 	        ];
 	      };
 	    }
-	  	{
-	  	  profile = {
-	  	    name = "desktop-secondary";
-	  	    outputs = [
-	  	      {
-	  	        criteria = "AOC Q27G40XMN 0x00000081";
-	      	    status = "enable";
-	      	    mode = "2560x1440@180Hz";
-	      	    position = "2560,0";
-	      	    #adaptiveSync = true;
-	      	  }
-	  	      {
-	  	        criteria = "Acer Technologies VG271U 0x0302811A";
-	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@143.999Hz";
-	  	  	    position = "0,0";
-	  	  	    #position = "2560,0";
-	  	  	    #adaptiveSync = true;
-	  	  	  }
-	  	  	  {
-	  	  	    criteria = "Technical Concepts Ltd 55R635 0x5BED4FBA";
-	  	  	    status = "disable";
-	  	  	    mode = "2560x1440@120Hz";
-	  	  	    position = "5120,0";
-	  	  	    #adaptiveSync = true;
-	  	  	  }
-	  	    ];
-	  	    exec = [
-	  	      "${pkgs.xrandr}/bin/xrandr --output DP-1 --primary"
-	  	      "${pkgs.sway}/bin/swaymsg output DP-1 hdr on"
-	  	      #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
-	  	      #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-9"
-	  	    ];
-	  	  };
-	  	}
-	  	{
-	  	  profile = {
-	  	    name = "desktop-secondary-headless";
-	  	    outputs = [
-	  	      {
-	  	        criteria = "AOC Q27G40XMN 0x00000081";
-	      	    status = "enable";
-	      	    mode = "2560x1440@180Hz";
-	      	    position = "2560,0";
-	      	    #adaptiveSync = true;
-	      	  }
-	  	      {
-	  	        criteria = "Acer Technologies VG271U 0x0302811A";
-	  	  	    status = "enable";
-	  	  	    mode = "2560x1440@143.999Hz";
-	  	  	    position = "0,0";
-	  	  	    #position = "2560,0";
-	  	  	    #adaptiveSync = true;
-	  	  	  }
-	  	  	  {
-	  	  	    criteria = "Technical Concepts Ltd 55R635 *";
-	  	  	    status = "disable";
-	  	  	    mode = "2560x1440@120Hz";
-	  	  	    position = "5120,0";
-	  	  	    #adaptiveSync = true;
-	  	  	  }
-	  	  	  {
-	  	  	    criteria = "Samsung Electric Company SAMSUNG 0x01000E00"; # Dummy display
-	  	  	    status = "disable";
-	  	  	    adaptiveSync = false;
-	  	  	  }
-	  	    ];
-	  	    exec = [
-	  	      "${pkgs.xrandr}/bin/xrandr --output DP-1 --primary"
-	  	      "${pkgs.sway}/bin/swaymsg output DP-1 hdr on"
-	  	      #"${pkgs.pulseaudio}/bin/pactl set-card-profile alsa_card.pci-0000_0c_00.1 pro-audio"
-	  	      #"${pkgs.pulseaudio}/bin/pactl set-default-sink alsa_output.pci-0000_0c_00.1.pro-output-9"
-	  	    ];
-	  	  };
-	  	}
 	  ];
-
-	  mako.settings = {
-	    output = "DP-2";
-	    anchor = lib.mkForce "top-left";
-	  };
 	};
 
 	home.file = {
@@ -287,6 +211,7 @@
 	      y = 0
 	      vrr = { mode = "variant1", cursor-hz = 80 }
 	      transfer-function = "pq"
+	      color-space = "bt2020"
 	      format = "xrgb2101010"
 	      name = "primary"
 	      tearing.mode = "never"
@@ -314,6 +239,7 @@
 	      mode = { width = 3840, height = 2160, refresh-rate = 120.0 }
 	      vrr = { mode = "variant1", cursor-hz = 80 }
 	      transfer-function = "pq"
+	      color-space = "bt2020"
 	      format = "xrgb2101010"
 	      tearing.mode = "never"
 	    '';
