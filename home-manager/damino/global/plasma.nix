@@ -53,8 +53,8 @@
     
     kwin = {
       virtualDesktops = {
-        number = 8;
-        rows = 8;
+        number = 10;
+        rows = 10;
       };
     };
 
@@ -291,6 +291,7 @@
         };
         Windows = {
           FocusPolicy = "FocusFollowsMouse";
+          PerOutputVirtualDesktops = true;
         };
         EdgeBarrier.EdgeBarrier = 0;
         "Effect-slide"."SlideBackground" = false;
