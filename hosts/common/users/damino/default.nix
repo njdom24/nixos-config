@@ -102,7 +102,7 @@ in
 	  })
 	  #betterdiscord-installer
 	  betterdiscordctl
-	  vesktop
+	  #vesktop
 	  jellyfin-media-player
 	  kdePackages.kdenlive
 	  shotcut
