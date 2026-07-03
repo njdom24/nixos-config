@@ -300,7 +300,7 @@
     ];
 
     file.".config/jay/config.toml" =
-      let satellite-loop = pkgs.writeShellScriptBin "satellite-loop" ''
+      let satellite-loop = pkgs.writeShellScript "satellite-loop" ''
       while true; do
         (sleep 5 && xrandr --output DP-1 --primary) &
         ${pkgs.xwayland-satellite}/bin/xwayland-satellite
@@ -345,7 +345,7 @@
         on-graphics-initialized = [
             { type = "exec", exec = ["kanshi"] },
             { type = "exec", exec = ["wlr-hdr-cal"] },
-            { type = "exec", exec = ["/home/damino/.config/jay/satellite-loop.sh"] },
+            { type = "exec", exec = ["${satellite-loop}"] },
             { type = "exec", exec = ["noctalia"] },
             { type = "exec", exec = ["firefox"] },
             { type = "exec", exec = ["discord"] },
