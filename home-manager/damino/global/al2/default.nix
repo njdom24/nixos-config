@@ -65,7 +65,8 @@ in
        # PROTON_FORCE_NVAPI = "1"; # Needed for Reflex 2 on non-NVIDIA hardware, but breaks OptiScaler's FakeNVAPI (Needed for FG)
        # LOW_LATENCY_SPOOF_NVIDIA = "1";
        #DISABLE_LOW_LATENCY_LAYER = "1";
-       ENABLE_LAYER_MESA_ANTI_LAG_ASTY = "1";
+       LOW_LATENCY_LAYER = "1";
+       #ENABLE_LAYER_MESA_ANTI_LAG_ASTY = "1";
     };
 
     # Deploy the .so
