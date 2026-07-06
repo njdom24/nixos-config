@@ -1,0 +1,48 @@
+From: Fix build error after Color Manager patch
+Date: Mon, 22 Jun 2026
+Subject: [PATCH] drm/amd/display: Fix build error from removed dc_plane_cm types
+
+The color manager patch removes union dc_plane_cm_flags and
+struct dc_plane_cm, but the full_update_required function in dc.c
+still references them. Replace the blend_only_flags check with
+the equivalent new field checks (func_shaper, lut3d_func, cm2_params).
+
+Signed-off-by: James Lin <pinglei.lin@amd.com>
+---
+ drivers/gpu/drm/amd/display/dc/core/dc.c | 18 ++++--------------
+ 1 file changed, 4 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/dc/core/dc.c b/drivers/gpu/drm/amd/display/dc/core/dc.c
+index c7036e2c5c51..414db674ca66 100644
+--- a/drivers/gpu/drm/amd/display/dc/core/dc.c
++++ b/drivers/gpu/drm/amd/display/dc/core/dc.c
+@@ -5240,12 +5240,6 @@ static bool full_update_required(
+ 		const struct dc_stream_update *stream_update,
+ 		const struct dc_stream_state *stream)
+ {
+-	const union dc_plane_cm_flags blend_only_flags = {
+-		.bits = {
+-			.blend_enable = 1,
+-		}
+-	};
+-
+ 	if (full_update_required_weak(dc, srf_updates, surface_count, stream_update, stream))
+ 		return true;
+ 
+@@ -5261,9 +5255,13 @@ static bool full_update_required(
+ 				srf_updates[i].surface->force_full_update ||
+ 				(srf_updates[i].flip_addr &&
+ 				srf_updates[i].flip_addr->address.tmz_surface != srf_updates[i].surface->address.tmz_surface) ||
+-				(srf_updates[i].cm &&
+-				((srf_updates[i].cm->flags.all != blend_only_flags.all && srf_updates[i].cm->flags.all != 0) ||
+-				(srf_updates[i].surface->cm.flags.all != blend_only_flags.all && srf_updates[i].surface->cm.flags.all != 0)))))
++				srf_updates[i].func_shaper ||
++				srf_updates[i].lut3d_func ||
++				(srf_updates[i].cm2_params &&
++				(srf_updates[i].cm2_params->component_settings.shaper_3dlut_setting !=
++				 srf_updates[i].surface->mcm_shaper_3dlut_setting ||
++				 srf_updates[i].cm2_params->component_settings.lut1d_enable !=
++				 srf_updates[i].surface->mcm_lut1d_enable))))
+ 			return true;
+ 	}
+ 
