@@ -313,11 +313,11 @@
       text = ''
         render-device.name = "dedicated"
         auto-reload = true
-        device-config-filter = "all"
+        device-config-filter = "new"
         window-management-key = "Super_L"
         focus-follows-mouse = true
         workspace-display-order = "sorted"
-        fallback-output-mode = "focus"
+        fallback-output-mode = "cursor"
         cursor-size = 25
         show-bar = false
         show-titles = true
