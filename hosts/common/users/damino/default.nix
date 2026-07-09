@@ -19,6 +19,7 @@ in
   imports = [
     inputs.chaotic.nixosModules.default
     ../../desktops/sway
+    inputs.mangowm.nixosModules.mango
     ./gaming
   ]; # ++ (builtins.attrValues outputs.nixosModules);
 
@@ -31,7 +32,6 @@ in
   ];
   nix.settings.substituters = [ "https://attic.xuyh0120.win/lantian" ];
   nix.settings.trusted-public-keys = [ "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=" ];
-
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.damino = {
@@ -198,6 +198,7 @@ in
     noisetorch.enable = true;
     virt-manager.enable = true;
 
+    mango.enable = true;
     hyprland = {	
       enable = true; # I don't condone Vaxry, but I need tiling + HDR
       #package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;

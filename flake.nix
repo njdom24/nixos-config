@@ -49,11 +49,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    mangowm= {
+      #url = "github:mangowm/mango";
+      url = "git+https://github.com/mangowm/mango?ref=wl-only&submodules=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hyprland = {
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    #hyprland.url = "git+https://github.com/UjinT34/Hyprland/fp16?submodules=1";
+    #hyprland.url = "git+https://github.com/UjinT34/Hyprland?ref=fp16&submodules=1";
 
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
