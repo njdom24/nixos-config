@@ -1127,15 +1127,24 @@ let
         fi
       done < <(jay randr)
 
-      jay randr output "$OUTPUT" colors set default pq
+      jay randr output "$OUTPUT" colors set bt2020 pq
       jay randr output "$OUTPUT" format set xrgb2101010
-      jay randr output "$OUTPUT" vrr set-mode variant1
       jay randr output "$OUTPUT" enable
+      jay randr output "$OUTPUT" non-desktop false
+      jay randr output "$OUTPUT" vrr set-mode variant1
+      jay randr output "$OUTPUT" mode $WIDTH $HEIGHT $REFRESH
 
       for display in $displays; do
         [ "$display" = "$OUTPUT" ] && continue
+        echo "Disabling $display"
         jay randr output "$display" disable
       done
+
+      if ! pgrep -f xwayland-satellite > /dev/null; then
+        xwayland-satellite &
+      fi
+      disown %1
+      sleep 3 && xrandr --output "$OUTPUT" --primary
     fi
 
     # Workaround for HDMI 2.0 banding in 4K
