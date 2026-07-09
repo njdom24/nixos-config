@@ -33,7 +33,7 @@ in
   boot.kernelModules = [ "kvm-amd" "it87" ]; # For Gigabyte motherboard fan control
   boot.extraModulePackages = with config.boot.kernelPackages; [ it87 ]; # https://www.reddit.com/r/NixOS/comments/1ooa2eh/it87_driver_for_it8613e_not_being_loaded_by/
   # Avoid audio crackle: https://wiki.cachyos.org/features/cachyos_settings/#udev-rules
-  boot.kernelParams = [ "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
+  boot.kernelParams = [ "amdgpu.dcfeaturemask=0x400" "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
 
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
   #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_latest;

@@ -1139,7 +1139,8 @@ let
     fi
 
     # Workaround for HDMI 2.0 banding in 4K
-    if [[ $OUTPUT == HDMI* ]]; then
+    kernel="$(uname -r | cut -d- -f1)"
+    if [[ $OUTPUT == HDMI* ]] && [[ "$(printf '%s\n' "$kernel" "7.1" | sort -V | head -n1)" != "7.1" ]]; then
       # Reduce banding for 4:2:0 chroma
       if [ $((WIDTH * HEIGHT)) -gt $((2560 * 1440)) ]; then
         export ENABLE_VKBASALT=1
