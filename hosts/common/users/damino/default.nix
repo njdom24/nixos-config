@@ -20,6 +20,7 @@ in
     inputs.chaotic.nixosModules.default
     ../../desktops/sway
     inputs.mangowm.nixosModules.mango
+    inputs.jay.nixosModules.default
     ./gaming
   ]; # ++ (builtins.attrValues outputs.nixosModules);
 
@@ -28,7 +29,6 @@ in
     outputs.overlays.unstable-packages
     outputs.overlays.legacy-packages
     outputs.overlays.additions
-    inputs.jay.overlays.default
   ];
   nix.settings.substituters = [ "https://attic.xuyh0120.win/lantian" ];
   nix.settings.trusted-public-keys = [ "lantian:EeAUQ+W+6r7EtwnmYjeVwx5kOGEBpjlBfPlzGlTNvHc=" ];
@@ -199,6 +199,7 @@ in
     virt-manager.enable = true;
 
     mango.enable = true;
+    jay.enable = true;
     hyprland = {	
       enable = true; # I don't condone Vaxry, but I need tiling + HDR
       #package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
@@ -243,19 +244,8 @@ in
   	};
   };
 
-  services = let
-    jaySession = (pkgs.writeTextDir "share/wayland-sessions/jay.desktop" ''
-      [Desktop Entry]
-      Name=Jay
-      Comment=Jay Wayland Compositor
-      Exec=${lib.getExe pkgs.jay} run
-      Type=Application
-    '').overrideAttrs (_: {
-      passthru.providedSessions = [ "jay" ];
-    });
-  in {
+  services = {
     desktopManager.gnome.enable = true;
-    displayManager.sessionPackages = [ jaySession ];
     power-profiles-daemon.enable = true;
     fwupd.enable = true;
 
