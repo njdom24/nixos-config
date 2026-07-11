@@ -20,14 +20,28 @@ in
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
   # Avoid audio crackle: https://wiki.cachyos.org/features/cachyos_settings/#udev-rules
-  boot.kernelParams = [ "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
+  boot.kernelParams = [ "amdgpu.dcfeaturemask=0x400" "snd_hda_intel.power_save=0" "btusb.enable_autosuspend=0" "amdgpu.gpu_recovery=1" "amdgpu.noretry=0" "hid_apple.fnmode=2" ];# ++ [ ("vfio-pci.ids=" + lib.concatStringsSep "," gpuIDs) ];
 
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
   #boot.kernelPackages = pkgs.linuxPackages_latest;
-  #boot.kernelPatches = [ {
-  #	name = "enable-hdmi-freesync";
-  #	patch = ../../patches/enable-hdmi-freesync.mypatch;
-  #}];
+  boot.kernelPatches = [
+    {
+      name = "cm-1";
+      patch = ../../patches/7-1-frl/0001-fix-amd-color-manager.patch;
+    }
+    {
+      name = "cm-2";
+      patch = ../../patches/7-1-frl/0002-fix-dc-plane-cm-build-error.patch;
+    }
+    {
+      name = "frl";
+      patch = ../../patches/7-1-frl/hdmi_frl_amdnext.patch;
+    }
+    {
+      name = "frl-vrr";
+      patch = ../../patches/7-1-frl/hdmi_vrr_amdnext.patch;
+    }
+  ];
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/fe2055ca-3525-4b13-bcd6-d578f0a416fb";
