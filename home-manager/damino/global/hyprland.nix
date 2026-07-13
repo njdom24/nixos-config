@@ -239,7 +239,6 @@
           hl.exec_cmd("${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular --selection-size-limit 209715200 --reconnect-tries 1 --all-mime-type-regex '(?i)^(?!image/x-inkscape-svg).+'")
           hl.exec_cmd("nm-applet &")
           hl.exec_cmd("hyprctl setcursor " .. cursorTheme .. " 24")
-          hl.exec_cmd("swaync &")
           hl.exec_cmd("hyprctl dispatch workspace 1")
           hl.exec_cmd("xwaylandvideobridge")
           hl.exec_cmd('ls "$XDG_RUNTIME_DIR/dri" 2> /dev/null | grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder')
@@ -668,16 +667,45 @@
              if [[ "$line" == *"Stream/Input/Video"* ]]; then
                streaming_sources=$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.gnugrep}/bin/grep -o Stream/Input/Video | ${pkgs.coreutils}/bin/wc -l)
                if [[ "$streaming_sources" == "0" ]]; then
-                 HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+                 case "$XDG_CURRENT_DESKTOP" in
+                   sway)
+                     HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
 
-                 if [[ -z "$HEADLESS" ]]; then
-                   echo "No headless output found. Ignoring" >&2
-                 else
-                   ${pkgs.sway}/bin/swaymsg output "$HEADLESS" unplug > /dev/null 2>&1 &
-                 fi
+                     if [[ -z "$HEADLESS" ]]; then
+                       echo "No headless output found. Ignoring" >&2
+                     else
+                       ${pkgs.sway}/bin/swaymsg output "$HEADLESS" unplug > /dev/null 2>&1 &
+                     fi
 
-                 ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
-                 exit 0
+                     ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
+                     exit 0
+                     ;;
+                   mango)
+                     for _ in {1..20}; do
+                       after="$(
+                         ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1 }'
+                       )"
+
+                       HEADLESS="$(
+                         comm -13 \
+                           <(printf '%s\n' "$before" | sort) \
+                           <(printf '%s\n' "$after" | sort) \
+                           | head -n1
+                       )"
+
+                       [[ -n "$HEADLESS" ]] && break
+                       sleep 0.1
+                     done
+                     ${pkgs.wlr-randr}/bin/wlr-randr --output "$HEADLESS" --off
+                     mmsg dispatch destroy_all_virtual_output
+                     ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
+                     exit 0
+                     ;;
+                   *)
+                     echo "Unsupported desktop: $XDG_CURRENT_DESKTOP" >&2
+                     exit 1
+                     ;;
+                 esac
                fi
              fi
            done
@@ -689,13 +717,14 @@
            # [SELECTION]/window:447338992
            # [SELECTION]/region:DP-1@697,422,953,722
 
-           if [[ "$XDG_CURRENT_DESKTOP" != "sway" ]]; then
+           if [[ "$XDG_CURRENT_DESKTOP" != "sway" && "$XDG_CURRENT_DESKTOP" != "mango" ]]; then
              hyprland-share-picker
              exit 0
            fi
 
            # Run the real command with all args, capture stdout
            display="$(${pkgs.slurp}/bin/slurp -f '%o' -or)"
+           ${pkgs.libnotify}/bin/notify-send "$XDG_CURRENT_DESKTOP: $display"
 
            if [[ "$display" != "HEADLESS-"* ]]; then
              # Create headless display to avoid direct scanout stutter: https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5173
@@ -703,34 +732,102 @@
              # Or maybe https://github.com/waycrate/wayshot/issues/181 when xdg-desktop-portal-luminous takes this,
              #   but libwayshot uses libplacebo's bt.2390 instead of gamma,param=2.2
 
-             HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
-             if [[ -z "$HEADLESS" ]]; then
-               echo "No headless output found, creating one..." >&2
-               ${pkgs.sway}/bin/swaymsg create_output > /dev/null 2>&1 &
-               HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
-               sleep 0.5
-             fi
+             case "$XDG_CURRENT_DESKTOP" in
+               sway)
+                 HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+                 if [[ -z "$HEADLESS" ]]; then
+                   focused="$(${pkgs.sway}/bin/swaymsg -t get_workspaces | ${pkgs.jq}/bin/jq -r '.[] | select(.focused) | .name')"
+                   ${pkgs.sway}/bin/swaymsg create_output > /dev/null 2>&1
+                   HEADLESS=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
+                   ${pkgs.sway}/bin/swaymsg workspace HEADLESS output "$HEADLESS"
+                   ${pkgs.sway}/bin/swaymsg "workspace HEADLESS; workspace $focused"
+                 fi
 
-             DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
-             # Get resolution, scale, and refresh rate
-             WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
-             HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
-             REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
-             SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
-             XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
-             YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
-             REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
+                 DISPLAY_INFO=$(${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r ".[] | select(.name == \"$display\")")
+                 # Get resolution, scale, and refresh rate
+                 WIDTH=$(${pkgs.jq}/bin/jq   -r '.current_mode.width'   <<< "$DISPLAY_INFO")
+                 HEIGHT=$(${pkgs.jq}/bin/jq  -r '.current_mode.height'  <<< "$DISPLAY_INFO")
+                 REFRESH=$(${pkgs.jq}/bin/jq -r '.current_mode.refresh' <<< "$DISPLAY_INFO")
+                 SCALE=$(${pkgs.jq}/bin/jq   -r '.scale'  <<< "$DISPLAY_INFO")
+                 XPOS=$(${pkgs.jq}/bin/jq    -r '.rect.x' <<< "$DISPLAY_INFO")
+                 YPOS=$(${pkgs.jq}/bin/jq    -r '.rect.y' <<< "$DISPLAY_INFO")
+                 REFRESH=$(${pkgs.gawk}/bin/awk "BEGIN { printf \"%.3f\", $REFRESH / 1000 }")
 
-             # Apply settings to headless output
-             ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+                 # Apply settings to headless output
+                 ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null
 
-             # r: Treat as allow_token_by_default=true
-             #echo "[SELECTION]r/screen:$HEADLESS"
-             echo "[SELECTION]/screen:$HEADLESS"
+                 # r: Treat as allow_token_by_default=true
+                 #echo "[SELECTION]r/screen:$HEADLESS"
+                 echo "[SELECTION]/screen:$HEADLESS"
 
-             ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
-             ${pkgs.systemd}/bin/systemctl --user reset-failed
-             ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror ${portal-watcher}
+                 ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror > /dev/null 2>&1 || true
+                 ${pkgs.systemd}/bin/systemctl --user reset-failed > /dev/null 2>&1
+                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet ${portal-watcher}
+
+                 (sleep 0.5 && noctalia msg bar-hide "$HEADLESS" > /dev/null 2>&1) &
+                 disown
+                 ;;
+               mango)
+                 # Check for an existing headless output.
+                 HEADLESS="$(
+                   ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1; exit }'
+                 )"
+
+                 if [[ -z "$HEADLESS" ]]; then
+                   # Create a new virtual output.
+                   mmsg dispatch create_virtual_output > /dev/null 2>&1
+
+                   # Find the headless output.
+                   HEADLESS=""
+                   for _ in {1..20}; do
+                     HEADLESS="$(
+                       ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1 }' | tail -n1
+                     )"
+
+                     [[ -n "$HEADLESS" ]] && break
+                     sleep 0.1
+                   done
+                 fi
+
+                 if [[ -z "$HEADLESS" ]]; then
+                   echo "Failed to determine the new virtual output."
+                   exit 1
+                 fi
+
+                 # Apply settings to headless output
+                 read -r X Y WIDTH HEIGHT SCALE REFRESH <<<"$(
+                   ${pkgs.wlr-randr}/bin/wlr-randr --json |
+                     ${pkgs.jq}/bin/jq -r --arg out "$display" '
+                       .[]
+                       | select(.name == $out)
+                       | . as $monitor
+                       | ($monitor.modes[] | select(.current)) as $mode
+                       | "\($monitor.position.x // 0) \($monitor.position.y // 0) \($mode.width) \($mode.height) \($monitor.scale) \($mode.refresh)"
+                     '
+                 )"
+
+                 ${pkgs.wlr-randr}/bin/wlr-randr \
+                   --output "$HEADLESS" \
+                   --pos "$X,$Y" \
+                   --scale "$SCALE" \
+                   --custom-mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz > /dev/null 2>&1
+
+                 # r: Treat as allow_token_by_default=true
+                 #echo "[SELECTION]r/screen:$HEADLESS"
+                 echo "[SELECTION]/screen:$HEADLESS"
+
+                 ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror > /dev/null 2>&1 || true
+                 ${pkgs.systemd}/bin/systemctl --user reset-failed > /dev/null 2>&1
+                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet ${portal-watcher}
+
+                 (sleep 0.5 && noctalia msg bar-hide "$HEADLESS" > /dev/null 2>&1) &
+                 disown
+                 ;;
+               *)
+                 echo "Unsupported desktop: $XDG_CURRENT_DESKTOP" >&2
+                 exit 1
+                 ;;
+             esac
            else
              echo "[SELECTION]/screen:$display"
            fi

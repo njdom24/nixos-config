@@ -539,10 +539,9 @@
                   fi
                 elif [[ ''${#OUTPUTS[@]} -eq 1 ]]; then
                   set_headless_mode "''${OUTPUTS[0]}"
-                  # grim doesn't take -o and -g, but seems to just prioritize HEADLESS
+                  # grim doesn't take -o and -g together, but seems to just prioritize HEADLESS
                   ${pkgs.grim}/bin/grim -g "$REGION" "$tmpfile"
                 else
-                  ${pkgs.libnotify}/bin/notify-send "BRANCH5"
                   ${pkgs.grim}/bin/grim -g "$REGION" "$tmpfile"
                 fi
 		        ;;
@@ -879,6 +878,7 @@
         
         # Apply settings to headless output
         ${pkgs.sway}/bin/swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+        noctalia msg bar-hide "$HEADLESS" 2> /dev/null
 
         echo "Monitor: $HEADLESS"
       '';

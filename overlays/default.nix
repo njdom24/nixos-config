@@ -70,6 +70,8 @@ in {
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
+    mango = inputs.mangowm.packages.${prev.stdenv.hostPlatform.system}.mango;
+
     hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
       patches = (old.patches or []) ++ [
       ];
