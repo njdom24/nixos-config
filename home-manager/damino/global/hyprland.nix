@@ -724,7 +724,6 @@
 
            # Run the real command with all args, capture stdout
            display="$(${pkgs.slurp}/bin/slurp -f '%o' -or)"
-           ${pkgs.libnotify}/bin/notify-send "$XDG_CURRENT_DESKTOP: $display"
 
            if [[ "$display" != "HEADLESS-"* ]]; then
              # Create headless display to avoid direct scanout stutter: https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5173
