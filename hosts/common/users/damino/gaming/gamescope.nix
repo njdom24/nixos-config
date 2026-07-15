@@ -30,6 +30,15 @@ let
         found && /VRR mode:/{print \$3; exit}
       ")
       echo "$vrr_mode"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
+      focused=$(${pkgs.mango}/bin/mmsg get all-monitors | ${pkgs.jq}/bin/jq -r '
+        .monitors[]
+        | select(.active == true)
+        | .name
+      ')
+      result=$(${pkgs.wlr-randr}/bin/wlr-randr --json | ${pkgs.jq}/bin/jq -r --arg focused "$focused" \
+        '.[] | select(.name == $focused) | (.adaptive_sync | if . then "1" else "0" end)')
+      echo "$result"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
       vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vrr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
@@ -119,6 +128,19 @@ let
         vrr_mode="never"
       fi
       jay randr output "$primary_display" vrr set-mode "$vrr_mode"
+    elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
+      focused=$(${pkgs.mango}/bin/mmsg get all-monitors | ${pkgs.jq}/bin/jq -r '
+        .monitors[]
+        | select(.active == true)
+        | .name
+      ')
+      case "$value" in
+        1) state="enabled" ;;
+        0) state="disabled" ;;
+        *) echo "Error: state must be '1' or '0'" >&2; exit 1 ;;
+      esac
+
+      ${pkgs.wlr-randr}/bin/wlr-randr --output "$focused" --adaptive-sync "$state"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       primary_display=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
         [.outputs[] | select(.enabled == true)] | min_by(.priority) | .name
@@ -183,6 +205,15 @@ let
         $0 ~ display":$" { found=1; next }
         found && /^ +mode:/ && !/VRR/ { match($0, /([0-9]+) x ([0-9]+) @ ([0-9.]+)/, m); print m[1], m[2], m[3]; exit }
       '
+    elif [ "$XDG_CURRENT_DESKTOP" = "mango" ]; then
+      focused=$(${pkgs.mango}/bin/mmsg get all-monitors | ${pkgs.jq}/bin/jq -r '
+        .monitors[]
+        | select(.active == true)
+        | .name
+      ')
+      result=$(${pkgs.wlr-randr}/bin/wlr-randr --json | ${pkgs.jq}/bin/jq -r --arg focused "$focused" \
+        '.[] | select(.name == $focused) | .modes[] | select(.current == true) | "\(.width) \(.height) \(.refresh)"')
+      echo "$result"
     elif [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]; then
       read width height refresh <<< $(LD_LIBRARY_PATH="" hyprctl -j monitors | ${pkgs.jq}/bin/jq -r '
         .[] 
@@ -497,6 +528,29 @@ let
           ")
 
           echo "1 203 $max_brightness"
+        else
+          echo "0 0 0"
+        fi
+      elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
+        focused=$(${pkgs.mango}/bin/mmsg get all-monitors | ${pkgs.jq}/bin/jq -r '
+          .monitors[]
+          | select(.active == true)
+          | .name
+        ')
+        conf="$HOME/.config/mango/monitors.conf"
+        if [[ ! -f "$conf" ]]; then
+          echo "0 0 0"
+          exit 1
+        fi
+
+        # "''$()"
+        if ${pkgs.gnugrep}/bin/grep -qE "name:\^''${focused}\\\$.*hdr:1" "$conf"; then
+          read edid_max edid_avg edid_min <<< "$(get_edid_luminance "$focused")"
+          if [[ "$edid_max" != "0" ]]; then
+            echo "1 203 $edid_max"
+          else
+            echo "0 0 0"
+          fi
         else
           echo "0 0 0"
         fi
