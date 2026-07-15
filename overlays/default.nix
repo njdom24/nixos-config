@@ -52,7 +52,7 @@ in {
     in {
       src = inputs.sway-git;
       buildInputs = (old.buildInputs or []) ++ [(
-        prev.wlroots_0_19.overrideAttrs (old: let
+        prev.wlroots_0_20.overrideAttrs (old: let
           existing = old.patches or [];
           newPatches = [
             (prev.fetchpatch {
