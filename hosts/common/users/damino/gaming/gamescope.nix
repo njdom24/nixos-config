@@ -25,7 +25,7 @@ let
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
       primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
-      vrr_mode=$(${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk "
+      vrr_mode=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk "
         /^      $primary_display:/{found=1}
         found && /VRR mode:/{print \$3; exit}
       ")
@@ -36,7 +36,7 @@ let
         | select(.active == true)
         | .name
       ')
-      result=$(${pkgs.wlr-randr}/bin/wlr-randr --json | ${pkgs.jq}/bin/jq -r --arg focused "$focused" \
+      result=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.wlr-randr}/bin/wlr-randr --json | ${pkgs.jq}/bin/jq -r --arg focused "$focused" \
         '.[] | select(.name == $focused) | (.adaptive_sync | if . then "1" else "0" end)')
       echo "$result"
     elif [[ "$XDG_CURRENT_DESKTOP" = "Hyprland" ]]; then
@@ -127,7 +127,7 @@ let
       elif [[ "$vrr_mode" = "0" ]]; then
         vrr_mode="never"
       fi
-      ${pkgs.jay}/bin/jay randr output "$primary_display" vrr set-mode "$vrr_mode"
+      WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.jay}/bin/jay randr output "$primary_display" vrr set-mode "$vrr_mode"
     elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
       focused=$(${pkgs.mango}/bin/mmsg get all-monitors | ${pkgs.jq}/bin/jq -r '
         .monitors[]
@@ -140,7 +140,7 @@ let
         *) echo "Error: state must be '1' or '0'" >&2; exit 1 ;;
       esac
 
-      ${pkgs.wlr-randr}/bin/wlr-randr --output "$focused" --adaptive-sync "$state"
+      WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.wlr-randr}/bin/wlr-randr --output "$focused" --adaptive-sync "$state"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       primary_display=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
         [.outputs[] | select(.enabled == true)] | min_by(.priority) | .name
@@ -439,10 +439,12 @@ let
       wdisplay="$WAYLAND_DISPLAY"
       session="$XDG_SESSION_TYPE"
 
-      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
-      DISPLAY="$_GSC_PARENT_DISPLAY"
-      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
-      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+      if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
+        XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+        DISPLAY="$_GSC_PARENT_DISPLAY"
+        WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+        XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+      fi
 
       get_edid_luminance() {
         local monitor="$1"
@@ -511,8 +513,8 @@ let
           echo "0 0 0"
         fi
       elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
-        primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
-        randr_output=$(${pkgs.jay}/bin/jay randr)
+        primary_display="$(${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+        randr_output=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.jay}/bin/jay randr)
 
         eotf=$(echo "$randr_output" | ${pkgs.gawk}/bin/awk "
           /^      $primary_display:/{found=1}
@@ -885,12 +887,7 @@ let
     echo "Launching gamescope at $width"x"$height@$refresh"
     ld_preload_pass="''${LD_PRELOAD-}"
 
-    # DXVK_HDR=1 should only be needed for Hyprland, but doesn't hurt to do that globally
-    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      if [[ "$hdr_enabled" == "1" ]]; then
-        extra_flags+=("--hdr-debug-force-support")
-      fi
-    elif [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+    if [[ "$hdr_enabled" == "1" ]]; then
       extra_flags+=("--hdr-debug-force-support")
     fi
 
@@ -946,7 +943,7 @@ let
     toggle_vrr() {
       # Work around Hyprland Auto-HDR modesetting instability with VRR on some displays (Thanks TCL)
       #echo "gsc: VRR mode: $vrr_mode"
-      if [[ "$GSC_MODESET_NOVRR" == "1" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+      if [[ "$GSC_MODESET_NOVRR" == "1" ]]; then
         if ! ${pkgs.procps}/bin/pgrep -x "novrr" >/dev/null; then
           (${set_vrr} 0 && sleep 10 && ${set_vrr} "1") &
           vrr_pid=$!
@@ -1050,9 +1047,9 @@ let
           fi
         fi
         if [[ "$curr_colorspace" != "$last_colorspace" ]]; then
-          if [[ "$GSC_HDR_MODESET" == "1" ]]; then
-            toggle_vrr
-          fi
+          #if [[ "$GSC_HDR_MODESET" == "1" ]]; then
+          #  toggle_vrr
+          #fi
           last_colorspace="$curr_colorspace"
         fi
       # "''$()"
@@ -1087,12 +1084,10 @@ let
     done
 
     # Restore VRR if gamescope closes while toggle job is running
-    if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]] || [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-      if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
-        ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
-        wait "$vrr_pid" 2>/dev/null
-        ${set_vrr} "1"
-      fi
+    if [[ -n "''${vrr_pid:-}" ]] && ${pkgs.procps}/bin/kill -0 "$vrr_pid" 2>/dev/null; then # "''$()"
+      ${pkgs.procps}/bin/kill -9 "$vrr_pid" 2>/dev/null
+      wait "$vrr_pid" 2>/dev/null
+      ${set_vrr} "1"
     fi
   '';
 
@@ -1187,6 +1182,10 @@ let
       ${pkgs.jay}/bin/jay randr output "$OUTPUT" non-desktop false
       ${pkgs.jay}/bin/jay randr output "$OUTPUT" vrr set-mode variant1
       ${pkgs.jay}/bin/jay randr output "$OUTPUT" mode $WIDTH $HEIGHT $REFRESH
+      jay-toggle-hdr on
+
+      #echo "$(${pkgs.jay}/bin/jay randr)" > /tmp/wah.log
+      #sleep 3
 
       for display in $displays; do
         [ "$display" = "$OUTPUT" ] && continue
@@ -1196,9 +1195,10 @@ let
 
       if ! pgrep -f xwayland-satellite > /dev/null; then
         xwayland-satellite &
+        disown %1
       fi
-      disown %1
-      sleep 3 && xrandr --output "$OUTPUT" --primary
+
+      sleep 3 && ${pkgs.xrandr}/bin/xrandr --output "$OUTPUT" --primary
     fi
 
     # Workaround for HDMI 2.0 banding in 4K

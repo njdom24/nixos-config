@@ -48,7 +48,7 @@
         ;;
     esac
 
-    OUTPUT="$(jay randr show --formats)"
+    OUTPUT="$(${pkgs.jay}/bin/jay randr show --formats)"
 
     # If no displays specified, find all enabled ones.
     if [[ $# -eq 0 ]]; then
@@ -91,7 +91,7 @@
       ' <<<"$OUTPUT")"
 
       for candidate in "''${preferred[@]}"; do
-        if grep -qx "[[:space:]]*$candidate" <<<"$block"; then
+        if ${pkgs.gnugrep}/bin/grep -qx "[[:space:]]*$candidate" <<<"$block"; then
           format="$candidate"
           break
         fi
@@ -103,11 +103,11 @@
       fi
 
       echo "$display -> $format"
-      jay randr output "$display" format set "$format"
+      ${pkgs.jay}/bin/jay randr output "$display" format set "$format"
     done
     ''; in
     let display-refresh = pkgs.writeShellScript "display-refresh" ''
-    OUTPUT="$(jay randr show --modes)"
+    OUTPUT="$(${pkgs.jay}/bin/jay randr show --modes)"
     # If no displays specified, find all enabled ones.
     if [[ $# -eq 0 ]]; then
       mapfile -t displays < <(
@@ -147,7 +147,7 @@
           modes+=("$line")
         fi
       done < <(
-        awk -v display="$display" '
+        ${pkgs.gawk}/bin/awk -v display="$display" '
         BEGIN {
           in_display = 0
         }
@@ -194,9 +194,9 @@
       IFS='x@' read -r aw ah ar <<<"$alternate"
       IFS='x@' read -r cw ch cr <<<"$current"
 
-      jay randr output "$display" mode "$aw" "$ah" "$ar"
+      ${pkgs.jay}/bin/jay randr output "$display" mode "$aw" "$ah" "$ar"
       sleep 1
-      jay randr output "$display" mode "$cw" "$ch" "$cr"
+      ${pkgs.jay}/bin/jay randr output "$display" mode "$cw" "$ch" "$cr"
     done
     ''; in
     let screenshot = pkgs.writeShellScript "screenshot" ''
@@ -247,9 +247,9 @@
     ''; in {
     packages = with pkgs; [
       (pkgs.writeShellScriptBin "jay-toggle-hdr" ''
-        primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+        primary_display="$(${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
 
-        read current_eotf current_w current_h current_hz < <(jay randr | awk "
+        read current_eotf current_w current_h current_hz < <(${pkgs.jay}/bin/jay randr | awk "
           /^      $primary_display:/{found=1}
           found && in_eotf && /\(current\)/{eotf=\$1}
           found && /eotfs:/{in_eotf=1}
@@ -261,7 +261,7 @@
         set_format() {
           local candidates=("$@")
           for fmt in "''${candidates[@]}"; do
-            if jay randr output "$primary_display" format set "$fmt" 2>/dev/null; then
+            if ${pkgs.jay}/bin/jay randr output "$primary_display" format set "$fmt" 2>/dev/null; then
               echo "Format set to $fmt"
               return 0
             fi
@@ -286,12 +286,12 @@
 
         if [ "$desired" = "off" ]; then
           if [ "$current_eotf" = "pq" ]; then
-            jay randr output "$primary_display" colors set default default
+            ${pkgs.jay}/bin/jay randr output "$primary_display" colors set default default
             ${display-refresh} "$primary_display"
           fi
         else
           if [ "$current_eotf" != "pq" ]; then
-            jay randr output "$primary_display" colors set bt2020 pq
+            ${pkgs.jay}/bin/jay randr output "$primary_display" colors set bt2020 pq
             ${set-bitdepth} 10
             ${display-refresh} "$primary_display"
           fi
@@ -302,7 +302,7 @@
     file.".config/jay/config.toml" =
       let satellite-loop = pkgs.writeShellScript "satellite-loop" ''
       while true; do
-        (sleep 5 && xrandr --output DP-1 --primary) &
+        (sleep 5 && ${pkgs.xrandr}/bin/xrandr --output DP-1 --primary) &
         ${pkgs.xwayland-satellite}/bin/xwayland-satellite
         sleep 1
         status=$?
@@ -430,18 +430,20 @@
         title-font = "Input Mono 0"
         bar-font = "Input Mono 8"
 
-        title-height = 4
+        title-height = 0
         bar-height = 28
+        bar-separator-width = 0
+        separator-color = "#00000000"
 
         border-width = 2
         border-color = "#00000000"
         #focused-border-color = "#${config.colorScheme.palette.base05}"
-        focused-border-color = "#285577"
+        focused-border-color = "#${config.colorScheme.palette.base04}"
         #focused-title-bg-color = "#00000000"
         unfocused-title-bg-color = "#00000000"
         show-window-icons = false
-        #container-borders = "full"
-        container-borders = "separators"
+        container-borders = "full"
+        #container-borders = "separators"
 
         [workspaces."1"]
         initial-output.name = "primary"
