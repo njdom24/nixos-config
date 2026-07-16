@@ -7,7 +7,22 @@ in {
   # This one contains whatever you want to overlay
   # You can change versions, add patches, set compilation flags, anything really.
   # https://nixos.wiki/wiki/Overlays
-  modifications = final: prev: (import ./temp-fixes.nix final prev) // {
+  modifications = final: prev: let
+    wlrootsPatched = prev.wlroots_0_20.overrideAttrs (old: let
+      existing = old.patches or [];
+      newPatches = [
+        (prev.fetchpatch {
+          url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5143.diff";
+          sha256 = "sha256-At3PsGV5KChIuNdGgfht/r7XydKiIqDahbeGFWM1Rok=";
+        })
+        #../patches/wlr-scrgb.patch
+        ../patches/wlr-hdr-hack.patch
+      ];
+    in {
+      src = inputs.wlroots-git;
+      patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
+    });
+  in (import ./temp-fixes.nix final prev) // {
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
     # });
@@ -51,26 +66,19 @@ in {
       newPatches = [ ../patches/sway-scrgb.patch ];
     in {
       src = inputs.sway-git;
-      buildInputs = (old.buildInputs or []) ++ [(
-        prev.wlroots_0_20.overrideAttrs (old: let
-          existing = old.patches or [];
-          newPatches = [
-            (prev.fetchpatch {
-              url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5143.diff";
-              sha256 = "sha256-At3PsGV5KChIuNdGgfht/r7XydKiIqDahbeGFWM1Rok=";
-            })
-            #../patches/wlr-scrgb.patch
-            ../patches/wlr-hdr-hack.patch
-          ];
-        in {
-          src = inputs.wlroots-git;
-          patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
-        })
-      )];
+      buildInputs = (old.buildInputs or []) ++ [ wlrootsPatched ];
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
-    mango = inputs.mangowm.packages.${prev.stdenv.hostPlatform.system}.mango;
+    jay = inputs.jay.packages.${prev.stdenv.hostPlatform.system}.jay;
+
+    mango = inputs.mangowm.packages.${prev.stdenv.hostPlatform.system}.mango.overrideAttrs (old: let
+      existing = old.patches or [];
+      newPatches = [ ../patches/mango-scrgb.patch ];
+    in {
+      buildInputs = (old.buildInputs or []) ++ [ wlrootsPatched ];
+      patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
+    });
 
     hyprland = inputs.hyprland.packages.${prev.stdenv.hostPlatform.system}.hyprland.overrideAttrs (old: {
       patches = (old.patches or []) ++ [
