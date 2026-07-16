@@ -24,8 +24,8 @@ let
       vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .adaptive_sync_status')
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
-      primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
-      vrr_mode=$(jay randr | ${pkgs.gawk}/bin/awk "
+      primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      vrr_mode=$(${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk "
         /^      $primary_display:/{found=1}
         found && /VRR mode:/{print \$3; exit}
       ")
@@ -120,14 +120,14 @@ let
       fi
       swaymsg output $focused_display adaptive_sync "$vrr_mode"
     elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
-      primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
 
       if [[ "$vrr_mode" = "1" ]]; then
         vrr_mode="variant1"
       elif [[ "$vrr_mode" = "0" ]]; then
         vrr_mode="never"
       fi
-      jay randr output "$primary_display" vrr set-mode "$vrr_mode"
+      ${pkgs.jay}/bin/jay randr output "$primary_display" vrr set-mode "$vrr_mode"
     elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
       focused=$(${pkgs.mango}/bin/mmsg get all-monitors | ${pkgs.jq}/bin/jq -r '
         .monitors[]
@@ -195,13 +195,13 @@ let
   get_display_mode = pkgs.writeShellScript "get-display-mode.sh" ''
     # Sway 1.11 sets this OOTB now
     if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
-      swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
+      ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
         .[] | select(.focused) | "\(.current_mode.width) \(.current_mode.height) \(.current_mode.refresh / 1000)"
       '
     elif [ "$XDG_CURRENT_DESKTOP" = "jay" ]; then
       # Jay has no way to detect focused display. Just choose primary or first display in xrandr...
-      primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
-      jay randr | ${pkgs.gawk}/bin/awk -v display="$primary_display" '
+      primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      ${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk -v display="$primary_display" '
         $0 ~ display":$" { found=1; next }
         found && /^ +mode:/ && !/VRR/ { match($0, /([0-9]+) x ([0-9]+) @ ([0-9.]+)/, m); print m[1], m[2], m[3]; exit }
       '
@@ -511,8 +511,8 @@ let
           echo "0 0 0"
         fi
       elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
-        primary_display="$(xrandr | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
-        randr_output=$(jay randr)
+        primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+        randr_output=$(${pkgs.jay}/bin/jay randr)
 
         eotf=$(echo "$randr_output" | ${pkgs.gawk}/bin/awk "
           /^      $primary_display:/{found=1}
@@ -1163,7 +1163,7 @@ let
       swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r --arg output "$OUTPUT" '.[] | select(.name | test($output) | not).name' | ${pkgs.findutils}/bin/xargs -r -I{} swaymsg output {} disable
       (sleep 2 && [ "$gsr_status" = "active" ] && systemctl --user restart gpu-screen-recorder.service) &
     elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
-      displays=$(jay randr | ${pkgs.gawk}/bin/awk '
+      displays=$(${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk '
         /^      [A-Z].*:$/{
           connector = $1
           sub(/:$/, "", connector)
@@ -1179,19 +1179,19 @@ let
         elif [[ "$line" =~ position: ]]; then
           jay_enabled["$connector"]=true
         fi
-      done < <(jay randr)
+      done < <(${pkgs.jay}/bin/jay randr)
 
-      jay randr output "$OUTPUT" colors set bt2020 pq
-      jay randr output "$OUTPUT" format set xrgb2101010
-      jay randr output "$OUTPUT" enable
-      jay randr output "$OUTPUT" non-desktop false
-      jay randr output "$OUTPUT" vrr set-mode variant1
-      jay randr output "$OUTPUT" mode $WIDTH $HEIGHT $REFRESH
+      ${pkgs.jay}/bin/jay randr output "$OUTPUT" colors set bt2020 pq
+      ${pkgs.jay}/bin/jay randr output "$OUTPUT" format set xrgb2101010
+      ${pkgs.jay}/bin/jay randr output "$OUTPUT" enable
+      ${pkgs.jay}/bin/jay randr output "$OUTPUT" non-desktop false
+      ${pkgs.jay}/bin/jay randr output "$OUTPUT" vrr set-mode variant1
+      ${pkgs.jay}/bin/jay randr output "$OUTPUT" mode $WIDTH $HEIGHT $REFRESH
 
       for display in $displays; do
         [ "$display" = "$OUTPUT" ] && continue
         echo "Disabling $display"
-        jay randr output "$display" disable
+        ${pkgs.jay}/bin/jay randr output "$display" disable
       done
 
       if ! pgrep -f xwayland-satellite > /dev/null; then
@@ -1234,14 +1234,14 @@ let
       # Restore previous state
       for display in "''${!jay_enabled[@]}"; do
         if [ "''${jay_enabled[$display]}" = "true" ]; then
-          jay randr output "$display" enable
+          ${pkgs.jay}/bin/jay randr output "$display" enable
         else
-          jay randr output "$display" disable
+          ${pkgs.jay}/bin/jay randr output "$display" disable
         fi
       done
       # Disable OUTPUT if it wasn't enabled before
       if [ "''${was_enabled[$OUTPUT]}" != "true" ]; then
-        jay randr output "$OUTPUT" disable
+        ${pkgs.jay}/bin/jay randr output "$OUTPUT" disable
       fi
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
