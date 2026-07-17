@@ -661,11 +661,11 @@
         "scenefx": "scenefx"
       },
       "locked": {
-        "lastModified": 1784184688,
-        "narHash": "sha256-zwvQrbeRx3SumO4PgfbJTkyOr18NeNwH0kf8jgeo5fM=",
+        "lastModified": 1784275202,
+        "narHash": "sha256-+jUePnmfxvLL4m1jDmwUkgmscZ2yXg+yq2wWPCqSx7E=",
         "ref": "wl-only",
-        "rev": "f15170cde930829259cc26ffdaa77e7596a42ce9",
-        "revCount": 1665,
+        "rev": "c601c3082e23da8aa367a3b5baed321e844264da",
+        "revCount": 1666,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/mangowm/mango"
