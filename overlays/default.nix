@@ -22,6 +22,21 @@ in {
       src = inputs.wlroots-git;
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
+
+    wlrootsPatchedStable = prev.wlroots_0_20.overrideAttrs (old: let
+      existing = old.patches or [];
+      newPatches = [
+        (prev.fetchpatch {
+          url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5143.diff";
+          sha256 = "sha256-At3PsGV5KChIuNdGgfht/r7XydKiIqDahbeGFWM1Rok=";
+        })
+        #../patches/wlr-scrgb.patch
+        ../patches/wlr-hdr-hack.patch
+      ];
+    in {
+      # no `src` override here — keep upstream 0.20 release source
+      patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
+    });
   in (import ./temp-fixes.nix final prev) // {
     # example = prev.example.overrideAttrs (oldAttrs: rec {
     # ...
@@ -72,11 +87,26 @@ in {
 
     jay = inputs.jay.packages.${prev.stdenv.hostPlatform.system}.jay;
 
-    mango = inputs.mangowm.packages.${prev.stdenv.hostPlatform.system}.mango.overrideAttrs (old: let
+    mango = let
+      scenefxFlake = inputs.mangowm.inputs.scenefx.packages.${final.stdenv.hostPlatform.system}.default;
+
+      scenefxPatched = let
+        existing = scenefxFlake.buildInputs or [];
+        withoutWlroots = builtins.filter
+          (p: !(final.lib.hasInfix "wlroots" (p.pname or p.name or "")))
+          existing;
+      in scenefxFlake.overrideAttrs (old: {
+        buildInputs = withoutWlroots ++ [ wlrootsPatchedStable ];
+      });
+
+      mangoBase = final.callPackage "${inputs.mangowm}/nix" {
+        scenefx = scenefxPatched;
+        wlroots_0_20 = wlrootsPatchedStable;
+      };
+    in mangoBase.overrideAttrs (old: let
       existing = old.patches or [];
       newPatches = [ ../patches/mango-scrgb.patch ];
     in {
-      buildInputs = (old.buildInputs or []) ++ [ wlrootsPatched ];
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
