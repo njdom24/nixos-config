@@ -44,7 +44,6 @@
       ACTION=="add|change", KERNEL=="event[0-9]*", ATTRS{name}=="Sunshine*Touchpad", ENV{LIBINPUT_IGNORE_DEVICE}="1"
     '';
 
-    cpupower-gui.enable = true;
     lact.enable = true;
 
  	ananicy = {
