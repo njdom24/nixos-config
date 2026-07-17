@@ -30,6 +30,10 @@ in {
           url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5143.diff";
           sha256 = "sha256-At3PsGV5KChIuNdGgfht/r7XydKiIqDahbeGFWM1Rok=";
         })
+        (prev.fetchpatch {
+          url = "https://gitlab.freedesktop.org/wlroots/wlroots/-/merge_requests/5361.diff";
+          sha256 = "sha256-J0Cr+slZP6EeDKIdGzY/mKA6y840i/KIvjgbgXs/zP0=";
+        })
         #../patches/wlr-scrgb.patch
         ../patches/wlr-hdr-hack.patch
       ];
