@@ -12,7 +12,6 @@ let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.
 	gst-plugins-bad
 	gst-plugins-ugly
 	gst-libav
-	gst-vaapi
   ]);
 in
 {

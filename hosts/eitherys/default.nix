@@ -12,7 +12,6 @@ let
 	gst-plugins-bad
 	gst-plugins-ugly
 	gst-libav
-	gst-vaapi
   ]);
 in
 {
