@@ -212,6 +212,7 @@
 	      vrr = { mode = "variant1", cursor-hz = 80 }
 	      transfer-function = "pq"
 	      color-space = "bt2020"
+	      blend-space = "linear"
 	      format = "xrgb2101010"
 	      name = "primary"
 	      tearing.mode = "never"
@@ -240,6 +241,7 @@
 	      vrr = { mode = "variant1", cursor-hz = 80 }
 	      transfer-function = "pq"
 	      color-space = "bt2020"
+	      blend-space = "linear"
 	      format = "xrgb2101010"
 	      tearing.mode = "never"
 	    '';
