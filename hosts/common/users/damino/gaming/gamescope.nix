@@ -24,7 +24,7 @@ let
       vrr_status=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.focused==true) | .adaptive_sync_status')
       echo "$vrr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "jay" ]]; then
-      primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      primary_display="$(DISPLAY=$DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
       vrr_mode=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk "
         /^      $primary_display:/{found=1}
         found && /VRR mode:/{print \$3; exit}
@@ -43,7 +43,7 @@ let
       vfr_status=$(LD_LIBRARY_PATH="" hyprctl -j getoption misc:vrr | ${pkgs.jq}/bin/jq '.int')
       echo "$vfr_status"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-      primary_display=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+      primary_display=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
         [.outputs[] | select(.enabled == true)] | min_by(.priority) | .name
       ')
       ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r --arg name "$primary_display" '.outputs[] | select(.name==$name) | .vrrPolicy'
@@ -142,7 +142,7 @@ let
 
       WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.wlr-randr}/bin/wlr-randr --output "$focused" --adaptive-sync "$state"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-      primary_display=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+      primary_display=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
         [.outputs[] | select(.enabled == true)] | min_by(.priority) | .name
       ')
 
@@ -237,7 +237,7 @@ let
       echo "$width $height $refresh"
     elif [ "$XDG_CURRENT_DESKTOP" = "KDE" ]; then
       read width height refresh < <(
-        ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
+        env WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
           (.outputs | map(select(.enabled == true)) | sort_by(.priority))[0] as $out |
           ($out.currentModeId) as $curId |
           ($out.modes[] | select(.id == $curId)) |
@@ -587,7 +587,7 @@ let
         fi
         echo "0 0 0"
       elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
-        json=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
+        json=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j)
         enabled=$(${pkgs.jq}/bin/jq -r '
           .outputs
           | map(select(.enabled == true and .priority == 1))
@@ -604,7 +604,7 @@ let
           ' <<< "$json")
           
           # Get peak brightness (Currently not exposed to JSON)
-          output=$(${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o | strip_ansi)
+          output=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -o | strip_ansi)
     
           block=$(${pkgs.gawk}/bin/awk '
             BEGIN { RS="Output: "; FS="\n" }
@@ -797,9 +797,14 @@ let
 
         if [[ "$hdr_enabled" == "1" ]]; then
           if [[ "$XDG_CURRENT_DESKTOP" == "KDE" || "$_GSC_PARENT_DESKTOP" == "KDE" ]]; then
-            # Scale peak brightness by luminance multiplier from base of 203 nits
-            scale=$(echo "scale=4; $hdr_paper_white / 203" | ${pkgs.bc}/bin/bc)
-            adjusted_peak=$(echo "$hdr_peak / $scale" | ${pkgs.bc}/bin/bc)
+            windows_reference=$(${pkgs.gawk}/bin/awk -F= '/^\[Windows_HDR\]/{f=1;next} /^\[/{f=0} f && $1=="Reference"{print $2}' "~/.config/kwinrc")
+            if [[ "$windows_reference" == "203" ]]; then
+              adjusted_peak=$hdr_peak
+            else
+              # Scale peak brightness by luminance multiplier from base of 203 nits
+              scale=$(echo "scale=4; $hdr_paper_white / 203" | ${pkgs.bc}/bin/bc)
+              adjusted_peak=$(echo "$hdr_peak / $scale" | ${pkgs.bc}/bin/bc)
+            fi
           else
             # Not KDE: don't scale
             adjusted_peak=$hdr_peak
