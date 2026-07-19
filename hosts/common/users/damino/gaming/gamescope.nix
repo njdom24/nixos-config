@@ -557,14 +557,9 @@ let
           | select(.active == true)
           | .name
         ')
-        conf="$HOME/.config/mango/monitors.conf"
-        if [[ ! -f "$conf" ]]; then
-          echo "0 0 0"
-          exit 1
-        fi
 
-        # "''$()"
-        if ${pkgs.gnugrep}/bin/grep -qE "name:\^''${focused}\\\$.*hdr:1" "$conf"; then
+        is_hdr=$(${pkgs.mango}/bin/mmsg get monitor "$focused" | jq -r '.is_hdr')
+        if [[ "$is_hdr" == "true" ]]; then
           read edid_max edid_avg edid_min <<< "$(get_edid_luminance "$focused")"
           if [[ "$edid_max" != "0" ]]; then
             echo "1 203 $edid_max"

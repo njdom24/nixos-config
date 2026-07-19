@@ -40,10 +40,7 @@ case "$#" in
     ;;
 esac
 
-command -v mmsg >/dev/null 2>&1 || { echo "Error: mmsg not found in PATH" >&2; exit 1; }
-
 if [[ -z "$OUTPUT" ]]; then
-    command -v jq >/dev/null 2>&1 || { echo "Error: jq not found (needed to auto-detect the focused monitor)" >&2; exit 1; }
     OUTPUT="$(mmsg get all-monitors | jq -r '.monitors[] | select(.active == true) | .name')"
     if [[ -z "$OUTPUT" || "$OUTPUT" == "null" ]]; then
       echo "Error: could not determine the focused monitor from mmsg" >&2
@@ -59,14 +56,6 @@ fi
 
 SEARCH="name:^${OUTPUT}\$,"
 MATCH_LINE="$(grep -Fn -- "$SEARCH" "$CONF" | head -n1 | cut -d: -f1)"
-
-if [[ -z "$MATCH_LINE" ]]; then
-  echo "Error: no monitorrule found for output '$OUTPUT' in $CONF" >&2
-  echo "Available outputs in config:" >&2
-  grep -oP '(?<=name:\^)[^$]+(?=\$,)' "$CONF" >&2 || true
-  exit 1
-fi
-
 LINE_CONTENT="$(sed -n "${MATCH_LINE}p" "$CONF")"
 
 CURRENT_STATE=""
@@ -76,23 +65,29 @@ elif [[ "$LINE_CONTENT" == *"hdr:1"* ]]; then
   CURRENT_STATE=1
 fi
 
+if [[ -z "$MATCH_LINE" ]]; then
+  echo "Error: no monitorrule found for output '$OUTPUT' in $CONF" >&2
+  echo "Available outputs in config:" >&2
+  grep -oP '(?<=name:\^)[^$]+(?=\$,)' "$CONF" >&2 || true
+  exit 1
+fi
+
 if [[ -n "$STATE_WORD" ]]; then
   # Forced state, regardless of current value.
   [[ "$STATE_WORD" == "on" ]] && NEW_STATE=1 || NEW_STATE=0
 else
+  is_hdr=$(mmsg get monitor "$OUTPUT" | jq -r '.is_hdr')
   # No state given: toggle.
-  if [[ "$CURRENT_STATE" == "0" ]]; then
-    NEW_STATE=1
-  elif [[ "$CURRENT_STATE" == "1" ]]; then
+  if [[ "$is_hdr" == "true" ]]; then
     NEW_STATE=0
   else
     NEW_STATE=1
   fi
 fi
 
-if [[ -z "$CURRENT_STATE" ]]; then
-# No hdr field present on this line yet - add one.
-sed -i "${MATCH_LINE}s/\$/,hdr:${NEW_STATE}/" "$CONF"
+if [[ "$LINE_CONTENT" != *"hdr:"* ]]; then
+  # No hdr field present on this line yet - add one.
+  sed -i "${MATCH_LINE}s/\$/,hdr:${NEW_STATE}/" "$CONF"
 elif [[ "$CURRENT_STATE" != "$NEW_STATE" ]]; then
   sed -i "${MATCH_LINE}s/hdr:${CURRENT_STATE}/hdr:${NEW_STATE}/" "$CONF"
 fi
