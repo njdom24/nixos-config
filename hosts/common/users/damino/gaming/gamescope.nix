@@ -1017,6 +1017,8 @@ let
                 fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
                 jay-toggle-hdr on
+              elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
+                mango-toggle-hdr on
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr on
@@ -1038,6 +1040,8 @@ let
                 fi
               elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
                 jay-toggle-hdr off
+              elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
+                mango-toggle-hdr off
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr off
@@ -1066,6 +1070,8 @@ let
             fi
           elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
             jay-toggle-hdr on
+          elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
+            mango-toggle-hdr on
           elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
             # Assuming cm_auto_hdr > 0, switching back to SDR is fine
             hypr-toggle-hdr off
@@ -1184,9 +1190,6 @@ let
       ${pkgs.jay}/bin/jay randr output "$OUTPUT" mode $WIDTH $HEIGHT $REFRESH
       jay-toggle-hdr on
 
-      #echo "$(${pkgs.jay}/bin/jay randr)" > /tmp/wah.log
-      #sleep 3
-
       for display in $displays; do
         [ "$display" = "$OUTPUT" ] && continue
         echo "Disabling $display"
@@ -1199,6 +1202,20 @@ let
       fi
 
       sleep 3 && ${pkgs.xrandr}/bin/xrandr --output "$OUTPUT" --primary
+    elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
+      cp ~/.config/mango/monitors.conf ~/.config/mango/monitors.conf.bak
+      ${pkgs.wlr-randr}/bin/wlr-randr --output "$OUTPUT" --mode "$WIDTH"x"$HEIGHT"@"$REFRESH"
+
+      # Disable every other enabled output.
+      ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '
+        /^[^[:space:]]/ { out=$1 }
+        /Enabled: yes/ { print out }
+      ' | while IFS= read -r out; do
+        [ "$out" = "$OUTPUT" ] && continue
+        ${pkgs.wlr-randr}/bin/wlr-randr --output "$out" --off
+      done
+      sleep 0.5
+      mango-toggle-hdr on
     fi
 
     # Workaround for HDMI 2.0 banding in 4K
@@ -1243,6 +1260,9 @@ let
       if [ "''${was_enabled[$OUTPUT]}" != "true" ]; then
         ${pkgs.jay}/bin/jay randr output "$OUTPUT" disable
       fi
+    elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
+      mv ~/.config/mango/monitors.conf.bak ~/.config/mango/monitors.conf
+      ${pkgs.mango}/bin/mmsg dispatch reload_config
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
   '';

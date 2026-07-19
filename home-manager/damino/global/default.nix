@@ -25,7 +25,7 @@
     ./plasma.nix
     ./sway.nix
     ./jay.nix
-    ./mango.nix
+    ./mango
     ./hyprland.nix
     ./terminals.nix
     ./theming
