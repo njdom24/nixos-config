@@ -193,6 +193,19 @@ let
 
   # Resolution & refresh detection
   get_display_mode = pkgs.writeShellScript "get-display-mode.sh" ''
+    # Account for nested case
+    desktop="$XDG_CURRENT_DESKTOP"
+    display="$DISPLAY"
+    wdisplay="$WAYLAND_DISPLAY"
+    session="$XDG_SESSION_TYPE"
+
+    if [[ "$XDG_CURRENT_DESKTOP" = "gamescope" ]]; then
+      XDG_CURRENT_DESKTOP="$_GSC_PARENT_DESKTOP"
+      DISPLAY="$_GSC_PARENT_DISPLAY"
+      WAYLAND_DISPLAY="$_GSC_PARENT_WAYLAND_DISPLAY"
+      XDG_SESSION_TYPE="$_GSC_PARENT_SESSION_TYPE"
+    fi
+
     # Sway 1.11 sets this OOTB now
     if [[ "$XDG_CURRENT_DESKTOP" = "sway" ]]; then
       ${pkgs.sway}/bin/swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '
@@ -200,8 +213,8 @@ let
       '
     elif [ "$XDG_CURRENT_DESKTOP" = "jay" ]; then
       # Jay has no way to detect focused display. Just choose primary or first display in xrandr...
-      primary_display="$(DISPLAY=$_GSC_PARENT_DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
-      ${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk -v display="$primary_display" '
+      primary_display="$(DISPLAY=$DISPLAY ${pkgs.xrandr}/bin/xrandr 2>/dev/null | ${pkgs.gawk}/bin/awk '/ connected/&&!f{f=$1}/ connected primary/{print $1;found=1;exit}END{if(!found)print f}')"
+      WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.jay}/bin/jay randr | ${pkgs.gawk}/bin/awk -v display="$primary_display" '
         $0 ~ display":$" { found=1; next }
         found && /^ +mode:/ && !/VRR/ { match($0, /([0-9]+) x ([0-9]+) @ ([0-9.]+)/, m); print m[1], m[2], m[3]; exit }
       '
@@ -258,6 +271,11 @@ let
       # echo "''$()"
       echo "$width $height $refresh"
     fi
+
+    XDG_CURRENT_DESKTOP="$desktop"
+    DISPLAY="$display"
+    WAYLAND_DISPLAY="$wdisplay"
+    XDG_SESSION_TYPE="$session"
   '';
 
   optifg-min = pkgs.writeShellScriptBin "optifg-min" ''
