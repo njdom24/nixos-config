@@ -404,8 +404,8 @@
       hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "almostLinear" })
       hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "almostLinear" })
       hl.animation({ leaf = "workspaces",    enabled = true,  speed = 0.94, bezier = "almostLinear", style = "fade" })
-      hl.animation({ leaf = "workspacesIn",  enabled = false, speed = 1.21, bezier = "almostLinear", style = "fade" })
-      hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 0.94, bezier = "almostLinear", style = "fade" })
+      hl.animation({ leaf = "workspacesIn",  enabled = true, speed = 1.21, bezier = "almostLinear", style = "slidevert" })
+      hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 0.94, bezier = "almostLinear", style = "slidevert" })
       
       -----------------
       ---- DEVICES ----
