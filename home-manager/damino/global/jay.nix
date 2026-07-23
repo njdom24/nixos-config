@@ -349,6 +349,7 @@
             { type = "exec", exec = ["noctalia"] },
             { type = "exec", exec = ["firefox"] },
             { type = "exec", exec = ["discord"] },
+            { type = "exec", exec = ["sh", "-c", "systemctl --user restart xdg-desktop-portal"] },
             { type = "exec", exec = ["sh", "-c", "sleep 5 && gtk-launch steam.desktop"] },
             { type = "exec", exec = ["jay", "randr", "output", "DP-1", "mode", "3840", "2160", "160"] },
             # Clipboard persistence
@@ -359,15 +360,17 @@
                 "--all-mime-type-regex", "(?i)^(?!image/x-inkscape-svg).+",
             ] },
             #{ type = "exec", exec = ["jay", "input", "seat", "default", "set-cursor-size", "25"] },
-            { type = "exec", exec = ["jay", "randr", "card", "$(readlink -f $XDG_RUNTIME_DIR/dri/dgpu0)", "primary"] },
+            { type = "exec", exec = ["sh", "-c", "jay randr card $(readlink -f $XDG_RUNTIME_DIR/dri/dgpu0) primary"] },
+            { type = "exec", exec = ["sh", "-c", "jay randr card $(readlink -f $XDG_RUNTIME_DIR/dri/dgpu0) plane-color-pipelines enable"] },
             # GPU screen recorder replay buffer (with delay for display init)
             { type = "exec", exec = ["sh", "-c", "sleep 2 && systemctl --user stop gpu-screen-recorder"] },
         ]
 
         [[drm-devices]]
         name = "dedicated"
-        match = { pci-vendor = 0x1002, pci-model = 0x7550 }
-        #match.syspath = "$XDG_RUNTIME_DIR/dri/dgpu0"
+        match.devnode = "/run/user/1000/dri/dgpu0"
+        #match = { pci-vendor = 0x1002, pci-model = 0x7550 }
+        plane-color-pipelines = true
 
         [transactions]
         timeout.millis = 200
