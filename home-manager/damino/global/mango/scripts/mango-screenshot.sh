@@ -14,7 +14,7 @@ set_headless_mode() {
     jq -r --arg out "$display" '
     .[]
     | select(.name == $out)
-    | . as $monito
+    | . as $monitor
     | ($monitor.modes[] | select(.current)) as $mode
     | "\($monitor.position.x // 0) \($monitor.position.y // 0) \($mode.width) \($mode.height) \($monitor.scale) \($mode.refresh)"
     '
@@ -85,7 +85,7 @@ case "$mode" in
       | select(.active == true)
       | .name
     ')
-    set_headless_mode $output
+    set_headless_mode "$output"
 
     grim -o "$HEADLESS" "$tmpfile"
     ;;
@@ -159,3 +159,4 @@ if [[ -s "$tmpfile" ]]; then
 fi
 
 wlr-randr --output $HEADLESS --off
+clear_headless_mode
