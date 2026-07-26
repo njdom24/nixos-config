@@ -115,6 +115,12 @@ fi
   fi
 } > /tmp/monitors.conf.new
 
+# Get the focused client's info before reload
+client_json=$(mmsg get focusing-client)
+client_id=$(jq -r '.id' <<< "$client_json")
+was_fullscreen=$(jq -r '.is_fullscreen' <<< "$client_json")
+
+# Can drop fullscreen state
 mkdir -p "$(dirname "$CONF_PATH")"
 mv /tmp/monitors.conf.new "$CONF_PATH"
 
@@ -122,3 +128,14 @@ mv /tmp/monitors.conf.new "$CONF_PATH"
 echo "env=DISPLAY,:1" >> "$CONF_PATH"
 mmsg dispatch reload_config
 sed -i '/^env=DISPLAY,:1$/d' "$CONF_PATH"
+
+# Restore fullscren if it was lost
+if [[ "$was_fullscreen" == "true" ]]; then
+  # Re-check current state after reload — don't just assume it dropped
+  now_json=$(mmsg get client "$client_id")
+  now_fullscreen=$(jq -r '.is_fullscreen' <<< "$now_json")
+
+  if [[ "$now_fullscreen" == "false" ]]; then
+    mmsg dispatch togglefullscreen client,"$client_id"
+  fi
+fi

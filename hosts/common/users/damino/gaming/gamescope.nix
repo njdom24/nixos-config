@@ -1222,7 +1222,7 @@ let
       sleep 3 && ${pkgs.xrandr}/bin/xrandr --output "$OUTPUT" --primary
     elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
       cp ~/.config/mango/monitors.conf ~/.config/mango/monitors.conf.bak
-      ${pkgs.wlr-randr}/bin/wlr-randr --output "$OUTPUT" --mode "$WIDTH"x"$HEIGHT"@"$REFRESH"
+      ${pkgs.wlr-randr}/bin/wlr-randr --output "$OUTPUT" --on --mode "$WIDTH"x"$HEIGHT"@"$REFRESH"
 
       # Disable every other enabled output.
       ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '
@@ -1282,6 +1282,7 @@ let
       mv ~/.config/mango/monitors.conf.bak ~/.config/mango/monitors.conf
       ${pkgs.mango}/bin/mmsg dispatch reload_config
       (${pkgs.coreutils}/bin/timeout 5 kanshi) &
+      (${pkgs.coreutils}/bin/timeout 10 kanshi) &
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
   '';
