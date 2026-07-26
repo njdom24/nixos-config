@@ -51,7 +51,7 @@
           # Use xwayland-satellite instead
           xwayland_persistence=0
           exec-once=xwayland-satellite
-          exec=noctalia
+          exec=bash -c "sleep 2 && noctalia"
           exec-once=kanshi
           exec-once=rm -f ~/.config/mango/monitors.conf.bak
           exec-once=bash -c "sleep 2 && ~/.config/mango/mango-snapshot-outputs.sh && sleep 1 && ~/.config/mango/mango-toggle-hdr.sh DP-1 on"
@@ -70,7 +70,6 @@
           
           # Monitor rules
           monitorrule=name:.+,vrr:0
-          # TODO: 0.15 release
           windowrule=title:.+,vrr_only_fullscreen:1
           
           #monitorrule=name:^DP-1$,hdr:0

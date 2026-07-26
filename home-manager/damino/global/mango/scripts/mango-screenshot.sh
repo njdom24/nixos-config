@@ -147,6 +147,10 @@ esac
 if [[ -s "$tmpfile" ]]; then
   # Compression can take a while. Put current image in clipboard for immediate pasting
   wl-copy --type text/uri-list <<< "file://$tmpfile"
+
+  wlr-randr --output $HEADLESS --off
+  clear_headless_mode
+
   notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
 
   # Compress to WebP for pasting in chat apps

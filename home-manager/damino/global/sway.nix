@@ -525,7 +525,6 @@
        		    ${pkgs.wl-clipboard-rs}/bin/wl-copy ""
 
                 # If exactly one output intersects, store in a variable
-                #${pkgs.libnotify}/bin/notify-send "$OUTPUTS"
                 if [[ ''${#OUTPUTS[@]} -eq 2 ]]; then
                   TARGET_OUTPUT="''${OUTPUTS[0]}"
                   if [[ "''${OUTPUTS[0]}" == "HEADLESS*" ]]; then
@@ -555,6 +554,7 @@
 		    if [[ -s "$tmpfile" ]]; then
 		      # Compression can take a while. Put current image in clipboard for immediate pasting
 		      ${pkgs.wl-clipboard-rs}/bin/wl-copy --type text/uri-list <<< "file://$tmpfile"
+		      swaymsg output $HEADLESS unplug 2> /dev/null
 		      ${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
 
 		      # Compress to WebP for pasting in chat apps
