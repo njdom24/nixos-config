@@ -43,7 +43,6 @@
 	    font_family = "Inter Medium";
 	    telemetry_enabled = false;
 	    time_format = "{:%I:%M %p}";
-	    ui_scale = 1.1;
 
 	    panel.clipboard_placement = "attached";
 	  };
@@ -65,8 +64,11 @@
 	    last.path = "/home/${config.home.username}/Pictures/Wallpapers/New Gridania.jpeg";
 	  };
 
-	  weather = {
+	  location = {
 	    auto_locate = true;
+	  };
+
+	  weather = {
 	    unit = "imperial";
 	  };
 
@@ -117,11 +119,14 @@
 	            ;;
 	        esac
 	      ''; in {
-	      command = "${nightlight} toggle";
+	      enabled = true;
 	      glyph = "nightlight-on";
-	      scroll_down_command = "${nightlight} decrease";
-	      scroll_up_command = "${nightlight} increase";
 	      type = "custom_button";
+	      actions = {
+	        left = "exec ${nightlight} toggle";
+	        scroll_down = "exec ${nightlight} decrease";
+	        scroll_up = "exec ${nightlight} increase";
+	      };
 	    };
 
 	    workspaces = {

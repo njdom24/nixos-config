@@ -24,7 +24,7 @@
 	  rofi.yoffset = 24;
 
 	  noctalia.settings = {
-	    notifications = lib.mkDefault {
+	    osd = lib.mkDefault {
 	      monitors = [ "DP-2" ];
 	      position = "top_left";
 	    };
