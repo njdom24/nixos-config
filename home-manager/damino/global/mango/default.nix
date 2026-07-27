@@ -4,12 +4,10 @@
   xdg.portal = {
     configPackages = [ pkgs.mango ];
     config.mango = {
-      default = [
-        "wlr"
-        "gtk"
-      ];
+      default = [ "wlr" "gtk" ];
+      "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
       "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
-      "org.freedesktop.impl.portal.RemoteDesktop" = [ "wlr" ];
+      "org.freedesktop.impl.portal.RemoteDesktop" = [ "luminous" ];
       "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
     };
   };

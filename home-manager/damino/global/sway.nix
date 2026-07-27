@@ -790,10 +790,11 @@
 
 	# """ # Workaround to fix highlighting
 
-    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr ];
+    xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-luminous ];
 	xdg.portal.config = {
 	  sway = {
-	    default = [ "gtk" ];
+	    default = [ "wlr" "gtk" ];
+	    "org.freedesktop.impl.portal.RemoteDesktop" = [ "luminous" ];
 	    "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
 	    "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ]; # TODO: Wait until xdpw adopts color-representation-v1 and https://github.com/emersion/xdg-desktop-portal-wlr/issues/351
 	  };
