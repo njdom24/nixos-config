@@ -31,9 +31,8 @@
 
       cleanup() {
         echo "Cleaning up…"
-        ${pkgs.systemd}/bin/systemctl --user stop steam-screenshot-watcher
-        ${pkgs.systemd}/bin/systemctl --user reset-failed steam-screenshot-watcher
-
+        [[ -n "$CURRENT_WATCH_PID" ]] && kill -- "-$CURRENT_WATCH_PID" 2>/dev/null
+        [[ -n "$STEAM_WATCHER_PID" ]] && kill "$STEAM_WATCHER_PID" 2>/dev/null
         trap - INT TERM
         kill -- -$$ 2>/dev/null
         exit 0
@@ -56,11 +55,9 @@
         echo "Monitoring Steam process PID $STEAM_PID"
         sleep 30
 
-        while kill -0 "$STEAM_PID" 2>/dev/null; do
-          sleep 30
-        done
+        kill -TERM "$$"   # signal the main script's trap, don't call cleanup() locally
         echo "Steam exited — cleaning up everything"
-        cleanup
+        kill -TERM "$$"   # signal the main script's trap, don't call cleanup() locally
       ) &
       STEAM_WATCHER_PID=$!
 
