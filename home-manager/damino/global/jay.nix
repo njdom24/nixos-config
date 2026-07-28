@@ -347,7 +347,7 @@
             { type = "exec", exec = ["wlr-hdr-cal"] },
             { type = "exec", exec = ["${satellite-loop}"] },
             { type = "exec", exec = ["noctalia"] },
-            { type = "exec", exec = ["firefox"] },
+            { type = "exec", exec = ["jay", "run-tagged", "ws1", "firefox"] },
             { type = "exec", exec = ["discord"] },
             { type = "exec", exec = ["sh", "-c", "systemctl --user restart xdg-desktop-portal"] },
             { type = "exec", exec = ["sh", "-c", "sleep 5 && gtk-launch steam.desktop"] },
@@ -414,7 +414,15 @@
         capabilities = ["all"]
 
         [[windows]]
+        match.tag = "ws1"
+        action = { type = "move-to-workspace", name = "1" }
+
+        [[windows]]
         match.app-id = "Discord"
+        action = { type = "move-to-workspace", name = "2" }
+
+        [[windows]]
+        match.app-id = "discord"
         action = { type = "move-to-workspace", name = "2" }
 
         [[windows]]

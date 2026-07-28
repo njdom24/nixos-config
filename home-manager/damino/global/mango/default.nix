@@ -51,6 +51,8 @@
           exec-once=xwayland-satellite
           exec=bash -c "sleep 2 && noctalia"
           exec-once=kanshi
+          exec-once=systemctl restart xdg-desktop-portal
+          exec-once=systemctl restart xdg-desktop-portal-hyprland
           exec-once=rm -f ~/.config/mango/monitors.conf.bak
           exec-once=bash -c "sleep 2 && ~/.config/mango/mango-snapshot-outputs.sh && sleep 1 && ~/.config/mango/mango-toggle-hdr.sh DP-1 on"
           exec-once=bash -c "sleep 3 && wlr-hdr-cal"

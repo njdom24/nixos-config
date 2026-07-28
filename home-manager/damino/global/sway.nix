@@ -196,6 +196,7 @@
 		in
 		''
 		  exec systemctl --user restart xdg-desktop-portal
+		  exec systemctl --user restart xdg-desktop-hyprland
 		  
 		  set $base00 #${config.colorScheme.palette.base00}
 		  set $base01 #${config.colorScheme.palette.base01}
