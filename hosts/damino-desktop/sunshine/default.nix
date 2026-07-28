@@ -413,7 +413,7 @@
             --setenv=GSC_HDR_MODESET="$([ "$is_hdr" = "1" ] && echo 1)" \
             --description="Launch Steam Gamescope detached in desktop session" \
             ${pkgs.bash}/bin/bash -c '
-              exec steam
+              exec gsc -e -- steam -console -gamepadui
             '
         fi
       '';
