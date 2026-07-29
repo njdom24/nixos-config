@@ -254,6 +254,7 @@
           bind=SUPER,Right,spawn,~/.config/mango/mango-focusdir.sh right
           bind=SUPER,Up,spawn,~/.config/mango/mango-focusdir.sh up
           bind=SUPER,Down,spawn,~/.config/mango/mango-focusdir.sh down
+          bind=SUPER,Space,spawn,~/.config/mango/mango-floating-focus.sh
           
           # swap window
           #bind=SUPER+SHIFT,Up,exchange_client,up
@@ -431,6 +432,7 @@
         "mango-virtual-monitor.sh"
         "mango-toggle-hdr.sh"
         "mango-snapshot-outputs.sh"
+        "mango-floating-focus.sh"
       ])
     );
   };
