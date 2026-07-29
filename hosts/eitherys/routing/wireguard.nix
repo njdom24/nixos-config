@@ -48,6 +48,10 @@
           publicKey = "QocvScsp6sKN7xRwmtCDKAnAFqk3iF5pNNXR58TeXRQ=";
           allowedIPs = [ "10.100.0.3/32" ];
         }
+        { # Deck
+          publicKey = "yU+AHMy+ugmOqFWM3Q8QQllHpNpyVKAPTzMDeRO3hEM=";
+          allowedIPs = [ "10.100.0.4/32" ];
+        }
       ];
     };
   };
