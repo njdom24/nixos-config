@@ -26,14 +26,6 @@ in
   #boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelPatches = [
     {
-      name = "cm-1";
-      patch = ../../patches/7-1-frl/0001-fix-amd-color-manager.patch;
-    }
-    {
-      name = "cm-2";
-      patch = ../../patches/7-1-frl/0002-fix-dc-plane-cm-build-error.patch;
-    }
-    {
       name = "frl";
       patch = ../../patches/7-1-frl/hdmi_frl_amdnext.patch;
     }

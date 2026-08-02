@@ -113,7 +113,6 @@
     ''; in with pkgs; [
       nwg-look
       nwg-displays
-      fluent-gtk-theme
       stable.fluent-icon-theme
       stable.kora-icon-theme
       flavours
@@ -329,8 +328,8 @@
     }; in {
     enable = true;
     theme = {
-      name = "Fluent-Dark";
-      package = pkgs.fluent-gtk-theme;
+      name = "adw-gtk3";
+      package = pkgs.adw-gtk3;
     };
     iconTheme = {
       name = "kora";
