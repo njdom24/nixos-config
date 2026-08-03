@@ -95,7 +95,7 @@ in {
         # ContainerBorders::FullSmart
         (prev.fetchpatch {
           url = "https://github.com/mahkoh/jay/pull/1147.diff";
-          sha256 = "sha256-iBA8jYtyLocQK/h3JTH3qoZajvYZ5WEZd4Xaopk3nXQ=";
+          sha256 = "sha256-zlDmabzajhe/k+peKbGJaVfBn3UjxXW2yataRhGerNs=";
         })
       ];
     in {

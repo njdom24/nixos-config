@@ -15,6 +15,35 @@
   };
 
   home =
+    let get-focused = pkgs.writeShellScript "get-focused" ''
+      FOCUSED_JSON=$(jay --json tree query match-windows -e 'focused = true' 2>/dev/null)
+      RANDR_JSON=$(jay --json randr 2>/dev/null)
+      
+      CX=$(jq '.position.x1 + .position.width/2' <<< "$FOCUSED_JSON" 2>/dev/null)
+      CY=$(jq '.position.y1 + .position.height/2' <<< "$FOCUSED_JSON" 2>/dev/null)
+      
+      FOCUSED_OUTPUT=""
+      if [ -n "$CX" ] && [ -n "$CY" ]; then
+        FOCUSED_OUTPUT=$(jq -r --argjson cx "$CX" --argjson cy "$CY" '
+          .drm_devices[].connectors[]
+          | select(.enabled and .output.width > 0)
+          | select(.output.x <= $cx and $cx < (.output.x + .output.width)
+                   and .output.y <= $cy and $cy < (.output.y + .output.height))
+          | .name
+        ' <<< "$RANDR_JSON" 2>/dev/null)
+      fi
+      
+      # Fallback: first enabled, active output
+      if [ -z "$FOCUSED_OUTPUT" ]; then
+        FOCUSED_OUTPUT=$(jq -r '
+          [.drm_devices[].connectors[] | select(.enabled and .output.width > 0)]
+          | first
+          | .name
+        ' <<< "$RANDR_JSON" 2>/dev/null)
+      fi
+      
+      echo "$FOCUSED_OUTPUT"
+    ''; in
     let set-bitdepth = pkgs.writeShellScript "set-bitdepth" ''
     usage() {
       echo "Usage: $0 <8|10> [DISPLAY...]"
@@ -217,7 +246,7 @@
 
       case "$mode" in
         focused)
-          monitor=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused==true).name")
+          monitor=$(${get-focused})
           ${pkgs.grim}/bin/grim -o "$monitor" "$tmpfile"
           ;;
         select|selector)
