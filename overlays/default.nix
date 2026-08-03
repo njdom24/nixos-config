@@ -89,7 +89,18 @@ in {
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
 
-    jay = inputs.jay.packages.${prev.stdenv.hostPlatform.system}.jay;
+    jay = (inputs.jay.packages.${prev.stdenv.hostPlatform.system}.jay).overrideAttrs (old: let
+      existing = old.patches or [];
+      newPatches = [
+        # ContainerBorders::FullSmart
+        (prev.fetchpatch {
+          url = "https://github.com/mahkoh/jay/pull/1147.diff";
+          sha256 = "sha256-iBA8jYtyLocQK/h3JTH3qoZajvYZ5WEZd4Xaopk3nXQ=";
+        })
+      ];
+    in {
+      patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
+    });
 
     mango = let
       scenefxFlake = inputs.mangowm.inputs.scenefx.packages.${final.stdenv.hostPlatform.system}.default;

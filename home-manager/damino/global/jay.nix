@@ -320,7 +320,7 @@
         fallback-output-mode = "cursor"
         cursor-size = 25
         show-bar = false
-        show-titles = true
+        show-titles = false
         idle = { minutes = 0 }
         gfx-api = "Vulkan"
         vrr = { mode = "variant1", cursor-hz = 90 }
@@ -453,7 +453,7 @@
         #focused-title-bg-color = "#00000000"
         unfocused-title-bg-color = "#00000000"
         show-window-icons = false
-        container-borders = "full"
+        container-borders = "full-smart"
         #container-borders = "separators"
 
         [workspaces."1"]
