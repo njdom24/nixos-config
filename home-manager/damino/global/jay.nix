@@ -16,25 +16,16 @@
 
   home =
     let get-focused = pkgs.writeShellScript "get-focused" ''
-      FOCUSED_JSON=$(jay --json tree query match-windows -e 'focused = true' 2>/dev/null)
-      RANDR_JSON=$(jay --json randr 2>/dev/null)
-      
-      CX=$(jq '.position.x1 + .position.width/2' <<< "$FOCUSED_JSON" 2>/dev/null)
-      CY=$(jq '.position.y1 + .position.height/2' <<< "$FOCUSED_JSON" 2>/dev/null)
+      WS=$(jay --json tree query match-windows -e 'focused = true' 2>/dev/null | jq -r .workspace 2>/dev/null)
       
       FOCUSED_OUTPUT=""
-      if [ -n "$CX" ] && [ -n "$CY" ]; then
-        FOCUSED_OUTPUT=$(jq -r --argjson cx "$CX" --argjson cy "$CY" '
-          .drm_devices[].connectors[]
-          | select(.enabled and .output.width > 0)
-          | select(.output.x <= $cx and $cx < (.output.x + .output.width)
-                   and .output.y <= $cy and $cy < (.output.y + .output.height))
-          | .name
-        ' <<< "$RANDR_JSON" 2>/dev/null)
+      if [ -n "$WS" ] && [ "$WS" != "null" ]; then
+        FOCUSED_OUTPUT=$(jay --json tree query workspace-name "$WS" 2>/dev/null | jq -r .output 2>/dev/null)
       fi
       
       # Fallback: first enabled, active output
-      if [ -z "$FOCUSED_OUTPUT" ]; then
+      if [ -z "$FOCUSED_OUTPUT" ] || [ "$FOCUSED_OUTPUT" = "null" ]; then
+        RANDR_JSON=$(jay --json randr 2>/dev/null)
         FOCUSED_OUTPUT=$(jq -r '
           [.drm_devices[].connectors[] | select(.enabled and .output.width > 0)]
           | first
