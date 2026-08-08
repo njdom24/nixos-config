@@ -338,6 +338,7 @@
         focus-follows-mouse = true
         workspace-display-order = "sorted"
         fallback-output-mode = "cursor"
+        split-reuses-container = true
         cursor-size = 25
         show-bar = false
         show-titles = false
