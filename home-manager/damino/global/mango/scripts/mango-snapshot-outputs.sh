@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 
 CONF_PATH="${HOME}/.config/mango/monitors.conf"
-DRY_RUN=0
 
 usage() {
-  echo "Usage: $0 [-o output_path] [-n]"
+  echo "Usage: $0 [-o output_path]"
   echo "  -o FILE   Write config to FILE instead of ${CONF_PATH}"
-  echo "  -n        Dry run: print generated config to stdout, don't write"
   exit 1
 }
 
-while getopts ":o:nh" opt; do
+while getopts ":o:h" opt; do
   case "$opt" in
     o) CONF_PATH="$OPTARG" ;;
-    n) DRY_RUN=1 ;;
     h) usage ;;
     *) usage ;;
   esac
@@ -21,6 +18,7 @@ done
 
 command -v wlr-randr >/dev/null 2>&1 || { echo "Error: wlr-randr not found in PATH" >&2; exit 1; }
 command -v jq        >/dev/null 2>&1 || { echo "Error: jq not found (install it, e.g. 'sudo pacman -S jq')" >&2; exit 1; }
+command -v mmsg      >/dev/null 2>&1 || { echo "Error: mmsg not found in PATH" >&2; exit 1; }
 
 RAW_JSON="$(wlr-randr --json)"
 
@@ -29,13 +27,29 @@ if [[ -z "$RAW_JSON" ]]; then
   exit 1
 fi
 
+# HDR status per output, from mmsg (wlr-randr doesn't expose this).
+# Falls back to an empty map if the query fails, so every output is
+# treated as "unknown" below rather than silently forced to hdr:0.
+HDR_MAP="$(mmsg get all-monitors 2>/dev/null | jq -c '[.monitors[] | {(.name): .is_hdr}] | add // {}' 2>/dev/null)"
+[[ -n "$HDR_MAP" ]] || HDR_MAP='{}'
+
 # For each enabled output, pull from active mode and build a monitorrule line.
-RULES="$(echo "$RAW_JSON" | jq -r '
+# HDR on/off comes from mmsg's is_hdr. mmsg doesn't report the actual
+# hdr_max_lum/hdr_max_avg_lum (that's EDID-derived), so we fill in
+# reasonable placeholder defaults when HDR is detected on; if mmsg has no
+# entry at all for an output, we leave a marker and fall back to whatever
+# was already in the config (see merge step below) instead of guessing.
+RULES="$(echo "$RAW_JSON" | jq -r --argjson hdrmap "$HDR_MAP" '
   .[]
   | select(.enabled == true)
   | . as $o
   | ($o.modes[] | select(.current == true)) as $m
-  | "monitorrule=name:^\($o.name)$,width:\($m.width),height:\($m.height),refresh:\($m.refresh | (. * 1000 | round) / 1000),x:\($o.position.x),y:\($o.position.y),scale:\($o.scale),hdr:0"
+  | ($hdrmap | has($o.name)) as $known
+  | (if $known then $hdrmap[$o.name] else false end) as $hdr
+  | "monitorrule=name:^\($o.name)$,width:\($m.width),height:\($m.height),refresh:\($m.refresh | (. * 1000 | round) / 1000),x:\($o.position.x),y:\($o.position.y),scale:\($o.scale),"
+    + (if ($known | not) then "hdr:UNKNOWN"
+       elif $hdr then "hdr:1,hdr_max_lum:1200,hdr_max_avg_lum:1000"
+       else "hdr:0" end)
 ')"
 
 SKIPPED="$(echo "$RAW_JSON" | jq -r '
@@ -44,8 +58,9 @@ SKIPPED="$(echo "$RAW_JSON" | jq -r '
   | .name
 ')"
 
-# Preserve each monitor's existing hdr:0/1 flag from the current config
-# file (if any) instead of blowing it away back to the hdr:0 default.
+# Keep track of existing per-monitor lines/hdr so we can carry settings
+# forward for disabled outputs, and fall back for outputs mmsg has no
+# HDR info for.
 declare -A EXISTING_HDR=()
 declare -A EXISTING_LINES=()
 if [[ -f "$CONF_PATH" ]]; then
@@ -59,13 +74,20 @@ if [[ -f "$CONF_PATH" ]]; then
   done < "$CONF_PATH"
 fi
 
-if [[ -n "$RULES" && ${#EXISTING_HDR[@]} -gt 0 ]]; then
+# Resolve any "hdr:UNKNOWN" markers: reuse the previous full line (so a
+# manually-tuned hdr_max_lum survives) if we have one, otherwise default
+# to hdr:0.
+if [[ -n "$RULES" ]]; then
   MERGED_RULES=""
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue
-    name="$(echo "$line" | grep -oP '(?<=name:\^)[^$]+(?=\$,)' || true)"
-    if [[ -n "$name" && -n "${EXISTING_HDR[$name]:-}" ]]; then
-      line="${line/hdr:0/hdr:${EXISTING_HDR[$name]}}"
+    if [[ "$line" == *"hdr:UNKNOWN"* ]]; then
+      name="$(echo "$line" | grep -oP '(?<=name:\^)[^$]+(?=\$,)' || true)"
+      if [[ -n "$name" && -n "${EXISTING_LINES[$name]:-}" ]]; then
+        line="${EXISTING_LINES[$name]}"
+      else
+        line="${line/hdr:UNKNOWN/hdr:0}"
+      fi
     fi
     MERGED_RULES+="${line}"$'\n'
   done <<< "$RULES"

@@ -21,9 +21,6 @@
       wl-clipboard
       imagemagick # provides `magick`, used by mango-screenshot.sh
       brightnessctl
-      (pkgs.writeShellScriptBin "mango-toggle-hdr"
-        (builtins.readFile ./scripts/mango-toggle-hdr.sh)
-      )
     ];
 
     file = {
@@ -54,7 +51,7 @@
           exec-once=systemctl restart xdg-desktop-portal
           exec-once=systemctl restart xdg-desktop-portal-hyprland
           exec-once=rm -f ~/.config/mango/monitors.conf.bak
-          exec-once=bash -c "sleep 2 && ~/.config/mango/mango-snapshot-outputs.sh && sleep 1 && ~/.config/mango/mango-toggle-hdr.sh DP-1 on"
+          exec-once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1 && ~/.config/mango/mango-snapshot-outputs.sh"
           exec-once=bash -c "sleep 3 && wlr-hdr-cal"
           exec-once=bash -c "rm ~/.config/mango/monitors.conf && mmsg dispatch reload_config && kanshi"
           exec=~/.config/mango/mango-workspace.sh assign 1 DP-1
@@ -278,7 +275,7 @@
           #bind=SUPER,o,toggleoverlay,
           #bind=SUPER+SHIFT,I,restore_minimized
           #bind=ALT,z,toggle_scratchpad
-          bind=CTRL+SHIFT,B,spawn,~/.config/mango/mango-toggle-hdr.sh
+          bind=CTRL+SHIFT,B,spawn,mmsg dispatch togglehdr
           
           # scroller layout
           #bind=ALT,e,set_proportion,1.0
@@ -289,8 +286,10 @@
           #bind=alt+super+ctrl,Down,scroller_stack,down
           
           #dwindle layout(manual split mode)
-          bind=SUPER,v,dwindle_split_vertical
-          bind=SUPER,h,dwindle_split_horizontal
+          #bind=SUPER,v,dwindle_split_vertical
+          #bind=SUPER,h,dwindle_split_horizontal
+          bind=SUPER,v,dwindle_toggle_current_split
+          bind=SUPER,h,dwindle_toggle_current_split
           
           # switch layout
           #bind=SUPER,n,switch_layout
@@ -430,7 +429,6 @@
         "mango-screenshot.sh"
         "mango-spawn-on-tag.sh"
         "mango-virtual-monitor.sh"
-        "mango-toggle-hdr.sh"
         "mango-snapshot-outputs.sh"
         "mango-floating-focus.sh"
       ])

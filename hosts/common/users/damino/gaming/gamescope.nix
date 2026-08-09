@@ -1036,7 +1036,7 @@ let
               elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
                 jay-toggle-hdr on
               elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
-                mango-toggle-hdr on
+                mmsg dispatch togglehdr,on
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr on
@@ -1059,7 +1059,7 @@ let
               elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
                 jay-toggle-hdr off
               elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
-                mango-toggle-hdr off
+                mmsg dispatch togglehdr,off
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr off
@@ -1089,7 +1089,7 @@ let
           elif [[ "$XDG_CURRENT_DESKTOP" == "jay" ]]; then
             jay-toggle-hdr on
           elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
-            mango-toggle-hdr on
+            mmsg dispatch togglehdr,on
           elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
             # Assuming cm_auto_hdr > 0, switching back to SDR is fine
             hypr-toggle-hdr off
@@ -1233,7 +1233,7 @@ let
         ${pkgs.wlr-randr}/bin/wlr-randr --output "$out" --off
       done
       sleep 0.5
-      mango-toggle-hdr on
+      mmsg dispatch togglehdr,on,"$OUTPUT"
     fi
 
     # Workaround for HDMI 2.0 banding in 4K
