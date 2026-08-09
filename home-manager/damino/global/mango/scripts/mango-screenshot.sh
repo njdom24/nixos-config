@@ -53,7 +53,8 @@ set_headless_mode() {
     exit 1
   fi
 
-  (noctalia msg bar-hide "$HEADLESS" 2> /dev/null) &
+  noctalia msg bar-hide "$HEADLESS" 2> /dev/null
+  sleep 0.2
 
   wlr-randr \
     --output "$HEADLESS" \

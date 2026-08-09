@@ -490,7 +490,9 @@
                 HEADLESS=$(swaymsg -t get_outputs | ${pkgs.jq}/bin/jq -r '.[] | select(.name | test("^HEADLESS-")) | .name' | ${pkgs.coreutils}/bin/head -n1)
               fi
 
-              swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1 &
+              swaymsg output $HEADLESS mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz enable pos "$XPOS" "$YPOS" scale "$SCALE" > /dev/null 2>&1
+              (noctalia msg bar-hide "$HEADLESS" 2> /dev/null) &
+              sleep 0.2
             }
             
             # Prefer overlapping HEADLESS outputs for HDR tonemapping
