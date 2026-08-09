@@ -54,6 +54,7 @@
           exec-once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1 && ~/.config/mango/mango-snapshot-outputs.sh"
           exec-once=bash -c "sleep 3 && wlr-hdr-cal"
           exec-once=bash -c "rm ~/.config/mango/monitors.conf && mmsg dispatch reload_config && kanshi"
+          exec-once=~/.config/mango/mango-fullscreen-vrr.sh DP-1 HDMI-A-1
           exec=~/.config/mango/mango-workspace.sh assign 1 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 2 DP-2
@@ -66,8 +67,8 @@
           circle_layout=dwindle
           
           # Monitor rules
-          monitorrule=name:.+,vrr:0
-          windowrule=title:.+,vrr_only_fullscreen:1
+          #monitorrule=name:.+,vrr:0
+          #windowrule=title:.+,vrr_only_fullscreen:1
           
           #monitorrule=name:^DP-1$,hdr:0
           #monitorrule=name:^DP-1$,width:2560,height:1440,refresh:180,x:2560,y:0,hdr:1
@@ -431,6 +432,7 @@
         "mango-virtual-monitor.sh"
         "mango-snapshot-outputs.sh"
         "mango-floating-focus.sh"
+        "mango-fullscreen-vrr.sh"
       ])
     );
   };

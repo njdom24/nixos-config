@@ -140,6 +140,12 @@ let
         *) echo "Error: state must be '1' or '0'" >&2; exit 1 ;;
       esac
 
+      if [[ "$vrr_mode" = "0" ]]; then
+        touch "$XDG_RUNTIME_DIR"/mango_vrr_lock
+      else
+        rm "$XDG_RUNTIME_DIR"/mango_vrr_lock
+      fi
+
       WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.wlr-randr}/bin/wlr-randr --output "$focused" --adaptive-sync "$state"
     elif [[ "$XDG_CURRENT_DESKTOP" = "KDE" ]]; then
       primary_display=$(WAYLAND_DISPLAY=$WAYLAND_DISPLAY ${pkgs.kdePackages.libkscreen}/bin/kscreen-doctor -j | ${pkgs.jq}/bin/jq -r '
@@ -176,6 +182,8 @@ let
       fi
       if [[ -v SWAYSOCK ]]; then
         rm "$XDG_RUNTIME_DIR"/sway_vrr_lock
+      elif [[ -v MANGO_INSTANCE_SIGNATURE ]]; then
+        rm "$XDG_RUNTIME_DIR"/mango_vrr_lock
       fi
       exit "$ec"
     }
