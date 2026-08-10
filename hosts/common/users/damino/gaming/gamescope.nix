@@ -1289,8 +1289,8 @@ let
     elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
       mv ~/.config/mango/monitors.conf.bak ~/.config/mango/monitors.conf
       ${pkgs.mango}/bin/mmsg dispatch reload_config
-      (${pkgs.coreutils}/bin/timeout 5 kanshi) &
-      (${pkgs.coreutils}/bin/timeout 10 kanshi) &
+      (sleep 1 && ${pkgs.coreutils}/bin/timeout 2 kanshi) &
+      (sleep 5 && ${pkgs.coreutils}/bin/timeout 2 kanshi) &
     fi
     ${pkgs.pulseaudio}/bin/pactl set-default-sink "$default_speakers" # Desktop speakers
   '';
