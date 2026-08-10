@@ -1259,7 +1259,8 @@ let
     # Allows scripts like steamos-session-select to run when "Switch to Desktop" is selected, which we (can) override
     #  Also seems to prevent AVIF HDR screenshots from saving...
     (sleep 10 && ${pkgs.bluez}/bin/bluetoothctl power on) &
-    sleep 3 && env GSC_HDR_MODESET=1 GSC_MODESET_NOVRR=0 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- env ENABLE_VKBASALT="$ENABLE_VKBASALT" steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
+    #"''$()"
+    sleep 3 && env GSC_HDR_MODESET="''${GSC_HDR_MODESET:-1}" GSC_MODESET_NOVRR=0 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- env ENABLE_VKBASALT="$ENABLE_VKBASALT" steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu
     # sleep 3 && env GSC_HDR_MODESET=1 ${gsc-watcher}/bin/gsc-watcher -e -r $REFRESH -- steam -tenfoot -pipewire-dmabuf -console -cef-force-gpu -steamos3
     # May also disable Bluetooth (toggle is default off...)
 
