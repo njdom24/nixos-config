@@ -364,11 +364,10 @@
           #bind=ALT+SHIFT,R,togglegaps
           
           # movewin
-          # TODO: Maybe SUPER? Need to see if it only applies to floating windows
-          bind=CTRL+SHIFT,Up,movewin,+0,-100
-          bind=CTRL+SHIFT,Down,movewin,+0,+100
-          bind=CTRL+SHIFT,Left,movewin,-100,+0
-          bind=CTRL+SHIFT,Right,movewin,+100,+0
+          bind=CTRL+SHIFT,Up,spawn,~/.config/mango/mango-move-float.sh +0 -100
+          bind=CTRL+SHIFT,Down,spawn,~/.config/mango/mango-move-float.sh +0 +100
+          bind=CTRL+SHIFT,Left,spawn,~/.config/mango/mango-move-float.sh -100 +0
+          bind=CTRL+SHIFT,Right,spawn,~/.config/mango/mango-move-float.sh +100 +0
           
           # resizewin
           bind=CTRL+ALT,Up,resizewin,+0,-50
@@ -433,6 +432,7 @@
         "mango-snapshot-outputs.sh"
         "mango-floating-focus.sh"
         "mango-fullscreen-vrr.sh"
+        "mango-move-float.sh"
       ])
     );
   };
