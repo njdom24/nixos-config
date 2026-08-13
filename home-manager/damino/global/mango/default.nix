@@ -260,10 +260,16 @@
           #bind=SUPER+SHIFT,Left,exchange_client,left
           #bind=SUPER+SHIFT,Right,exchange_client,right
           
-          bind=SUPER+SHIFT,Up,spawn,~/.config/mango/mango-exchange-or-move.sh up
-          bind=SUPER+SHIFT,Down,spawn,~/.config/mango/mango-exchange-or-move.sh down
-          bind=SUPER+SHIFT,Left,spawn,~/.config/mango/mango-exchange-or-move.sh left
-          bind=SUPER+SHIFT,Right,spawn,~/.config/mango/mango-exchange-or-move.sh right
+          #bind=SUPER+SHIFT,Up,spawn,~/.config/mango/mango-exchange-or-move.sh up
+          #bind=SUPER+SHIFT,Down,spawn,~/.config/mango/mango-exchange-or-move.sh down
+          #bind=SUPER+SHIFT,Left,spawn,~/.config/mango/mango-exchange-or-move.sh left
+          #bind=SUPER+SHIFT,Right,spawn,~/.config/mango/mango-exchange-or-move.sh right
+
+          # mango-move-float wraps mango-exchange-or-move for tiled windows
+          bind=SUPER+SHIFT,Up,spawn,~/.config/mango/mango-move-float.sh up
+          bind=SUPER+SHIFT,Down,spawn,~/.config/mango/mango-move-float.sh down
+          bind=SUPER+SHIFT,Left,spawn,~/.config/mango/mango-move-float.sh left
+          bind=SUPER+SHIFT,Right,spawn,~/.config/mango/mango-move-float.sh right
           
           # switch window status
           #bind=SUPER,g,toggleglobal,
@@ -362,12 +368,6 @@
           bind=ALT+SHIFT,X,incgaps,1
           bind=ALT+SHIFT,Z,incgaps,-1
           #bind=ALT+SHIFT,R,togglegaps
-          
-          # movewin
-          bind=CTRL+SHIFT,Up,spawn,~/.config/mango/mango-move-float.sh +0 -100
-          bind=CTRL+SHIFT,Down,spawn,~/.config/mango/mango-move-float.sh +0 +100
-          bind=CTRL+SHIFT,Left,spawn,~/.config/mango/mango-move-float.sh -100 +0
-          bind=CTRL+SHIFT,Right,spawn,~/.config/mango/mango-move-float.sh +100 +0
           
           # resizewin
           bind=CTRL+ALT,Up,resizewin,+0,-50
