@@ -91,13 +91,7 @@ in {
 
     jay = (inputs.jay.packages.${prev.stdenv.hostPlatform.system}.jay).overrideAttrs (old: let
       existing = old.patches or [];
-      newPatches = [
-        # ContainerBorders::FullSmart
-        (prev.fetchpatch {
-          url = "https://github.com/mahkoh/jay/pull/1147.diff";
-          sha256 = "sha256-zlDmabzajhe/k+peKbGJaVfBn3UjxXW2yataRhGerNs=";
-        })
-      ];
+      newPatches = [];
     in {
       patches = existing ++ builtins.concatMap (addIfMissing existing) newPatches;
     });
