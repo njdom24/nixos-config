@@ -1230,7 +1230,29 @@ let
       sleep 3 && ${pkgs.xrandr}/bin/xrandr --output "$OUTPUT" --primary
     elif [[ "$XDG_CURRENT_DESKTOP" = "mango" ]]; then
       cp ~/.config/mango/monitors.conf ~/.config/mango/monitors.conf.bak
-      ${pkgs.wlr-randr}/bin/wlr-randr --output "$OUTPUT" --on --mode "$WIDTH"x"$HEIGHT"@"$REFRESH"
+
+      CANDIDATE="$WIDTH"x"$HEIGHT"@"$REFRESH"
+
+      if ${pkgs.wlr-randr}/bin/wlr-randr --output "$OUTPUT" --on --mode "$CANDIDATE"; then
+        echo "Set $OUTPUT to $CANDIDATE"
+      else
+        BEST=$(${pkgs.wlr-randr}/bin/wlr-randr --json | ${pkgs.jq}/bin/jq -r \
+          --arg output "$OUTPUT" --argjson tw "$WIDTH" --argjson th "$HEIGHT" --argjson tr "$REFRESH" '
+          .[] | select(.name == $output) | .modes
+          | map({w: .width, h: .height, r: .refresh,
+             res_pen:  (if .width == $tw and .height == $th then 0 else 1000000 end),
+             res_dist: (((.width - $tw) | fabs) + ((.height - $th) | fabs)),
+             ref_dist: (if $tr > 0 then ((.refresh - $tr) | fabs) else 0 end)})
+          | sort_by([.res_pen, .res_dist, .ref_dist])
+          | .[0]
+          | if . == null then "NONE" else "\(.w)x\(.h)@\(.r)Hz" end
+        ')
+
+        echo "Closest match: $BEST" >&2
+        if ${pkgs.wlr-randr}/bin/wlr-randr --output "$OUTPUT" --on --mode "$BEST"; then
+          echo "Set $OUTPUT to $BEST"
+        fi
+      fi
 
       # Disable every other enabled output.
       ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '
