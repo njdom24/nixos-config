@@ -59,8 +59,11 @@ let
     
     export RCLONE_CONFIG=/var/secrets/rclone.conf
 
-    echo "Backing up .nfos"
+    echo "Backing up media metadata"
     ${pkgs.rsync}/bin/rsync -av --relative /mnt/ext/Media/TV/*/*/*.nfo "$BACKUP_DIR"
+    # Subtitles
+    ${pkgs.rsync}/bin/rsync -av --relative /mnt/ext/Media/TV/*/*/*.ass "$BACKUP_DIR"
+    ${pkgs.rsync}/bin/rsync -av --relative /mnt/ext/Media/TV/*/*/*.srt "$BACKUP_DIR"
     
     # Rsync locally (-LK to follow links, dir links)
     # "'''" (Fixing syntax highlighting issue)
