@@ -1,9 +1,10 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, inputs, ... }:
 
+let
+  openrgb-rescan = pkgs.writers.writePython3Bin "openrgb-rescan" {
+    libraries = [ pkgs.python3Packages.openrgb-python ];
+  } (builtins.readFile ./openrgb-rescan.py);
+in
 {
   imports =
     [
@@ -40,7 +41,11 @@
     serviceConfig = {
       Type = "oneshot";
       TimeoutStartSec = "10s";
-      ExecStart = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
+      ExecStart = [
+        "${openrgb-rescan}/bin/openrgb-rescan"
+        "${pkgs.coreutils}/bin/sleep 2"
+        "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}"
+      ];
     };
   };
 
@@ -48,9 +53,12 @@
     after = [ "multi-user.target" ];
     serviceConfig = {
       TimeoutStopSec = "20s";
-      ExecStartPost = "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}";
+      ExecStartPost = [
+        "${openrgb-rescan}/bin/openrgb-rescan"
+        "${pkgs.coreutils}/bin/sleep 2"
+        "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}"
+      ];
       ExecStop = "${pkgs.openrgb}/bin/openrgb --mode static --color 000000";
     };
   };
-
 }
