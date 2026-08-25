@@ -45,6 +45,8 @@ in
         "${openrgb-rescan}/bin/openrgb-rescan"
         "${pkgs.coreutils}/bin/sleep 2"
         "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}"
+        "${pkgs.coreutils}/bin/sleep 2"
+        "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}"
       ];
     };
   };
@@ -55,6 +57,8 @@ in
       TimeoutStopSec = "20s";
       ExecStartPost = [
         "${openrgb-rescan}/bin/openrgb-rescan"
+        "${pkgs.coreutils}/bin/sleep 2"
+        "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}"
         "${pkgs.coreutils}/bin/sleep 2"
         "${pkgs.openrgb}/bin/openrgb --profile ${./Profile.orp}"
       ];
