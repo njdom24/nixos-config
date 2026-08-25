@@ -83,7 +83,7 @@ in
 	  nix-index
 	  pavucontrol
 	  pwvucontrol
-	  easyeffects
+      easyeffects
 	  pulseaudio # Needed for pactl
 	  remmina
 	  filezilla
@@ -194,9 +194,7 @@ in
 	  ];
     };
 
-    noisetorch.enable = true;
     virt-manager.enable = true;
-
     mango.enable = true;
     jay.enable = true;
     hyprland = {	
@@ -663,6 +661,7 @@ in
   	  gnome-firmware
   	  seahorse
   	  android-tools
+  	  easyeffects
   	] ++ gst_plugins;
 
     # TODO: Remove after https://github.com/NixOS/nixpkgs/issues/409986#issuecomment-3217982330
