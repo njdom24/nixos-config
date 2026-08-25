@@ -199,17 +199,17 @@
           scratchpad_width_ratio=0.8
           scratchpad_height_ratio=0.9
           borderpx=2
-          #shadowscolor= 0x${config.colorScheme.palette.base00}ff
-          rootcolor=0x${config.colorScheme.palette.base00}ff
-          bordercolor=0x${config.colorScheme.palette.base01}ff
-          dropcolor=0x${config.colorScheme.palette.base0C}55
-          splitcolor=0x${config.colorScheme.palette.base05}ff
-          focuscolor=0x${config.colorScheme.palette.base04}ff
-          maximizescreencolor=0x${config.colorScheme.palette.base0B}ff
-          urgentcolor=0x${config.colorScheme.palette.base0F}ff
-          scratchpadcolor=0x${config.colorScheme.palette.base03}ff
-          globalcolor=0x${config.colorScheme.palette.base08}ff
-          overlaycolor=0x${config.colorScheme.palette.base0C}ff
+          #shadowscolor= 0x${config.lib.stylix.colors.base00}ff
+          rootcolor=0x${config.lib.stylix.colors.base00}ff
+          bordercolor=0x${config.lib.stylix.colors.base01}ff
+          dropcolor=0x${config.lib.stylix.colors.base0C}55
+          splitcolor=0x${config.lib.stylix.colors.base05}ff
+          focuscolor=0x${config.lib.stylix.colors.base04}ff
+          maximizescreencolor=0x${config.lib.stylix.colors.base0B}ff
+          urgentcolor=0x${config.lib.stylix.colors.base0F}ff
+          scratchpadcolor=0x${config.lib.stylix.colors.base03}ff
+          globalcolor=0x${config.lib.stylix.colors.base08}ff
+          overlaycolor=0x${config.lib.stylix.colors.base0C}ff
           
           # layout support:
           # tile,scroller,grid,deck,monocle,center_tile,vertical_tile,vertical_scroller

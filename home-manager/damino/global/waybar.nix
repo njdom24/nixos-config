@@ -302,22 +302,22 @@
 	};
 	
 	style = ''
-@define-color base00 #${config.colorScheme.palette.base00};
-@define-color base01 #${config.colorScheme.palette.base01};
-@define-color base02 #${config.colorScheme.palette.base02};
-@define-color base03 #${config.colorScheme.palette.base03};
-@define-color base04 #${config.colorScheme.palette.base04};
-@define-color base05 #${config.colorScheme.palette.base05};
-@define-color base06 #${config.colorScheme.palette.base06};
-@define-color base07 #${config.colorScheme.palette.base07};
-@define-color base08 #${config.colorScheme.palette.base08};
-@define-color base09 #${config.colorScheme.palette.base09};
-@define-color base0A #${config.colorScheme.palette.base0A};
-@define-color base0B #${config.colorScheme.palette.base0B};
-@define-color base0C #${config.colorScheme.palette.base0C};
-@define-color base0D #${config.colorScheme.palette.base0D};
-@define-color base0E #${config.colorScheme.palette.base0E};
-@define-color base0F #${config.colorScheme.palette.base0F};
+@define-color base00 #${config.lib.stylix.colors.base00};
+@define-color base01 #${config.lib.stylix.colors.base01};
+@define-color base02 #${config.lib.stylix.colors.base02};
+@define-color base03 #${config.lib.stylix.colors.base03};
+@define-color base04 #${config.lib.stylix.colors.base04};
+@define-color base05 #${config.lib.stylix.colors.base05};
+@define-color base06 #${config.lib.stylix.colors.base06};
+@define-color base07 #${config.lib.stylix.colors.base07};
+@define-color base08 #${config.lib.stylix.colors.base08};
+@define-color base09 #${config.lib.stylix.colors.base09};
+@define-color base0A #${config.lib.stylix.colors.base0A};
+@define-color base0B #${config.lib.stylix.colors.base0B};
+@define-color base0C #${config.lib.stylix.colors.base0C};
+@define-color base0D #${config.lib.stylix.colors.base0D};
+@define-color base0E #${config.lib.stylix.colors.base0E};
+@define-color base0F #${config.lib.stylix.colors.base0F};
 
 * {
     border: none;
@@ -332,7 +332,7 @@
 }
 
 window#waybar {
-    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.95);
+    background-color: rgba(${config.lib.stylix.colors.base00-rgb-r}, ${config.lib.stylix.colors.base00-rgb-g}, ${config.lib.stylix.colors.base00-rgb-b}, 0.95);
     color: @base07;
     transition-property: background-color;
     transition-duration: .5s;
@@ -366,15 +366,15 @@ window#waybar.chromium {
 }
 
 #workspaces button.focused {
-    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 0.6);
+    background-color: rgba(${config.lib.stylix.colors.base00-rgb-r}, ${config.lib.stylix.colors.base00-rgb-g}, ${config.lib.stylix.colors.base00-rgb-b}, 0.6);
 }
 
 #workspaces button.urgent {
-    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 0.8);
+    background-color: rgba(${config.lib.stylix.colors.base01-rgb-r}, ${config.lib.stylix.colors.base01-rgb-g}, ${config.lib.stylix.colors.base01-rgb-b}, 0.8);
 }
 
 #mode {
-    background-color: rgba(${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 0.6);
+    background-color: rgba(${config.lib.stylix.colors.base01-rgb-r}, ${config.lib.stylix.colors.base01-rgb-g}, ${config.lib.stylix.colors.base01-rgb-b}, 0.6);
 }
 
 #clock,

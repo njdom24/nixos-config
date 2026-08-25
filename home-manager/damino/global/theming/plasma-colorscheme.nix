@@ -14,22 +14,22 @@
     Name=Base16
 
     [Colors:Window]
-    BackgroundNormal=#${config.colorScheme.palette.base00}
+    BackgroundNormal=#${config.lib.stylix.colors.base00}
 
     # Override Selection colors
     [Colors:Selection]
-    BackgroundNormal=#${config.colorScheme.palette.base02}
-    ForegroundNormal=#${config.colorScheme.palette.base05}
+    BackgroundNormal=#${config.lib.stylix.colors.base02}
+    ForegroundNormal=#${config.lib.stylix.colors.base05}
 
     # Override Link colors
     [Colors:Link]
-    ForegroundNormal=#${config.colorScheme.palette.base0D}
-    ForegroundVisited=#${config.colorScheme.palette.base0E}
+    ForegroundNormal=#${config.lib.stylix.colors.base0D}
+    ForegroundVisited=#${config.lib.stylix.colors.base0E}
 
     # Override Complementary (Negative/Neutral/Positive) colors
     [Colors:Complementary]
-    NegativeText=#${config.colorScheme.palette.base08}
-    NeutralText=#${config.colorScheme.palette.base09}
-    PositiveText=#${config.colorScheme.palette.base0B}
+    NegativeText=#${config.lib.stylix.colors.base08}
+    NeutralText=#${config.lib.stylix.colors.base09}
+    PositiveText=#${config.lib.stylix.colors.base0B}
   '';
 }

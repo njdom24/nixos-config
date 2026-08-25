@@ -279,8 +279,8 @@
               gaps_out         = 4,
               border_size      = 2,
               col = {
-                  active_border   = "rgba(${config.colorScheme.palette.base05}ff)",
-                  inactive_border = "rgba(${config.colorScheme.palette.base01}ff)",
+                  active_border   = "rgba(${config.lib.stylix.colors.base05}ff)",
+                  inactive_border = "rgba(${config.lib.stylix.colors.base01}ff)",
               },
               resize_on_border = false,
               allow_tearing    = false,

@@ -469,8 +469,8 @@
 
         border-width = 2
         border-color = "#00000000"
-        #focused-border-color = "#${config.colorScheme.palette.base05}"
-        focused-border-color = "#${config.colorScheme.palette.base04}"
+        #focused-border-color = "#${config.lib.stylix.colors.base05}"
+        focused-border-color = "#${config.lib.stylix.colors.base04}"
         #focused-title-bg-color = "#00000000"
         unfocused-title-bg-color = "#00000000"
         show-window-icons = false

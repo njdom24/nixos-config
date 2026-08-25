@@ -16,13 +16,13 @@
 
 	theme = let inherit (config.lib.formats.rasi) mkLiteral; in {
 	  "*" = {
-		red = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base08}, 100 % )";
-		blue = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base0D}, 100 % )";
-		lightfg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base06}, 100 % )";
-		lightbg = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base01}, 100 % )";
-		foreground = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base05}, 100 % )";
-		background = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 80 % )";
-		transparent = mkLiteral "rgba ( ${inputs.nix-colors.lib.conversions.hexToRGBString ", " config.colorScheme.palette.base00}, 00 % )";
+		red = mkLiteral "rgba ( ${config.lib.stylix.colors.base08-rgb-r}, ${config.lib.stylix.colors.base08-rgb-g}, ${config.lib.stylix.colors.base08-rgb-b}, 100 % )";
+		blue = mkLiteral "rgba ( ${config.lib.stylix.colors.base0D-rgb-r}, ${config.lib.stylix.colors.base0D-rgb-g}, ${config.lib.stylix.colors.base0D-rgb-b}, 100 % )";
+		lightfg = mkLiteral "rgba ( ${config.lib.stylix.colors.base06-rgb-r}, ${config.lib.stylix.colors.base06-rgb-g}, ${config.lib.stylix.colors.base06-rgb-b}, 100 % )";
+		lightbg = mkLiteral "rgba ( ${config.lib.stylix.colors.base01-rgb-r}, ${config.lib.stylix.colors.base01-rgb-g}, ${config.lib.stylix.colors.base01-rgb-b}, 100 % )";
+		foreground = mkLiteral "rgba ( ${config.lib.stylix.colors.base05-rgb-r}, ${config.lib.stylix.colors.base05-rgb-g}, ${config.lib.stylix.colors.base05-rgb-b}, 100 % )";
+		background = mkLiteral "rgba ( ${config.lib.stylix.colors.base00-rgb-r}, ${config.lib.stylix.colors.base00-rgb-g}, ${config.lib.stylix.colors.base00-rgb-b}, 80 % )";
+		transparent = mkLiteral "rgba ( ${config.lib.stylix.colors.base00-rgb-r}, ${config.lib.stylix.colors.base00-rgb-g}, ${config.lib.stylix.colors.base00-rgb-b}, 00 % )";
 		background-color = mkLiteral "@background";
 
 		separatorcolor = mkLiteral "@foreground";

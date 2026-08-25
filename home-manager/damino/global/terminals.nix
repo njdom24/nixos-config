@@ -94,47 +94,47 @@
 	  touch_scroll_multiplier = "7.0";
 
 	  # Colors
-	  background = "#${config.colorScheme.palette.base00}";
-	  foreground = "#${config.colorScheme.palette.base05}";
-	  selection_background = "#${config.colorScheme.palette.base05}";
-	  selection_foreground = "#${config.colorScheme.palette.base00}";
-	  url_color = "#${config.colorScheme.palette.base04}";
-	  cursor = "#${config.colorScheme.palette.base05}";
-	  active_border_color = "#${config.colorScheme.palette.base03}";
-	  inactive_border_color = "#${config.colorScheme.palette.base01}";
-	  active_tab_background = "#${config.colorScheme.palette.base00}";
-	  active_tab_foreground = "#${config.colorScheme.palette.base05}";
-	  inactive_tab_background = "#${config.colorScheme.palette.base01}";
-	  inactive_tab_foreground = "#${config.colorScheme.palette.base04}";
-	  tab_bar_background = "#${config.colorScheme.palette.base01}";
+	  background = "#${config.lib.stylix.colors.base00}";
+	  foreground = "#${config.lib.stylix.colors.base05}";
+	  selection_background = "#${config.lib.stylix.colors.base05}";
+	  selection_foreground = "#${config.lib.stylix.colors.base00}";
+	  url_color = "#${config.lib.stylix.colors.base04}";
+	  cursor = "#${config.lib.stylix.colors.base05}";
+	  active_border_color = "#${config.lib.stylix.colors.base03}";
+	  inactive_border_color = "#${config.lib.stylix.colors.base01}";
+	  active_tab_background = "#${config.lib.stylix.colors.base00}";
+	  active_tab_foreground = "#${config.lib.stylix.colors.base05}";
+	  inactive_tab_background = "#${config.lib.stylix.colors.base01}";
+	  inactive_tab_foreground = "#${config.lib.stylix.colors.base04}";
+	  tab_bar_background = "#${config.lib.stylix.colors.base01}";
 
 	  # Normal
-	  color0 = "#${config.colorScheme.palette.base00}";
-	  color1 = "#${config.colorScheme.palette.base08}";
-	  color2 = "#${config.colorScheme.palette.base0B}";
-	  color3 = "#${config.colorScheme.palette.base0A}";
-	  color4 = "#${config.colorScheme.palette.base0D}";
-	  color5 = "#${config.colorScheme.palette.base0E}";
-	  color6 = "#${config.colorScheme.palette.base0C}";
-	  color7 = "#${config.colorScheme.palette.base05}";
+	  color0 = "#${config.lib.stylix.colors.base00}";
+	  color1 = "#${config.lib.stylix.colors.base08}";
+	  color2 = "#${config.lib.stylix.colors.base0B}";
+	  color3 = "#${config.lib.stylix.colors.base0A}";
+	  color4 = "#${config.lib.stylix.colors.base0D}";
+	  color5 = "#${config.lib.stylix.colors.base0E}";
+	  color6 = "#${config.lib.stylix.colors.base0C}";
+	  color7 = "#${config.lib.stylix.colors.base05}";
 
 	  # Bright
-	  color8 = "#${config.colorScheme.palette.base03}";
-	  color9 = "#${config.colorScheme.palette.base08}";
-	  color10 = "#${config.colorScheme.palette.base0B}";
-	  color11 = "#${config.colorScheme.palette.base0A}";
-	  color12 = "#${config.colorScheme.palette.base0D}";
-	  color13 = "#${config.colorScheme.palette.base0E}";
-	  color14 = "#${config.colorScheme.palette.base0C}";
-	  color15 = "#${config.colorScheme.palette.base07}";
+	  color8 = "#${config.lib.stylix.colors.base03}";
+	  color9 = "#${config.lib.stylix.colors.base08}";
+	  color10 = "#${config.lib.stylix.colors.base0B}";
+	  color11 = "#${config.lib.stylix.colors.base0A}";
+	  color12 = "#${config.lib.stylix.colors.base0D}";
+	  color13 = "#${config.lib.stylix.colors.base0E}";
+	  color14 = "#${config.lib.stylix.colors.base0C}";
+	  color15 = "#${config.lib.stylix.colors.base07}";
 
 	  # Extended base16 colors
-	  color16 = "#${config.colorScheme.palette.base09}";
-	  color17 = "#${config.colorScheme.palette.base0F}";
-	  color18 = "#${config.colorScheme.palette.base01}";
-	  color19 = "#${config.colorScheme.palette.base02}";
-	  color20 = "#${config.colorScheme.palette.base04}";
-	  color21 = "#${config.colorScheme.palette.base06}";
+	  color16 = "#${config.lib.stylix.colors.base09}";
+	  color17 = "#${config.lib.stylix.colors.base0F}";
+	  color18 = "#${config.lib.stylix.colors.base01}";
+	  color19 = "#${config.lib.stylix.colors.base02}";
+	  color20 = "#${config.lib.stylix.colors.base04}";
+	  color21 = "#${config.lib.stylix.colors.base06}";
 	};
   };
 }
