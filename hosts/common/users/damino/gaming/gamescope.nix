@@ -1395,6 +1395,7 @@ in
         "-F fsr"
         "--fsr-sharpness 8"
         "--hide-cursor-delay 10000"
+        "--sdr-gamut-wideness 0"
         "--hdr-sdr-content-nits 203"
         "--hdr-itm-sdr-nits 203"
       ];
