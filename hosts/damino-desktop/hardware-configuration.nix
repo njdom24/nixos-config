@@ -38,14 +38,10 @@ in
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
   #boot.kernelPackages = pkgs.linuxPackagesFor pkgs.linux_latest;
   boot.kernelPatches = [
-    {
-      name = "frl";
-      patch = ../../patches/7-1-frl/hdmi_frl_amdnext.patch;
-    }
-    {
-      name = "frl-vrr";
-      patch = ../../patches/7-1-frl/hdmi_vrr_amdnext.patch;
-    }
+    #{
+    #  name = "frl-vrr";
+    #  patch = ../../patches/7-1-frl/hdmi_vrr_amdnext.patch;
+    #}
   ];
 
   fileSystems."/" =
