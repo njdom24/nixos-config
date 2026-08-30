@@ -434,6 +434,12 @@
         name = "give-all-permissions"
         capabilities = ["all"]
 
+        # Auto tiling
+        [[windows]]
+        match.just-mapped = true
+        match.floating = false
+        latch = "split-major"
+
         [[windows]]
         match.tag = "ws1"
         action = { type = "move-to-workspace", name = "1" }
