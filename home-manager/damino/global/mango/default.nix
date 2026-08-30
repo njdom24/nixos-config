@@ -12,6 +12,17 @@
     };
   };
 
+  # Trigger graphical-session.target for portal to start
+  systemd.user.targets.mango-session = {
+    Unit = {
+      Description = "Mango compositor session";
+      Documentation = [ "man:systemd.special(7)" ];
+      BindsTo = [ "graphical-session.target" ];
+      Wants = [ "graphical-session-pre.target" ];
+      After = [ "graphical-session-pre.target" ];
+    };
+  };
+
   home = {
     packages = with pkgs; [
       jq
@@ -48,8 +59,10 @@
           exec-once=xwayland-satellite
           exec=bash -c "sleep 2 && noctalia"
           exec-once=kanshi
-          exec-once=systemctl restart xdg-desktop-portal
-          exec-once=systemctl restart xdg-desktop-portal-hyprland
+          exec-once=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+          exec-once=systemctl --user start mango-session.target
+          exec-once=systemctl --user restart xdg-desktop-portal
+          exec-once=systemctl --user restart xdg-desktop-portal-hyprland
           exec-once=rm -f ~/.config/mango/monitors.conf.bak
           exec-once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1 && ~/.config/mango/mango-snapshot-outputs.sh"
           exec-once=bash -c "sleep 3 && wlr-hdr-cal"

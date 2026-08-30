@@ -230,6 +230,11 @@
       
       -- exec-once (run only on Hyprland start)
       hl.on("hyprland.start", function()
+          -- Home Manager's own hyprland-session.target activation (registered via
+          -- systemd.enable) is not reliably running before this block, leaving
+          -- graphical-session.target inactive and xdg-desktop-portal.service
+          -- permanently failing (it Requisite=s that target). Start it here too.
+          hl.exec_cmd("systemctl --user start hyprland-session.target")
           hl.exec_cmd("systemctl --user stop plasma-xdg-desktop-portal-kde")
           hl.exec_cmd("systemctl --user restart xdg-desktop-portal")
           hl.exec_cmd("systemctl --user import-environment PATH")
