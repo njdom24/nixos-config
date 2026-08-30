@@ -977,6 +977,19 @@ let
       fi
     }
 
+    # MangoWM specifically has an issue with gamescope losing fullscreen on first game launch
+    mango_redo_fullscreen() {
+      local client_json client_id is_fullscreen
+
+      client_json=$(mmsg get focusing-client)
+      client_id=$(jq -r '.id' <<< "$client_json")
+      is_fullscreen=$(jq -r '.is_fullscreen' <<< "$client_json")
+
+      if [[ "$is_fullscreen" == "false" ]]; then
+        mmsg dispatch togglefullscreen client,"$client_id"
+      fi
+    }
+
     # Vars to help find screenshot dir
     USER_LOG="$HOME/.steam/steam/logs/connection_log.txt"
     STEAM_USERID=$(${pkgs.gnugrep}/bin/grep -Po '\[U:1:\K[0-9]+' "$USER_LOG" | tail -n1)
@@ -1045,6 +1058,7 @@ let
                 jay-toggle-hdr on
               elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
                 mmsg dispatch togglehdr,on
+                mango_redo_fullscreen
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr on
@@ -1068,6 +1082,7 @@ let
                 jay-toggle-hdr off
               elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
                 mmsg dispatch togglehdr,off
+                mango_redo_fullscreen
               elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
                 hyprctl eval "hl.dispatch(hl.dsp.window.fullscreen())"
                 hypr-toggle-hdr off
@@ -1098,6 +1113,7 @@ let
             jay-toggle-hdr on
           elif [[ "$XDG_CURRENT_DESKTOP" == "mango" ]]; then
             mmsg dispatch togglehdr,on
+            mango_redo_fullscreen
           elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
             # Assuming cm_auto_hdr > 0, switching back to SDR is fine
             hypr-toggle-hdr off
