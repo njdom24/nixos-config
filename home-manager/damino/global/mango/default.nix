@@ -88,6 +88,9 @@
           
           windowrule=appid:discord,isopensilent:1
           windowrule=appid:steam,isopensilent:1,force_tiled_state:1
+
+          windowrule=isfullscreen:1,appid:gamescope
+          windowrule=isfullscreen:1,appid:^(steam_app_\d+)$
           
           # Window effect
           #blur=0
