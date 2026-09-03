@@ -701,8 +701,21 @@
                        [[ -n "$HEADLESS" ]] && break
                        sleep 0.1
                      done
+
+                     noctalia_was_running=0
+                     if ${pkgs.procps}/bin/pgrep -f noctalia > /dev/null; then
+                       noctalia_was_running=1
+                       ${pkgs.procps}/bin/pkill -f noctalia
+                     fi
+
                      ${pkgs.wlr-randr}/bin/wlr-randr --output "$HEADLESS" --off
                      mmsg dispatch destroy_all_virtual_output
+
+                     if [[ "$noctalia_was_running" == "1" ]]; then
+                       noctalia &
+                       disown
+                     fi
+
                      ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
                      exit 0
                      ;;
