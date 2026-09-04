@@ -57,7 +57,7 @@
           # Use xwayland-satellite instead
           xwayland_persistence=0
           exec-once=xwayland-satellite
-          exec=bash -c "sleep 2 && noctalia"
+          exec=bash -c "sleep 2 && env DISPLAY=:1 noctalia"
           exec-once=kanshi
           exec-once=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
           exec-once=systemctl --user start mango-session.target
