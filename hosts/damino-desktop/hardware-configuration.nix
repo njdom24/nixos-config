@@ -61,20 +61,14 @@ in
       fsType = "vfat";
     };
 
-  fileSystems."/mnt/WD_BLACK" =
-    { device = "dev/disk/by-uuid/38c2bd3d-7f9e-47a5-8385-7b970e6ac656";
-      fsType = "btrfs";
-      options = [ "noauto" "nosuid" "nodev" "nofail" "x-gvfs-show" ];
-    };
-
   fileSystems."/mnt/WD_BLACK2" =
-    { device = "dev/disk/by-uuid/417a6a41-7168-4ad1-b945-6cd820914983";
+    { device = "/dev/disk/by-uuid/417a6a41-7168-4ad1-b945-6cd820914983";
       fsType = "btrfs";
       options = [ "noauto" "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };
 
   fileSystems."/mnt/s860" =
-    { device = "dev/disk/by-uuid/4176292a-e20c-4ccb-8b06-14eacd7449b5";
+    { device = "/dev/disk/by-uuid/4176292a-e20c-4ccb-8b06-14eacd7449b5";
       fsType = "ext4";
       options = [ "nosuid" "nodev" "nofail" "x-gvfs-show" ];
     };

@@ -48,6 +48,12 @@ in
       fsType = "vfat";
     };
 
+  fileSystems."/mnt/WD_BLACK" =
+    { device = "/dev/disk/by-uuid/38c2bd3d-7f9e-47a5-8385-7b970e6ac656";
+      fsType = "btrfs";
+      options = [ "noauto" "nosuid" "nodev" "nofail" "x-gvfs-show" ];
+    };
+
   swapDevices = [{
     device = "/var/lib/swapfile";
     size = 16*1024;
