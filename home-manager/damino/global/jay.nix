@@ -383,6 +383,7 @@
             #{ type = "exec", exec = ["jay", "input", "seat", "default", "set-cursor-size", "25"] },
             { type = "exec", exec = ["sh", "-c", "jay randr card $(readlink -f $XDG_RUNTIME_DIR/dri/dgpu0) primary"] },
             { type = "exec", exec = ["sh", "-c", "jay randr card $(readlink -f $XDG_RUNTIME_DIR/dri/dgpu0) plane-color-pipelines enable"] },
+            { type = "exec", exec = ["sh", "-c", "jay randr card $(readlink -f $XDG_RUNTIME_DIR/dri/igpu) plane-color-pipelines enable"] },
             # GPU screen recorder replay buffer (with delay for display init)
             { type = "exec", exec = ["sh", "-c", "sleep 2 && systemctl --user stop gpu-screen-recorder"] },
         ]
