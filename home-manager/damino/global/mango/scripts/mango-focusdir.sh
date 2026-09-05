@@ -36,7 +36,8 @@ else
   all_clients_json="$(mmsg get all-clients)"
   has_candidate="$(echo "$all_clients_json" | jq -r \
     --argjson ccx "$ccx" --argjson ccy "$ccy" --arg dir "$dir" \
-    --arg mon "$cur_mon_name" --argjson curid "$cur_id" '
+    --arg mon "$cur_mon_name" --argjson curid "$cur_id" \
+    --argjson cx "$cx" --argjson cy "$cy" --argjson cw "$cw" --argjson ch "$ch" '
     [ .clients[]
       | select(.monitor == $mon)
       | select(.id != $curid)
@@ -49,6 +50,12 @@ else
         elif $dir == "right" then $x2 > $ccx
         elif $dir == "up" then $y2 < $ccy
         else $y2 > $ccy
+        end
+      )
+      | select(
+        if $dir == "left" or $dir == "right"
+        then ($c.y < ($cy + $ch)) and (($c.y + $c.height) > $cy)
+        else ($c.x < ($cx + $cw)) and (($c.x + $c.width) > $cx)
         end
       )
     ] | length > 0
