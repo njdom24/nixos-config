@@ -424,6 +424,14 @@
         #output.name = "primary"
 
         [[inputs]]
+        match.is-gesture = true
+        natural-scrolling = true
+
+        [[inputs]]
+        match.is-touch = true
+        natural-scrolling = true
+
+        [[inputs]]
         match.name = "Sony Interactive Entertainment Wireless Controller Touchpad"
         detached = true
 
