@@ -24,6 +24,7 @@
 
   programs = {
     gpu-screen-recorder.enable = true;
+    gpu-screen-recorder.ui.enable = true;
   };
 
   hardware = {
