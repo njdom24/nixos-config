@@ -12,8 +12,12 @@
       ./displays-secondary.nix
     ];
 
-  networking.hostName = "damino-secondary"; # Define your hostname.
-  networking.interfaces.enp4s0.wakeOnLan.enable = true;
+  networking = {
+    hostName = "damino-secondary";
+    interfaces.enp4s0.wakeOnLan.enable = true;
+    nameservers = [ "9.9.9.9" "149.112.112.112" ]; # https://quad9.net/. Work around ISP failing to resolve raw.github.com patch URLs
+    networkmanager.dns = "none";
+  };
 
   environment.sessionVariables = {
     RADV_DEBUG = "nofastclears"; # Fix for 5700 XT (https://gitlab.freedesktop.org/mesa/mesa/-/issues/6113)

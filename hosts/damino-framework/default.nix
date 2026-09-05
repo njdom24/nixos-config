@@ -15,8 +15,12 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "damino-framework"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking = {
+    hostName = "damino-framework";
+    nameservers = [ "9.9.9.9" "149.112.112.112" ]; # https://quad9.net/. Work around ISP failing to resolve raw.github.com patch URLs
+    networkmanager.dns = "none";
+    # wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  };
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
