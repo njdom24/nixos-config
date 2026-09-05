@@ -51,9 +51,7 @@
           env=NIXOS_OZONE_WL,1
           env=XDG_MENU_PREFIX,plasma-
           env=WLR_RENDERER,vulkan
-          env=WLR_DRM_DEVICES,/run/user/1000/dri/dgpu0
-          env=WLR_RENDER_DRM_DEVICE,/run/user/1000/dri/dgpu0-render
-          
+
           # Use xwayland-satellite instead
           xwayland_persistence=0
           exec-once=xwayland-satellite

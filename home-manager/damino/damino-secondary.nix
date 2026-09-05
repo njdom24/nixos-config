@@ -1,11 +1,12 @@
 { inputs, pkgs, lib, ... }: {
   imports = [ ./global ];
 
-  wayland.windowManager = {
-    sway.extraSessionCommands = ''
-      export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0
-    '';
+  home.sessionVariables = {
+    WLR_DRM_DEVICES = "$XDG_RUNTIME_DIR/dri/dgpu0";
+    #WLR_RENDER_DRM_DEVICE = "$XDG_RUNTIME_DIR/dri/dgpu0-render";
+  };
 
+  wayland.windowManager = {
     hyprland = {
         extraConfig = ''
           hl.env("AQ_DRM_DEVICES", xdgRuntimeDir .. "/dri/dgpu0")

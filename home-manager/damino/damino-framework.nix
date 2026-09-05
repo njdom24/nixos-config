@@ -1,12 +1,13 @@
 { inputs, pkgs, lib, ... }: {
 	imports = [ ./global ];
 
-	wayland.windowManager = {
-	  # eGPU setup
-	  sway.extraSessionCommands = ''
-	    export WLR_DRM_DEVICES=$XDG_RUNTIME_DIR/dri/dgpu0:$XDG_RUNTIME_DIR/dri/igpu
-	  '';
+	# eGPU setup
+	home.sessionVariables = {
+	  WLR_DRM_DEVICES = "$XDG_RUNTIME_DIR/dri/dgpu0:$XDG_RUNTIME_DIR/dri/igpu";
+	  #WLR_RENDER_DRM_DEVICE = "$XDG_RUNTIME_DIR/dri/igpu-render";
+	};
 
+	wayland.windowManager = {
 	  hyprland = {
 	    extraConfig = ''
 	      hl.env("AQ_DRM_DEVICES", xdgRuntimeDir .. "/dri/dgpu0:" .. xdgRuntimeDir .. "/dri/igpu")
