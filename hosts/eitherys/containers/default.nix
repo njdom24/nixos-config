@@ -67,9 +67,9 @@ in
         wants = [ "docker.service" ];
         serviceConfig = {
           TimeoutStartSec = "60min";
-          ExecStartPre = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker compose -f ${composeFile} down && ${pkgs.docker}/bin/docker compose -f ${composeFile} pull'";
-          ExecStart = "${pkgs.bash}/bin/bash -c '${sleepCommand} ${pkgs.docker}/bin/docker compose -f ${composeFile} $(test -f ${envFile} && echo --env-file ${envFile}) up'";
-          ExecStop = "${pkgs.docker}/bin/docker compose -f ${composeFile} down";
+          ExecStartPre = "${pkgs.bash}/bin/bash -c '${pkgs.docker}/bin/docker compose -p ${serviceName} -f ${composeFile} down && ${pkgs.docker}/bin/docker compose -p ${serviceName} -f ${composeFile} pull'";
+          ExecStart = "${pkgs.bash}/bin/bash -c '${sleepCommand} ${pkgs.docker}/bin/docker compose -p ${serviceName} -f ${composeFile} $(test -f ${envFile} && echo --env-file ${envFile}) up'";
+          ExecStop = "${pkgs.docker}/bin/docker compose -p ${serviceName} -f ${composeFile} down";
           Restart = "on-failure";
           RestartSec = "5";
           Type = "simple";
