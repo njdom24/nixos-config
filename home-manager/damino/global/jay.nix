@@ -323,6 +323,8 @@
       let satellite-loop = pkgs.writeShellScript "satellite-loop" ''
       while true; do
         (sleep 5 && ${pkgs.xrandr}/bin/xrandr --output DP-1 --primary) &
+        # https://github.com/niri-wm/niri/discussions/3986
+        (sleep 5 && env XDG_CURRENT_DESKTOP=niri gsr-ui) &
         ${pkgs.xwayland-satellite}/bin/xwayland-satellite
         sleep 1
         status=$?

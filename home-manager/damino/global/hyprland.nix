@@ -107,18 +107,6 @@
           esac
         done
       '';
-      checkrec = pkgs.writeShellScript "checkrec" ''
-        # Check if recording will be started, since GSR doesn't give feedback
-        # Get the latest status line from the gpu-screen-recorder journal
-        ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
-        last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
-
-        if [[ "$last_line" != *"Started recording"* ]]; then
-          ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Starting recording..."
-        else
-          ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Stopping recording..."
-        fi
-      '';
       screenshot = pkgs.writeShellScript "screenshot" ''
         mode="$1"
         SCREENSHOT_DIR="$XDG_RUNTIME_DIR/screenshots"
@@ -169,25 +157,6 @@
           #${pkgs.libnotify}/bin/notify-send -a "Screenshot" -i "$newfile" "Screenshot converted"
         fi
       ''; 
-      screenrec = pkgs.writeShellScript "screenrec" ''
-        # Check if recording will be started, since GSR doesn't give feedback
-        ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
-
-        # Get the latest status line from the gpu-screen-recorder journal
-        last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
-
-        if [[ "$last_line" != *"Started recording"* ]]; then
-          ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording started"
-        fi
-
-        ${pkgs.procps}/bin/pgrep -f "gpu-screen-recorder" | while read pid; do
-          cmd=$(${pkgs.ps}/bin/ps -p "$pid" -o args=)
-
-          if [[ "$cmd" == *"-r"* && "$cmd" == *"-ro"* ]]; then
-            kill -SIGRTMIN "$pid"
-          fi
-        done
-      '';
     in ''
       -- hyprland.lua
       -- Converted from hyprland.conf (hyprlang) to Lua (Hyprland 0.55+)
@@ -246,13 +215,12 @@
           hl.exec_cmd("hyprctl setcursor " .. cursorTheme .. " 24")
           hl.exec_cmd("hyprctl dispatch workspace 1")
           hl.exec_cmd("xwaylandvideobridge")
-          hl.exec_cmd('ls "$XDG_RUNTIME_DIR/dri" 2> /dev/null | grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder')
+          hl.exec_cmd("sleep 5; gsr-ui")
       
           -- exec (re-run on reload) equivalents — run at start too
           hl.exec_cmd("kill $(pgrep hyprpaper); sleep 1 && ${pkgs.hyprpaper}/bin/hyprpaper &")
           hl.exec_cmd("noctalia")
           hl.exec_cmd("sleep 1; wlr-hdr-cal")
-          hl.exec_cmd("sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder")
       end)
       
       --------------------
@@ -436,6 +404,7 @@
       ----------------------
       
       hl.layer_rule({ name = "sel-no-anim",      match = { namespace = "selection" },                   no_anim = true })
+      hl.layer_rule({ name = "gsr-ui-no-anim",   match = { namespace = "gsr-ui" },                      no_anim = true })
       hl.layer_rule({ name = "swaync-notif-blur",match = { namespace = "swaync-notification-window" },  blur = true, ignore_alpha = 0.5 })
       hl.layer_rule({ name = "swaync-cc-blur",   match = { namespace = "swaync-control-center" },       blur = true, ignore_alpha = 0.5 })
       hl.layer_rule({ name = "rofi-blur",        match = { namespace = "rofi" },                        blur = true, ignore_alpha = 0.5 })
@@ -583,17 +552,6 @@
       hl.bind("SHIFT + Next",  hl.dsp.exec_cmd("${screenshot} focused"))
       hl.bind("SHIFT + Print", hl.dsp.exec_cmd("${screenshot} selector"))
       hl.bind("SHIFT + Prior", hl.dsp.exec_cmd("${screenshot} selector"))
-      
-      -- GPU screen recorder (save replay — bindo equivalent: only fires when service active)
-      hl.bind("CTRL + Print",       hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && notify-send -a 'gpu-screen-recorder' 'Saving replay...'"))
-      hl.bind("CTRL + Print",       hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && killall -SIGUSR1 gpu-screen-recorder"), { long_press = true })
-      hl.bind("CTRL + SHIFT + Next",  hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && notify-send -a 'gpu-screen-recorder' 'Saving replay...'"))
-      hl.bind("CTRL + SHIFT + Next",  hl.dsp.exec_cmd("systemctl --user is-active --quiet gpu-screen-recorder.service && killall -SIGUSR1 gpu-screen-recorder"), { long_press = true })
-
-      hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("${checkrec}"))
-      hl.bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("${screenrec}"), { long_press = true })
-      hl.bind("CTRL + SHIFT + Prior", hl.dsp.exec_cmd("${checkrec}"))
-      hl.bind("CTRL + SHIFT + Prior", hl.dsp.exec_cmd("${screenrec}"), { long_press = true })
       
       -- HDR toggle
       hl.bind("CTRL + SHIFT + B", hl.dsp.exec_cmd("hypr-toggle-hdr"))
@@ -928,8 +886,6 @@
               fi
               ;;
           esac
-
-          sleep 1 && systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder
 
         else
           echo "HDR not supported on $monitor; no changes made."

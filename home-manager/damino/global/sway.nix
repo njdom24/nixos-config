@@ -228,9 +228,7 @@
           exec systemctl --user import-environment PATH
           #exec_always timeout 10 kanshi
           exec_always ${displaySetup}
-          # Start recording only on desktops (dGPU heuristic)
-          exec sh -c "ls \"$XDG_RUNTIME_DIR/dri\" 2> /dev/null | ${pkgs.gnugrep}/bin/grep -q dgpu && sleep 2 && systemctl --user restart gpu-screen-recorder"
-          exec_always sh -c "sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder"
+          exec sh -c 'sleep 5 && env XDG_CURRENT_DESKTOP=niri gsr-ui'
 
 		  #exec mako
 		  # Handled by Noctalia
@@ -432,37 +430,6 @@
 		        ;;
 		    esac
 		  '';
-		  screenrec = pkgs.writeShellScript "screenrec" ''
-		    # Check if recording will be started, since GSR doesn't give feedback
-		    ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
-
-		    # Get the latest status line from the gpu-screen-recorder journal
-		    last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
-
-		    if [[ "$last_line" != *"Started recording"* ]]; then
-		      ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Recording started"
-		    fi
-
-		    ${pkgs.procps}/bin/pgrep -f "gpu-screen-recorder" | while read pid; do
-		      cmd=$(${pkgs.ps}/bin/ps -p "$pid" -o args=)
-
-		      if [[ "$cmd" == *"-r"* && "$cmd" == *"-ro"* ]]; then
-		        kill -SIGRTMIN "$pid"
-		      fi
-		    done
-		  '';
-		  checkrec = pkgs.writeShellScript "checkrec" ''
-		    # Check if recording will be started, since GSR doesn't give feedback
-		    # Get the latest status line from the gpu-screen-recorder journal
-		    ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service || exit 1
-		    last_line=$(${pkgs.systemd}/bin/journalctl --user-unit=gpu-screen-recorder.service -n 50 --no-pager | ${pkgs.gnugrep}/bin/grep -E "Started recording|Stopped recording" | tail -n 1)
-
-		    if [[ "$last_line" != *"Started recording"* ]]; then
-		      ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Starting recording..."
-		    else
-		      ${pkgs.libnotify}/bin/notify-send -a "gpu-screen-recorder" "Stopping recording..."
-		    fi
-		  '';
 		  hdr-screenshot = pkgs.writeShellScript "hdr-screenshot" ''
 		    mode="$1"
 		    SCREENSHOT_DIR="$XDG_RUNTIME_DIR/screenshots"
@@ -651,19 +618,6 @@
 			"--no-repeat Shift+Prior" = "exec ${hdr-screenshot} select";
 			"--no-repeat Print" = "exec ${hdr-screenshot} focused";
 			"--no-repeat Shift+Next" = "exec ${hdr-screenshot} focused";
-
-			# Save replay if gpu-screen-recorder -r is running
-			#"Control+Print" = "exec ${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'";
-			"--no-repeat Control+Print" = "exec ${bind-hold} start gsc-replay \"${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'\" \"killall -SIGUSR1 gpu-screen-recorder\"";
-			"--no-repeat Control+Shift+Next" = "exec ${bind-hold} start gsc-replay \"${pkgs.systemd}/bin/systemctl --user is-active --quiet gpu-screen-recorder.service && ${pkgs.libnotify}/bin/notify-send -a 'gpu-screen-recorder' 'Saving replay...'\" \"killall -SIGUSR1 gpu-screen-recorder\"";
-			"--release Control+Print" = "exec ${bind-hold} stop gsc-replay";
-			"--release Control+Shift+Next" = "exec ${bind-hold} stop gsc-replay";
-
-			# Start / stop manual recording if gpu-screen-recorder -ro is running
-			"--no-repeat Control+Shift+Print" = "exec ${bind-hold} start gsc-record ${checkrec} ${screenrec}";
-			"--no-repeat Control+Shift+Prior" = "exec ${bind-hold} start gsc-record ${checkrec} ${screenrec}";
-			"--release Control+Shift+Print" = "exec ${bind-hold} stop gsc-record";
-			"--release Control+Shift+Prior" = "exec ${bind-hold} stop gsc-record";
 		  };
 		  left = "$mod+Left";
 		  right = "$mod+Right";
@@ -934,7 +888,6 @@
         esac
 
         swaymsg output "$focused_display" hdr "$action"
-        sleep 1; systemctl --user is-active --quiet gpu-screen-recorder && systemctl --user reload gpu-screen-recorder
       '')
     ];
   };

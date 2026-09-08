@@ -29,7 +29,6 @@
     ./hyprland.nix
     ./terminals.nix
     ./theming
-    ./gpu-screen-recorder.nix
     ./al2
     ./noctalia.nix
   ];
