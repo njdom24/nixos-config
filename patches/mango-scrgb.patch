@@ -1,8 +1,8 @@
-diff --git a/src/mango.c b/src/mango.c
-index e9d7ff4..6378dce 100644
---- a/src/mango.c
-+++ b/src/mango.c
-@@ -6099,6 +6099,7 @@ void setup(void) {
+diff --git a/src/main.c b/src/main.c
+index da72a14d..47c635ad 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -459,6 +459,7 @@ void setup(void) {
  					{
  						.parametric = true,
  						.set_mastering_display_primaries = true,
