@@ -57,6 +57,7 @@
           exec-once=xwayland-satellite
           exec=bash -c "sleep 2 && env DISPLAY=:1 noctalia"
           exec-once=kanshi
+          exec-once=~/.config/mango/mango-autotiling.sh
           exec-once=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
           exec-once=systemctl --user start mango-session.target
           exec-once=systemctl --user restart xdg-desktop-portal
@@ -150,7 +151,7 @@
           dwindle_smart_resize=0
           dwindle_drop_simple_split=1
           dwindle_split_ratio=0.5
-          dwindle_manual_split=0
+          dwindle_manual_split=1
           dwindle_hsplit=1
           dwindle_vsplit=1
           dwindle_preserve_split=1
@@ -310,10 +311,10 @@
           #bind=alt+super+ctrl,Down,scroller_stack,down
           
           #dwindle layout(manual split mode)
-          #bind=SUPER,v,dwindle_split_vertical
-          #bind=SUPER,h,dwindle_split_horizontal
-          bind=SUPER,v,dwindle_toggle_current_split
-          bind=SUPER,h,dwindle_toggle_current_split
+          bind=SUPER,v,dwindle_split_vertical
+          bind=SUPER,h,dwindle_split_horizontal
+          #bind=SUPER,v,dwindle_toggle_current_split
+          #bind=SUPER,h,dwindle_toggle_current_split
           
           # switch layout
           #bind=SUPER,n,switch_layout
@@ -440,6 +441,7 @@
         };
       })
       [
+        "mango-autotiling.sh"
         "mango-workspace.sh"
         "mango-focusdir.sh"
         "mango-exchange-or-move.sh"
