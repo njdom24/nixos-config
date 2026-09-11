@@ -70,12 +70,16 @@
           exec=~/.config/mango/mango-workspace.sh assign 1 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 2 DP-2
-          exec-once=~/.config/mango/mango-spawn-on-tag.sh 1 DP-1 firefox firefox
-          exec-once=~/.config/mango/mango-spawn-on-tag.sh 2 DP-2 discord env DISPLAY=:1 discord
-          exec-once=~/.config/mango/mango-spawn-on-tag.sh 4 DP-1 steam env DISPLAY=:1 gtk-launch steam.desktop
+          exec-once=firefox
+          exec-once=env DISPLAY=:1 discord
+          exec-once=env DISPLAY=:1 gtk-launch steam.desktop
           exec-once=bash -c "sleep 5 && env DISPLAY=:1 gsr-ui"
           #exec-once=discord
           #exec-once=gtk-launch steam.desktop
+
+          windowrule-once=tags:1,monitor:DP-1,appid:firefox
+          windowrule=tags:4,monitor:DP-1,appid:steam
+          windowrule=tags:2,monitor:DP-2,appid:discord
           
           circle_layout=dwindle
           
@@ -446,7 +450,6 @@
         "mango-focusdir.sh"
         "mango-move.sh"
         "mango-screenshot.sh"
-        "mango-spawn-on-tag.sh"
         "mango-virtual-monitor.sh"
         "mango-snapshot-outputs.sh"
         "mango-floating-focus.sh"
