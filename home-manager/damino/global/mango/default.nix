@@ -273,10 +273,10 @@
           bind=SUPER,Space,spawn,~/.config/mango/mango-floating-focus.sh
           
           # swap window
-          #bind=SUPER+SHIFT,Up,exchange_client,up
-          #bind=SUPER+SHIFT,Down,exchange_client,down
-          #bind=SUPER+SHIFT,Left,exchange_client,left
-          #bind=SUPER+SHIFT,Right,exchange_client,right
+          #bind=SUPER+SHIFT,Up,move_client,up
+          #bind=SUPER+SHIFT,Down,move_client,down
+          #bind=SUPER+SHIFT,Left,move_client,left
+          #bind=SUPER+SHIFT,Right,move_client,right
           
           #bind=SUPER+SHIFT,Up,spawn,~/.config/mango/mango-exchange-or-move.sh up
           #bind=SUPER+SHIFT,Down,spawn,~/.config/mango/mango-exchange-or-move.sh down
@@ -444,7 +444,7 @@
         "mango-autotiling.sh"
         "mango-workspace.sh"
         "mango-focusdir.sh"
-        "mango-exchange-or-move.sh"
+        "mango-move.sh"
         "mango-screenshot.sh"
         "mango-spawn-on-tag.sh"
         "mango-virtual-monitor.sh"

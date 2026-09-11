@@ -9,7 +9,7 @@ case "$dir" in
 esac
 
 fallback() {
-  mmsg dispatch exchange_client,"$dir"
+  mmsg dispatch move_client,"$dir"
   exit 0
 }
 
