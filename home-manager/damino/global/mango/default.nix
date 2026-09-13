@@ -96,7 +96,7 @@
           windowrule=isfullscreen:1,appid:gamescope
           windowrule=isfullscreen:1,appid:^(steam_app_\d+)$
 
-          windowrule=appid:gsr-ui,isfloating:1
+          windowrule=appid:gsr-ui,isfloating:1,isfullscreen:1
           
           # Window effect
           #blur=0
