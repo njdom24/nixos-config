@@ -626,7 +626,9 @@
       ".config/hypr/xdph.conf" = let screenshare-fix =
          let portal-watcher = pkgs.writeShellScript "portal-watcher.sh" ''
            #! /usr/bin/env bash
-           ${pkgs.pipewire}/bin/pw-mon | while read -r line; do
+           coproc PWMON { ${pkgs.pipewire}/bin/pw-mon; }
+
+           while IFS= read -r line; do
              if [[ "$line" == *"Stream/Input/Video"* ]]; then
                streaming_sources=$(${pkgs.pipewire}/bin/pw-dump | ${pkgs.gnugrep}/bin/grep -o Stream/Input/Video | ${pkgs.coreutils}/bin/wc -l)
                if [[ "$streaming_sources" == "0" ]]; then
@@ -640,6 +642,7 @@
                        ${pkgs.sway}/bin/swaymsg output "$HEADLESS" unplug > /dev/null 2>&1 &
                      fi
 
+                     kill "$PWMON_PID" 2> /dev/null || true
                      ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
                      exit 0
                      ;;
@@ -660,20 +663,25 @@
                        sleep 0.1
                      done
 
-                     noctalia_was_running=0
-                     if ${pkgs.procps}/bin/pgrep -f noctalia > /dev/null; then
-                       noctalia_was_running=1
-                       ${pkgs.procps}/bin/pkill -f noctalia
+                     pid=$(${pkgs.procps}/bin/pgrep -f noctalia | head -n1)
+
+                     if [ -n "$pid" ]; then
+                       env_vars=$(tr '\0' '\n' < /proc/"$pid"/environ)
+                       wayland_display=$(echo "$env_vars" | ${pkgs.gnugrep}/bin/grep '^WAYLAND_DISPLAY=' | cut -d= -f2-)
+                       mango_sig=$(echo "$env_vars" | ${pkgs.gnugrep}/bin/grep '^MANGO_INSTANCE_SIGNATURE=' | cut -d= -f2-)
+
+                       kill "$pid"
                      fi
 
                      ${pkgs.wlr-randr}/bin/wlr-randr --output "$HEADLESS" --off
                      mmsg dispatch destroy_all_virtual_output
 
-                     if [[ "$noctalia_was_running" == "1" ]]; then
-                       noctalia &
+                     if [ -n "$pid" ]; then
+                       WAYLAND_DISPLAY="$wayland_display" MANGO_INSTANCE_SIGNATURE="$mango_sig" noctalia &
                        disown
                      fi
 
+                     kill "$PWMON_PID" 2> /dev/null || true
                      ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror 2> /dev/null || true
                      exit 0
                      ;;
@@ -684,8 +692,8 @@
                  esac
                fi
              fi
-           done
-         ''; 
+           done <&"''${PWMON[0]}"
+         '';
          in pkgs.writeShellScript "screenshare-fix.sh" ''
            #! /usr/bin/env bash
            # Example outputs:
@@ -737,7 +745,7 @@
 
                  ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror > /dev/null 2>&1 || true
                  ${pkgs.systemd}/bin/systemctl --user reset-failed > /dev/null 2>&1
-                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet ${portal-watcher}
+                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet --property=KillMode=process ${portal-watcher}
 
                  (sleep 0.5 && noctalia msg bar-hide "$HEADLESS" > /dev/null 2>&1) &
                  disown
@@ -793,7 +801,7 @@
 
                  ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror > /dev/null 2>&1 || true
                  ${pkgs.systemd}/bin/systemctl --user reset-failed > /dev/null 2>&1
-                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet ${portal-watcher}
+                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet --property=KillMode=process ${portal-watcher}
 
                  (sleep 0.5 && noctalia msg bar-hide "$HEADLESS" > /dev/null 2>&1) &
                  disown
