@@ -179,7 +179,7 @@
           focus_cross_tag=1
           
           # Handled by script to send instead of exchanging
-          exchange_cross_monitor=0
+          exchange_cross_monitor=1
           
           enable_floating_snap=0
           snap_distance=30
@@ -281,11 +281,6 @@
           #bind=SUPER+SHIFT,Down,move_client,down
           #bind=SUPER+SHIFT,Left,move_client,left
           #bind=SUPER+SHIFT,Right,move_client,right
-          
-          #bind=SUPER+SHIFT,Up,spawn,~/.config/mango/mango-exchange-or-move.sh up
-          #bind=SUPER+SHIFT,Down,spawn,~/.config/mango/mango-exchange-or-move.sh down
-          #bind=SUPER+SHIFT,Left,spawn,~/.config/mango/mango-exchange-or-move.sh left
-          #bind=SUPER+SHIFT,Right,spawn,~/.config/mango/mango-exchange-or-move.sh right
 
           # mango-move-float wraps mango-exchange-or-move for tiled windows
           bind=SUPER+SHIFT,Up,spawn,~/.config/mango/mango-move-float.sh up
@@ -448,7 +443,6 @@
         "mango-autotiling.sh"
         "mango-workspace.sh"
         "mango-focusdir.sh"
-        "mango-move.sh"
         "mango-screenshot.sh"
         "mango-virtual-monitor.sh"
         "mango-snapshot-outputs.sh"

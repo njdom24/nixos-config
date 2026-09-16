@@ -11,7 +11,7 @@ STEP=100
 is_floating="$(mmsg get focusing-client | jq -r '.is_floating')"
 
 if [[ "$is_floating" != "true" ]]; then
-  exec ~/.config/mango/mango-move.sh "$dir"
+  exec mmsg dispatch "move_client, $dir"
 fi
 
 case "$dir" in
