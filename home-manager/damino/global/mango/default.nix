@@ -1,4 +1,38 @@
-{ inputs, lib, config, pkgs, ... }: {
+{ inputs, lib, config, pkgs, ... }:
+let
+  mango-satellite-wrapper = pkgs.writeShellScriptBin "mango-satellite-wrapper" ''
+    # Subsequent calls probably belong to gamescope
+    if [ "$1" != ":0" ]; then
+      exec ${pkgs.xwayland}/bin/Xwayland "$@"
+    else
+      echo "dummy"
+    fi
+  '';
+
+  mango-satellite-runner = pkgs.writeShellScript "mango-satellite-runner" ''
+    MAX_ATTEMPTS=10
+    ATTEMPT=0
+
+    while (( ATTEMPT < MAX_ATTEMPTS )); do
+        ATTEMPT=$(( ATTEMPT + 1 ))
+
+        ${pkgs.xwayland-satellite}/bin/xwayland-satellite &
+        XWS_PID=$!
+
+        # Give it a moment to initialize
+        sleep 1
+
+        if ${pkgs.xrandr}/bin/xrandr &>/dev/null; then
+          exit 0
+        fi
+
+        # Started on wrong display. Kill and retry
+        kill "$XWS_PID" 2>/dev/null || true
+        wait "$XWS_PID" 2>/dev/null || true
+    done
+    exit 1
+  '';
+in {
   imports = [
   ];
   xdg.portal = {
@@ -40,7 +74,7 @@
           # More option see https://github.com/DreamMaoMao/mango/wiki/
           env=SSH_AUTH_SOCK,/run/user/1000/gcr/ssh
           env=SSH_ASKPASS,/run/current-system/sw/libexec/seahorse/ssh-askpass
-          #env=DISPLAY,:1
+          env=WLR_XWAYLAND,${mango-satellite-wrapper}/bin/mango-satellite-wrapper
           env=XCURSOR_THEME,XCursor-Pro-Dark
           env=XCURSOR_SIZE,25
           env=QT_QPA_PLATFORM,wayland;xcb
@@ -52,10 +86,9 @@
           env=XDG_MENU_PREFIX,plasma-
           env=WLR_RENDERER,vulkan
 
-          # Use xwayland-satellite instead
           xwayland_persistence=0
-          exec-once=xwayland-satellite
-          exec=bash -c "sleep 2 && env DISPLAY=:1 noctalia"
+          exec-once=${mango-satellite-runner}
+          exec=bash -c "sleep 2 && noctalia"
           exec-once=kanshi
           exec-once=~/.config/mango/mango-autotiling.sh
           exec-once=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
@@ -71,9 +104,9 @@
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 2 DP-2
           exec-once=firefox
-          exec-once=env DISPLAY=:1 discord
-          exec-once=env DISPLAY=:1 gtk-launch steam.desktop
-          exec-once=bash -c "sleep 5 && env DISPLAY=:1 gsr-ui"
+          exec-once=discord
+          exec-once=bash -c "sleep 1 && gtk-launch steam.desktop"
+          exec-once=bash -c "sleep 1 && gsr-ui"
           #exec-once=discord
           #exec-once=gtk-launch steam.desktop
 

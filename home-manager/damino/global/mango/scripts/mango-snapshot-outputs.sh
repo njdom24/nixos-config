@@ -146,10 +146,7 @@ was_fullscreen=$(jq -r '.is_fullscreen' <<< "$client_json")
 mkdir -p "$(dirname "$CONF_PATH")"
 mv /tmp/monitors.conf.new "$CONF_PATH"
 
-# Set DISPLAY=:1 on start, then remove to avoid breaking the next session startup (env is preserved during existing session...)
-echo "env=DISPLAY,:1" >> "$CONF_PATH"
 mmsg dispatch reload_config
-sed -i '/^env=DISPLAY,:1$/d' "$CONF_PATH"
 
 # Restore fullscren if it was lost
 if [[ "$was_fullscreen" == "true" ]]; then
