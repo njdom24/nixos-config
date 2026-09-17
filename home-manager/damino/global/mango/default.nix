@@ -95,10 +95,9 @@ in {
           exec-once=systemctl --user start mango-session.target
           exec-once=systemctl --user restart xdg-desktop-portal
           exec-once=systemctl --user restart xdg-desktop-portal-hyprland
-          exec-once=rm -f ~/.config/mango/monitors.conf.bak
-          exec-once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1 && ~/.config/mango/mango-snapshot-outputs.sh"
+          exec-once=bash -c "kanshi"
+          exec-once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1"
           exec-once=bash -c "sleep 3 && wlr-hdr-cal"
-          exec-once=bash -c "rm ~/.config/mango/monitors.conf && mmsg dispatch reload_config && kanshi"
           exec-once=~/.config/mango/mango-fullscreen-vrr.sh DP-1 HDMI-A-1
           exec=~/.config/mango/mango-workspace.sh assign 1 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
@@ -460,8 +459,6 @@ in {
           bind=NONE,Down,resizewin,+0,-100
           bind=SUPER,R,setkeymode,default
           bind=NONE,Escape,setkeymode,default
-          
-          source-optional=~/.config/mango/monitors.conf
         '';
       };
     } // (lib.listToAttrs (map
@@ -478,7 +475,6 @@ in {
         "mango-focusdir.sh"
         "mango-screenshot.sh"
         "mango-virtual-monitor.sh"
-        "mango-snapshot-outputs.sh"
         "mango-floating-focus.sh"
         "mango-fullscreen-vrr.sh"
         "mango-move-float.sh"
