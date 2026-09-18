@@ -2,17 +2,16 @@
   programs.rofi = {
 	enable = true;
 
-	extraConfig = {
+	settings = {
 	  show-icons = true;
 	  sidebar-mode = true;
 
 	  # Close on clicking outside 
 	  kb-cancel = "Escape,MousePrimary";
+	  location = 8; # Left
+	  xoffset = 0;
+	  font = "${config.gtk.font.name} Bold 11.5";
 	};
-
-	font = "${config.gtk.font.name} Bold 11.5";
-
-	location = "left";
 
 	theme = let inherit (config.lib.formats.rasi) mkLiteral; in {
 	  "*" = {

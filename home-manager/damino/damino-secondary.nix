@@ -22,7 +22,7 @@
   };
 
   programs = {
-    rofi.yoffset = 24;
+    rofi.settings.yoffset = 24;
 
     noctalia.settings = {
       osd = lib.mkDefault {

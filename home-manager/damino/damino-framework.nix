@@ -32,7 +32,7 @@
 	};
 
 	programs = {
-	  rofi.yoffset = 11;
+	  rofi.settings.yoffset = 11;
 	  waybar.settings.mainBar.modules-right = [ "battery" ];
 	};
 
