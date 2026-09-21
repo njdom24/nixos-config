@@ -43,11 +43,11 @@ in
       TimeoutStartSec = "10s";
       ExecStart = [
         "${openrgb-rescan}/bin/openrgb-rescan"
-        "${pkgs.coreutils}/bin/install -m644 ${./Profile.orp} /var/lib/OpenRGB/Profile.orp"
+        "${pkgs.coreutils}/bin/install -m644 ${./Profile.json} /var/lib/OpenRGB/Profile.json"
         "${pkgs.coreutils}/bin/sleep 2"
-        "${pkgs.openrgb}/bin/openrgb --profile Profile.orp"
+        "${pkgs.openrgb}/bin/openrgb --profile Profile"
         "${pkgs.coreutils}/bin/sleep 2"
-        "${pkgs.openrgb}/bin/openrgb --profile Profile.orp"
+        "${pkgs.openrgb}/bin/openrgb --profile Profile"
       ];
     };
   };
@@ -58,11 +58,11 @@ in
       TimeoutStopSec = "20s";
       ExecStartPost = [
         "${openrgb-rescan}/bin/openrgb-rescan"
-        "${pkgs.coreutils}/bin/install -m644 ${./Profile.orp} /var/lib/OpenRGB/Profile.orp"
+        "${pkgs.coreutils}/bin/install -m644 ${./Profile.json} /var/lib/OpenRGB/Profile.json"
         "${pkgs.coreutils}/bin/sleep 2"
-        "${pkgs.openrgb}/bin/openrgb --profile Profile.orp"
+        "${pkgs.openrgb}/bin/openrgb --profile Profile"
         "${pkgs.coreutils}/bin/sleep 2"
-        "${pkgs.openrgb}/bin/openrgb --profile Profile.orp"
+        "${pkgs.openrgb}/bin/openrgb --profile Profile"
       ];
       ExecStop = "${pkgs.openrgb}/bin/openrgb --mode static --color 000000";
     };
