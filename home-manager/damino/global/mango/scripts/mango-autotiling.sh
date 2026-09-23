@@ -9,7 +9,10 @@ mmsg watch focusing-client | while read -r line; do
 
   [[ -z "$width" || -z "$height" ]] && continue
 
-  if (( width >= height )); then
+  # Bias toward top-bottom splits: only a window that's clearly landscape
+  # (>=1.3x wider than tall) gets a left-right split, so borderline/near-square
+  # windows default to top-bottom instead of extending an existing horizontal row.
+  if (( width * 10 >= height * 13 )); then
     mmsg dispatch dwindle_split_horizontal
   else
     mmsg dispatch dwindle_split_vertical
