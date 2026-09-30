@@ -344,6 +344,7 @@ let
 
     ${pkgs.gnused}/bin/sed -i "/^\[FrameGen\]/,/^\[/ s/^\s*Enabled\s*=\s*.*/Enabled = ''${fg:-false}/" "$opti_file"
     if [ "$fg" = "false" ]; then
+      ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*ForceVsync\s*=\s*.*/ForceVsync = true/" "$opti_file"
       exec "$@"
     fi
 
@@ -352,7 +353,9 @@ let
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*AllowAsync\s*=\s*.*/AllowAsync = true/" "$opti_file"
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTHybridSpin\s*=\s*.*/FPTHybridSpin = true/" "$opti_file"
     ${pkgs.gnused}/bin/sed -i "/^\[FSRFG\]/,/^\[/ s/^\s*FPTWaitForSingleObjectOnFence\s*=\s*.*/FPTWaitForSingleObjectOnFence = true/" "$opti_file"
-    ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*ForceVsync\s*=\s*.*/ForceVsync = true/" "$opti_file"
+    ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*ForceVsync\s*=\s*.*/ForceVsync = false/" "$opti_file"
+    # XeFG + XeLL performs better without VSync (at least for UE5)
+    # Note: UE5 games without *-Win64-Shipping.exe may require VKD3D_CONFIG="no_staggered_submit"
     ${pkgs.gnused}/bin/sed -i "/^\[V-Sync\]/,/^\[/ s/^\s*SyncInterval\s*=\s*.*/SyncInterval = 1/" "$opti_file"
 
     if [ "$vrr" = "true" ]; then
