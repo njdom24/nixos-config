@@ -134,7 +134,7 @@ let
         | select(.active == true)
         | .name
       ')
-      case "$value" in
+      case "$vrr_mode" in
         1) state="enabled" ;;
         0) state="disabled" ;;
         *) echo "Error: state must be '1' or '0'" >&2; exit 1 ;;
