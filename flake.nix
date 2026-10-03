@@ -92,6 +92,16 @@
       flake = false;
     };
 
+    volt-src = {
+      url = "github:pythonlover02/volt-gui";
+      flake = false;
+    };
+
+    volt-gui = {
+      url = "github:keygenesis/volt-gui-nix";
+      inputs.volt-src.follows = "volt-src";
+    };
+
     #hy3 = {
     #  url = "github:outfoxxed/hy3";
     #  #url = "github:outfoxxed/hy3?ref=hl{version}"; # where {version} is the hyprland release version

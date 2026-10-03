@@ -120,6 +120,7 @@
       stable.kora-icon-theme
       flavours
       adw-gtk3
+      inputs.volt-gui.packages.${pkgs.system}.default
       playYoutubeHdr
     ];
   };

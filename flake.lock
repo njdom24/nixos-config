@@ -953,6 +953,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_5": {
+      "locked": {
+        "lastModified": 1788404924,
+        "narHash": "sha256-lhEhY8X5EgkQ/eg6IFz4cc8jRuSYSvnxx1al7d1dvZ0=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "0968519e14f7aa7d3e9b389682bd74d2b51c8ce8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "noctalia": {
       "inputs": {
         "nixpkgs": [
@@ -1066,6 +1082,8 @@
         "plasma-manager": "plasma-manager",
         "stylix": "stylix",
         "sway-git": "sway-git",
+        "volt-gui": "volt-gui",
+        "volt-src": "volt-src",
         "wlr-hdr-cal": "wlr-hdr-cal",
         "wlroots-git": "wlroots-git",
         "xwayland-satellite": "xwayland-satellite"
@@ -1325,6 +1343,43 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "volt-gui": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5",
+        "volt-src": [
+          "volt-src"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790358799,
+        "narHash": "sha256-RFhtiEdlozecF8+tJWUHhqu9xZLpuUnS/Stf9Y1ZcL0=",
+        "owner": "keygenesis",
+        "repo": "volt-gui-nix",
+        "rev": "e165f3b522f5b5963aafa16ee7fe329ac2e7f644",
+        "type": "github"
+      },
+      "original": {
+        "owner": "keygenesis",
+        "repo": "volt-gui-nix",
+        "type": "github"
+      }
+    },
+    "volt-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790052028,
+        "narHash": "sha256-shtJ4489PlFJo15qd2nwFfuG0lFa9TdWTbFmddkCnoo=",
+        "owner": "pythonlover02",
+        "repo": "volt-gui",
+        "rev": "d2ca878472dded58ea169340e2f83885f397c9a1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pythonlover02",
+        "repo": "volt-gui",
         "type": "github"
       }
     },
