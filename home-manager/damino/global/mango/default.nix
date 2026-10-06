@@ -87,48 +87,48 @@ in {
           env=WLR_RENDERER,vulkan
 
           xwayland_persistence=0
-          exec-once=${mango-satellite-runner}
+          exec_once=${mango-satellite-runner}
           exec=bash -c "sleep 2 && noctalia"
-          exec-once=kanshi
-          exec-once=~/.config/mango/mango-autotiling.sh
-          exec-once=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
-          exec-once=systemctl --user start mango-session.target
-          exec-once=systemctl --user restart xdg-desktop-portal
-          exec-once=systemctl --user restart xdg-desktop-portal-hyprland
-          exec-once=bash -c "kanshi"
-          exec-once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1"
-          exec-once=bash -c "sleep 3 && wlr-hdr-cal"
-          exec-once=~/.config/mango/mango-fullscreen-vrr.sh DP-1 HDMI-A-1
+          exec_once=kanshi
+          exec_once=~/.config/mango/mango-autotiling.sh
+          exec_once=dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+          exec_once=systemctl --user start mango-session.target
+          exec_once=systemctl --user restart xdg-desktop-portal
+          exec_once=systemctl --user restart xdg-desktop-portal-hyprland
+          exec_once=bash -c "kanshi"
+          exec_once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1"
+          exec_once=bash -c "sleep 3 && wlr-hdr-cal"
+          exec_once=~/.config/mango/mango-fullscreen-vrr.sh DP-1 HDMI-A-1
           exec=~/.config/mango/mango-workspace.sh assign 1 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 2 DP-2
-          exec-once=firefox
-          exec-once=discord
-          exec-once=bash -c "sleep 1 && gtk-launch steam.desktop"
-          exec-once=bash -c "sleep 1 && gsr-ui"
-          #exec-once=discord
-          #exec-once=gtk-launch steam.desktop
+          exec_once=firefox
+          exec_once=discord
+          exec_once=bash -c "sleep 1 && gtk-launch steam.desktop"
+          exec_once=bash -c "sleep 1 && gsr-ui"
+          #exec_once=discord
+          #exec_once=gtk-launch steam.desktop
 
-          windowrule-once=tags:1,monitor:DP-1,appid:firefox
-          windowrule=tags:4,monitor:DP-1,appid:steam
-          windowrule=tags:2,monitor:DP-2,appid:discord
+          window_rule_once=tags:1,monitor:DP-1,app_id:firefox
+          window_rule=tags:4,monitor:DP-1,app_id:steam
+          window_rule=tags:2,monitor:DP-2,app_id:discord
           
           circle_layout=dwindle
           
           # Monitor rules
-          #monitorrule=name:.+,vrr:0
-          #windowrule=title:.+,vrr_only_fullscreen:1
+          #monitor_rule=name:.+,vrr:0
+          #window_rule=title:.+,vrr_only_fullscreen:1
           
-          #monitorrule=name:^DP-1$,hdr:0
-          #monitorrule=name:^DP-1$,width:2560,height:1440,refresh:180,x:2560,y:0,hdr:1
+          #monitor_rule=name:^DP-1$,hdr:0
+          #monitor_rule=name:^DP-1$,width:2560,height:1440,refresh:180,x:2560,y:0,hdr:1
           
-          windowrule=appid:discord,isopensilent:1
-          windowrule=appid:steam,isopensilent:1,force_tiled_state:1
+          window_rule=app_id:discord,is_open_silent:1
+          window_rule=app_id:steam,is_open_silent:1,force_tiled_state:1
 
-          windowrule=isfullscreen:1,appid:gamescope
-          windowrule=isfullscreen:1,appid:^(steam_app_\d+)$
+          window_rule=is_fullscreen:1,app_id:gamescope
+          window_rule=is_fullscreen:1,app_id:^(steam_app_\d+)$
 
-          windowrule=appid:gsr-ui,isfloating:1,isfullscreen:1
+          window_rule=app_id:gsr-ui,is_floating:1,is_fullscreen:1
           
           # Window effect
           #blur=0
@@ -148,7 +148,7 @@ in {
           #shadows_blur = 15
           #shadows_position_x = 0
           #shadows_position_y = 0
-          #shadowscolor= 0x000000ff
+          #shadows_color= 0x000000ff
           
           #border_radius=0
           #no_radius_when_single=0
@@ -167,8 +167,8 @@ in {
           tag_animation_direction=0
           zoom_initial_ratio=0.4
           zoom_end_ratio=0.8
-          fadein_begin_opacity=0.5
-          fadeout_begin_opacity=0.8
+          fade_in_begin_opacity=0.5
+          fade_out_begin_opacity=0.8
           animation_duration_move=250
           animation_duration_open=200
           animation_duration_tag=175
@@ -179,8 +179,8 @@ in {
           animation_curve_tag=0.46,1.0,0.29,1
           animation_curve_close=0.08,0.92,0,1
           animation_curve_focus=0.46,1.0,0.29,1
-          animation_curve_opafadeout=0.5,0.5,0.5,0.5
-          animation_curve_opafadein=0.46,1.0,0.29,1
+          animation_curve_opacity_fade_out=0.5,0.5,0.5,0.5
+          animation_curve_opacity_fade_in=0.46,1.0,0.29,1
           
           # Dwindle Layout Setting
           dwindle_smart_split=0
@@ -188,25 +188,23 @@ in {
           dwindle_drop_simple_split=1
           dwindle_split_ratio=0.5
           dwindle_manual_split=1
-          dwindle_hsplit=1
-          dwindle_vsplit=1
+          dwindle_horizontal_split=1
+          dwindle_vertical_split=1
           dwindle_preserve_split=1
           
           # Overview Setting
           hotarea_size=10
           enable_hotarea=0
-          ov_tab_mode=1
-          ov_no_resize=1
-          overviewgappi=5
-          overviewgappo=30
+          overview_gap_inner=5
+          overview_gap_outer=30
           
           # Misc
           no_border_when_single=1
           axis_bind_apply_timeout=100
           focus_on_activate=0
-          idleinhibit_ignore_visible=0
-          sloppyfocus=1
-          warpcursor=1
+          idle_inhibit_ignore_visible=0
+          sloppy_focus=1
+          warp_cursor=1
           focus_cross_monitor=1
           focus_cross_tag=1
           
@@ -219,13 +217,13 @@ in {
           cursor_hide_timeout=10
           drag_tile_to_tile=1
           drag_tile_small=1
-          syncobj_enable=1
-          smartgaps=1
+          sync_obj_enable=1
+          smart_gaps=1
           
           # keyboard
           repeat_rate=25
           repeat_delay=600
-          numlockon=0
+          numlock_on=0
           xkb_rules_layout=us
           
           # Trackpad
@@ -235,9 +233,9 @@ in {
           tap_and_drag=1
           drag_lock=1
           trackpad_natural_scrolling=1
-          disable_while_typing=1
-          left_handed=0
-          middle_button_emulation=0
+          trackpad_disable_while_typing=1
+          trackpad_left_handed=0
+          trackpad_middle_button_emulation=0
           swipe_min_threshold=1
           
           # mouse
@@ -246,43 +244,43 @@ in {
           mouse_accel_profile=0
           
           # Appearance
-          gappih=4
-          gappiv=4
-          gappoh=4
-          gappov=4
+          gap_inner_horizontal=4
+          gap_inner_vertical=4
+          gap_outer_horizontal=4
+          gap_outer_vertical=4
           scratchpad_width_ratio=0.8
           scratchpad_height_ratio=0.9
-          borderpx=2
-          #shadowscolor= 0x${config.lib.stylix.colors.base00}ff
-          rootcolor=0x${config.lib.stylix.colors.base00}ff
-          bordercolor=0x${config.lib.stylix.colors.base01}ff
-          dropcolor=0x${config.lib.stylix.colors.base0C}55
-          splitcolor=0x${config.lib.stylix.colors.base05}ff
-          focuscolor=0x${config.lib.stylix.colors.base04}ff
-          maximizescreencolor=0x${config.lib.stylix.colors.base0B}ff
-          urgentcolor=0x${config.lib.stylix.colors.base0F}ff
-          scratchpadcolor=0x${config.lib.stylix.colors.base03}ff
-          globalcolor=0x${config.lib.stylix.colors.base08}ff
-          overlaycolor=0x${config.lib.stylix.colors.base0C}ff
+          border_px=2
+          #shadows_color= 0x${config.lib.stylix.colors.base00}ff
+          root_color=0x${config.lib.stylix.colors.base00}ff
+          border_color=0x${config.lib.stylix.colors.base01}ff
+          drop_color=0x${config.lib.stylix.colors.base0C}55
+          split_color=0x${config.lib.stylix.colors.base05}ff
+          focus_color=0x${config.lib.stylix.colors.base04}ff
+          maximized_screen_color=0x${config.lib.stylix.colors.base0B}ff
+          urgent_color=0x${config.lib.stylix.colors.base0F}ff
+          scratchpad_color=0x${config.lib.stylix.colors.base03}ff
+          global_color=0x${config.lib.stylix.colors.base08}ff
+          overlay_color=0x${config.lib.stylix.colors.base0C}ff
           
           # layout support:
           # tile,scroller,grid,deck,monocle,center_tile,vertical_tile,vertical_scroller
-          tagrule=id:1,layout_name:dwindle
-          tagrule=id:2,layout_name:dwindle
-          tagrule=id:3,layout_name:dwindle
-          tagrule=id:4,layout_name:dwindle
-          tagrule=id:5,layout_name:dwindle
-          tagrule=id:6,layout_name:dwindle
-          tagrule=id:7,layout_name:dwindle
-          tagrule=id:8,layout_name:dwindle
-          tagrule=id:9,layout_name:dwindle
+          tag_rule=id:1,layout_name:dwindle
+          tag_rule=id:2,layout_name:dwindle
+          tag_rule=id:3,layout_name:dwindle
+          tag_rule=id:4,layout_name:dwindle
+          tag_rule=id:5,layout_name:dwindle
+          tag_rule=id:6,layout_name:dwindle
+          tag_rule=id:7,layout_name:dwindle
+          tag_rule=id:8,layout_name:dwindle
+          tag_rule=id:9,layout_name:dwindle
           
           # Key Bindings
           # key name refer to `xev` or `wev` command output,
           # mod keys name: super,ctrl,alt,shift,none
           
           # Default mode bindings
-          keymode=default
+          key_mode=default
           bind=SUPER,R,setkeymode,resize
           
           # reload config
@@ -452,7 +450,7 @@ in {
           bind=SHIFT,XF86AudioMute,spawn,wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
           
           # 'resize' mode bindings
-          keymode=resize
+          key_mode=resize
           bind=NONE,Left,resizewin,-100,+0
           bind=NONE,Right,resizewin,+100,+0
           bind=NONE,UP,resizewin,+0,+100
