@@ -166,7 +166,7 @@
         toggle_hud = "Shift_R+F12";
         toggle_logging = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
         reload_cfg = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
-        blacklist = ".gamescope-wrapped,gamescope,gamescope-wl";
+        blacklist = ".gamescope-wrapped,gamescope,gamescope-wl,sway,.sway-wrapped,jay,mango";
       };
 
 	  settingsPerApplication = {
@@ -180,7 +180,7 @@
 	  	  toggle_hud = "Shift_R+F12";
 	  	  toggle_logging = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
 	  	  reload_cfg = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
-	  	  blacklist = ".gamescope-wrapped,gamescope,gamescope-wl";
+          blacklist = ".gamescope-wrapped,gamescope,gamescope-wl,sway,.sway-wrapped,jay,mango";
 	  	};
 	  	".moonlight-wrapped" = {
 	  	  no_display = true;
@@ -192,7 +192,7 @@
 	  	  toggle_hud = "Shift_R+F12";
 	  	  toggle_logging = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
 	  	  reload_cfg = "Shift_L+Shift_R+F1+F2+F3+F4+F5+F6+F7+F8+F9"; # Unbind
-	  	  blacklist = ".gamescope-wrapped,gamescope,gamescope-wl";
+          blacklist = ".gamescope-wrapped,gamescope,gamescope-wl,sway,.sway-wrapped,jay,mango";
 	  	};
 	  };
 	};

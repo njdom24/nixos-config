@@ -53,11 +53,23 @@
  	  enable = true;
  	  package = pkgs.ananicy-cpp;
  	  rulesProvider = pkgs.ananicy-rules-cachyos;
+      # The workaround moves every realtime process (e.g. SCHED_RR mango) to the
+      # root cgroup, taking it and its children out of the logind session so
+      # polkit denies poweroff etc. Only needed with kernel CONFIG_RT_GROUP_SCHED
+      settings.cgroup_realtime_workaround = lib.mkForce false;
       # Breaks login 50% of the time, possibly since Sway run under sddm?
       extraTypes = [
         {
           type = "LowLatency_RT";
           #sched = "rr";
+          nice = -20;
+          ioclass = "best-effort";
+        }
+        # Separate from LowLatency_RT so RR is opt-in per rule
+        {
+          type = "LowLatency_RR";
+          sched = "rr";
+          rtprio = 10;
           nice = -20;
           ioclass = "best-effort";
         }
@@ -75,26 +87,26 @@
  	    #  nice = -20;
  	    #}
  	    # -20: https://github.com/CachyOS/ananicy-rules/blob/master/00-default/games/gamescope.rules
- 	    #{
- 	    #  name = "gamescope";
- 	    #  type = "LowLatency_RT";
- 	    #}
- 	    #{
- 	    #  name = "gamescope-wl";
- 	    #  type = "LowLatency_RT";
- 	    #}
- 	    {
- 	      name = "sunshine";
- 	      type = "LowLatency_RT";
- 	    }
- 	    {
- 	      name = "wlr-hdr-cal";
- 	      type = "BG_CPUIO";
- 	    }
- 	    {
- 	      name = "noctalia";
- 	      type = "service";
- 	    }
+        {
+          name = "gamescope";
+          type = "LowLatency_RR";
+        }
+        {
+          name = "gamescope-wl";
+          type = "LowLatency_RR";
+        }
+        {
+          name = "sunshine";
+          type = "LowLatency_RT";
+        }
+        {
+          name = "wlr-hdr-cal";
+          type = "BG_CPUIO";
+        }
+        {
+          name = "noctalia";
+          type = "service";
+        }
         {
           name = "jay";
           type = "LowLatency_RT";
@@ -104,6 +116,21 @@
   };
   # Soemtimes would start too early and enter a bad state
   systemd.services.ananicy-cpp.after = lib.mkAfter [ "multi-user.target" ];
+
+  # Start mango as SCHED_RR. Reset-on-fork reverts spawned clients to
+  # SCHED_OTHER, and setpriv drops the wrapper's ambient CAP_SYS_NICE
+  # before exec so neither mango nor its children keep it
+  security.wrappers.mango = {
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_nice+p";
+    source = "${pkgs.runCommand "mango-rr" { nativeBuildInputs = [ pkgs.makeBinaryWrapper ]; } ''
+      makeBinaryWrapper ${pkgs.util-linux}/bin/chrt $out/bin/mango \
+        --add-flags "--rr --reset-on-fork 1" \
+        --add-flags "${pkgs.util-linux}/bin/setpriv --inh-caps=-all --ambient-caps=-all --" \
+        --add-flags "${pkgs.mango}/bin/mango"
+    ''}/bin/mango";
+  };
 
   environment = {
   	systemPackages = with pkgs; [
