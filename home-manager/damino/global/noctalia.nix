@@ -21,14 +21,19 @@
 	    widget_spacing = 10;
 	  };
 
-	  control_center.shortcuts = [
-	    { type = "wifi"; }
-	    { type = "bluetooth"; }
-	    { type = "caffeine"; }
-	    { type = "notification"; }
-	    { type = "power_profile"; }
-	    { type = "audio"; }
-	  ];
+	  control_center = {
+	    width = 860;
+	    shortcuts = [
+   	      { type = "wifi"; }
+   	      { type = "bluetooth"; }
+   	      { type = "caffeine"; }
+   	      { type = "notification"; }
+   	      { type = "power_profile"; }
+   	      { type = "audio"; }
+	    ];
+	  };
+
+	  control_center.
 
 	  desktop_widgets.enabled = false;
 	  dock.launcher_position = "start";
