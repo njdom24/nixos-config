@@ -32,6 +32,19 @@ let
     done
     exit 1
   '';
+
+  mango-fullscreen-vrr-runner = pkgs.writeShellScript "mango-fullscreen-vrr-runner" ''
+    # Restart the VRR watcher whenever it exits
+    while :; do
+      "$HOME/.config/mango/mango-fullscreen-vrr.sh" "$@"
+      rc=$?
+
+      [[ -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]] || exit 0
+
+      echo "mango-fullscreen-vrr exited ($rc), restarting" >&2
+      sleep 1
+    done
+  '';
 in {
   imports = [
   ];
@@ -98,7 +111,7 @@ in {
           exec_once=bash -c "kanshi"
           exec_once=bash -c "sleep 2 && mmsg dispatch togglehdr,on,DP-1"
           exec_once=bash -c "sleep 3 && wlr-hdr-cal"
-          exec_once=~/.config/mango/mango-fullscreen-vrr.sh DP-1 HDMI-A-1
+          exec_once=${mango-fullscreen-vrr-runner} DP-1 HDMI-A-1
           exec=~/.config/mango/mango-workspace.sh assign 1 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 2 DP-2
