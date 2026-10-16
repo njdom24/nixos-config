@@ -51,7 +51,7 @@ in {
     #  ];
     #});
 
-    gamescope = prev.gamescope.overrideAttrs (old: let
+    gamescope = inputs.chaotic.packages.${prev.stdenv.hostPlatform.system}.gamescope_git.overrideAttrs (old: let
     #gamescope = prev.gamescope.overrideAttrs (old: let
       existing = old.patches or [];
       newPatches = [
