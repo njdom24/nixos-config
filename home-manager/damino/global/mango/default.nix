@@ -116,7 +116,7 @@ in {
           exec=~/.config/mango/mango-workspace.sh assign 4 DP-1
           exec=~/.config/mango/mango-workspace.sh assign 2 DP-2
           exec_once=firefox
-          exec_once=discord
+          exec_once=bash -c "sleep 2 && discord & ~/.config/mango/mango-workspace.sh view 2 && ~/.config/mango/mango-workspace.sh view 1"
           exec_once=bash -c "sleep 1 && gtk-launch steam.desktop"
           exec_once=bash -c "sleep 1 && gsr-ui"
           #exec_once=discord

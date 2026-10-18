@@ -371,7 +371,7 @@
             { type = "exec", exec = ["${satellite-loop}"] },
             { type = "exec", exec = ["noctalia"] },
             { type = "exec", exec = ["jay", "run-tagged", "ws1", "firefox"] },
-            { type = "exec", exec = ["discord"] },
+            { type = "exec", exec = ["sh", "-c", "sleep 2 && discord"] },
             { type = "exec", exec = ["sh", "-c", "systemctl --user restart xdg-desktop-portal"] },
             { type = "exec", exec = ["sh", "-c", "sleep 5 && gtk-launch steam.desktop"] },
             { type = "exec", exec = ["jay", "randr", "output", "DP-1", "mode", "3840", "2160", "160"] },
