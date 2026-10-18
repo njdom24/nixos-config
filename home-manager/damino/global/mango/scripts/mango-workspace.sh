@@ -5,6 +5,12 @@ set -euo pipefail
 STATE_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/mango-workspace-map"
 touch "$STATE_FILE"
 
+# Serialize invocations: several `exec=... assign` lines run concurrently at
+# startup, and the read-modify-write in map_set would otherwise race and drop
+# assignments.
+exec 9>"${STATE_FILE}.lock"
+flock 9
+
 usage() {
   echo "usage: $0 {view|move} TAG" >&2
   echo "       $0 assign TAG MONITOR" >&2
