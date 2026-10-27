@@ -52,6 +52,10 @@
           publicKey = "yU+AHMy+ugmOqFWM3Q8QQllHpNpyVKAPTzMDeRO3hEM=";
           allowedIPs = [ "10.100.0.4/32" ];
         }
+        { # S24U (2)
+          publicKey = "mGVOaveKQTt0mLp+ciLXQBpFwvL9teMEs3zpT6vv/iQ=";
+          allowedIPs = [ "10.100.0.5/32" ];
+        }
       ];
     };
   };
