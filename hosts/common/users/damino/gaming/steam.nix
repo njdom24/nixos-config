@@ -242,8 +242,11 @@
   # Local network discovery for visibility to headset
   services.avahi = { 
     enable = true;
-    publish.enable = true;
-    publish.userServices = true;
+    settings.publish = {
+      "disable-publishing" = false;
+      publish-addresses = true;
+      disable-user-service-publishing = false;
+    };
   };
 
   environment = {
