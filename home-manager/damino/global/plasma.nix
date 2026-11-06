@@ -195,26 +195,26 @@
           	  };
           	};
           }
-          {
-            name = "org.dhruv8sh.kara";
-            config = {
-              appearance = {
-                showOnlyActive = true;
-              };
-              general = {
-                animationDuration = 0;
-                highlightOpacityFull = false;
-                highlightType = 1; # Line
-                spacing = 0;
-                wrapOn = false;
-              };
-              type1 = {
-                fixedLen = 3;
-                labelSource = 0;
-                t1activeWidth = 10;
-              };
-            };
-          }
+          #{
+          #  name = "org.dhruv8sh.kara";
+          #  config = {
+          #    appearance = {
+          #      showOnlyActive = true;
+          #    };
+          #    general = {
+          #      animationDuration = 0;
+          #      highlightOpacityFull = false;
+          #      highlightType = 1; # Line
+          #      spacing = 0;
+          #      wrapOn = false;
+          #    };
+          #    type1 = {
+          #      fixedLen = 3;
+          #      labelSource = 0;
+          #      t1activeWidth = 10;
+          #    };
+          #  };
+          #}
           {
           	name = "org.kde.plasma.icontasks";
           	config = {
