@@ -98,6 +98,7 @@ in {
           env=NIXOS_OZONE_WL,1
           env=XDG_MENU_PREFIX,plasma-
           env=WLR_RENDERER,vulkan
+          env=DISPLAY,:2
 
           xwayland_persistence=0
           exec_once=${mango-satellite-runner}
