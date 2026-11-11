@@ -10,6 +10,7 @@
 	  bar.default = {
 	    background_opacity = 0.98;
 	    end = [ "tray" "notifications" "wlr-hdr-cal" "network" "bluetooth" "volume" "battery" "session" "launcher" ];
+	    font_family = "Noto Sans"; # Inter stopped working for bar font at some point...
 	    font_weight = 700;
 	    margin_edge = 0.0;
 	    margin_ends = 0.0;
