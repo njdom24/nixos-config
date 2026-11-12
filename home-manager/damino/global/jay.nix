@@ -405,7 +405,7 @@
         [env]
         SSH_AUTH_SOCK="/run/user/1000/gcr/ssh"
         SSH_ASKPASS="/run/current-system/sw/libexec/seahorse/ssh-askpass"
-        DISPLAY = ":0"
+        DISPLAY = ":1"
         XCURSOR_THEME = "XCursor-Pro-Dark"
         XCURSOR_SIZE = "25"
         QT_QPA_PLATFORM = "wayland;xcb"
