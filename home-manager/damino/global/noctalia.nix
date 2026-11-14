@@ -10,7 +10,7 @@
 	  bar.default = {
 	    background_opacity = 0.98;
 	    end = [ "tray" "notifications" "wlr-hdr-cal" "network" "bluetooth" "volume" "battery" "session" "launcher" ];
-	    font_family = "Noto Sans"; # Inter stopped working for bar font at some point...
+	    font_family = "Inter";
 	    font_weight = 700;
 	    margin_edge = 0.0;
 	    margin_ends = 0.0;
@@ -137,32 +137,33 @@
 
 	    workspaces = {
 	      hide_when_empty = true;
-	      focused_color = "outline";
-	      occupied_color = "surface_variant";
-	      empty_color = "surface_variant";
+	      focused_color = "outline_variant";
+	      occupied_color = "surface_container";
+	      empty_color = "surface_container";
 	    };
 	  };
 	};
   };
 
   home.file.".config/noctalia/palettes/base16.json".text = builtins.toJSON {
+    version = 2;
     dark = {
-      mPrimary = "#${config.lib.stylix.colors.base0B}";
-      mOnPrimary = "#${config.lib.stylix.colors.base00}";
-      mSecondary = "#${config.lib.stylix.colors.base0D}";
-      mOnSecondary = "#${config.lib.stylix.colors.base00}";
-      mTertiary = "#${config.lib.stylix.colors.base0A}";
-      mOnTertiary = "#${config.lib.stylix.colors.base00}";
-      mError = "#${config.lib.stylix.colors.base08}";
-      mOnError = "#${config.lib.stylix.colors.base00}";
-      mSurface = "#${config.lib.stylix.colors.base00}";
-      mOnSurface = "#${config.lib.stylix.colors.base07}";
-      mSurfaceVariant = "#${config.lib.stylix.colors.base01}";
-      mOnSurfaceVariant = "#${config.lib.stylix.colors.base04}";
-      mOutline = "#${config.lib.stylix.colors.base03}";
-      mShadow = "#000000";
-      mHover = "#${config.lib.stylix.colors.base02}";
-      mOnHover = "#${config.lib.stylix.colors.base07}";
+      primary = "#${config.lib.stylix.colors.base0B}";
+      on_primary = "#${config.lib.stylix.colors.base00}";
+      secondary = "#${config.lib.stylix.colors.base0D}";
+      on_secondary = "#${config.lib.stylix.colors.base00}";
+      tertiary = "#${config.lib.stylix.colors.base0A}";
+      on_tertiary = "#${config.lib.stylix.colors.base00}";
+      error = "#${config.lib.stylix.colors.base08}";
+      on_error = "#${config.lib.stylix.colors.base00}";
+      surface = "#${config.lib.stylix.colors.base00}";
+      on_surface = "#${config.lib.stylix.colors.base07}";
+      surface_container = "#${config.lib.stylix.colors.base01}";
+      on_surface_variant = "#${config.lib.stylix.colors.base04}";
+      outline_variant = "#${config.lib.stylix.colors.base03}";
+      shadow = "#000000";
+      hover = "#${config.lib.stylix.colors.base02}";
+      on_hover = "#${config.lib.stylix.colors.base07}";
       terminal = {
         normal = {
           black = "#${config.lib.stylix.colors.base00}";
@@ -186,29 +187,29 @@
         };
         foreground = "#${config.lib.stylix.colors.base05}";
         background = "#${config.lib.stylix.colors.base00}";
-        selectionFg = "#${config.lib.stylix.colors.base00}";
-        selectionBg = "#${config.lib.stylix.colors.base02}";
-        cursorText = "#${config.lib.stylix.colors.base00}";
+        selection_fg = "#${config.lib.stylix.colors.base00}";
+        selection_bg = "#${config.lib.stylix.colors.base02}";
+        cursor_text = "#${config.lib.stylix.colors.base00}";
         cursor = "#${config.lib.stylix.colors.base05}";
       };
     };
     light = {
-      mPrimary = "#${config.lib.stylix.colors.base0B}";
-      mOnPrimary = "#${config.lib.stylix.colors.base07}";
-      mSecondary = "#${config.lib.stylix.colors.base0D}";
-      mOnSecondary = "#${config.lib.stylix.colors.base07}";
-      mTertiary = "#${config.lib.stylix.colors.base0A}";
-      mOnTertiary = "#${config.lib.stylix.colors.base07}";
-      mError = "#${config.lib.stylix.colors.base08}";
-      mOnError = "#${config.lib.stylix.colors.base07}";
-      mSurface = "#${config.lib.stylix.colors.base07}";
-      mOnSurface = "#${config.lib.stylix.colors.base00}";
-      mSurfaceVariant = "#${config.lib.stylix.colors.base06}";
-      mOnSurfaceVariant = "#${config.lib.stylix.colors.base01}";
-      mOutline = "#${config.lib.stylix.colors.base04}";
-      mShadow = "#000000";
-      mHover = "#${config.lib.stylix.colors.base05}";
-      mOnHover = "#${config.lib.stylix.colors.base00}";
+      primary = "#${config.lib.stylix.colors.base0B}";
+      on_primary = "#${config.lib.stylix.colors.base07}";
+      secondary = "#${config.lib.stylix.colors.base0D}";
+      on_secondary = "#${config.lib.stylix.colors.base07}";
+      tertiary = "#${config.lib.stylix.colors.base0A}";
+      on_tertiary = "#${config.lib.stylix.colors.base07}";
+      error = "#${config.lib.stylix.colors.base08}";
+      on_error = "#${config.lib.stylix.colors.base07}";
+      surface = "#${config.lib.stylix.colors.base07}";
+      on_surface = "#${config.lib.stylix.colors.base00}";
+      surface_container = "#${config.lib.stylix.colors.base06}";
+      on_surface_variant = "#${config.lib.stylix.colors.base01}";
+      outline_variant = "#${config.lib.stylix.colors.base04}";
+      shadow = "#000000";
+      hover = "#${config.lib.stylix.colors.base05}";
+      on_hover = "#${config.lib.stylix.colors.base00}";
       terminal = {
         normal = {
           black = "#${config.lib.stylix.colors.base07}";
@@ -232,9 +233,9 @@
         };
         foreground = "#${config.lib.stylix.colors.base01}";
         background = "#${config.lib.stylix.colors.base07}";
-        selectionFg = "#${config.lib.stylix.colors.base07}";
-        selectionBg = "#${config.lib.stylix.colors.base05}";
-        cursorText = "#${config.lib.stylix.colors.base07}";
+        selection_fg = "#${config.lib.stylix.colors.base07}";
+        selection_bg = "#${config.lib.stylix.colors.base05}";
+        cursor_text = "#${config.lib.stylix.colors.base07}";
         cursor = "#${config.lib.stylix.colors.base01}";
       };
     };
