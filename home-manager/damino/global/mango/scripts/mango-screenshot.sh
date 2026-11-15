@@ -22,6 +22,10 @@ set_headless_mode() {
 
   echo "Creating headless output" >&2
 
+  # Record where the real outputs are before adding the headless output
+  local real_positions
+  real_positions="$(output_positions)"
+
   # Record existing headless outputs.
   before="$(
     wlr-randr | awk '/^HEADLESS-/ { print $1 }'
@@ -61,6 +65,29 @@ set_headless_mode() {
     --pos "$X,$Y" \
     --scale "$SCALE" \
     --custom-mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz
+
+  # Protect against reflowing outputs that were moved by the new headless output
+  local restore=() name pos
+  while read -r name pos; do
+    [[ -z "$name" ]] && continue
+    if ! grep -qx "$name $pos" <<<"$(output_positions)"; then
+      restore+=(--output "$name" --pos "$pos")
+    fi
+  done <<<"$real_positions"
+
+  if (( ${#restore[@]} )); then
+    echo "Restoring reflowed outputs: ${restore[*]}" >&2
+    wlr-randr "${restore[@]}"
+  fi
+}
+
+# Prints "NAME X,Y" for every enabled non-headless output.
+output_positions() {
+  wlr-randr --json | jq -r '
+    .[]
+    | select(.enabled and (.name | startswith("HEADLESS-") | not))
+    | "\(.name) \(.position.x),\(.position.y)"
+  '
 }
 
 clear_headless_mode() {
