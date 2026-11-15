@@ -5,7 +5,10 @@ SCREENSHOT_DIR="$XDG_RUNTIME_DIR/screenshots"
 mkdir -p "$SCREENSHOT_DIR"
 timestamp=$(date +%s)
 tmpfile="$SCREENSHOT_DIR/$timestamp.png"
-trap 'rm -f "$tmpfile && wlr-randr --output $HEADLESS --off 2> /dev/null"' EXIT
+
+# Store to clean up headless outputs on exit
+HEADLESS_OUTPUTS=()
+trap clear_headless_mode EXIT
 
 set_headless_mode() {
   local display="$1"
@@ -56,6 +59,7 @@ set_headless_mode() {
     echo "Failed to determine the new virtual output."
     exit 1
   fi
+  HEADLESS_OUTPUTS+=("$HEADLESS")
 
   noctalia msg bar-hide "$HEADLESS" 2> /dev/null
   sleep 0.2
@@ -91,7 +95,12 @@ output_positions() {
 }
 
 clear_headless_mode() {
-  wlr-randr --output $HEADLESS --off
+  (( ${#HEADLESS_OUTPUTS[@]} )) || return 0
+  local out
+  for out in "${HEADLESS_OUTPUTS[@]}"; do
+    wlr-randr --output "$out" --off 2> /dev/null
+  done
+  HEADLESS_OUTPUTS=()
   headless_count=$(mmsg get all-monitors | jq '
     [
       .monitors[]
@@ -125,13 +134,15 @@ case "$mode" in
     W=${WH%x*}      # before x
     H=${WH#*x}      # after x
 
-    # Get all outputs that intersect the region
-    OUTPUTS=$(mmsg get all-monitors | jq -r \
+    # Get all real outputs that intersect the region
+    mapfile -t OUTPUTS < <(mmsg get all-monitors | jq -r \
       --argjson x "$X" \
       --argjson y "$Y" \
       --argjson w "$W" \
       --argjson h "$H" '
       .monitors[]
+      | select(.width > 0 and .height > 0)
+      | select(.name | startswith("HEADLESS-") | not)
       | select(
         (.x + .width  > $x) and
         ($x + $w > .x) and
@@ -145,29 +156,14 @@ case "$mode" in
     rm -f "$SCREENSHOT_DIR/"*
     wl-copy ""
 
-    # If exactly one output intersects, store in a variable
-    if [[ ${#OUTPUTS[@]} -eq 2 ]]; then
-      TARGET_OUTPUT="${OUTPUTS[0]}"
-      if [[ "${OUTPUTS[0]}" == "HEADLESS*" ]]; then
-      set_headless_mode "${OUTPUTS[1]}"
-      grim -o "${OUTPUTS[0]}" -g "$REGION" "$tmpfile"
-      elif [[ "${OUTPUTS[1]}" == "HEADLESS*" ]]; then
-      set_headless_mode "${OUTPUTS[0]}"
-      grim -o "${OUTPUTS[1]}" -g "$REGION" "$tmpfile"
-      else
-      grim -g "$REGION" "$tmpfile"
-      fi
-    elif [[ ${#OUTPUTS[@]} -eq 1 ]]; then
-      set_headless_mode "${OUTPUTS[0]}"
-      # grim doesn't take -o and -g together, but seems to just prioritize HEADLESS
-      grim -g "$REGION" "$tmpfile"
-    else
-      grim -g "$REGION" "$tmpfile"
-    fi
+    # Overlap every intersecting output with its own headless output
+    for out in "${OUTPUTS[@]}"; do
+      set_headless_mode "$out"
+    done
+    grim -g "$REGION" "$tmpfile"
     ;;
   *)
     echo "Usage: $0 {focused|select}" >&2
-    wlr-randr --output $HEADLESS --off
     exit 1
     ;;
 esac
@@ -176,7 +172,6 @@ if [[ -s "$tmpfile" ]]; then
   # Compression can take a while. Put current image in clipboard for immediate pasting
   wl-copy --type text/uri-list <<< "file://$tmpfile"
 
-  wlr-randr --output $HEADLESS --off
   clear_headless_mode
 
   notify-send -a "Screenshot" -i "$tmpfile" "Screenshot taken"
@@ -189,6 +184,3 @@ if [[ -s "$tmpfile" ]]; then
 
   wl-copy --type text/uri-list <<< "file://$newfile"
 fi
-
-wlr-randr --output $HEADLESS --off
-clear_headless_mode
