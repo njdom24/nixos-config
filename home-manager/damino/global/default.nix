@@ -406,6 +406,28 @@
     '';
   };
 
+  # gsr-ui's default screenshot hotkeys steal print keybinds from compositors
+  home.activation.gsrUiUnbindScreenshotHotkeys = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    cfg="$HOME/.config/gpu-screen-recorder/config_ui"
+    if [[ -f "$cfg" ]]; then
+      tmp="$(mktemp "$cfg.XXXXXX")"
+      if ${pkgs.jq}/bin/jq '
+        .screenshot.take_screenshot_hotkey        = {key: 0, modifiers: 0}
+        | .screenshot.take_screenshot_region_hotkey = {key: 0, modifiers: 0}
+        | .screenshot.take_screenshot_window_hotkey = {key: 0, modifiers: 0}
+      ' "$cfg" > "$tmp"; then
+        if ${pkgs.diffutils}/bin/cmp -s "$cfg" "$tmp"; then
+          rm -f "$tmp"
+        else
+          verboseEcho "Clearing gsr-ui screenshot hotkeys (restart gsr-ui to apply)"
+          run mv "$tmp" "$cfg"
+        fi
+      else
+        rm -f "$tmp"
+      fi
+    fi
+  '';
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "26.05";
 }
