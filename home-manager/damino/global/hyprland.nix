@@ -647,22 +647,6 @@
                      exit 0
                      ;;
                    mango)
-                     for _ in {1..20}; do
-                       after="$(
-                         ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1 }'
-                       )"
-
-                       HEADLESS="$(
-                         comm -13 \
-                           <(printf '%s\n' "$before" | sort) \
-                           <(printf '%s\n' "$after" | sort) \
-                           | head -n1
-                       )"
-
-                       [[ -n "$HEADLESS" ]] && break
-                       sleep 0.1
-                     done
-
                      pid=$(${pkgs.procps}/bin/pgrep -f noctalia | head -n1)
 
                      if [ -n "$pid" ]; then
@@ -673,11 +657,25 @@
                        kill "$pid"
                      fi
 
-                     ${pkgs.wlr-randr}/bin/wlr-randr --output "$HEADLESS" --off
-                     mmsg dispatch destroy_all_virtual_output
+                     # Turn off the picker's outputs; destroy all only if none are still in use
+                     state="$XDG_RUNTIME_DIR/mango-screenshare-outputs"
+                     if [[ -f "$state" ]]; then
+                       while read -r out; do
+                         [[ -n "$out" ]] && ${pkgs.wlr-randr}/bin/wlr-randr --output "$out" --off 2> /dev/null
+                       done < "$state"
+                       rm -f "$state"
+                     fi
+                     enabled_headless=$(mmsg get all-monitors | ${pkgs.jq}/bin/jq '
+                       [ .monitors[] | select(.name | startswith("HEADLESS-")) | select(.width > 0) ] | length
+                     ')
+                     if [[ "$enabled_headless" -eq 0 ]]; then
+                       mmsg dispatch destroy_all_virtual_output > /dev/null
+                     fi
 
                      if [ -n "$pid" ]; then
-                       WAYLAND_DISPLAY="$wayland_display" MANGO_INSTANCE_SIGNATURE="$mango_sig" noctalia &
+                       # Own scope so it isn't killed with this unit
+                       WAYLAND_DISPLAY="$wayland_display" MANGO_INSTANCE_SIGNATURE="$mango_sig" \
+                         ${pkgs.systemd}/bin/systemd-run --user --scope --quiet noctalia > /dev/null 2>&1 &
                        disown
                      fi
 
@@ -751,36 +749,13 @@
                  disown
                  ;;
                mango)
-                 # Check for an existing headless output.
-                 HEADLESS="$(
-                   ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1; exit }'
-                 )"
+                 wlr_randr=${pkgs.wlr-randr}/bin/wlr-randr
+                 jq=${pkgs.jq}/bin/jq
 
-                 if [[ -z "$HEADLESS" ]]; then
-                   # Create a new virtual output.
-                   mmsg dispatch create_virtual_output > /dev/null 2>&1
-
-                   # Find the headless output.
-                   HEADLESS=""
-                   for _ in {1..20}; do
-                     HEADLESS="$(
-                       ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1 }' | tail -n1
-                     )"
-
-                     [[ -n "$HEADLESS" ]] && break
-                     sleep 0.1
-                   done
-                 fi
-
-                 if [[ -z "$HEADLESS" ]]; then
-                   echo "Failed to determine the new virtual output."
-                   exit 1
-                 fi
-
-                 # Apply settings to headless output
+                 # Geometry of the selected display.
                  read -r X Y WIDTH HEIGHT SCALE REFRESH <<<"$(
-                   ${pkgs.wlr-randr}/bin/wlr-randr --json |
-                     ${pkgs.jq}/bin/jq -r --arg out "$display" '
+                   $wlr_randr --json |
+                     $jq -r --arg out "$display" '
                        .[]
                        | select(.name == $out)
                        | . as $monitor
@@ -789,19 +764,82 @@
                      '
                  )"
 
-                 ${pkgs.wlr-randr}/bin/wlr-randr \
-                   --output "$HEADLESS" \
-                   --pos "$X,$Y" \
-                   --scale "$SCALE" \
-                   --custom-mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz > /dev/null 2>&1
+                 # Prints "NAME X,Y" for every enabled non-headless output.
+                 output_positions() {
+                   $wlr_randr --json | $jq -r '
+                     .[]
+                     | select(.enabled and (.name | startswith("HEADLESS-") | not))
+                     | "\(.name) \(.position.x),\(.position.y)"
+                   '
+                 }
+                 real_positions="$(output_positions)"
+
+                 # Reuse a headless output only if it's already enabled over this display
+                 HEADLESS="$(
+                   $wlr_randr --json | $jq -r \
+                     --argjson x "$X" --argjson y "$Y" \
+                     --argjson w "$WIDTH" --argjson h "$HEIGHT" '
+                     [ .[]
+                       | select(.enabled and (.name | startswith("HEADLESS-")))
+                       | select(.position.x == $x and .position.y == $y)
+                       | select(any(.modes[]; .current and .width == $w and .height == $h))
+                       | .name
+                     ] | first // empty
+                   '
+                 )"
+
+                 if [[ -z "$HEADLESS" ]]; then
+                   # Create a new virtual output.
+                   before="$($wlr_randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1 }')"
+                   mmsg dispatch create_virtual_output > /dev/null 2>&1
+
+                   for _ in {1..20}; do
+                     after="$($wlr_randr | ${pkgs.gawk}/bin/awk '/^HEADLESS-/ { print $1 }')"
+                     HEADLESS="$(
+                       comm -13 \
+                         <(printf '%s\n' "$before" | sort) \
+                         <(printf '%s\n' "$after" | sort) \
+                         | head -n1
+                     )"
+                     [[ -n "$HEADLESS" ]] && break
+                     sleep 0.1
+                   done
+
+                   if [[ -z "$HEADLESS" ]]; then
+                     echo "Failed to determine the new virtual output." >&2
+                     exit 1
+                   fi
+
+                   # Let portal-watcher clean it up
+                   echo "$HEADLESS" >> "$XDG_RUNTIME_DIR/mango-screenshare-outputs"
+
+                   $wlr_randr \
+                     --output "$HEADLESS" \
+                     --on \
+                     --pos "$X,$Y" \
+                     --scale "$SCALE" \
+                     --custom-mode "$WIDTH"x"$HEIGHT"@"$REFRESH"Hz > /dev/null 2>&1
+
+                   # Protect against reflowing outputs that were moved by the new headless output
+                   restore=()
+                   while read -r name pos; do
+                     [[ -z "$name" ]] && continue
+                     if ! ${pkgs.gnugrep}/bin/grep -qx "$name $pos" <<<"$(output_positions)"; then
+                       restore+=(--output "$name" --pos "$pos")
+                     fi
+                   done <<<"$real_positions"
+                   if (( ''${#restore[@]} )); then
+                     $wlr_randr "''${restore[@]}" > /dev/null 2>&1
+                   fi
+                 fi
 
                  # r: Treat as allow_token_by_default=true
                  #echo "[SELECTION]r/screen:$HEADLESS"
                  echo "[SELECTION]/screen:$HEADLESS"
 
-                 ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror > /dev/null 2>&1 || true
+                                  ${pkgs.systemd}/bin/systemctl --user stop hypr-screenshare-mirror > /dev/null 2>&1 || true
                  ${pkgs.systemd}/bin/systemctl --user reset-failed > /dev/null 2>&1
-                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet --property=KillMode=process ${portal-watcher}
+                 ${pkgs.systemd}/bin/systemd-run --user --unit=hypr-screenshare-mirror --quiet ${portal-watcher}
 
                  (sleep 0.5 && noctalia msg bar-hide "$HEADLESS" > /dev/null 2>&1) &
                  disown
